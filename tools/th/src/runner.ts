@@ -16,7 +16,7 @@ import {
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 import { getModel, getProviders } from "@earendil-works/pi-ai";
 import type { KnownProvider } from "@earendil-works/pi-ai";
-import { loadMember, validateName } from "./members.js";
+import { ensureLocalMember, loadMember, validateName } from "./members.js";
 
 // ─── Sandbox (bwrap) ──────────────────────────────────────────────────────────
 
@@ -90,6 +90,21 @@ function loadSkillFromPath(skillPath: string): Skill {
 }
 const LOG_RESULT_MAX = 500;
 
+export async function listAvailableSkills(): Promise<Array<{ name: string; description: string; source: string; filePath: string }>> {
+  const loader = new DefaultResourceLoader({
+    cwd: process.cwd(),
+    agentDir: getAgentDir(),
+  });
+  await loader.reload();
+  const { skills } = loader.getSkills();
+  return skills.map((s) => ({
+    name: s.name,
+    description: s.description,
+    source: s.sourceInfo?.source ?? "unknown",
+    filePath: s.filePath,
+  }));
+}
+
 export async function listAvailableModels(): Promise<Array<{ provider: string; id: string; name: string }>> {
   const authStorage = AuthStorage.create();
   const modelRegistry = ModelRegistry.create(authStorage);
@@ -150,6 +165,8 @@ export async function runMember(
     model = getModel(provider as KnownProvider, modelId as never);
     if (!model) throw new Error(`Model non trovato: "${modelStr}". Usa: th models`);
   }
+  const autoInstantiated = ensureLocalMember(memberName);
+  if (autoInstantiated) process.stderr.write(`info: istanziato "${memberName}" da globale in .th/members/\n`);
   const { member, systemPrompt } = loadMember(memberName);
 
   const injectedSkills: Skill[] = (skillPaths ?? []).map(loadSkillFromPath);

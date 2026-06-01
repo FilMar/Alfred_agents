@@ -1,5 +1,6 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { homedir } from "node:os";
 import type { Member } from "./types.js";
 
 // ─── Percorsi ─────────────────────────────────────────────────────────────────
@@ -18,8 +19,9 @@ function resolveHatsDir(): string {
   throw new Error(`Directory hats non trovata. Imposta TH_HATS_DIR oppure esegui da tools/th/.`);
 }
 
-const MEMBERS_DIR = join(process.cwd(), ".th", "members");
-const TMP_MEMBERS_DIR = join("/tmp", ".th", "members");
+const MEMBERS_DIR = process.env.TH_MEMBERS_DIR ?? join(process.cwd(), ".th", "members");
+const TMP_MEMBERS_DIR = process.env.TH_TMP_MEMBERS_DIR ?? join("/tmp", ".th", "members");
+const GLOBAL_MEMBERS_DIR = process.env.TH_GLOBAL_MEMBERS_DIR ?? join(homedir(), ".th", "members");
 
 // ─── Validazione ──────────────────────────────────────────────────────────────
 
@@ -86,7 +88,9 @@ function resolveMemberPath(name: string): string {
   if (existsSync(local)) return local;
   const tmp = join(TMP_MEMBERS_DIR, `${name}.md`);
   if (existsSync(tmp)) return tmp;
-  throw new Error(`Membro "${name}" non trovato (cercato in .th/members/ e /tmp/.th/members/).`);
+  const global = join(GLOBAL_MEMBERS_DIR, `${name}.md`);
+  if (existsSync(global)) return global;
+  throw new Error(`Membro "${name}" non trovato (cercato in .th/members/, /tmp/.th/members/, ~/.th/members/).`);
 }
 
 function parseMemberContent(name: string, content: string): { member: Member; systemPrompt: string } {
@@ -137,21 +141,30 @@ export function createMember(name: string, hat: string, role: string, tools: str
   return { name, hat, tools, skills };
 }
 
-export function listMembers(includeAll = false): Array<Member & { tmp: boolean }> {
-  const fromDir = (dir: string, tmp: boolean): Array<Member & { tmp: boolean }> => {
-    if (!existsSync(dir)) return [];
-    return readdirSync(dir)
-      .filter((f) => f.endsWith(".md"))
-      .map((f) => {
-        const content = readFileSync(join(dir, f), "utf-8");
-        const { member } = parseMemberContent(f.replace(".md", ""), content);
-        return { ...member, tmp };
-      });
-  };
+type Scope = "local" | "global" | "tmp";
 
-  const project = fromDir(MEMBERS_DIR, false);
-  if (!includeAll) return project;
-  return [...project, ...fromDir(TMP_MEMBERS_DIR, true)];
+function fromDir(dir: string, scope: Scope): Array<Member & { scope: Scope }> {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => {
+      const content = readFileSync(join(dir, f), "utf-8");
+      const { member } = parseMemberContent(f.replace(".md", ""), content);
+      return { ...member, scope };
+    });
+}
+
+export function listMembers(opts: { local?: boolean; global?: boolean; tmp?: boolean } = {}): {
+  local: Array<Member & { scope: Scope }>;
+  global: Array<Member & { scope: Scope }>;
+  tmp: Array<Member & { scope: Scope }>;
+} {
+  const showAll = !opts.local && !opts.global && !opts.tmp;
+  return {
+    local: showAll || opts.local ? fromDir(MEMBERS_DIR, "local") : [],
+    global: showAll || opts.global ? fromDir(GLOBAL_MEMBERS_DIR, "global") : [],
+    tmp: showAll || opts.tmp ? fromDir(TMP_MEMBERS_DIR, "tmp") : [],
+  };
 }
 
 export function loadMember(name: string): { member: Member; systemPrompt: string } {
@@ -167,6 +180,53 @@ export function getMember(name: string): Member {
 export function deleteMember(name: string): void {
   const memberPath = resolveMemberPath(name);
   unlinkSync(memberPath);
+}
+
+export function promoteMember(name: string, force = false): Member {
+  validateName(name);
+  const srcPath = (() => {
+    const local = join(MEMBERS_DIR, `${name}.md`);
+    if (existsSync(local)) return local;
+    const tmp = join(TMP_MEMBERS_DIR, `${name}.md`);
+    if (existsSync(tmp)) return tmp;
+    throw new Error(`Membro "${name}" non trovato in locale o tmp.`);
+  })();
+  const destPath = join(GLOBAL_MEMBERS_DIR, `${name}.md`);
+  if (existsSync(destPath) && !force) {
+    throw new Error(`Membro globale "${name}" esiste già. Usa --force per sovrascrivere.`);
+  }
+  mkdirSync(GLOBAL_MEMBERS_DIR, { recursive: true });
+  copyFileSync(srcPath, destPath);
+  return getMember(name);
+}
+
+export function createMemberFrom(name: string, globalName: string): Member {
+  validateName(name);
+  validateName(globalName);
+  const srcPath = join(GLOBAL_MEMBERS_DIR, `${globalName}.md`);
+  if (!existsSync(srcPath)) throw new Error(`Membro globale "${globalName}" non trovato.`);
+  const destPath = join(MEMBERS_DIR, `${name}.md`);
+  if (existsSync(destPath)) throw new Error(`Membro "${name}" esiste già.`);
+  mkdirSync(MEMBERS_DIR, { recursive: true });
+  let content = readFileSync(srcPath, "utf-8");
+  if (name !== globalName) content = content.replace(/^name: .+$/m, `name: ${name}`);
+  writeFileSync(destPath, content, "utf-8");
+  return getMember(name);
+}
+
+/** Garantisce che il membro esista localmente. Se trovato solo in globale, lo copia in locale.
+ *  Ritorna true se è stato auto-istanziato da globale. */
+export function ensureLocalMember(name: string): boolean {
+  validateName(name);
+  if (existsSync(join(MEMBERS_DIR, `${name}.md`))) return false;
+  if (existsSync(join(TMP_MEMBERS_DIR, `${name}.md`))) return false;
+  const globalPath = join(GLOBAL_MEMBERS_DIR, `${name}.md`);
+  if (!existsSync(globalPath)) {
+    throw new Error(`Membro "${name}" non trovato (cercato in .th/members/, /tmp/.th/members/, ~/.th/members/).`);
+  }
+  mkdirSync(MEMBERS_DIR, { recursive: true });
+  copyFileSync(globalPath, join(MEMBERS_DIR, `${name}.md`));
+  return true;
 }
 
 export function listHats(): string[] {
