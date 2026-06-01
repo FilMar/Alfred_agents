@@ -129,6 +129,10 @@ export function updateTaskData(id: string, data: Record<string, unknown>): void 
   db.run("UPDATE tasks SET data = ? WHERE id = ?", [JSON.stringify(data), id]);
 }
 
+export function updateTaskProject(id: string, project_id: string | null): void {
+  db.run("UPDATE tasks SET project_id = ? WHERE id = ?", [project_id, id]);
+}
+
 export function searchTasks(query: string, opts: { includeDone?: boolean } = {}): Task[] {
   const conditions: string[] = ["data LIKE ?"];
   const params: unknown[] = [`%${query}%`];
@@ -147,7 +151,7 @@ function rowToTask(row: Record<string, unknown>): Task {
   return {
     id: row.id as string,
     list: row.list as List,
-    project_id: row.project_id as string | undefined,
+    project_id: (row.project_id as string | null) ?? undefined,
     done_at: row.done_at as string | undefined,
     created_at: row.created_at as string,
     data: JSON.parse(row.data as string),

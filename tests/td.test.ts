@@ -5,7 +5,7 @@ const TEST_DB = "/tmp/td-test.db";
 process.env.TD_DB_PATH = TEST_DB;
 
 // import dopo aver impostato la variabile — il singleton apre TEST_DB
-const { insertTask, insertProject, getTask, getProject, listTasks, moveTask, doneTask, updateTaskData, searchTasks, taskCountByProject } = await import("../tools/td/src/db.ts");
+const { insertTask, insertProject, getTask, getProject, listTasks, moveTask, doneTask, updateTaskData, updateTaskProject, searchTasks, taskCountByProject } = await import("../tools/td/src/db.ts");
 
 afterAll(() => {
   try { unlinkSync(TEST_DB); } catch {}
@@ -117,6 +117,26 @@ describe("searchTasks", () => {
     insertTask(t);
     doneTask(t.id);
     expect(searchTasks("task keyword inclusione", { includeDone: true }).find(x => x.id === t.id)).toBeDefined();
+  });
+});
+
+describe("updateTaskProject", () => {
+  it("assegna un task a un progetto", () => {
+    const p = makeProject();
+    insertProject(p);
+    const t = makeTask();
+    insertTask(t);
+    updateTaskProject(t.id, p.id);
+    expect(getTask(t.id)?.project_id).toBe(p.id);
+  });
+
+  it("rimuove il progetto con null", () => {
+    const p = makeProject();
+    insertProject(p);
+    const t = makeTask({ project_id: p.id });
+    insertTask(t);
+    updateTaskProject(t.id, null);
+    expect(getTask(t.id)?.project_id).toBeUndefined();
   });
 });
 

@@ -3,7 +3,7 @@ import { Command } from "commander";
 import { randomUUID } from "node:crypto";
 import {
   insertProject, getProject, getProjectByName, listProjects, updateProject, taskCountByProject,
-  insertTask, getTask, listTasks, moveTask, doneTask, updateTaskData, searchTasks,
+  insertTask, getTask, listTasks, moveTask, doneTask, updateTaskData, updateTaskProject, searchTasks,
 } from "./db.js";
 import { LISTS, type List } from "./types.js";
 
@@ -33,6 +33,21 @@ function validateList(v: string): List {
 
 function shortId(id: string): string {
   return id.slice(0, 8);
+}
+
+function collect(val: string, prev: string[]): string[] {
+  return [...prev, val];
+}
+
+function applyFields(data: Record<string, unknown>, fields: string[]): void {
+  for (const f of fields) {
+    const eq = f.indexOf("=");
+    if (eq === -1) die(`--field formato invalido: "${f}". Usa key=value`);
+    const key = f.slice(0, eq);
+    const value = f.slice(eq + 1);
+    if (!key) die(`--field: chiave vuota in "${f}"`);
+    if (value === "") delete data[key]; else data[key] = value;
+  }
 }
 
 function printTask(t: ReturnType<typeof getTask> & object, projectName?: string): void {
@@ -114,6 +129,7 @@ program
   .option("--due <date>", "Scadenza (YYYY-MM-DD)")
   .option("--waiting-for <who>", "In attesa di")
   .option("--notes <text>", "Note libere")
+  .option("--field <key=value>", "Campo custom in data (ripetibile, key= per cancellare)", collect, [])
   .action((what: string, opts) => {
     try {
       const list = validateList(opts.list);
@@ -123,11 +139,21 @@ program
         if (!p) die(`Progetto "${opts.project}" non trovato. Crealo con: td project add "${opts.project}"`);
         project_id = p.id;
       }
+      const similar = searchTasks(what).filter(t => !t.done_at);
+      if (similar.length) {
+        process.stderr.write(`Simili già presenti:\n`);
+        for (const t of similar) {
+          const pName = t.project_id ? getProject(t.project_id)?.name : undefined;
+          printTask(t as NonNullable<typeof t>, pName);
+        }
+      }
+
       const data: Record<string, unknown> = { what };
       if (opts.context) data.context = opts.context;
       if (opts.due) data.due = opts.due;
       if (opts.waitingFor) data.waiting_for = opts.waitingFor;
       if (opts.notes) data.notes = opts.notes;
+      applyFields(data, opts.field);
 
       const t = { id: randomUUID(), list, project_id, created_at: now(), data };
       insertTask(t);
@@ -250,6 +276,8 @@ program
   .option("--due <date>", "Scadenza (YYYY-MM-DD)")
   .option("--notes <text>", "Note libere")
   .option("--waiting-for <who>", "In attesa di")
+  .option("--project <name>", "Sposta in un progetto (stringa vuota per rimuovere)")
+  .option("--field <key=value>", "Campo custom in data (ripetibile, key= per cancellare)", collect, [])
   .action((id: string, opts) => {
     try {
       const t = getTask(id) ?? listTasks({ includeDone: true }).find(t => t.id.startsWith(id));
@@ -260,7 +288,17 @@ program
       if (opts.due !== undefined) { if (opts.due) data.due = opts.due; else delete data.due; }
       if (opts.notes !== undefined) { if (opts.notes) data.notes = opts.notes; else delete data.notes; }
       if (opts.waitingFor !== undefined) { if (opts.waitingFor) data.waiting_for = opts.waitingFor; else delete data.waiting_for; }
+      applyFields(data, opts.field);
       updateTaskData(t.id, data);
+      if (opts.project !== undefined) {
+        if (opts.project === "") {
+          updateTaskProject(t.id, null);
+        } else {
+          const p = getProjectByName(opts.project);
+          if (!p) die(`Progetto "${opts.project}" non trovato`);
+          updateTaskProject(t.id, p.id);
+        }
+      }
       process.stdout.write(`Aggiornato: ${shortId(t.id)}\n`);
     } catch (e) { die(err(e)); }
   });
