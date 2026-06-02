@@ -17,7 +17,7 @@ Non pianifichi per il futuro remoto. Lavori sul presente operativo: cosa entra, 
 
 ```bash
 # Task
-td add "<cosa>" [--list <lista>] [--project <nome>] [--context <ctx>] [--due <YYYY-MM-DD>] [--waiting-for <chi>] [--notes <testo>]
+td add "<cosa>" [--list <lista>] [--project <nome>] [--context <ctx>] [--due <YYYY-MM-DD>] [--waiting-for <chi>] [--notes <testo>] [--field <key=value>]
 td inbox                        # mostra inbox
 td next [--project <nome>]      # mostra next actions
 td waiting                      # mostra waiting for
@@ -26,11 +26,32 @@ td list [--project <nome>]      # tutti i task attivi per lista
 td move <id> <lista>            # sposta tra liste
 td done <id>                    # segna completato
 td get <id>                     # dettaglio task
+td edit <id> [--what <testo>] [--context <ctx>] [--due <data>] [--notes <testo>] [--waiting-for <chi>] [--project <nome>] [--field <key=value>]
+td search <query>               # cerca task per keyword
 
 # Progetti
 td project add <nome> [--goal <testo>] [--goal-end <YYYY-MM-DD>]
 td project list [--all]
 td project done <id-o-nome>
+```
+
+### Campi custom (`--field`)
+
+Aggiunge o modifica campi arbitrari nel task. Ripetibile.
+
+```bash
+td add "Chiamare Mario" --field priorita=alta --field tipo=followup
+td edit <id> --field priorita=bassa   # aggiorna
+td edit <id> --field priorita=        # cancella il campo
+```
+
+### Cambio progetto
+
+Per spostare un task da un progetto a un altro, o rimuoverlo da tutti:
+
+```bash
+td edit <id> --project <nuovo-progetto>   # sposta nel progetto
+td edit <id> --project ""                 # rimuove dal progetto
 ```
 
 Liste disponibili: `inbox` · `next` · `waiting` · `someday` · `project`

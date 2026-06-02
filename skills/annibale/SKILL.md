@@ -94,16 +94,32 @@ Aspetta conferma. Se l'utente vuole modificare il flow, adattati prima di esegui
 Controlla quali membri esistono già:
 
 ```bash
-th member list
+th member list              # locale + globale + tmp
+th member list --global     # solo globali (~/.th/members/)
+th member list --local      # solo locali (.th/members/)
+th member list --tmp        # solo temporanei (/tmp/.th/members/)
 ```
 
-Per quelli mancanti, creali con il cappello appropriato:
+**Auto-instantiate**: se usi `th run --member <nome>` e il membro esiste globalmente ma non localmente, viene istanziato in automatico. Non serve pre-crearlo.
+
+Per membri non esistenti, creali:
 
 ```bash
-th member create <nome> --hat <cappello-core> --role "<ruolo specifico per questo task>" --tools read,bash --tmp
+# Da zero
+th member create <nome> --hat <cappello-core> --role "<ruolo specifico>" --tools read,bash --tmp
+
+# Da un membro globale come base (ignora --hat, --role, --tools, --skills)
+th member create <nome> --from <nome-globale> --tmp
 ```
 
-Usa `--tmp` per membri usa-e-getta specifici per il task corrente. Usa membri permanenti (senza `--tmp`) solo se l'utente vuole tenerli.
+Usa `--tmp` per membri usa-e-getta. Usa membri permanenti (senza `--tmp`) solo se l'utente vuole tenerli.
+
+Per promuovere un membro locale o tmp a globale (disponibile in tutti i progetti):
+
+```bash
+th member promote <nome>          # promuove a ~/.th/members/
+th member promote <nome> --force  # sovrascrive se esiste già
+```
 
 ### 5. Esegui il flow
 
