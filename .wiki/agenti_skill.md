@@ -1,7 +1,7 @@
 ---
 tags: [agenti, skill, cappelli]
 sources: [alfred.md, skills/annibale/SKILL.md, skills/aristotele/SKILL.md, skills/ermes/SKILL.md, skills/feynman/SKILL.md, skills/indiana/SKILL.md, skills/oracolo/SKILL.md, skills/platone/SKILL.md, skills/prometeo/SKILL.md, skills/seneca/SKILL.md, skills/socrate/SKILL.md, skills/omero/SKILL.md]
-updated: 2026-05-30
+updated: 2026-06-02
 ---
 
 # Agenti e Skill

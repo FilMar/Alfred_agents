@@ -1,7 +1,7 @@
 ---
 tags: [cli, tb, td, th, reference]
-sources: [roadmap.md, skills/seneca/SKILL.md, skills/oracolo/SKILL.md]
-updated: 2026-05-30
+sources: [roadmap.md, skills/seneca/SKILL.md, skills/oracolo/SKILL.md, tools/td/src/cli.ts, tools/th/src/cli.ts, tools/th/src/members.ts]
+updated: 2026-06-02
 ---
 
 # CLI Reference
@@ -46,7 +46,7 @@ GTD. DB globale in `~/.pi/td.db`.
 
 ```bash
 # Task
-td add "<cosa>" [--list <lista>] [--project <nome>] [--context <ctx>] [--due <YYYY-MM-DD>] [--waiting-for <chi>] [--notes <testo>]
+td add "<cosa>" [--list <lista>] [--project <nome>] [--context <ctx>] [--due <YYYY-MM-DD>] [--waiting-for <chi>] [--notes <testo>] [--field <key=value>]
 td inbox
 td next [--project <nome>]
 td waiting
@@ -55,7 +55,7 @@ td list [--project <nome>]
 td move <id> <lista>
 td done <id>
 td get <id>
-td edit <id>                  # patch post-creazione di what, context, due, notes, waiting-for
+td edit <id> [--project <nome>] [--field <key=value>]   # patch post-creazione
 td search <query> [--all]     # ricerca keyword sul JSON
 
 # Progetti
@@ -68,6 +68,10 @@ td project done <id-o-nome>
 
 **Gli id si usano abbreviati (primi 8 caratteri).**
 
+**Warn su task simili:** `td add` controlla i task attivi con contenuto simile e li mostra su stderr prima di inserire. Non blocca — avvisa.
+
+**`--field <key=value>`** (ripetibile): scrive campi custom in `data`. `key=` (valore vuoto) cancella il campo. Disponibile su `add` e `edit`.
+
 ---
 
 ## th — Third Hand
@@ -77,9 +81,14 @@ Orchestrazione agenti. DB in `~/.pi/th.db` (runs + tracking).
 ```bash
 # Membri
 th member create <nome> --hat <cappello> --role "<ruolo>" --tools <t1,t2> [--skills <s1,s2>] [--tmp]
-th member list [--all]
+th member create <nome> --from <global>   # copia da un membro globale (ignora --hat/--role/--tools/--skills)
+th member promote <nome> [--force]        # promuove locale/tmp a globale (~/.th/members/)
+th member list [--local] [--global] [--tmp]
 th member get <nome>
 th member delete <nome>
+
+# Skill disponibili
+th skills                                 # lista skill nel progetto corrente
 
 # Esecuzione
 th run --member <nome> --task "<prompt>" \
@@ -100,6 +109,18 @@ th get <runId>
 # Modelli
 th models
 ```
+
+**Scope dei membri:**
+
+| Scope | Path | Visibilità |
+|---|---|---|
+| Locale | `.th/members/<nome>.md` | Solo progetto corrente |
+| Globale | `~/.th/members/<nome>.md` | Tutti i progetti |
+| Tmp | `/tmp/.th/members/<nome>.md` | Temporanei, non persistono al reboot |
+
+**Auto-instantiate:** `th run` su un membro globale (non presente localmente) lo copia automaticamente in `.th/members/` prima dell'esecuzione.
+
+**`th member list`** senza flag mostra tutti e tre i gruppi. Con `--local`, `--global`, o `--tmp` filtra il gruppo.
 
 **Sandbox bwrap:** ogni `th run` è isolato in un container read-only (tranne `cwd`, `~/.pi`, `/tmp`).
 

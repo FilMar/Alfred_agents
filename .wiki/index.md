@@ -30,3 +30,7 @@ Pi
 - `alfred.md`
 - `roadmap.md`
 - `skills/*/SKILL.md` (tutti e 11)
+
+## Riferimenti esterni
+
+- [Pi docs ufficiali](https://github.com/earendil-works/pi/tree/main/packages/coding-agent/docs) — skills, settings, sessions, providers, sdk. Fetchare via Ermes quando serve.
