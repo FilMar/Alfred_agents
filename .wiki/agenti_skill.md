@@ -1,7 +1,7 @@
 ---
 tags: [agenti, skill, cappelli]
 sources: [alfred.md, skills/annibale/SKILL.md, skills/aristotele/SKILL.md, skills/ermes/SKILL.md, skills/feynman/SKILL.md, skills/indiana/SKILL.md, skills/oracolo/SKILL.md, skills/platone/SKILL.md, skills/prometeo/SKILL.md, skills/socrate/SKILL.md, skills/omero/SKILL.md]
-updated: 2026-06-02
+updated: 2026-06-04
 ---
 
 # Agenti e Skill
@@ -21,7 +21,7 @@ Ogni agente ha un ruolo cognitivo preciso. Non si sovrappongono — si complemen
 | **Ermes** | Estrae testo da URL (web + YouTube) | Qualsiasi URL esterno |
 | **Indiana** | Archeologia del codice: diagnostica pattern e debiti tecnici | "Analizza questo progetto" |
 | **Prometeo** | Crea e migliora skill: draft, eval, benchmark, ottimizzazione description | "Crea una skill per X" |
-| **Omero** | Mantiene la wiki locale del progetto in `.wiki/` | Ingestare sorgenti, query sulla wiki, health-check |
+| **Omero** | Mantiene la wiki locale del progetto tramite la CLI `tw` | Ingestare sorgenti, query sulla wiki, gestione task, health-check |
 
 ## Dettaglio Agenti Chiave
 
@@ -68,12 +68,25 @@ Regola: una domanda sola — la più scomoda. Non valida, non conclude.
 
 ### Omero (Wiki Locale)
 
+Tool consentiti: `Bash`, `Read` — niente Write o Edit, la wiki si gestisce solo via `tw`.
+
+Strumento principale: CLI `tw` — non tocca mai `.wiki/` direttamente. `tw` trova la wiki risalendo dal cwd, come `git`.
+
 Struttura:
 - `./` — sorgenti del progetto (mai modificare)
-- `.wiki/` — layer di sintesi
-- `wiki.md` — convenzioni locali (se esiste)
+- `.wiki/` — layer di sintesi (gestito solo via `tw`)
+- `wiki.md` — convenzioni locali (se esiste, si legge prima di ogni operazione)
 
-Operazioni: **Ingest** (legge → discute → scrive → aggiorna index + cross-ref + log), **Query** (index → pagine → risposta), **Lint** (contraddizioni, orfani, gap).
+Comandi chiave:
+```bash
+tw init [--name <nome>]                                          # crea la wiki
+tw page list / tw page get <nome>                                # naviga
+tw page update <nome> --section "<H2>" --content "<md>"         # scrivi sezione
+tw search "<query>"                                              # cerca
+tw task list / tw task add "<testo>" / tw task done "<testo>"   # task
+```
+
+Operazioni: **Ingest** (legge sorgenti → discute → `tw page update` sezione per sezione → aggiorna index + cross-ref + log), **Query** (`tw search` → `tw page get` → risposta con citazioni), **Task** (gestione tramite `tw task`), **Lint** (contraddizioni, orfani, gap).
 
 ## Invocazione via th
 
@@ -88,3 +101,9 @@ th run --member <agente> --task "<prompt>" --output /tmp/out.md --detach
 - [Sistema Overview](sistema_overview.md)
 - [CLI Reference](cli_reference.md)
 - [Flussi Quotidiani](flussi_quotidiani.md)
+
+## Frontmatter
+
+tags: [agenti, skill, cappelli]
+sources: [alfred.md, skills/annibale/SKILL.md, skills/aristotele/SKILL.md, skills/ermes/SKILL.md, skills/feynman/SKILL.md, skills/indiana/SKILL.md, skills/oracolo/SKILL.md, skills/platone/SKILL.md, skills/prometeo/SKILL.md, skills/socrate/SKILL.md, skills/omero/SKILL.md]
+updated: 2026-06-04

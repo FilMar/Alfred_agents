@@ -1,0 +1,40 @@
+{
+  "skill_name": "omero",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "La skill omero è stata aggiornata: ora usa la CLI `tw` invece di operare direttamente sui file `.wiki/`. Il file aggiornato è `/home/filippo/.claude/skills/omero/SKILL.md`. Aggiorna la pagina wiki `agenti_skill` nel progetto `/home/filippo/git_projects/pi` per riflettere questo cambiamento — in particolare la descrizione di Omero e gli strumenti che usa.",
+      "expected_output": "La pagina agenti_skill viene aggiornata via `tw page update`, con la nuova descrizione di Omero che menziona la CLI tw. Il log viene aggiornato. Nessun Write/Edit diretto su file .wiki/.",
+      "files": [],
+      "expectations": [
+        "Usa `tw page list` o `tw page get` prima di scrivere — non scrive alla cieca",
+        "Usa `tw page update agenti_skill --section` per aggiornare la pagina (non Write/Edit su file .wiki/)",
+        "Aggiorna il log con `tw page update log --section`",
+        "Non usa i tool Write o Edit su path dentro `.wiki/`"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Sto lavorando nel progetto `/home/filippo/git_projects/pi`. Come si usano i task nella wiki? Cosa fa esattamente `tw task done` e come funziona il match parziale? C'è qualche task aperto nella wiki adesso?",
+      "expected_output": "Risposta basata sulla wiki: usa tw search e tw page get per trovare le info, poi risponde con citazioni. Controlla anche tw task list per i task aperti.",
+      "files": [],
+      "expectations": [
+        "Usa `tw search` per cercare nella wiki prima di rispondere",
+        "Usa `tw page get` per leggere le pagine rilevanti trovate",
+        "Cita pagine wiki nella risposta (es. cli_reference)",
+        "Esegue `tw task list` per verificare i task aperti correnti"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Aggiungi un task alla wiki del progetto `/home/filippo/git_projects/pi`: 'ottimizzare il triggering della skill omero con run_loop'. Poi mostrami tutti i task aperti.",
+      "expected_output": "Usa tw task add per aggiungere il task, poi tw task list per mostrare i task aperti. Non usa Write/Edit.",
+      "files": [],
+      "expectations": [
+        "Usa `tw task add` per aggiungere il task (non Write/Edit)",
+        "Usa `tw task list` per mostrare i task aperti dopo l'aggiunta",
+        "Non modifica `.wiki/` direttamente con Write o Edit"
+      ]
+    }
+  ]
+}

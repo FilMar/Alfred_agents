@@ -38,3 +38,4 @@ Pi
 ## Tasks
 
 - [x] costruire tw CLI
+- [ ] ottimizzare il triggering della skill omero con run_loop
