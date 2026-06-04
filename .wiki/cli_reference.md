@@ -1,7 +1,7 @@
 ---
-tags: [cli, tb, td, th, reference]
-sources: [roadmap.md, skills/seneca/SKILL.md, skills/oracolo/SKILL.md, tools/td/src/cli.ts, tools/th/src/cli.ts, tools/th/src/members.ts]
-updated: 2026-06-02
+tags: [cli, tb, tw, th, reference]
+sources: [roadmap.md, skills/oracolo/SKILL.md, tools/tw/src/cli.ts, tools/th/src/cli.ts, tools/th/src/members.ts]
+updated: 2026-06-04
 ---
 
 # CLI Reference
@@ -40,37 +40,40 @@ tb graph                     # grafo interattivo nel browser (PCA 2D)
 
 ---
 
-## td — Third Done
+## tw — Third Wiki
 
-GTD. DB globale in `~/.pi/td.db`.
+Wiki locale di progetto. File in `.wiki/`, registro globale in `~/.pi/tw_registry.json`.
 
 ```bash
-# Task
-td add "<cosa>" [--list <lista>] [--project <nome>] [--context <ctx>] [--due <YYYY-MM-DD>] [--waiting-for <chi>] [--notes <testo>] [--field <key=value>]
-td inbox
-td next [--project <nome>]
-td waiting
-td someday
-td list [--project <nome>]
-td move <id> <lista>
-td done <id>
-td get <id>
-td edit <id> [--project <nome>] [--field <key=value>]   # patch post-creazione
-td search <query> [--all]     # ricerca keyword sul JSON
+# Setup
+tw init [--name <nome>]              # crea .wiki/ e registra (default: nome dir)
+tw register [--name <nome>]          # registra una wiki già esistente
+tw wikis                             # lista wiki registrate globalmente
 
-# Progetti
-td project add <nome> [--goal <testo>] [--goal-end <YYYY-MM-DD>]
-td project list [--all]
-td project done <id-o-nome>
+# Pagine
+tw page list                         # lista pagine della wiki locale
+tw page get <nome>                   # legge una pagina (raw markdown)
+tw page update <nome> \
+  --section "<sezione>" \
+  --content "<markdown>"             # aggiorna una sezione (scrittura atomica)
+
+# Task
+tw task list [--page <nome>] [--all]  # task aperti (--all include completati)
+tw task add "<testo>" [--page <nome>] # aggiunge task alla sezione Tasks
+tw task done "<testo>" [--page <nome>] # segna completato (match parziale)
+
+# Ricerca
+tw search "<query>"                  # regex case-insensitive sulla wiki locale
+tw search "<query>" --global         # tutte le wiki registrate (sola lettura)
+tw search "<query>" --wiki <nome>    # wiki specifica del registro
 ```
 
-**Liste:** `inbox` · `next` · `waiting` · `someday` · `project`
-
-**Gli id si usano abbreviati (primi 8 caratteri).**
-
-**Warn su task simili:** `td add` controlla i task attivi con contenuto simile e li mostra su stderr prima di inserire. Non blocca — avvisa.
-
-**`--field <key=value>`** (ripetibile): scrive campi custom in `data`. `key=` (valore vuoto) cancella il campo. Disponibile su `add` e `edit`.
+**Comportamento:**
+- `tw` cerca `.wiki/` risalendo dal cwd (come `git`)
+- `--page` default: `index`
+- Task = checkbox markdown `- [ ]` / `- [x]` nella sezione `## Tasks` della pagina
+- Scrittura sempre atomica (`write tmp → mv`)
+- `--global` e `--wiki` sono sola lettura — scrittura solo sulla wiki locale
 
 ---
 

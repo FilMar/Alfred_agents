@@ -1,5 +1,16 @@
 # Log Wiki Pi
 
+## [2026-06-04] feat | tw — Third Wiki CLI, rimozione td/Seneca
+
+Rimossi `tools/td/`, `skills/seneca/`, `tests/td.test.ts`.
+
+Introdotti:
+- `tools/tw/` — CLI Third Wiki (`init`, `register`, `wikis`, `page list/get/update`, `task list/add/done`, `search`)
+- `tests/tw.test.ts` — 19 test su comportamento wiki e registro
+- Registro globale wiki in `~/.pi/tw_registry.json`
+
+Aggiornati: `alfred.md`, `cli_reference.md`, `flussi_quotidiani.md`, `sistema_overview.md`, `agenti_skill.md`, `index.md`.
+
 ## [2026-06-02] update | th global members + td warn simili
 
 Aggiornato `cli_reference.md`:

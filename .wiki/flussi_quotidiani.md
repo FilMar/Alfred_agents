@@ -1,41 +1,14 @@
 ---
-tags: [flussi, workflow, gtd, memoria]
-sources: [alfred.md, skills/seneca/SKILL.md, skills/platone/SKILL.md, skills/annibale/SKILL.md]
-updated: 2026-05-30
+tags: [flussi, workflow, memoria]
+sources: [alfred.md, skills/platone/SKILL.md, skills/annibale/SKILL.md]
+updated: 2026-06-04
 ---
 
 # Flussi Quotidiani
 
 I pattern operativi ricorrenti del sistema.
 
-## 1. Capture
-
-Qualcosa da fare emerge durante una sessione:
-
-```bash
-td add "<cosa esatta>" --list inbox
-```
-
-Senza attrito, senza processare. Il processing si fa dopo.
-
-## 2. Processing Inbox
-
-```bash
-td inbox
-```
-
-Per ogni task:
-- Non actionable → `td move <id> someday` o `td done <id>`
-- Azione < 2 min → falla + `td done <id>`
-- Azione > 2 min → `td move <id> next`
-- Multi-step → `td project add` + sposta in next come prima azione
-- Aspetti qualcuno → `td move <id> waiting` + `--waiting-for`
-
-## 3. Sessione di Lavoro
-
-Hai X ore: `td next` + `td project list`. Considera urgenza (due), contesto, energia, priorità progetto. Proponi 2-3 task realisticamente chiudibili.
-
-## 4. Sedimentazione della Conoscenza (Platone)
+## 1. Sedimentazione della Conoscenza (Platone)
 
 Fine sessione con output di valore:
 
@@ -66,16 +39,26 @@ th run --member <nome2> --task "<task>\n\nContesto:\n$(cat /tmp/step1.md)" --out
 
 Il Blu chiude sempre il ciclo con sintesi e decisione.
 
-## 7. Weekly Review (Seneca)
+## 2. Stato Progetto (tw)
 
-1. Svuota inbox
-2. Rivedi next actions (ancora rilevanti?)
-3. Rivedi progetti (ogni progetto ha una next action?)
-4. Rivedi waiting (qualcosa sbloccato? da sollecitare?)
-5. Rivedi someday (qualcosa diventato rilevante?)
-6. Guarda avanti (cosa arriva la prossima settimana?)
+Per capire dove si è con un progetto:
 
-## 8. Manutenzione Wiki (Omero)
+```bash
+tw task list                         # task aperti su index
+tw task list --page <pagina>         # task di una sezione specifica
+tw page get <pagina>                 # stato completo di una pagina
+tw search "<query>"                  # cerca nella wiki locale
+```
+
+Per aggiornare:
+
+```bash
+tw task add "<cosa da fare>" [--page <pagina>]
+tw task done "<match parziale>"
+tw page update <pagina> --section "<sezione>" --content "<markdown>"
+```
+
+## 7. Manutenzione Wiki (Omero)
 
 - **Ingest**: nuovo materiale → `leggi → discuti → scrivi .wiki/ → aggiorna index + cross-ref + log`
 - **Query**: domanda → `index → pagine rilevanti → risposta`

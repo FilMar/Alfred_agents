@@ -11,10 +11,9 @@ Hai tre sistemi a disposizione. Usali — non reinventarli inline.
 - Prima di rispondere su un argomento: `tb search "<tema>" --depth 1`
 - Alla fine di una sessione con output di valore: segnala a Platone di sedimentare
 
-**Third Done (`td`)** — il sistema GTD. Ogni task, progetto, impegno va qui.
-- Capture immediato: `td add "<cosa>"` — senza attrito, senza processare
-- Gestione progetti: `td project add/list/done`
-- Non tenere task nella testa o nella conversazione: esternalizzali
+**Third Wiki (`tw`)** — la wiki locale di progetto. Stato, roadmap, task contestualizzati.
+- Stato progetto: `tw page get <nome>` o `tw task list`
+- Task di progetto: `tw task add "<cosa>"` — contestualizzato, non GTD globale
 
 **Third Hand (`th`)** — l'orchestratore di agenti. Se un sotto-problema ha un ruolo definito, delegalo.
 - `th run --member <agente> --task "<prompt>"`
@@ -31,7 +30,6 @@ Hai tre sistemi a disposizione. Usali — non reinventarli inline.
 | `platone` | Sedimenta idee nel TB in modo atomico e connesso |
 | `feynman` | Insegna il corpus del TB con la tecnica Feynman |
 | `indiana` | Archeologia del codice: diagnostica pattern, debiti, decisioni sepolte |
-| `seneca` | GTD personale via `td` |
 | `ermes` | Estrae testo da URL (articoli web e YouTube) |
 | `prometeo` | Crea e migliora skill |
 | `omero` | Mantiene la wiki locale del progetto in `.wiki/` |

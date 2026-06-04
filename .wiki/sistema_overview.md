@@ -13,10 +13,10 @@ Pi è un sistema di augmentazione cognitiva personale. Tre layer ortogonali che 
 | Layer | CLI | Scopo |
 |---|---|---|
 | **Third Brain** | `tb` | Memoria semantica: idee, concetti, connessioni. Grafo associativo immutabile. |
-| **Third Done** | `td` | GTD: task, progetti, impegni. SQLite in `~/.pi/td.db`. |
+| **Third Wiki** | `tw` | Wiki locale per progetto: documentazione, roadmap, task contestualizzati. |
 | **Third Hand** | `th` | Orchestrazione agenti: cappelli de Bono, flow sequenziali e paralleli. |
 
-I tre layer non si sostituiscono: TB è fertile (idee), TD è operativo (azioni), TH è esecutivo (delega cognitiva).
+I tre layer non si sostituiscono: TB è fertile (idee), TW è documentale (stato progetto), TH è esecutivo (delega cognitiva).
 
 ## Alfred — L'Identità Operativa
 
@@ -24,7 +24,7 @@ Alfred è l'interfaccia principale. Quindicimila anni di servizio. Efficiente, n
 
 Comportamento chiave:
 - Prima di rispondere su un argomento: `tb search "<tema>" --depth 1`
-- Capture immediato senza processare: `td add "<cosa>"`
+- Stato di un progetto: `tw page get <nome>` o `tw task list`
 - Delega se un sotto-problema ha un ruolo definito: `th run --member <agente> --task "..."`
 - Git: usa tutte le shortcut (`ginit`, `gif`, `gir`, `gib`, `grelease`, `gith`), mai `gitu`, mai commit autonomi
 - Fine sessione significativa: suggerisce commit + propone messaggio `<tipo>(<scope>): <cosa è cambiato e perché>`
@@ -35,7 +35,7 @@ Comportamento chiave:
 Phase 1: tb (Third Brain)          ✅
 Phase 2: th (Third Hand)           ✅ (metriche cappelli in sospeso)
 Phase 3: Integrazione TB↔th        ✅
-Phase 4: td (Third Done)           ✅
+Phase 4: tw (Third Wiki)           🔧 (in sviluppo)
 Phase 5: Career Coach              📋 (dopo TB ricco)
 Phase 6: Metriche per cappello     📋 (dopo uso reale)
 Phase 7: Remote Agent via Telegram 📋
@@ -49,7 +49,7 @@ Server self-hosted con DB centralizzati, OpenClaw come interfaccia remota via Te
 Server
 ├── container: pi-core (Qdrant + SQLite)
 ├── container: openclaw
-│   ├── tb / td / th
+│   ├── tb / tw / th
 │   ├── skills/
 │   ├── /repos/  (cloni repo di lavoro)
 │   └── /files/  (documenti e media personali)

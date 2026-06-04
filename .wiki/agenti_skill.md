@@ -1,6 +1,6 @@
 ---
 tags: [agenti, skill, cappelli]
-sources: [alfred.md, skills/annibale/SKILL.md, skills/aristotele/SKILL.md, skills/ermes/SKILL.md, skills/feynman/SKILL.md, skills/indiana/SKILL.md, skills/oracolo/SKILL.md, skills/platone/SKILL.md, skills/prometeo/SKILL.md, skills/seneca/SKILL.md, skills/socrate/SKILL.md, skills/omero/SKILL.md]
+sources: [alfred.md, skills/annibale/SKILL.md, skills/aristotele/SKILL.md, skills/ermes/SKILL.md, skills/feynman/SKILL.md, skills/indiana/SKILL.md, skills/oracolo/SKILL.md, skills/platone/SKILL.md, skills/prometeo/SKILL.md, skills/socrate/SKILL.md, skills/omero/SKILL.md]
 updated: 2026-06-02
 ---
 
@@ -18,7 +18,6 @@ Ogni agente ha un ruolo cognitivo preciso. Non si sovrappongono — si complemen
 | **Socrate** | Genera attrito cognitivo: contraddizioni, lacune, assunzioni | "Stressami questa idea" |
 | **Aristotele** | Cura sintesi TB: hub, connessioni mancanti, cluster | TB che ha bisogno di struttura |
 | **Oracolo** | Recupera conoscenza dal TB senza interpretare | "Cosa c'è nel TB su X" |
-| **Seneca** | GTD via `td`: capture, processing, sessione, weekly review | Task da catturare, inbox da processare |
 | **Ermes** | Estrae testo da URL (web + YouTube) | Qualsiasi URL esterno |
 | **Indiana** | Archeologia del codice: diagnostica pattern e debiti tecnici | "Analizza questo progetto" |
 | **Prometeo** | Crea e migliora skill: draft, eval, benchmark, ottimizzazione description | "Crea una skill per X" |
