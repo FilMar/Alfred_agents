@@ -94,6 +94,7 @@ export async function listAvailableSkills(): Promise<Array<{ name: string; descr
   const loader = new DefaultResourceLoader({
     cwd: process.cwd(),
     agentDir: getAgentDir(),
+    noExtensions: true,
   });
   await loader.reload();
   const { skills } = loader.getSkills();
@@ -174,6 +175,7 @@ export async function runMember(
   const loader = new DefaultResourceLoader({
     cwd: process.cwd(),
     agentDir: getAgentDir(),
+    noExtensions: true,
     systemPromptOverride: () => systemPrompt,
     skillsOverride: (current) => {
       const filtered = member.skills.length > 0
