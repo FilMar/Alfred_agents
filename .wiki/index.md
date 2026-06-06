@@ -1,41 +1,18 @@
-# Wiki Pi — Indice
-
-Wiki locale del sistema Pi (augmentazione cognitiva personale).
+# Wiki — pi
 
 ## Pagine
 
 | Pagina | Contenuto |
-|---|---|
-| [sistema_overview.md](sistema_overview.md) | Architettura generale: i tre layer (tb/tw/th), Alfred, fasi di sviluppo |
-| [agenti_skill.md](agenti_skill.md) | Tutti gli agenti: ruoli, trigger, dettaglio comportamento |
-| [cli_reference.md](cli_reference.md) | Comandi tb, tw, th — flag, formati output, shortcut git |
-| [flussi_quotidiani.md](flussi_quotidiani.md) | Pattern operativi: capture, processing, sedimentazione, orchestrazione, weekly review |
+|--------|-----------|
+| [architettura](architettura) | I tre layer: tb, th, tw — ruoli, confini, cooperazione |
+| [agenti](agenti) | Agenti disponibili, ruoli, trigger |
+| [th_cli](th_cli) | Riferimento CLI per `th` — comandi, flag, esempi |
+| [tw_cli](tw_cli) | Riferimento CLI per `tw` — comandi, flag, esempi |
+| [roadmap](roadmap) | Stato fasi di sviluppo, cosa è fatto, cosa resta |
+| [log](log) | Storico aggiornamenti wiki |
 
-## Mappa concettuale
+## Frontmatter
 
-```
-Pi
-├── Alfred (identità operativa)
-├── tb — Third Brain (memoria semantica)
-│   └── Agenti: Platone, Feynman, Socrate, Aristotele, Oracolo
-├── tw — Third Wiki (wiki locale per progetto)
-│   └── Agente: Omero
-├── th — Third Hand (orchestrazione)
-│   └── Agenti: Annibale + cappelli de Bono
-└── Skill trasversali: Ermes, Indiana, Prometeo, Omero
-```
-
-## Sorgenti ingested
-
-- `alfred.md`
-- `roadmap.md`
-- `skills/*/SKILL.md` (tutti e 11)
-
-## Riferimenti esterni
-
-- [Pi docs ufficiali](https://github.com/earendil-works/pi/tree/main/packages/coding-agent/docs) — skills, settings, sessions, providers, sdk. Fetchare via Ermes quando serve.
-
-## Tasks
-
-- [x] costruire tw CLI
-- [ ] ottimizzare il triggering della skill omero con run_loop
+tags: [pi, indice, architettura]
+sources: [README.md, roadmap.md, alfred.md]
+updated: 2026-06-06

@@ -1,6 +1,6 @@
 ---
 name: omero
-description: "Omero mantiene la wiki locale di un progetto tramite la CLI `tw`: ingestisce file in pagine strutturate, risponde a query, gestisce task, esegue health-check. Usalo quando l'utente vuole ingestare materiale nella wiki, fare domande sul progetto, aggiungere o completare task, o verificare la consistenza della wiki. Funziona per qualsiasi progetto — tecnico, narrativo, worldbuilding. Il CLAUDE.md del progetto definisce le convenzioni locali."
+description: "Omero mantiene la wiki locale di un progetto tramite la CLI `tw`: ingestisce file in pagine strutturate, risponde a query, mantiene guide di stile e convenzioni del codice, esegue health-check. Usalo quando l'utente vuole ingestare materiale nella wiki, fare domande sul progetto, documentare come è scritto il codice e come estenderlo, o verificare la consistenza della wiki. Funziona per qualsiasi progetto — tecnico, narrativo, worldbuilding. Il CLAUDE.md del progetto definisce le convenzioni locali."
 allowed-tools: Bash, Read
 ---
 
@@ -59,17 +59,29 @@ L'utente fa una domanda. Tu:
 
 La wiki è il layer di conoscenza sintetizzato — non leggere i file sorgente del progetto per rispondere a query. Se la wiki non contiene la risposta, dillo esplicitamente e proponi di ingestare il materiale mancante.
 
-### Task
+### Style
 
-Gestione task contestuali alla wiki:
+Documentazione di pattern, convenzioni e struttura del codice — la memoria di come il progetto è scritto e come va esteso.
 
-```bash
-tw task list [--page <nome>] [--all]        # lista task (--all include completati)
-tw task add "<testo>" [--page <nome>]        # aggiungi task
-tw task done "<testo>" [--page <nome>]       # segna completato (match parziale)
-```
+1. Crea una nuova entry quando emerge un pattern significativo o una convenzione non ovvia:
+   ```bash
+   tw style add <nome> --desc "<descrizione breve>"
+   ```
+2. Popola le sezioni con `tw style update`:
+   - **Come è scritto** — spiega il pattern con contesto (perché quella scelta)
+   - **Come estendere** — passi concreti per aggiungere nuovi casi simili
+   - **Esempio** — snippet di codice rappresentativo
+   ```bash
+   tw style update <nome> --section "Come è scritto" --content "<md>"
+   tw style update <nome> --section "Esempio" --content '```ts\n...\n```'
+   ```
+3. Lista e leggi le entry esistenti:
+   ```bash
+   tw style list
+   tw style get <nome>
+   ```
 
-`--page` di default punta a `index`. Usa pagine tematiche per task contestuali al loro contenuto.
+Aggiorna le style page quando il codice evolve e il pattern cambia. Una style page obsoleta è peggio di nessuna.
 
 ### Lint
 

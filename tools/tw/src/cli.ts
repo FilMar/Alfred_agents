@@ -2,7 +2,7 @@
 import { Command } from "commander";
 import { basename, resolve } from "node:path";
 import { findWikiByName, listWikis, registerWiki } from "./registry.js";
-import { addTask, doneTask, findWiki, getPage, initWiki, listPages, listTasks, requireWiki, searchWiki, updateSection } from "./wiki.js";
+import { addStylePage, findWiki, getPage, getStylePage, initWiki, listPages, listStylePages, requireWiki, searchWiki, updateSection, updateStyleSection } from "./wiki.js";
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
 
@@ -120,59 +120,67 @@ page
 
 program.addCommand(page);
 
-// ─── task ─────────────────────────────────────────────────────────────────────
+// ─── style ────────────────────────────────────────────────────────────────────
 
-const task = new Command("task").description("Gestione task nella wiki");
+const style = new Command("style").description("Gestione guide di stile e convenzioni del codice");
 
-task
+style
+  .command("add <name>")
+  .description("Crea una nuova entry di stile con template standard")
+  .option("--desc <desc>", "Descrizione breve del pattern/convenzione", "")
+  .action((name: string, opts) => {
+    try {
+      const wikiDir = requireWiki();
+      addStylePage(wikiDir, name, opts.desc);
+      out({ added: true, name });
+    } catch (err) {
+      die(errorMessage(err));
+    }
+  });
+
+style
   .command("list")
-  .description("Lista i task aperti (e chiusi) di una pagina")
-  .option("--page <name>", "Pagina su cui operare (default: index)")
-  .option("--all", "Mostra anche i task completati")
-  .action((opts) => {
+  .description("Lista tutte le entry di stile")
+  .action(() => {
     try {
       const wikiDir = requireWiki();
-      const pageName: string = opts.page ?? "index";
-      const tasks = listTasks(wikiDir, pageName);
-      const filtered = opts.all ? tasks : tasks.filter((t) => !t.done);
-      if (!filtered.length) die("Nessun task.");
-      out(filtered);
+      const styles = listStylePages(wikiDir);
+      if (!styles.length) die("Nessuna entry di stile.");
+      out(styles);
     } catch (err) {
       die(errorMessage(err));
     }
   });
 
-task
-  .command("add <text>")
-  .description("Aggiunge un task alla sezione Tasks di una pagina")
-  .option("--page <name>", "Pagina su cui operare (default: index)")
-  .action((text: string, opts) => {
+style
+  .command("get <name>")
+  .description("Legge una entry di stile")
+  .action((name: string) => {
     try {
       const wikiDir = requireWiki();
-      const pageName: string = opts.page ?? "index";
-      addTask(wikiDir, pageName, text);
-      out({ added: true, page: pageName, text });
+      const p = getStylePage(wikiDir, name);
+      process.stdout.write(p.content);
     } catch (err) {
       die(errorMessage(err));
     }
   });
 
-task
-  .command("done <text>")
-  .description("Segna un task come completato (match parziale)")
-  .option("--page <name>", "Pagina su cui operare (default: index)")
-  .action((text: string, opts) => {
+style
+  .command("update <name>")
+  .description("Aggiorna una sezione di una entry di stile")
+  .requiredOption("--section <section>", "Nome della sezione (senza ##)")
+  .requiredOption("--content <content>", "Nuovo contenuto della sezione (markdown)")
+  .action((name: string, opts) => {
     try {
       const wikiDir = requireWiki();
-      const pageName: string = opts.page ?? "index";
-      doneTask(wikiDir, pageName, text);
-      out({ done: true, page: pageName, text });
+      updateStyleSection(wikiDir, name, opts.section, opts.content);
+      out({ updated: true, name, section: opts.section });
     } catch (err) {
       die(errorMessage(err));
     }
   });
 
-program.addCommand(task);
+program.addCommand(style);
 
 // ─── search ───────────────────────────────────────────────────────────────────
 

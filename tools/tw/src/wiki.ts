@@ -5,7 +5,7 @@ import type { Page, SearchResult } from "./types.js";
 // ─── Costanti ─────────────────────────────────────────────────────────────────
 
 const WIKI_DIRNAME = ".wiki";
-const TASKS_SECTION = "Tasks";
+const STYLE_PREFIX = "style_";
 
 // ─── Discovery ────────────────────────────────────────────────────────────────
 
@@ -79,57 +79,33 @@ export function initWiki(projectDir: string, name: string): string {
   mkdirSync(wikiDir, { recursive: true });
   const indexPath = resolve(wikiDir, "index.md");
   if (!existsSync(indexPath)) {
-    writeFileSync(indexPath, `# Wiki — ${name}\n\n## Pagine\n\n## Tasks\n`);
+    writeFileSync(indexPath, `# Wiki — ${name}\n\n## Pagine\n`);
   }
   return wikiDir;
 }
 
-// ─── Tasks ────────────────────────────────────────────────────────────────────
+// ─── Style ────────────────────────────────────────────────────────────────────
 
-function parseTasks(sectionContent: string): Task[] {
-  const tasks: Task[] = [];
-  for (const line of sectionContent.split("\n")) {
-    const m = line.match(/^- \[([ x])\] (.+)/);
-    if (m) tasks.push({ done: m[1] === "x", text: m[2].trim() });
-  }
-  return tasks;
+export function addStylePage(wikiDir: string, name: string, desc: string): void {
+  const pageName = `${STYLE_PREFIX}${name}`;
+  const path = resolve(wikiDir, `${pageName}.md`);
+  if (existsSync(path)) throw new Error(`Style già esistente: "${name}"`);
+  const content = `# Style: ${name}\n\n## Descrizione\n\n${desc}\n\n## Come è scritto\n\n## Come estendere\n\n## Esempio\n\n## Riferimenti incrociati\n`;
+  atomicWrite(path, content);
 }
 
-function renderTasks(tasks: Task[]): string {
-  return tasks.map((t) => `- [${t.done ? "x" : " "}] ${t.text}`).join("\n");
+export function listStylePages(wikiDir: string): string[] {
+  return listPages(wikiDir)
+    .filter((p) => p.startsWith(STYLE_PREFIX))
+    .map((p) => p.slice(STYLE_PREFIX.length));
 }
 
-function readTasksSection(wikiDir: string, pageName: string): { tasks: Task[]; page: Page } {
-  const page = getPage(wikiDir, pageName);
-  const lines = page.content.split("\n");
-  const header = `## ${TASKS_SECTION}`;
-  const start = lines.findIndex((l) => l.trimEnd() === header);
-  if (start === -1) return { tasks: [], page };
-
-  let end = lines.length;
-  for (let i = start + 1; i < lines.length; i++) {
-    if (lines[i].startsWith("## ")) { end = i; break; }
-  }
-
-  return { tasks: parseTasks(lines.slice(start + 1, end).join("\n")), page };
+export function getStylePage(wikiDir: string, name: string): Page {
+  return getPage(wikiDir, `${STYLE_PREFIX}${name}`);
 }
 
-export function listTasks(wikiDir: string, pageName: string): Task[] {
-  return readTasksSection(wikiDir, pageName).tasks;
-}
-
-export function addTask(wikiDir: string, pageName: string, text: string): void {
-  const { tasks } = readTasksSection(wikiDir, pageName);
-  tasks.push({ text, done: false });
-  updateSection(wikiDir, pageName, TASKS_SECTION, renderTasks(tasks));
-}
-
-export function doneTask(wikiDir: string, pageName: string, text: string): void {
-  const { tasks } = readTasksSection(wikiDir, pageName);
-  const idx = tasks.findIndex((t) => t.text.toLowerCase().includes(text.toLowerCase()));
-  if (idx === -1) throw new Error(`Task non trovato: "${text}"`);
-  tasks[idx] = { ...tasks[idx], done: true };
-  updateSection(wikiDir, pageName, TASKS_SECTION, renderTasks(tasks));
+export function updateStyleSection(wikiDir: string, name: string, section: string, content: string): void {
+  updateSection(wikiDir, `${STYLE_PREFIX}${name}`, section, content);
 }
 
 // ─── Search ──────────────────────────────────────────────────────────────────

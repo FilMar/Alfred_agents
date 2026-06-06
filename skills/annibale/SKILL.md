@@ -58,7 +58,7 @@ Posso procedere comunque con membri temporanei neutri — vuoi che lo faccia?
 Se l'utente vuole procedere subito, crea tmp neutri con lo script incluso nella skill:
 
 ```bash
-<base_dir>/default.sh <cappello-core>
+<annibale_dir>/default.sh <cappello-core>
 ```
 
 Un membro per cappello necessario, niente di più.
@@ -70,11 +70,14 @@ I globali sono auto-istanziati da `th run` — non serve crearli. Usali direttam
 
 ## 3. Cerca un flow template
 
-```bash
-ls <base_dir>/flows/
-```
+Flow disponibili nella skill annibale:
 
-Se esiste un template pertinente, leggilo e seguilo. I template sono flow già validati.
+| File | Quando usarlo |
+|---|---|
+| `debate.md` | Esplorare un'idea o decisione via ciclo socratico sedimentato nel TB |
+| `tdd-coding.md` | Implementare una funzionalità con architettura esplicita, test-first e chiusura sulla wiki |
+
+Leggi il template pertinente con `Read` e seguilo. I template sono flow già validati.
 
 ---
 

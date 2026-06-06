@@ -8,7 +8,7 @@ const WIKI_DIR = join(TEST_BASE, ".wiki");
 const REGISTRY_PATH = join(TEST_BASE, "tw_registry.json");
 process.env.TW_REGISTRY_PATH = REGISTRY_PATH;
 
-const { initWiki, listPages, getPage, updateSection, addTask, doneTask, listTasks, searchWiki } =
+const { initWiki, listPages, getPage, updateSection, addStylePage, listStylePages, getStylePage, updateStyleSection, searchWiki } =
   await import("../tools/tw/src/wiki.ts");
 const { registerWiki, listWikis, findWikiByName } =
   await import("../tools/tw/src/registry.ts");
@@ -65,46 +65,40 @@ describe("updateSection", () => {
   });
 });
 
-// ─── Tasks ────────────────────────────────────────────────────────────────────
+// ─── Style ────────────────────────────────────────────────────────────────────
 
-describe("addTask", () => {
-  it("aggiunge un task alla sezione Tasks", () => {
-    addTask(WIKI_DIR, "index", "primo task");
-    const tasks = listTasks(WIKI_DIR, "index");
-    expect(tasks.some((t) => t.text === "primo task")).toBe(true);
+describe("addStylePage", () => {
+  it("crea una pagina style_ con il template standard", () => {
+    addStylePage(WIKI_DIR, "error-handling", "Come gestiamo gli errori");
+    const page = getStylePage(WIKI_DIR, "error-handling");
+    expect(page.content).toContain("# Style: error-handling");
+    expect(page.content).toContain("## Descrizione");
+    expect(page.content).toContain("Come gestiamo gli errori");
+    expect(page.content).toContain("## Come è scritto");
+    expect(page.content).toContain("## Come estendere");
+    expect(page.content).toContain("## Esempio");
   });
 
-  it("il task aggiunto è marcato come non completato", () => {
-    addTask(WIKI_DIR, "index", "task aperto");
-    const tasks = listTasks(WIKI_DIR, "index");
-    const t = tasks.find((x) => x.text === "task aperto");
-    expect(t?.done).toBe(false);
-  });
-});
-
-describe("doneTask", () => {
-  it("marca un task come completato con match parziale", () => {
-    addTask(WIKI_DIR, "index", "implementare qualcosa");
-    doneTask(WIKI_DIR, "index", "qualcosa");
-    const tasks = listTasks(WIKI_DIR, "index");
-    const t = tasks.find((x) => x.text === "implementare qualcosa");
-    expect(t?.done).toBe(true);
-  });
-
-  it("lancia se il task non esiste", () => {
-    expect(() => doneTask(WIKI_DIR, "index", "task-inesistente-xyz")).toThrow(/non trovato/);
+  it("lancia se il nome esiste già", () => {
+    expect(() => addStylePage(WIKI_DIR, "error-handling", "dup")).toThrow(/già esistente/);
   });
 });
 
-describe("listTasks", () => {
-  it("filtra i completati per default", () => {
-    const open = listTasks(WIKI_DIR, "index").filter((t) => !t.done);
-    expect(open.every((t) => !t.done)).toBe(true);
+describe("listStylePages", () => {
+  it("elenca solo le pagine di stile senza prefisso", () => {
+    addStylePage(WIKI_DIR, "naming", "Convenzioni di naming");
+    const styles = listStylePages(WIKI_DIR);
+    expect(styles).toContain("error-handling");
+    expect(styles).toContain("naming");
+    expect(styles).not.toContain("index");
   });
+});
 
-  it("restituisce array vuoto su pagina senza sezione Tasks", () => {
-    writeFileSync(join(WIKI_DIR, "vuota.md"), "# Pagina senza tasks\n");
-    expect(listTasks(WIKI_DIR, "vuota")).toHaveLength(0);
+describe("updateStyleSection", () => {
+  it("aggiorna una sezione di una style page", () => {
+    updateStyleSection(WIKI_DIR, "naming", "Esempio", "```ts\nconst myVar = 1;\n```");
+    const page = getStylePage(WIKI_DIR, "naming");
+    expect(page.content).toContain("myVar");
   });
 });
 
