@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
-import type { Page, SearchResult, Task } from "./types.js";
+import type { Page, SearchResult } from "./types.js";
 
 // ─── Costanti ─────────────────────────────────────────────────────────────────
 

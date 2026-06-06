@@ -13,13 +13,6 @@ export interface Page {
   content: string;
 }
 
-// ─── Tasks ───────────────────────────────────────────────────────────────────
-
-export interface Task {
-  text: string;
-  done: boolean;
-}
-
 // ─── Search ──────────────────────────────────────────────────────────────────
 
 export interface SearchResult {
