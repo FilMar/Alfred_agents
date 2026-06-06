@@ -117,27 +117,32 @@ I task sono specifici ("implementa autenticazione JWT con refresh token", non "a
 
 Regole operative per l'AI su questo progetto specifico. Estratte dal dialogo, non generiche.
 
+**Principi da rispettare nella stesura:**
+- Solo istruzioni universalmente applicabili a qualsiasi task su questo progetto. Se vale solo per un caso specifico, non appartiene qui.
+- Meno è meglio. Il modello ha già ~50 istruzioni nel system prompt. Ogni riga che aggiungi compete con le altre.
+- Niente convenzioni di stile o linting — quelli vanno in linter/formatter, non nell'AI.
+- Preferisci puntatori a contenuto inline: se ci sono docs, guide o convenzioni dettagliate, mettile in file separati (es. `agent_docs/`) e aggiungi un puntatore nel CLAUDE.md.
+- Target: < 50 righe. Se superi, taglia o sposta in agent_docs/.
+
 ```markdown
-## Principi
+## Progetto
 
-[2-4 principi specifici per questo progetto e dominio]
+[Una riga: cosa è, per chi, perché esiste]
 
-## Stack e convenzioni
+## Stack
 
-[Linguaggio, framework, pattern stabiliti — non da inventare autonomamente]
+[Linguaggio, framework, strumenti — non da cambiare autonomamente]
 
-## Cosa non fare
+## Vincoli
 
-[Vincoli emersi dal dialogo: tecnologie da evitare, pattern da non introdurre, perimetro da rispettare]
+[Cosa non fare: tecnologie da evitare, pattern da non introdurre, perimetro da rispettare]
 
-## TDD
+## Come lavorare
 
-[Se applicabile: quando scrivere test, cosa testare su questo progetto]
-
-## Git
-
-[Convenzioni di commit e branch se rilevanti per questo progetto]
+[Regole operative emerse dal dialogo: git, test, build — solo quelle universali a ogni task]
 ```
+
+Se durante il dialogo emergono convenzioni dettagliate (es. architettura, schema DB, pattern di test), non metterle nel CLAUDE.md — crea `agent_docs/<argomento>.md` e aggiungi un puntatore.
 
 ## Regole di comportamento
 
