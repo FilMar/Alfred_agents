@@ -30,10 +30,19 @@ tw wikis   # lista tutte le wiki registrate in ~/.pi/tw_registry.json
 ```bash
 tw page list                             # lista pagine (esclude prefix .)
 tw page get <nome>                       # legge raw markdown
+tw page create <name> [--content <c>]    # crea name.md con sezione ## Panoramica
 tw page update <nome> --section "<S>" --content "<md>"   # aggiorna/aggiunge sezione
 ```
 
-**Attenzione**: `page update` richiede che la pagina esista. Non crea pagine nuove — bisogna creare il file `.md` direttamente in `.wiki/` (limitazione attuale della CLI).
+**Comando create**:
+- Crea `<name>.md` nella wiki con sezione `## Panoramica` sempre presente
+- `--content` opzionale: contenuto iniettato nella Panoramica (trim automatico)
+- Errore se la pagina esiste già
+
+**Firma funzione** (wiki.ts):
+```ts
+createPage(wikiDir: string, name: string, content = ""): void
+```
 
 La sezione viene cercata per header H2 esatto (`## <S>`). Se non trovata, viene aggiunta in fondo. La scrittura è atomica (write → rename).
 

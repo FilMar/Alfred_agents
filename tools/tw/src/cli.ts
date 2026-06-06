@@ -2,7 +2,7 @@
 import { Command } from "commander";
 import { basename, resolve } from "node:path";
 import { findWikiByName, listWikis, registerWiki } from "./registry.js";
-import { addStylePage, findWiki, getPage, getStylePage, initWiki, listPages, listStylePages, requireWiki, searchWiki, updateSection, updateStyleSection } from "./wiki.js";
+import { addStylePage, createPage, findWiki, getPage, getStylePage, initWiki, listPages, listStylePages, requireWiki, searchWiki, updateSection, updateStyleSection } from "./wiki.js";
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
 
@@ -113,6 +113,20 @@ page
       const wikiDir = requireWiki();
       updateSection(wikiDir, name, opts.section, opts.content);
       out({ updated: true, page: name, section: opts.section });
+    } catch (err) {
+      die(errorMessage(err));
+    }
+  });
+
+page
+  .command("create <name>")
+  .description("Crea una nuova pagina nella wiki locale")
+  .option("--content <content>", "Contenuto iniziale della pagina", "")
+  .action((name: string, opts) => {
+    try {
+      const wikiDir = requireWiki();
+      createPage(wikiDir, name, opts.content);
+      out({ created: true, page: name });
     } catch (err) {
       die(errorMessage(err));
     }

@@ -72,6 +72,16 @@ export function updateSection(wikiDir: string, pageName: string, section: string
   atomicWrite(page.path, `${before}\n\n${content}${sep}${after}`);
 }
 
+export function createPage(wikiDir: string, name: string, content = ""): void {
+  const path = resolve(wikiDir, `${name}.md`);
+  if (existsSync(path)) throw new Error(`Pagina già esistente: "${name}"`);
+  const trimmed = content.trim();
+  const template = trimmed
+    ? `# ${name}\n\n## Panoramica\n\n${trimmed}\n`
+    : `# ${name}\n\n## Panoramica\n`;
+  atomicWrite(path, template);
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 export function initWiki(projectDir: string, name: string): string {

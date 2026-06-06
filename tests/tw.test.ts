@@ -8,7 +8,7 @@ const WIKI_DIR = join(TEST_BASE, ".wiki");
 const REGISTRY_PATH = join(TEST_BASE, "tw_registry.json");
 process.env.TW_REGISTRY_PATH = REGISTRY_PATH;
 
-const { initWiki, listPages, getPage, updateSection, addStylePage, listStylePages, getStylePage, updateStyleSection, searchWiki } =
+const { initWiki, listPages, getPage, updateSection, addStylePage, listStylePages, getStylePage, updateStyleSection, searchWiki, createPage } =
   await import("../tools/tw/src/wiki.ts");
 const { registerWiki, listWikis, findWikiByName } =
   await import("../tools/tw/src/registry.ts");
@@ -148,5 +148,33 @@ describe("findWikiByName", () => {
 
   it("restituisce null se non trovata", () => {
     expect(findWikiByName("inesistente-xyz")).toBeNull();
+  });
+});
+
+// ─── CreatePage ───────────────────────────────────────────────────────────────
+
+describe("createPage", () => {
+  it("crea la pagina .md e risulta in listPages", () => {
+    createPage(WIKI_DIR, "nuova-pagina", "contenuto di prova");
+    expect(listPages(WIKI_DIR)).toContain("nuova-pagina");
+  });
+
+  it("il file contiene # name come titolo H1", () => {
+    const page = getPage(WIKI_DIR, "nuova-pagina");
+    expect(page.content).toContain("# nuova-pagina");
+  });
+
+  it("con --content, il contenuto è presente nel file", () => {
+    createPage(WIKI_DIR, "con-contenuto", "questo è il contenuto personalizzato");
+    expect(getPage(WIKI_DIR, "con-contenuto").content).toContain("questo è il contenuto personalizzato");
+  });
+
+  it("senza --content, il file ha comunque il titolo H1", () => {
+    createPage(WIKI_DIR, "senza-contenuto");
+    expect(getPage(WIKI_DIR, "senza-contenuto").content).toContain("# senza-contenuto");
+  });
+
+  it("lancia errore se la pagina esiste già", () => {
+    expect(() => createPage(WIKI_DIR, "nuova-pagina", "altro contenuto")).toThrow(/già esistente/);
   });
 });
