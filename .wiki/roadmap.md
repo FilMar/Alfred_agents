@@ -11,12 +11,17 @@ updated: 2026-06-06
 | Fase | Nome | Stato |
 |------|------|-------|
 | 1 | Third Brain (`tb`) | Completato |
-| 2 | Third Hand (`th`) — Flow Engine | In Progress |
+| 2 | Third Hand (`th`) — Flow Engine | Completato* |
 | 3 | Integrazione Third Brain | Completato |
-| 4 | GTD Task Manager (`td`) | Completato |
-| 5 | Career Coach | Pianificata |
-| 6 | Metriche per cappello | Pianificata |
-| 7 | Server Personale + Remote Agent | Pianificata |
+| 4 | GTD Task Manager (`td`) | Completato† |
+| 5 | Third Wiki (`tw`) | Completato‡ |
+| 6 | Career Coach | Pianificata |
+| 7 | Metriche per cappello | Pianificata |
+| 8 | Server Personale + Remote Agent | Pianificata |
+
+*Mancano ancora le metriche aggregate per cappello (Phase 2C incompleto).
+†Sorgente `tools/td/` assente dal repo — symlink rotto. DB esiste in `~/.pi/td.db`.
+‡`tw` non ancora in `setup.sh` — symlink `~/.local/bin/tw` da aggiungere.
 
 ## Phase 2 — dettaglio (in progress)
 
@@ -44,8 +49,8 @@ Server self-hosted con container `pi-core` (Qdrant + SQLite) e `openclaw`. Inter
 
 ## Todo imminente
 
-- [ ] Aggiungere `tw` (Third Wiki) a `setup.sh` — symlink in `~/.local/bin/tw`
-- [ ] Aggiungere `tw page create` alla CLI (attualmente le pagine nuove vanno create scrivendo file `.md` direttamente)
+- [ ] Aggiungere `tw` a `setup.sh` — symlink `~/.local/bin/tw` + `chmod +x`
+- [ ] Ripristinare `tools/td/` nel repo (sorgente mancante, symlink rotto)
 - [ ] Metriche aggregate per cappello (`th stats`)
 
 ## Riferimenti incrociati

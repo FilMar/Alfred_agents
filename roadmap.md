@@ -67,16 +67,35 @@ Alfred interroga `tb search` prima di ogni flow. Platone è interattivo: propone
 
 CLI `td` (Third Done) con SQLite + colonna JSON per flessibilità senza migration. DB globale in `~/.pi/td.db`. Due tabelle: `projects` (id, name, start, goal_end, real_end, data) e `tasks` (id, list, project_id, done_at, created_at, data). Link tra task via array in `data.links`.
 
+> **Nota:** `tools/td/` non presente in questo repo — il symlink `~/.local/bin/td` punta a un path inesistente. Il DB esiste (`~/.pi/td.db`), il codice sorgente no.
+
 - [x] CLI `td` con `add`, `inbox`, `next`, `waiting`, `someday`, `list`, `move`, `done`, `get`
 - [x] **`td edit <id>`**: Patch post-creazione di `what`, `context`, `due`, `notes`, `waiting-for`. Stringa vuota cancella il campo.
 - [x] **`td search <query>`**: Ricerca per keyword sul JSON dei task. `--all` include completati.
 - [x] Gestione progetti: `td project add/list/done`
-- [x] Symlink in `~/.local/bin/td` — setup.sh aggiornato
+- [x] Symlink in `~/.local/bin/td` — setup.sh aggiornato (ma sorgente mancante)
 - [x] Skill `taiichi` — capture, processing inbox, sessioni di lavoro, weekly review
 
 ---
 
-## Phase 5: Career Coach ← dopo TB popolato
+## Phase 5: Third Wiki (`tw`) ✅
+**Status:** Completato
+
+CLI `tw` con gestione wiki locali per progetto in `.wiki/`. Registry globale in `~/.pi/tw_registry.json`. Supporto multi-wiki con ricerca cross-wiki.
+
+> **Nota:** `tw` non ancora in `setup.sh` — symlink `~/.local/bin/tw` assente. Da aggiungere.
+
+- [x] **`tw init`**: Inizializza `.wiki/` nel progetto corrente e registra globalmente.
+- [x] **`tw register`**: Registra una wiki esistente nel registro globale.
+- [x] **`tw wikis`**: Lista tutte le wiki registrate.
+- [x] **`tw page list/get/update/create`**: CRUD completo sulle pagine.
+- [x] **`tw style add/list/get/update`**: Guide di stile e convenzioni per progetto.
+- [x] **`tw search <query>`**: Ricerca regex nella wiki locale, `--global` su tutte le wiki registrate, `--wiki <name>` su wiki specifica.
+- [x] Skill `omero` — mantiene la wiki locale, health-check, query sull'indice.
+
+---
+
+## Phase 6: Career Coach ← dopo TB popolato
 **Status:** Pianificata
 
 Funziona meglio quando il TB è già ricco di storia e pattern personali. Da costruire dopo uso reale del sistema.
@@ -87,7 +106,7 @@ Funziona meglio quando il TB è già ricco di storia e pattern personali. Da cos
 
 ---
 
-## Phase 6: Metriche per cappello ← quando serve misurare
+## Phase 7: Metriche per cappello ← quando serve misurare
 **Status:** Pianificata
 
 Base dati già pronta (Phase 2C). Ha senso dopo aver usato Alfred abbastanza da voler misurare le performance per cappello.
@@ -97,7 +116,7 @@ Base dati già pronta (Phase 2C). Ha senso dopo aver usato Alfred abbastanza da 
 
 ---
 
-## Phase 7: Server Personale + Remote Agent
+## Phase 8: Server Personale + Remote Agent
 **Status:** Pianificata
 
 Server personale self-hosted con DB centralizzati, OpenClaw come interfaccia remota via Telegram, file system personale accessibile via agente.
@@ -169,7 +188,7 @@ Restore interattivo via Telegram: "ripristina backup di ieri" → OpenClaw scari
 
 ### Annibale (Orchestratore) ✅
 
-Orchestra agenti con cappelli de Bono via `th run`. Due pattern: sequenziale (output di uno diventa contesto del successivo) e parallelo (`--detach` + poll + sintesi). Flow ripetibili → script sh/ts. Flow predefiniti in `skills/annibale/flows/`.
+Orchestra agenti con cappelli de Bono via `th run`. Due pattern: sequenziale (output di uno diventa contesto del successivo) e parallelo (`--detach` + poll + sintesi). Flow ripetibili → script sh/ts. Flow predefiniti in `skills/annibale/flows/`: `debate` (panel de Bono con sintesi), `tdd-coding` (TDD guidato da agenti).
 
 ### Platone (Accrescitore della Memoria) ✅
 
@@ -202,6 +221,14 @@ Estrae testo da qualsiasi fonte esterna: articoli web e transcript YouTube. Un s
 ### Indiana (Archeologia del Codice) ✅
 
 Scava nei progetti software per estrarre pattern strutturali nascosti, debiti tecnici, decisioni architetturali sepolte. Non corregge — diagnostica.
+
+### Archimede (Fondatore di Progetti) ✅
+
+Avvia nuovi progetti via dibattito strutturato. Estrae scopo, vincoli, utenti e regole di lavoro AI prima di toccare il codice. Produce README.md, ROADMAP.md e CLAUDE.md calibrati sul progetto specifico.
+
+### Giano (Team Designer) ✅
+
+Progetta e costruisce il team di membri `th` per un progetto. Legge il contesto (README, roadmap, CLAUDE.md), propone un roster con cappelli e ruoli specifici, genera tutti i membri. Usalo all'inizio di un progetto o quando il team va rivisto.
 
 ### Prometeo (Creatore di Skill) ✅
 
