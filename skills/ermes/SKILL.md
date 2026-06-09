@@ -13,6 +13,13 @@ python3 /home/filippo/git_projects/pi/skills/ermes/scripts/youtube.py "<URL1>" "
 ```
 Supporta più URL in una sola chiamata. Se un video fallisce, lo script riporta l'errore e continua con gli altri.
 
+**GitHub** (URL contiene `github.com`):
+Converti l'URL in raw prima di scaricare:
+- `https://github.com/<user>/<repo>/blob/<branch>/<path>` → `https://raw.githubusercontent.com/<user>/<repo>/<branch>/<path>`
+```bash
+curl -s "<RAW_URL>"
+```
+
 **Articolo web** (qualsiasi altro URL):
 ```bash
 python3 /home/filippo/git_projects/pi/skills/ermes/scripts/article.py "<URL>"
