@@ -1,18 +1,18 @@
 # Wiki — pi
 
-## Pagine
+## Pages
 
-| Pagina | Contenuto |
-|--------|-----------|
-| [architettura](architettura) | I tre layer: tb, th, tw — ruoli, confini, cooperazione |
-| [agenti](agenti) | Agenti disponibili, ruoli, trigger |
-| [th_cli](th_cli) | Riferimento CLI per `th` — comandi, flag, esempi |
-| [tw_cli](tw_cli) | Riferimento CLI per `tw` — comandi, flag, esempi |
-| [roadmap](roadmap) | Stato fasi di sviluppo, cosa è fatto, cosa resta |
-| [log](log) | Storico aggiornamenti wiki |
+| Page | Content |
+|------|---------|
+| [architettura](architettura) | The three layers: tb, th, tw — roles, boundaries, cooperation |
+| [agenti](agenti) | Available agents, roles, triggers |
+| [th_cli](th_cli) | CLI reference for `th` — commands, flags, examples |
+| [tw_cli](tw_cli) | CLI reference for `tw` — commands, flags, examples |
+| [roadmap](roadmap) | Development phase status, what is done, what remains |
+| [log](log) | Wiki update history |
 
 ## Frontmatter
 
-tags: [pi, indice, architettura]
+tags: [pi, index, architecture]
 sources: [README.md, roadmap.md, alfred.md]
 updated: 2026-06-06

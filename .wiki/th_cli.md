@@ -2,30 +2,30 @@
 
 ## Frontmatter
 
-tags: [th, cli, riferimento, agenti, orchestrazione]
+tags: [th, cli, reference, agents, orchestration]
 sources: [tools/th/src/cli.ts, tools/th/src/runner.ts, tools/th/src/members.ts, tools/th/src/db.ts]
 updated: 2026-06-06
 
-## Panoramica
+## Overview
 
-`th` (Third Hand) — orchestratore di agenti. Ogni `th run` esegue un agente Claude Code in sandbox bwrap con system prompt specializzato (ruolo + cappello de Bono) e traccia il run in SQLite (`~/.pi/th.db`).
+`th` (Third Hand) — agent orchestrator. Each `th run` executes a Claude Code agent in a bwrap sandbox with a specialised system prompt (role + de Bono hat) and tracks the run in SQLite (`~/.pi/th.db`).
 
 ## member
 
 ```bash
-th member create <name> --hat <hat> --role "<ruolo>" [--tools <csv>] [--tmp]
-th member create <name> --from <globale>   # clona da membro globale
+th member create <name> --hat <hat> --role "<role>" [--tools <csv>] [--tmp]
+th member create <name> --from <global>   # clone from global member
 th member list [--local | --global | --tmp]
 th member get <name>
 th member delete <name>
-th member promote <name> [--force]         # da locale/tmp → ~/.th/members/
+th member promote <name> [--force]        # from local/tmp → ~/.th/members/
 ```
 
-- Nome limitato a `[a-zA-Z0-9_-]` (path traversal protection)
+- Name limited to `[a-zA-Z0-9_-]` (path traversal protection)
 - Default tools: `read,bash`
-- `--tmp`: salva in `/tmp/.th/members/` invece di `.th/members/`
-- Risoluzione: cerca prima `.th/members/`, poi `~/.th/members/`, poi `/tmp/.th/members/`
-- Se il membro globale esiste ma non quello locale, `th run` lo istanzia automaticamente in `.th/members/`
+- `--tmp`: saves to `/tmp/.th/members/` instead of `.th/members/`
+- Resolution order: `.th/members/` first, then `~/.th/members/`, then `/tmp/.th/members/`
+- If the global member exists but not the local one, `th run` auto-instantiates it in `.th/members/`
 
 ## hats
 
@@ -34,64 +34,64 @@ th hats list
 th hats get <name>
 ```
 
-I cappelli de Bono definiscono il frame cognitivo. Directory: configurata via `TH_HATS_DIR` env var (default: embedded nella distribuzione).
+De Bono hats define the cognitive frame. Directory: configured via `TH_HATS_DIR` env var (default: embedded in the distribution).
 
 ## run
 
 ```bash
-th run --member <name> --task "<task>" [opzioni]
+th run --member <name> --task "<task>" [options]
 ```
 
-**Opzioni:**
+**Options:**
 
-| Flag | Descrizione |
+| Flag | Description |
 |------|-------------|
-| `--thinking <level>` | Thinking esteso: off, minimal, low, medium, high, xhigh. Il reasoning va in `/tmp/th-<member>-<ts>.log` |
-| `--model <provider/id>` | Es. `anthropic/claude-opus-4-7`. Default: impostazione globale pi. |
-| `--detach` | Background: ritorna subito `{pid, out, log, status}`. Status in `/tmp/th-*.status` |
-| `--timeout <sec>` | Aborta la sessione dopo N secondi |
+| `--thinking <level>` | Extended thinking: off, minimal, low, medium, high, xhigh. Reasoning goes to `/tmp/th-<member>-<ts>.log` |
+| `--model <provider/id>` | E.g. `anthropic/claude-opus-4-7`. Default: global pi setting. |
+| `--detach` | Background: returns immediately `{pid, out, log, status}`. Status in `/tmp/th-*.status` |
+| `--timeout <sec>` | Aborts the session after N seconds |
 
-**Sandbox bwrap**: automatica se `bwrap` è nel PATH. Read-only su tutto tranne `cwd`, `~/.pi`, `~/.bun`, `/tmp`.
+**bwrap sandbox**: automatic if `bwrap` is in PATH. Read-only on everything except `cwd`, `~/.pi`, `~/.bun`, `/tmp`.
 
 **Output files** (in `/tmp`):
-- `.out` — output dell'agente
+- `.out` — agent output
 - `.log` — thinking + tool calls
 - `.status` — `running` → `done` / `error: ...` / `timeout`
 
 ## models
 
 ```bash
-th models   # lista modelli disponibili per le API key configurate
+th models   # list models available for the configured API keys
 ```
 
 ## history / get
 
 ```bash
-th history [--member <name>] [--limit <n>]   # default limit: 20, ordine decrescente
-th get <runId>                                 # metadati + output se ancora su disco
+th history [--member <name>] [--limit <n>]   # default limit: 20, descending order
+th get <runId>                                 # metadata + output if still on disk
 ```
 
-Run tracciati in `~/.pi/th.db` (tabella `runs`): id, member, task (troncata a 300 char), started_at, finished_at, status, out_path, log_path.
+Runs tracked in `~/.pi/th.db` (table `runs`): id, member, task (truncated to 300 chars), started_at, finished_at, status, out_path, log_path.
 
-## Esempi tipici
+## Typical examples
 
 ```bash
-# Esecuzione semplice
-th run --member oracolo --task "cosa so su Zettelkasten?"
+# Simple execution
+th run --member oracolo --task "what do I know about Zettelkasten?"
 
-# Con output salvato per pipeline
-th run --member oracolo --task "recupera su X" > /tmp/out.txt
+# With saved output for pipeline
+th run --member oracolo --task "retrieve on X" > /tmp/out.txt
 th run --member feynman --task "$(cat /tmp/out.txt)"
 
-# Background parallelo
-th run --member socrate --task "trova lacune in questa idea: ..." --detach
-th run --member aristotele --task "suggerisci hub per cluster TB" --detach
+# Parallel background
+th run --member socrate --task "find gaps in this idea: ..." --detach
+th run --member aristotele --task "suggest hubs for TB cluster" --detach
 
-# Con thinking alto e timeout
-th run --member indiana --task "analizza questo codebase" --thinking high --timeout 300
+# With high thinking and timeout
+th run --member indiana --task "analyse this codebase" --thinking high --timeout 300
 ```
 
-## Riferimenti incrociati
+## Cross-references
 
-- [agenti](agenti) — lista agenti e cappelli
-- [architettura](architettura) — sandbox e struttura file system
+- [agenti](agenti) — agent list and hats
+- [architettura](architettura) — sandbox and filesystem structure

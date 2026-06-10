@@ -1,51 +1,51 @@
 # Flow: TDD Coding
 
-**Quando usarlo**: implementare una funzionalità partendo da zero, con architettura esplicita, test-first e chiusura sulla wiki.
+**When to use**: implement a feature from scratch, with explicit architecture, test-first, and wiki closure.
 
-**Natura**: guidato — ogni fase produce artefatti concreti richiesti dalla fase successiva. Non è un pipeline batch.
+**Nature**: guided — each phase produces concrete artefacts required by the next phase. Not a batch pipeline.
 
-**Prerequisiti**: test runner disponibile nel progetto. Wiki inizializzata (`tw init`).
+**Prerequisites**: test runner available in the project. Wiki initialised (`tw init`).
 
 ---
 
-## Il ciclo
+## The cycle
 
 ```
-[0. CHIARIMENTO]  → Annibale raccoglie requisiti precisi
-[1. ARCHITETTURA] → white + green: strutture, firme, trade-off
-[2. STUB]         → coder scrive firme + TODO — deve compilare
-[3. TEST]         → black scrive test comportamentali — devono fallire
-[4. IMPLEMENTA]   → loop: coder implementa finché i test passano
-[5. REVIEW]       → black + white: DRY, pulizia, conformità
-[6. WIKI]         → omero aggiorna la wiki del progetto
+[0. CLARIFICATION] → Annibale collects precise requirements
+[1. ARCHITECTURE]  → white + green: structures, signatures, trade-offs
+[2. STUB]          → coder writes signatures + TODOs — must compile
+[3. TESTS]         → black writes behavioural tests — must fail
+[4. IMPLEMENT]     → loop: coder implements until tests pass
+[5. REVIEW]        → black + white: DRY, cleanup, conformity
+[6. WIKI]          → omero updates the project wiki
 ```
 
 ---
 
-## Fase 0 — Chiarimento
+## Phase 0 — Clarification
 
-Annibale chiede direttamente, senza delegare:
-- Comportamento atteso? (input/output concreti)
-- Vincoli di performance, compatibilità, stile?
-- Dove va il codice? (file, modulo, package)
-- Qual è il test runner del progetto?
+Annibale asks directly, without delegating:
+- Expected behaviour? (concrete inputs/outputs)
+- Performance, compatibility, style constraints?
+- Where does the code go? (file, module, package)
+- What is the project's test runner?
 
-Non procedere senza risposte concrete.
+Do not proceed without concrete answers.
 
 ---
 
-## Fase 1 — Architettura (parallelo)
+## Phase 1 — Architecture (parallel)
 
 ```bash
-P_W=$(th run --member <nome-white> --task "Analizza i requisiti: strutture dati, tipi, dipendenze esistenti da riusare, vincoli.
+P_W=$(th run --member <name-white> --task "Analyse the requirements: data structures, types, existing dependencies to reuse, constraints.
 
-Requisiti:
-<fase 0>" --detach)
+Requirements:
+<phase 0>" --detach)
 
-P_G=$(th run --member <nome-green> --task "Proponi 2-3 architetture alternative con trade-off per:
-<fase 0>
+P_G=$(th run --member <name-green> --task "Propose 2-3 alternative architectures with trade-offs for:
+<phase 0>
 
-Non scegliere — genera varianti." --detach)
+Do not choose — generate variants." --detach)
 
 STATUS_W=$(echo "$P_W" | jq -r '.status')
 STATUS_G=$(echo "$P_G" | jq -r '.status')
@@ -55,89 +55,89 @@ OUT_W=$(cat "$(echo "$P_W" | jq -r '.out')")
 OUT_G=$(cat "$(echo "$P_G" | jq -r '.out')")
 ```
 
-Presenta entrambe le prospettive all'utente. Chiedi quale architettura adottare prima di continuare.
+Present both perspectives to the user. Ask which architecture to adopt before continuing.
 
 ---
 
-## Fase 2 — Stub
+## Phase 2 — Stub
 
-Il membro coder deve avere `--tools read,write,edit,bash`.
+The coder member must have `--tools read,write,edit,bash`.
 
 ```bash
-th run --member <nome-white> --task "Scrivi le firme e le strutture dati per:
-<architettura scelta>
+th run --member <name-white> --task "Write the signatures and data structures for:
+<chosen architecture>
 
-Regole:
-- Solo firme e tipi, nessuna implementazione
-- Body di ogni funzione: TODO comment esplicito con descrizione
-- Il codice deve già compilare (o passare type-check) in questo stato"
+Rules:
+- Signatures and types only, no implementation
+- Each function body: explicit TODO comment with description
+- The code must already compile (or pass type-check) in this state"
 ```
 
-Verifica manualmente che compili prima di andare avanti.
+Manually verify it compiles before moving on.
 
 ---
 
-## Fase 3 — Test
+## Phase 3 — Tests
 
-Il membro black deve avere `--tools read,write,bash`.
+The black member must have `--tools read,write,bash`.
 
 ```bash
-th run --member <nome-black> --task "Scrivi i test comportamentali per queste firme:
-<output fase 2>
+th run --member <name-black> --task "Write behavioural tests for these signatures:
+<phase 2 output>
 
-Regole:
-- Testa il comportamento, non l'implementazione
-- Includi: caso normale, edge case, caso di errore
-- I test DEVONO fallire adesso (implementazione è TODO)
-- Non mockare ciò che puoi testare per davvero"
+Rules:
+- Test behaviour, not implementation
+- Include: normal case, edge case, error case
+- Tests MUST fail now (implementation is TODO)
+- Do not mock what you can test for real"
 ```
 
-Esegui il test runner e verifica che tutti i test falliscano. Se qualcuno passa già, il test è sbagliato.
+Run the test runner and verify all tests fail. If any already pass, the test is wrong.
 
 ---
 
-## Fase 4 — Implementa (loop)
+## Phase 4 — Implement (loop)
 
 ```bash
-ERRORI="<output test runner iniziale>"
+ERRORS="<initial test runner output>"
 
 while true; do
-  th run --member <nome-white> --task "Implementa le funzioni per far passare i test.
+  th run --member <name-white> --task "Implement the functions to make the tests pass.
 
-Firme:
-<output fase 2>
+Signatures:
+<phase 2 output>
 
-Test:
-<output fase 3>
+Tests:
+<phase 3 output>
 
-Errori attuali:
-$ERRORI"
+Current errors:
+$ERRORS"
 
-  # esegui il test runner
-  # se tutti i test passano → break
-  # altrimenti aggiorna $ERRORI e continua
+  # run the test runner
+  # if all tests pass → break
+  # otherwise update $ERRORS and continue
 done
 ```
 
-Se dopo 3 iterazioni i test non passano, fermati e presenta il problema all'utente.
+If after 3 iterations the tests still don't pass, stop and present the problem to the user.
 
 ---
 
-## Fase 5 — Review (parallelo)
+## Phase 5 — Review (parallel)
 
 ```bash
-P_B=$(th run --member <nome-black> --task "Code review. Cerca: codice duplicato, nomi oscuri, logica nascosta, dead code.
+P_B=$(th run --member <name-black> --task "Code review. Look for: duplicated code, obscure names, hidden logic, dead code.
 
-Codice:
-<implementazione>" --detach)
+Code:
+<implementation>" --detach)
 
-P_W=$(th run --member <nome-white> --task "Verifica conformità. Confronta requisiti e implementazione riga per riga. Non fare assunzioni.
+P_W=$(th run --member <name-white> --task "Verify conformity. Compare requirements and implementation line by line. Do not make assumptions.
 
-Requisiti:
-<fase 0>
+Requirements:
+<phase 0>
 
-Codice:
-<implementazione>" --detach)
+Code:
+<implementation>" --detach)
 
 STATUS_B=$(echo "$P_B" | jq -r '.status')
 STATUS_W=$(echo "$P_W" | jq -r '.status')
@@ -147,31 +147,31 @@ OUT_B=$(cat "$(echo "$P_B" | jq -r '.out')")
 OUT_W=$(cat "$(echo "$P_W" | jq -r '.out')")
 ```
 
-Presenta i problemi trovati. Se ci sono fix non-triviali, torna alla fase 4.
+Present issues found. If there are non-trivial fixes, go back to phase 4.
 
 ---
 
-## Fase 6 — Wiki
+## Phase 6 — Wiki
 
 ```bash
-th run --member <membro> --task "Usa la skill omero per aggiornare la wiki del progetto con la nuova funzionalità.
+th run --member <member> --task "Use the omero skill to update the project wiki with the new feature.
 
-Cosa è stato implementato:
-<sommario>
+What was implemented:
+<summary>
 
-Firme pubbliche:
-<output fase 2>
+Public signatures:
+<phase 2 output>
 
-Decisioni architetturali:
-<architettura scelta e perché>"
+Architectural decisions:
+<chosen architecture and why>"
 ```
 
 ---
 
-## Regole
+## Rules
 
-- **Le firme compilano prima dei test.** Non si scrivono test su codice che non type-checka.
-- **I test falliscono prima di implementare.** Un test che passa senza implementazione è rotto.
-- **Il loop ha un limite.** Dopo 3 iterazioni infruttuose, escalate all'utente.
-- **Review separata dall'implementazione.** Non fare review durante il loop.
-- **Omero chiude sempre.** La wiki è parte del deliverable, non un'opzione.
+- **Signatures compile before tests.** Do not write tests on code that does not type-check.
+- **Tests fail before implementing.** A test that passes without implementation is broken.
+- **The loop has a limit.** After 3 fruitless iterations, escalate to the user.
+- **Review is separate from implementation.** Do not review during the loop.
+- **Omero always closes.** The wiki is part of the deliverable, not an option.

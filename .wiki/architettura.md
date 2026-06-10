@@ -1,64 +1,64 @@
-# Architettura
+# Architecture
 
 ## Frontmatter
 
-tags: [architettura, tb, th, tw, layer]
+tags: [architecture, tb, th, tw, layer]
 sources: [README.md, roadmap.md]
 updated: 2026-06-06
 
-## I tre layer
+## The three layers
 
-Pi è un sistema di augmentazione cognitiva personale composto da tre CLI ortogonali:
+Pi is a personal cognitive augmentation system composed of three orthogonal CLIs:
 
-| CLI | Nome | Scopo |
-|-----|------|-------|
-| `tb` | Third Brain | Memoria semantica: idee, concetti, connessioni. Grafo associativo immutabile con backrefs e hybrid search. |
-| `th` | Third Hand | Orchestrazione agenti con cappelli de Bono. Flow sequenziali e paralleli, sandbox bwrap, tracking SQLite. |
-| `tw` | Third Wiki | Wiki locale di progetto. Pagine strutturate, style guide, ricerca regex. |
-| `td` | Third Done | GTD: task, progetti, impegni. DB globale SQLite in `~/.pi/td.db`. |
+| CLI | Name | Purpose |
+|-----|------|---------|
+| `tb` | Third Brain | Semantic memory: ideas, concepts, connections. Immutable associative graph with backrefs and hybrid search. |
+| `th` | Third Hand | Agent orchestration with de Bono hats. Sequential and parallel flows, bwrap sandbox, SQLite tracking. |
+| `tw` | Third Wiki | Local project wiki. Structured pages, style guides, regex search. |
+| `td` | Third Done | GTD: tasks, projects, commitments. Global SQLite DB in `~/.pi/td.db`. |
 
-I layer non si sovrappongono per design:
-- **Third Brain**: idee che valgono oltre il progetto — principi, pattern, tensioni cognitive. No codice, no documentazione tecnica.
-- **Wiki locale** (`.wiki/`): documentazione specifica del progetto — comandi, flussi, architettura. Vive e muore con il progetto.
-- **Third Done**: task GTD globali — non contestualizzati al progetto.
+The layers do not overlap by design:
+- **Third Brain**: ideas that have value beyond the project — principles, patterns, cognitive tensions. No code, no technical documentation.
+- **Local wiki** (`.wiki/`): project-specific documentation — commands, flows, architecture. Lives and dies with the project.
+- **Third Done**: global GTD tasks — not contextualised to the project.
 
-## Storage e file system
+## Storage and filesystem
 
 ```
 ~/.pi/
-  agent/          # configurazione agente (SYSTEM.md, skills/)
-  th.db           # tracking run th (SQLite)
-  td.db           # task GTD (SQLite)
-  tw_registry.json # registro wiki globale
+  agent/           # agent configuration (SYSTEM.md, skills/)
+  th.db            # th run tracking (SQLite)
+  td.db            # GTD tasks (SQLite)
+  tw_registry.json # global wiki registry
 
-~/.local/bin/     # symlink: tb, th, td (setup.sh)
+~/.local/bin/      # symlinks: tb, th, td (setup.sh)
 
-.th/members/      # membri locali del progetto
-~/.th/members/    # membri globali
-/tmp/.th/members/ # membri temporanei
+.th/members/       # local project members
+~/.th/members/     # global members
+/tmp/.th/members/  # temporary members
 ```
 
 ## Sandbox
 
-Ogni `th run` viene eseguito sotto `bwrap` se disponibile. Il filesystem è read-only tranne:
-- `cwd` (directory corrente del progetto)
+Each `th run` is executed under `bwrap` if available. The filesystem is read-only except for:
+- `cwd` (current project directory)
 - `~/.pi`
 - `~/.bun`
 - `/tmp`
 
-L'agente non può scrivere fuori da questi path.
+The agent cannot write outside these paths.
 
 ## Setup
 
 ```bash
-./setup.sh   # installa symlink tb/th/td in ~/.local/bin/, linka alfred.md e skills/
+./setup.sh   # installs tb/th/td symlinks in ~/.local/bin/, links alfred.md and skills/
 ```
 
-`tw` non è ancora incluso in `setup.sh` (da aggiungere, vedi [roadmap](roadmap)).
+`tw` is not yet included in `setup.sh` (to be added, see [roadmap](roadmap)).
 
-## Riferimenti incrociati
+## Cross-references
 
-- [agenti](agenti) — agenti disponibili e ruoli
-- [th_cli](th_cli) — CLI completa di `th`
-- [tw_cli](tw_cli) — CLI completa di `tw`
-- [roadmap](roadmap) — stato fasi di sviluppo
+- [agenti](agenti) — available agents and roles
+- [th_cli](th_cli) — full `th` CLI
+- [tw_cli](tw_cli) — full `tw` CLI
+- [roadmap](roadmap) — development phase status

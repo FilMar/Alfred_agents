@@ -1,76 +1,76 @@
-# Agenti
+# Agents
 
 ## Frontmatter
 
-tags: [agenti, skill, th, cappelli]
+tags: [agents, skills, th, hats]
 sources: [README.md, roadmap.md, skills/]
 updated: 2026-06-06
 
-## Panoramica
+## Overview
 
-Gli agenti sono Claude Code instances con system prompt specializzato (ruolo + cappello de Bono). Vivono in `skills/<nome>/SKILL.md` e vengono eseguiti via `th run --member <nome>` oppure come skill Claude Code.
+Agents are Claude Code instances with a specialised system prompt (role + de Bono hat). They live in `skills/<name>/SKILL.md` and are executed via `th run --member <name>` or as Claude Code skills.
 
-Il file `SKILL.md` contiene:
-- Chi è l'agente (identità, comportamento)
-- Quando triggerarlo (trigger impliciti)
-- Come opera (protocollo di lavoro)
+The `SKILL.md` file contains:
+- Who the agent is (identity, behaviour)
+- When to trigger it (implicit triggers)
+- How it operates (work protocol)
 
-## Agenti disponibili
+## Available agents
 
-| Agente | Ruolo | Cappello |
-|--------|-------|----------|
-| `annibale` | Orchestratore: scompone lavori complessi in flow multi-agente con cappelli de Bono | Blue (processo) |
-| `oracolo` | Recupera conoscenza dal TB senza interpretare | White (dati) |
-| `socrate` | Genera attrito cognitivo: trova contraddizioni e lacune, non chiude | Black (critico) |
-| `aristotele` | Cura le sintesi del TB: hub, connessioni mancanti, cluster densi | Yellow (sintesi) |
-| `platone` | Sedimenta idee nel TB in modo atomico e connesso, con serendipità | Green (creativo) |
-| `feynman` | Insegna il corpus del TB con la tecnica Feynman a tre livelli | White + Yellow |
-| `indiana` | Archeologia del codice: diagnostica pattern, debiti, decisioni sepolte | Black (critico) |
-| `ermes` | Estrae testo da URL (articoli web e YouTube) | White (dati) |
-| `prometeo` | Crea e migliora skill, misura performance via eval e benchmark | Green (creativo) |
-| `omero` | Mantiene la wiki locale del progetto in `.wiki/` via CLI `tw` | Blue (processo) |
-| `giano` | Ruolo in definizione | — |
+| Agent | Role | Hat |
+|-------|------|-----|
+| `annibale` | Orchestrator: decomposes complex work into multi-agent flows with de Bono hats | Blue (process) |
+| `oracolo` | Retrieves knowledge from the TB without interpreting | White (data) |
+| `socrate` | Generates cognitive friction: finds contradictions and gaps, never closes | Black (critical) |
+| `aristotele` | Curates TB syntheses: hubs, missing connections, dense clusters | Yellow (synthesis) |
+| `platone` | Sediments ideas in the TB atomically and connectedly, with serendipity | Green (creative) |
+| `feynman` | Teaches the TB corpus with the three-level Feynman technique | White + Yellow |
+| `indiana` | Code archaeology: diagnoses patterns, debt, buried decisions | Black (critical) |
+| `ermes` | Extracts text from URLs (web articles and YouTube) | White (data) |
+| `prometeo` | Creates and improves skills, measures performance via evals and benchmarks | Green (creative) |
+| `omero` | Maintains the local project wiki in `.wiki/` via `tw` CLI | Blue (process) |
+| `giano` | Designs and builds the th member team for a project | Blue (process) |
 
-## Cappelli de Bono
+## De Bono hats
 
-I cappelli de Bono definiscono il frame cognitivo dell'agente:
+De Bono hats define the agent's cognitive frame:
 
-| Cappello | Frame | Uso tipico |
-|----------|-------|------------|
-| White | Dati puri, nessuna interpretazione | Retrieval, estrazione |
-| Black | Critico, rischi, problemi | Review, stress test |
-| Yellow | Ottimismo, valore, opportunità | Sintesi, sintesi positiva |
-| Green | Creatività, nuove idee | Generazione, design |
-| Blue | Processo, organizzazione | Orchestrazione, piano |
-| Red | Emozioni, intuizioni | — |
+| Hat | Frame | Typical use |
+|-----|-------|-------------|
+| White | Pure data, no interpretation | Retrieval, extraction |
+| Black | Critical, risks, problems | Review, stress test |
+| Yellow | Optimism, value, opportunities | Synthesis, positive synthesis |
+| Green | Creativity, new ideas | Generation, design |
+| Blue | Process, organisation | Orchestration, planning |
+| Red | Emotions, intuitions | — |
 
-I cappelli vivono in `tools/th/src/` (directory `hats/`). Usa `th hats list` per vederli tutti.
+Hats live in `tools/th/src/` (directory `hats/`). Use `th hats list` to see them all.
 
-## Pattern di esecuzione
+## Execution patterns
 
-**Sequenziale** (output di uno → contesto del successivo):
+**Sequential** (one's output → next one's context):
 ```bash
-th run --member oracolo --task "recupera tutto su X" --output /tmp/oracolo.out
-th run --member feynman --task "$(cat /tmp/oracolo.out) — insegna"
+th run --member oracolo --task "retrieve everything on X" --output /tmp/oracolo.out
+th run --member feynman --task "$(cat /tmp/oracolo.out) — teach"
 ```
 
-**Parallelo** con `--detach`:
+**Parallel** with `--detach`:
 ```bash
-th run --member socrate --task "trova lacune in..." --detach
-th run --member aristotele --task "trova cluster in..." --detach
-# poll su /tmp/th-*.status, poi sintetizza
+th run --member socrate --task "find gaps in..." --detach
+th run --member aristotele --task "find clusters in..." --detach
+# poll on /tmp/th-*.status, then synthesise
 ```
 
-**Annibale** orchestra automaticamente il pattern giusto scomponendo il problema in sotto-task.
+**Annibale** automatically orchestrates the right pattern by decomposing the problem into sub-tasks.
 
-## Ciclo del membro
+## Member lifecycle
 
-1. `th member create <name> --hat <hat> --role "<ruolo>"` — crea il membro
-2. `th run --member <name> --task "<task>"` — esegue in sandbox bwrap
-3. `th history --member <name>` — storico run
-4. `th member promote <name>` — promuove da locale a globale
+1. `th member create <name> --hat <hat> --role "<role>"` — create the member
+2. `th run --member <name> --task "<task>"` — execute in bwrap sandbox
+3. `th history --member <name>` — run history
+4. `th member promote <name>` — promote from local to global
 
-## Riferimenti incrociati
+## Cross-references
 
-- [architettura](architettura) — overview system e sandbox
-- [th_cli](th_cli) — comandi `th` completi
+- [architettura](architettura) — system overview and sandbox
+- [th_cli](th_cli) — full `th` commands

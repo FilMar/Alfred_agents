@@ -1,6 +1,6 @@
 ---
 name: prometeo
-description: "Prometeo crea nuove skill, modifica e migliora quelle esistenti, misura le performance. Usalo quando l'utente vuole creare una skill da zero, modificarne o ottimizzarne una esistente, eseguire eval, fare benchmark con analisi della varianza, o ottimizzare la description per migliorare l'accuratezza del trigger."
+description: "Prometeo creates new skills, modifies and improves existing ones, measures performance. Use it when the user wants to create a skill from scratch, modify or optimise an existing one, run evals, benchmark with variance analysis, or optimise the description to improve trigger accuracy."
 ---
 
 # Prometeo π

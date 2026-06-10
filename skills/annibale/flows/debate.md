@@ -1,84 +1,84 @@
-# Flow: Debate dialettico
+# Flow: Dialectic Debate
 
-**Quando usarlo**: l'utente vuole esplorare un'idea, una tensione o una decisione attraverso un ciclo socratico che si sedimenta nel Third Brain.
+**When to use**: the user wants to explore an idea, a tension or a decision through a Socratic cycle that sediments into the Third Brain.
 
-**Natura**: interattivo — aspetta la risposta dell'utente tra le fasi. Non è un pipeline batch.
+**Nature**: interactive — waits for the user's response between phases. Not a batch pipeline.
 
-**Prerequisiti**: Qdrant e Ollama attivi (`tb status`). Se non lo sono, chiedi all'utente di avviarli con `tb start`.
-
----
-
-## Il ciclo
-
-```
-[1. ORACOLO]    → recupera contesto sul tema dal TB
-[2. SOCRATE]    → trova la tensione, fa la domanda scomoda
-[3. UTENTE]     → risponde, riflette, spinge
-[4. ARISTOTELE] → integra nel Third Brain ciò che è nuovo
-[5. ORACOLO]    → verifica le connessioni aggiornate
-→ torna a [2] oppure chiudi
-```
+**Prerequisites**: Qdrant and Ollama active (`tb status`). If not, ask the user to start them with `tb start`.
 
 ---
 
-## Fase 1 — Oracolo: contesto
+## The cycle
 
-```bash
-th run --member <membro> --task "Usa la skill oracolo per recuperare tutto ciò che il Third Brain sa su: <tema>"
 ```
-
-Presenta il risultato. Se il TB è vuoto sull'argomento, dillo — il vuoto è informazione.
-
-## Fase 2 — Socrate: tensione
-
-```bash
-th run --member <membro> --task "Usa la skill socrate.
-
-Tema: <tema>
-
-Contesto dal Third Brain:
-<output fase 1>
-
-Risposta utente precedente (se esiste):
-<risposta utente>
-
-Trova la tensione più scomoda e fai una sola domanda."
+[1. ORACOLO]    → retrieves context on the topic from the TB
+[2. SOCRATE]    → finds the tension, asks the uncomfortable question
+[3. USER]       → responds, reflects, pushes
+[4. ARISTOTELE] → integrates what is new into the Third Brain
+[5. ORACOLO]    → verifies the updated connections
+→ back to [2] or close
 ```
-
-Presenta la domanda. Aspetta. Non interrompere.
-
-## Fase 3 — Utente
-
-Quando l'utente ha finito, vai alla fase 4.
-
-## Fase 4 — Aristotele: integra
-
-```bash
-th run --member <membro> --task "Usa la skill aristotele.
-
-Tema: <tema>
-
-Domanda di Socrate:
-<domanda fase 2>
-
-Risposta dell'utente:
-<risposta utente>
-
-Integra nel Third Brain ciò che è nuovo. Se non c'è nulla di nuovo, dillo."
-```
-
-## Fase 5 — Oracolo: reverifica
-
-```bash
-th run --member <membro> --task "Usa la skill oracolo per reverificare il grafo del Third Brain su: <tema> — mostra cosa è cambiato rispetto all'inizio del ciclo."
-```
-
-Poi chiedi: **Vuoi continuare il ciclo su questa tensione, o portare un'idea diversa?**
 
 ---
 
-## Regole
+## Phase 1 — Oracolo: context
 
-- Non fare il lavoro degli agenti: non cercare nel TB tu stesso, non generare tensioni, non salvare note. Delega sempre via `th run`.
-- Trasmetti contesto esplicito: ogni `th run` deve ricevere nel `--task` tutto ciò che l'agente non può sapere da solo.
-- Il ciclo termina quando l'utente lo dice.
+```bash
+th run --member <member> --task "Use the oracolo skill to retrieve everything the Third Brain knows about: <topic>"
+```
+
+Present the result. If the TB has nothing on the topic, say so — the void is information.
+
+## Phase 2 — Socrate: tension
+
+```bash
+th run --member <member> --task "Use the socrate skill.
+
+Topic: <topic>
+
+Context from the Third Brain:
+<phase 1 output>
+
+Previous user response (if any):
+<user response>
+
+Find the most uncomfortable tension and ask a single question."
+```
+
+Present the question. Wait. Do not interrupt.
+
+## Phase 3 — User
+
+When the user is done, go to phase 4.
+
+## Phase 4 — Aristotele: integrate
+
+```bash
+th run --member <member> --task "Use the aristotele skill.
+
+Topic: <topic>
+
+Socrates' question:
+<phase 2 question>
+
+User's response:
+<user response>
+
+Integrate what is new into the Third Brain. If nothing is new, say so."
+```
+
+## Phase 5 — Oracolo: re-verify
+
+```bash
+th run --member <member> --task "Use the oracolo skill to re-verify the Third Brain graph on: <topic> — show what has changed since the start of the cycle."
+```
+
+Then ask: **Do you want to continue the cycle on this tension, or bring a different idea?**
+
+---
+
+## Rules
+
+- Do not do the agents' work: do not search the TB yourself, do not generate tensions, do not save notes. Always delegate via `th run`.
+- Pass explicit context: every `th run` must receive in `--task` everything the agent cannot know on its own.
+- The cycle ends when the user says so.

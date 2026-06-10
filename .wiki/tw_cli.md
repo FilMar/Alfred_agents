@@ -2,82 +2,82 @@
 
 ## Frontmatter
 
-tags: [tw, cli, riferimento, wiki]
+tags: [tw, cli, reference, wiki]
 sources: [tools/tw/src/cli.ts, tools/tw/src/wiki.ts, tools/tw/src/registry.ts]
 updated: 2026-06-06
 
-## Panoramica
+## Overview
 
-`tw` (Third Wiki) — wiki locale di progetto. Risale il filesystem dal cwd come `git` per trovare `.wiki/`. Le pagine sono file `.md` con sezioni H2. Le style page hanno prefisso `style_`.
+`tw` (Third Wiki) — local project wiki. Walks the filesystem up from cwd like `git` to find `.wiki/`. Pages are `.md` files with H2 sections. Style pages have the `style_` prefix.
 
-**Nota**: `tw` non è ancora linkato in `setup.sh`. Per ora eseguire con:
+**Note**: `tw` is not yet linked in `setup.sh`. For now run with:
 ```bash
-bun run /path/to/pi/tools/tw/src/cli.ts <comando>
+bun run /path/to/pi/tools/tw/src/cli.ts <command>
 ```
 
 ## init / register / wikis
 
 ```bash
-tw init [--name <nome>]   # crea .wiki/ e registra globalmente. Default name: nome directory.
-tw register [--name <nome>]   # registra una wiki già esistente nel registro globale
-tw wikis   # lista tutte le wiki registrate in ~/.pi/tw_registry.json
+tw init [--name <name>]       # creates .wiki/ and registers globally. Default name: directory name.
+tw register [--name <name>]   # registers an existing wiki in the global registry
+tw wikis                      # list all wikis registered in ~/.pi/tw_registry.json
 ```
 
-`tw init` crea `index.md` con sezione `## Pagine` vuota.
+`tw init` creates `index.md` with an empty `## Pages` section.
 
 ## page
 
 ```bash
-tw page list                             # lista pagine (esclude prefix .)
-tw page get <nome>                       # legge raw markdown
-tw page create <name> [--content <c>]    # crea name.md con sezione ## Panoramica
-tw page update <nome> --section "<S>" --content "<md>"   # aggiorna/aggiunge sezione
+tw page list                             # list pages (excludes . prefix)
+tw page get <name>                       # reads raw markdown
+tw page create <name> [--content <c>]    # creates name.md with ## Overview section
+tw page update <name> --section "<S>" --content "<md>"   # updates/adds section
 ```
 
-**Comando create**:
-- Crea `<name>.md` nella wiki con sezione `## Panoramica` sempre presente
-- `--content` opzionale: contenuto iniettato nella Panoramica (trim automatico)
-- Errore se la pagina esiste già
+**create command**:
+- Creates `<name>.md` in the wiki with a `## Overview` section always present
+- `--content` optional: content injected into Overview (auto-trimmed)
+- Error if page already exists
 
-**Firma funzione** (wiki.ts):
+**Function signature** (wiki.ts):
 ```ts
 createPage(wikiDir: string, name: string, content = ""): void
 ```
 
-La sezione viene cercata per header H2 esatto (`## <S>`). Se non trovata, viene aggiunta in fondo. La scrittura è atomica (write → rename).
+The section is found by exact H2 header (`## <S>`). If not found, it is appended at the bottom. Writing is atomic (write → rename).
 
 ## style
 
 ```bash
-tw style add <nome> [--desc "<desc>"]    # crea style page con template standard
-tw style list                            # lista entry di stile
-tw style get <nome>                      # legge entry di stile
-tw style update <nome> --section "<S>" --content "<md>"
+tw style add <name> [--desc "<desc>"]    # creates style page with standard template
+tw style list                            # list style entries
+tw style get <name>                      # reads style entry
+tw style update <name> --section "<S>" --content "<md>"
 ```
 
-Le style page hanno nome `style_<nome>.md` internamente. Il template include: Descrizione, Come è scritto, Come estendere, Esempio, Riferimenti incrociati.
+Style pages are named `style_<name>.md` internally. The template includes: Description, How it is written, How to extend, Example, Cross-references.
 
 ## search
 
 ```bash
-tw search "<query>"              # regex case-insensitive nella wiki locale
-tw search "<query>" --global     # cerca in tutte le wiki registrate
-tw search "<query>" --wiki <n>   # cerca in una wiki specifica del registro
+tw search "<query>"              # case-insensitive regex in the local wiki
+tw search "<query>" --global     # search across all registered wikis
+tw search "<query>" --wiki <n>   # search in a specific wiki from the registry
 ```
 
-Ritorna: `{wiki, page, line, text}` per ogni match.
+Returns: `{wiki, page, line, text}` for each match.
 
-## Convenzioni pagine
+## Page conventions
 
-- Nome: `categoria_soggetto` (minuscole, underscore, senza `.md`)
-- Struttura: sezioni H2 (`## Nome Sezione`)
-- Prima sezione: `## Frontmatter` con tags, sources, updated
-- Ultima sezione: `## Riferimenti incrociati`
-- Link interni: `[Testo](nome_pagina)` — senza estensione
-- Pagine speciali: `index` (catalogo con `## Pagine`), `log` (storico con `## Log`)
-- Pagine stile: prefisso `style_` — gestite via `tw style`
+- Name: `category_subject` (lowercase, underscore, without `.md`)
+- Structure: H2 sections (`## Section Name`)
+- First section: `## Frontmatter` with tags, sources, updated
+- Last section: `## Cross-references`
+- Internal links: `[Text](page_name)` — without extension
+- Special pages: `index` (catalogue with `## Pages`), `log` (history with `## Log`)
+- Style pages: `style_` prefix — managed via `tw style`
 
-## Riferimenti incrociati
+## Cross-references
 
-- [architettura](architettura) — dove vive `.wiki/` e il registro
-- [agenti](agenti) — omero gestisce questa wiki
+- [architettura](architettura) — where `.wiki/` lives and the registry
+- [agenti](agenti) — omero manages this wiki

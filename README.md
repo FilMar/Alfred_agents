@@ -1,30 +1,30 @@
 # Pi
 
-Sistema di augmentazione cognitiva personale. Tre layer ortogonali che cooperano senza sovrapporsi.
+Personal cognitive augmentation system. Three orthogonal layers that cooperate without overlapping.
 
-## I Tre Layer
+## The Three Layers
 
-| CLI | Nome | Scopo |
-|-----|------|-------|
-| `tb` | Third Brain | Memoria semantica: idee, concetti, connessioni. Grafo associativo immutabile. |
-| `td` | Third Done | GTD: task, progetti, impegni. Cattura senza attrito, processa con metodo. |
-| `th` | Third Hand | Orchestrazione agenti con cappelli de Bono. Flow sequenziali e paralleli. |
+| CLI | Name | Purpose |
+|-----|------|---------|
+| `tb` | Third Brain | Semantic memory: ideas, concepts, connections. Immutable associative graph. |
+| `td` | Third Done | GTD: tasks, projects, commitments. Capture without friction, process with method. |
+| `th` | Third Hand | Agent orchestration with de Bono hats. Sequential and parallel flows. |
 
-## Gli Agenti
+## Agents
 
-| Agente | Ruolo |
-|--------|-------|
-| `annibale` | Orchestratore: scompone lavori complessi in flow multi-cappello |
-| `platone` | Sedimenta idee nel TB in modo atomico e connesso |
-| `feynman` | Insegna il corpus TB con la tecnica Feynman |
-| `socrate` | Genera attrito cognitivo: trova contraddizioni e lacune, non chiude |
-| `aristotele` | Cura le sintesi del TB: hub, connessioni mancanti, cluster |
-| `oracolo` | Recupera conoscenza dal TB senza interpretare |
-| `seneca` | GTD personale via `td` |
-| `ermes` | Estrae testo da URL (articoli web e YouTube) |
-| `indiana` | Archeologia del codice: diagnostica pattern e debiti tecnici |
-| `prometeo` | Crea e migliora skill |
-| `omero` | Mantiene la wiki locale del progetto in `.wiki/` |
+| Agent | Role |
+|-------|------|
+| `annibale` | Orchestrator: decomposes complex work into multi-hat flows |
+| `platone` | Sediments ideas in the TB atomically and connectedly |
+| `feynman` | Teaches the TB corpus with the Feynman technique |
+| `socrate` | Generates cognitive friction: finds contradictions and gaps, never closes |
+| `aristotele` | Curates TB syntheses: hubs, missing connections, clusters |
+| `oracolo` | Retrieves knowledge from the TB without interpreting |
+| `ermes` | Extracts text from URLs (web articles and YouTube) |
+| `indiana` | Code archaeology: diagnoses patterns and technical debt |
+| `prometeo` | Creates and improves skills |
+| `omero` | Maintains the local project wiki in `.wiki/` |
+| `giano` | Designs and builds the th member team for a project |
 
 ## Setup
 
@@ -32,54 +32,54 @@ Sistema di augmentazione cognitiva personale. Tre layer ortogonali che cooperano
 ./setup.sh
 ```
 
-Installa i symlink di `tb`, `td`, `th` in `~/.local/bin/`.
+Installs the `tb`, `td`, `th` symlinks in `~/.local/bin/`.
 
 ---
 
-## Il Rituale
+## The Ritual
 
-Il sistema funziona solo se usato con continuità. Tre momenti al giorno.
+The system works only if used consistently. Three moments a day.
 
-### Mattina — Seneca (5 min)
-
-```bash
-td inbox      # processa tutto ciò che è entrato
-td next       # scegli 2-3 task reali per la giornata
-```
-
-Nient'altro. Non pianificare l'intera settimana — scegli cosa chiudi oggi.
-
-### Durante il lavoro — Alfred + th
-
-Prima di rispondere su un argomento che potrebbe essere nel TB:
+### Morning — Seneca (5 min)
 
 ```bash
-tb search "<tema>" --depth 1
+td inbox      # process everything that has come in
+td next       # pick 2-3 real tasks for the day
 ```
 
-Per problemi complessi che beneficiano di prospettive multiple: Annibale orchestra.
-Per estrarre contenuto da URL o video: Ermes.
-Per catturare task che emergono durante il lavoro: `td add "<cosa>"` — senza processare.
+Nothing else. Do not plan the entire week — choose what you close today.
 
-### Fine sessione — Platone (10 min)
+### During work — Alfred + th
 
-Se c'è stato output di valore (una decisione, un'idea, un pattern): Platone sedimenta nel TB.
-Se il lavoro era su un progetto con wiki: Omero aggiorna `.wiki/`.
+Before answering on a topic that might be in the TB:
 
-La regola: se non lo sedimenti adesso, non esiste domani.
+```bash
+tb search "<topic>" --depth 1
+```
 
-### Settimanale — Seneca + Aristotele
+For complex problems that benefit from multiple perspectives: Annibale orchestrates.
+To extract content from URLs or videos: Ermes.
+To capture tasks that emerge during work: `td add "<what>"` — without processing.
 
-**Seneca weekly review**: svuota inbox, rivedi next actions, verifica che ogni progetto abbia una next action, guarda la settimana che viene.
+### End of session — Platone (10 min)
 
-**Aristotele** (ogni 2-4 settimane): quando il TB inizia a sembrare denso, Aristotele crea hub e connette note isolate.
+If there has been valuable output (a decision, an idea, a pattern): Platone sediments into the TB.
+If the work was on a project with a wiki: Omero updates `.wiki/`.
+
+The rule: if you do not sediment it now, it does not exist tomorrow.
+
+### Weekly — Seneca + Aristotele
+
+**Seneca weekly review**: empty inbox, review next actions, verify every project has a next action, look at the week ahead.
+
+**Aristotele** (every 2-4 weeks): when the TB starts to feel dense, Aristotele creates hubs and connects isolated notes.
 
 ---
 
-### La distinzione fondamentale
+### The fundamental distinction
 
-**Third Brain**: idee che valgono oltre il progetto — principi, pattern, tensioni cognitive. No blocchi di codice, no documentazione tecnica dettagliata.
+**Third Brain**: ideas that have value beyond the project — principles, patterns, cognitive tensions. No code blocks, no detailed technical documentation.
 
-**Wiki locale** (`.wiki/`): documentazione specifica del progetto — comandi, flussi, architettura, lore. Vive e muore con il progetto.
+**Local wiki** (`.wiki/`): project-specific documentation — commands, flows, architecture, lore. Lives and dies with the project.
 
-I due sistemi si complementano, non si sovrappongono.
+The two systems complement each other, they do not overlap.

@@ -2,58 +2,58 @@
 
 ## Frontmatter
 
-tags: [roadmap, fasi, stato]
+tags: [roadmap, phases, status]
 sources: [roadmap.md]
 updated: 2026-06-06
 
-## Stato fasi
+## Phase status
 
-| Fase | Nome | Stato |
-|------|------|-------|
-| 1 | Third Brain (`tb`) | Completato |
-| 2 | Third Hand (`th`) — Flow Engine | Completato* |
-| 3 | Integrazione Third Brain | Completato |
-| 4 | GTD Task Manager (`td`) | Completato† |
-| 5 | Third Wiki (`tw`) | Completato‡ |
-| 6 | Career Coach | Pianificata |
-| 7 | Metriche per cappello | Pianificata |
-| 8 | Server Personale + Remote Agent | Pianificata |
+| Phase | Name | Status |
+|-------|------|--------|
+| 1 | Third Brain (`tb`) | Done |
+| 2 | Third Hand (`th`) — Flow Engine | Done* |
+| 3 | Third Brain Integration | Done |
+| 4 | GTD Task Manager (`td`) | Done† |
+| 5 | Third Wiki (`tw`) | Done‡ |
+| 6 | Career Coach | Planned |
+| 7 | Per-hat metrics | Planned |
+| 8 | Personal Server + Remote Agent | Planned |
 
-*Mancano ancora le metriche aggregate per cappello (Phase 2C incompleto).
-†Sorgente `tools/td/` assente dal repo — symlink rotto. DB esiste in `~/.pi/td.db`.
-‡`tw` non ancora in `setup.sh` — symlink `~/.local/bin/tw` da aggiungere.
+*Aggregate per-hat metrics still missing (Phase 2C incomplete).
+†Source `tools/td/` absent from repo — broken symlink. DB exists in `~/.pi/td.db`.
+‡`tw` not yet in `setup.sh` — symlink `~/.local/bin/tw` to be added.
 
-## Phase 2 — dettaglio (in progress)
+## Phase 2 — detail (in progress)
 
-### 2A — Membro (fatto)
-Creazione, lista, get, delete, promote. Flag `--tmp`. Validazione nome. Risoluzione multi-path. `TH_HATS_DIR` env var.
+### 2A — Member (done)
+Create, list, get, delete, promote. `--tmp` flag. Name validation. Multi-path resolution. `TH_HATS_DIR` env var.
 
-### 2B — Esecuzione singola (fatto)
-`th run` con `--thinking`, `--model`, `--detach`, `--timeout`. Sandbox bwrap. File descriptor safety (try/finally). `th models`.
+### 2B — Single execution (done)
+`th run` with `--thinking`, `--model`, `--detach`, `--timeout`. bwrap sandbox. File descriptor safety (try/finally). `th models`.
 
-### 2C — Tracking SQLite (fatto, incompleto)
-Layer dati SQLite (`~/.pi/th.db`). `th history`, `th get`. 
-**Mancante**: metriche aggregate per cappello nel tempo (qualità output, token, durata).
+### 2C — SQLite tracking (done, incomplete)
+SQLite data layer (`~/.pi/th.db`). `th history`, `th get`.
+**Missing**: aggregate per-hat metrics over time (output quality, tokens, duration).
 
 ## Phase 5 — Career Coach
 
-Funziona meglio con TB già ricco. Consulterà TB prima di ogni risposta. Non generico — calibrato su storia e obiettivi reali.
+Works better with an already-rich TB. Will consult TB before every response. Not generic — calibrated on real history and objectives.
 
-## Phase 6 — Metriche per cappello
+## Phase 6 — Per-hat metrics
 
-Base dati già pronta (Phase 2C). Comando `th stats [--member <name>]`.
+Data already ready (Phase 2C). Command `th stats [--member <name>]`.
 
-## Phase 7 — Server Personale
+## Phase 7 — Personal Server
 
-Server self-hosted con container `pi-core` (Qdrant + SQLite) e `openclaw`. Interfaccia Telegram con topic separati (GTD, ThirdBrain, Dev, Recap, Alfred, Files). Backup notturno su Mega via `megacmd`.
+Self-hosted server with `pi-core` container (Qdrant + SQLite) and `openclaw`. Telegram interface with separate topics (GTD, ThirdBrain, Dev, Recap, Alfred, Files). Nightly backup to Mega via `megacmd`.
 
-## Todo imminente
+## Immediate todo
 
-- [ ] Aggiungere `tw` a `setup.sh` — symlink `~/.local/bin/tw` + `chmod +x`
-- [ ] Ripristinare `tools/td/` nel repo (sorgente mancante, symlink rotto)
-- [ ] Metriche aggregate per cappello (`th stats`)
+- [ ] Add `tw` to `setup.sh` — symlink `~/.local/bin/tw` + `chmod +x`
+- [ ] Restore `tools/td/` in repo (missing source, broken symlink)
+- [ ] Aggregate per-hat metrics (`th stats`)
 
-## Riferimenti incrociati
+## Cross-references
 
-- [architettura](architettura) — overview system
-- [agenti](agenti) — skills operative completate
+- [architettura](architettura) — system overview
+- [agenti](agenti) — completed operative skills

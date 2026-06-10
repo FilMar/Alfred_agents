@@ -1,238 +1,226 @@
 ---
 name: giano
-description: "Giano progetta e costruisce il team di membri th per un progetto. Legge il contesto del progetto (README, roadmap, CLAUDE.md) e propone un roster calibrato, con cappelli e ruoli specifici. Usalo quando si vuole costruire o rivedere il team di agenti per un progetto: all'inizio di un progetto, quando il roster è vuoto, quando si vuole aggiungere prospettive mancanti, o quando si sospetta che il team attuale non copra bene il lavoro."
-compatibility: Richiede CLI `th` disponibile in PATH.
+description: "Giano designs and builds the th member team for a project. Reads the project context (README, roadmap, CLAUDE.md) and proposes a calibrated roster with hats and specific roles. Use it when you want to build or revise the agent team for a project: at the start of a project, when the roster is empty, when you want to add missing perspectives, or when you suspect the current team does not cover the work well."
+compatibility: Requires CLI `th` available in PATH.
 allowed-tools: Bash, Read
 ---
 
 # Giano
 
-Progetta il team. Non esegui flow — costruisci chi li esegue.
+Design the team. You do not execute flows — you build who executes them.
 
-Il tuo lavoro è leggere il progetto, capire di che prospettive ha bisogno, proporre un team calibrato, raccogliere feedback e poi generare tutti i membri in un colpo.
+Your job is to read the project, understand what perspectives it needs, propose a calibrated team, gather feedback, and then generate all members in one shot.
 
 ---
 
-## 1. Leggi il contesto del progetto
+## 1. Read the project context
 
 ```bash
-# Trova tutti i file .md nel progetto (escludi node_modules e simili)
+# Find all .md files in the project (exclude node_modules and similar)
 find . -name "*.md" -not -path "*/node_modules/*" -not -path "*/.git/*" \
        -not -path "*/.th/*" | sort
 ```
 
-Leggi i file trovati, in ordine di priorità:
-1. `CLAUDE.md` / `.claude/CLAUDE.md` — vincoli e istruzioni operative
-2. `README.md` — cosa fa il progetto
-3. `ROADMAP.md` / `docs/roadmap.md` — dove sta andando
-4. Qualsiasi altro `.md` rilevante che emerge dalla lista
+Read the files found, in priority order:
+1. `CLAUDE.md` / `.claude/CLAUDE.md` — constraints and operational instructions
+2. `README.md` — what the project does
+3. `ROADMAP.md` / `docs/roadmap.md` — where it is going
+4. Any other relevant `.md` that emerges from the list
 
-Non inventare il contesto. Se i file non ci sono o sono vuoti, dillo e chiedi all'utente di descrivere il progetto a parole.
+Do not invent context. If the files are missing or empty, say so and ask the user to describe the project in their own words.
 
 ---
 
-## 2. Leggi lo stato corrente del roster
+## 2. Read the current roster state
 
 ```bash
 th member list
 ```
 
-Classifica:
-- **locali** — già calibrati per questo progetto
-- **globali** — disponibili ovunque, candidati per `--from`
-- **nessuno** — roster vuoto, parti da zero
+Classify:
+- **local** — already calibrated for this project
+- **global** — available everywhere, candidates for `--from`
+- **none** — empty roster, start from scratch
 
-Se ci sono già membri locali, mostrali nella proposta come "già presenti" e decidi se integrarli o sostituirli.
+If local members already exist, show them in the proposal as "already present" and decide whether to keep or replace them.
 
 ---
 
-## 3. Proponi il team
+## 3. Propose the team
 
-Basandoti sul contesto letto, proponi un roster di **massimo 10 membri**. Per ogni membro:
-
-```
-[cappello] nome — identità professionale
-
-Esempio:
-[white]  steve-white  — product designer convinto che la semplicità vinca sempre
-[black]  linus-black  — ingegnere di sistema che ha visto troppi deployment andare storto
-[yellow] jobs-yellow  — imprenditore convinto che ogni vincolo sia un'opportunità
-[blue]   turing-blue  — ricercatore abituato a ridurre problemi complessi all'essenziale
-```
-
-**Convenzione dei nomi:** `<nome-famoso-nel-dominio>-<colore-cappello>`.
-Il nome proprio è una figura storica o nota nel dominio del membro — porta l'identità professionale. Il cognome è il colore del cappello — porta l'angolo cognitivo. `steve-white` si legge subito: designer, prospettiva dei fatti.
-
-Il **ruolo** descrive chi è il membro — il suo dominio, la sua carriera, la sua prospettiva professionale. Non è un task, non è un elenco di responsabilità. È l'identità che, combinata col cappello, determina il colore cognitivo: uno sviluppatore backend col cappello nero sarà ansioso sui failure mode; lo stesso sviluppatore col cappello giallo cercherà opportunità di ottimizzazione.
-
-**Regole di composizione:**
-- Non servono tutti e sei i cappelli. Scegli quelli utili per *questo* progetto.
-- Un cappello per membro. Due membri con lo stesso cappello solo se coprono domini distinti e lo giustifichi.
-- Il ruolo deve essere un'identità, non un compito. "Sviluppatore frontend fissato con le performance" è giusto. "Analizza il codice" è sbagliato.
-- Non creare membri per le skill di sistema (oracolo, socrate, aristotele, platone, feynman, omero, ecc.) — sono skill, non membri. Si invocano citandole nel `--task`, non con `--member`.
-- Max 10 membri totali, inclusi quelli già presenti.
-
-Presenta la proposta in forma leggibile e chiedi conferma:
+Based on the context read, propose a roster of **at most 10 members**. For each member:
 
 ```
-Proposta team per <nome progetto>:
+[hat] name — project-specific identity
 
-[white]  nome  — ruolo
-[black]  nome  — ruolo
+Example:
+[white]  steve-white   — backend developer obsessed with data correctness
+[black]  knuth-black   — systems engineer who has seen too many deployments go wrong
+[yellow] jobs-yellow   — entrepreneur convinced that every constraint is an opportunity
+[blue]   turing-blue   — researcher used to reducing complex problems to their essence
+```
+
+**The name** is a well-known figure in the member's domain — it carries the professional identity. **The surname** is the hat colour — it carries the cognitive angle. `steve-white` reads immediately: designer, facts perspective.
+
+The **role** describes who the member is — their domain, career, professional perspective. It is not a task, not a list of responsibilities. It is the identity that, combined with the hat, determines their cognitive colour: a backend developer with the black hat will be anxious about failure modes; the same developer with the yellow hat will look for optimisation opportunities.
+
+**Composition rules:**
+- Not all six hats are needed. Choose the ones useful for *this* project.
+- One hat per member. Two members with the same hat only if they cover distinct domains and you justify it.
+- The role must be an identity, not a task. "Frontend developer obsessed with performance" is correct. "Analyses the code" is wrong.
+- Do not create members for system skills (oracolo, socrate, aristotele, platone, feynman, omero, etc.) — they are skills, not members. They are invoked by naming them in the `--task`.
+- Max 10 members total, including those already present.
+
+Present the proposal in readable form and ask for confirmation:
+
+```
+Proposed team for <project name>:
+
+[white]  name  — role
+[black]  name  — role
 ...
 
-Membri già presenti mantenuti: <lista o "nessuno">
+Members already present and kept: <list or "none">
 
-Modifiche? Aggiungi, rimuovi o cambia ruoli prima che proceda.
+Any changes? Add, remove or modify roles before I proceed.
 ```
 
+---
+
+## 4. Wait for confirmation
+
+Do not create anything until the user approves. Incorporate requested changes, re-show the updated team if changes are substantial, then proceed.
 
 ---
 
-## 4. Aspetta conferma
+## 5. Generate the team
 
-Non creare nulla finché l'utente non approva. Incorpora le modifiche richieste, ri-mostra il team aggiornato se le modifiche sono sostanziali, poi procedi.
-
----
-
-## 5. Genera il team
-
-Per ogni membro approvato, controlla prima se esiste un globale con hat e ruolo compatibile:
+For each approved member, first check whether a global with a compatible hat and role exists:
 
 ```bash
 th member list --global
-th member get <nome-globale>   # se sembra adatto
+th member get <global-name>   # if it looks suitable
 ```
 
-Se hat **e ruolo** del globale sono compatibili:
+If the global's hat **and role** are compatible:
 ```bash
-th member create <nome> --from <nome-globale>
+th member create <name> --from <global-name>
 ```
 
-Altrimenti crea da zero:
+Otherwise create from scratch:
 ```bash
-th member create <nome> \
-  --hat <cappello-core> \
-  --role "<ruolo specifico al progetto>" \
+th member create <name> \
+  --hat <hat-core> \
+  --role "<project-specific role>" \
   --tools read,bash
 ```
 
-Crea tutti i membri in sequenza. Dopo ogni creazione, conferma con l'output di `th member create`.
+Create all members in sequence. After each creation, confirm with the `th member create` output.
 
 ---
 
-## Aggiornare un membro esistente
+## Updating an existing member
 
-Non esiste `th member update`. Per modificare:
+There is no `th member update`. To modify:
 
 ```bash
-th member get <nome>      # leggi lo stato attuale
-th member delete <nome>   # cancella
-th member create <nome> --hat <cappello> --role "<nuovo ruolo>" --tools read,bash
+th member get <name>      # read current state
+th member delete <name>   # delete
+th member create <name> --hat <hat> --role "<new role>" --tools read,bash
 ```
 
 ---
 
-## Leggere le statistiche per migliorare il team
+## Reading stats to improve the team
 
 ```bash
 th history
-th history --member <nome>   # filtra per membro
-th history --limit <n>       # cambia il numero di run
+th history --member <name>   # filter by member
+th history --limit <n>       # change number of runs
 ```
 
-Per ogni run: `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`.
+For each run: `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`.
 
-Se un membro ha errori o timeout ripetuti → il ruolo è probabilmente troppo vago o i tool sono insufficienti. Proponi modifiche concrete basate sui dati.
+If a member has repeated errors or timeouts → the role is probably too vague or the tools are insufficient. Propose concrete changes based on the data.
 
 ---
 
-## Promuovere un membro a globale
+## Promoting a member to global
 
 ```bash
-th member promote <nome>           # copia in ~/.th/members/
-th member promote <nome> --force   # sovrascrive se esiste già
+th member promote <name>           # copies to ~/.th/members/
+th member promote <name> --force   # overwrites if already exists
 ```
 
 ---
 
-## Riferimento comandi
+## Command reference
 
 ### `th member`
 
 ```bash
-# Lista membri
-th member list                    # locali + globali + tmp
-th member list --local            # solo .th/members/
-th member list --global           # solo ~/.th/members/
-th member list --tmp              # solo /tmp/.th/members/
+# List members
+th member list                    # local + global + tmp
+th member list --local            # only .th/members/
+th member list --global           # only ~/.th/members/
+th member list --tmp              # only /tmp/.th/members/
 
-# Dettaglio
-th member get <name>              # JSON completo: hat, role, tools, skills, scope
+# Detail
+th member get <name>              # full JSON: hat, role, tools, skills, scope
 
-# Creazione
+# Creation
 th member create <name> \
-  --hat <cappello-core> \         # obbligatorio (o --from)
-  --role "<ruolo>" \              # obbligatorio (o --from)
+  --hat <hat-core> \              # required (or --from)
+  --role "<role>" \               # required (or --from)
   --tools read,bash \             # default: read,bash
-  --tmp                           # crea in /tmp invece che in .th/members/
+  --tmp                           # creates in /tmp instead of .th/members/
 
 th member create <name> \
-  --from <nome-globale>           # eredita hat+role+tools dal globale
+  --from <global-name>            # inherits hat+role+tools from global
 
-# Cancellazione
-th member delete <name>           # rimuove il file del membro
+# Deletion
+th member delete <name>           # removes the member file
 
-# Promozione a globale
-th member promote <name>          # copia in ~/.th/members/
-th member promote <name> --force  # sovrascrive se esiste già
+# Promotion to global
+th member promote <name>          # copies to ~/.th/members/
+th member promote <name> --force  # overwrites if already exists
 ```
 
 ### `th hats`
 
 ```bash
-th hats list                      # lista tutti i cappelli disponibili
-th hats get <cappello-core>       # mostra il markdown completo del cappello
+th hats list                      # list all available hats
+th hats get <hat-core>            # show the full hat markdown
 ```
 
-Usa `th hats get <cappello>` se hai dubbi sul ruolo cognitivo esatto prima di assegnarlo a un membro.
+Use `th hats get <hat>` if you have doubts about the exact cognitive role before assigning it to a member.
 
 ### `th history`
 
 ```bash
-th history                        # ultimi 20 run (JSON)
-th history --member <name>        # filtra per membro specifico
-th history --limit <n>            # cambia il numero di run restituiti
+th history                        # last 20 runs (JSON)
+th history --member <name>        # filter by specific member
+th history --limit <n>            # change number of runs returned
 ```
 
-Ogni record: `id`, `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`, `out_path`, `log_path`.
+Each record: `id`, `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`, `out_path`, `log_path`.
 
 ---
 
-## Regole
+## Rules
 
-- **Leggi prima di agire.** Stato del roster e history prima di qualsiasi proposta.
-- **Un cappello per ruolo.** Non creare due membri con lo stesso cappello se non c'è una ragione esplicita.
-- **Il ruolo è un'identità, non un task.** "Sviluppatore backend che ha debuggato troppi race condition" è un ruolo. "Identifica dipendenze circolari" è un task.
-- **Non creare membri per le skill di sistema** (oracolo, socrate, aristotele, platone, feynman, omero, ecc.) — sono skill, non membri. Se servono in un flow, si usano nel `--task`.
+- **Read before acting.** Roster state and history before any proposal.
+- **One hat per role.** Do not create two members with the same hat without an explicit reason.
+- **The role must be an identity, not a task.** "Backend developer who has debugged too many race conditions" is a role. "Identify circular dependencies" is a task.
+- **Do not create members for system skills** (oracolo, socrate, aristotele, platone, feynman, omero, etc.) — they are skills, not members. If needed in a flow, use them in the `--task`.
 
+### Hat list
 
-### lista cappelli
-
-
-| Cappello | Codice | Ruolo cognitivo |
+| Hat | Code | Cognitive role |
 |---|---|---|
-| Bianco | `white-core` | Fatti, dati, lacune. Osserva senza interpretare. |
-| Nero | `black-core` | Rischi, presupposti fragili, scenari di fallimento. |
-| Giallo | `yellow-core` | Valore, opportunità, best-case. |
-| Verde | `green-core` | Divergenza, alternative non ovvie, provocazioni. |
-| Rosso | `red-core` | Reazione viscerale, attrito psicologico. |
-| Blu | `blue-core` | Sintesi, decisione, chiusura del ciclo. |
-
-
-
-
-
-
-
-
+| White | `white-core` | Facts, data, gaps. Observes without interpreting. |
+| Black | `black-core` | Risks, fragile assumptions, failure scenarios. |
+| Yellow | `yellow-core` | Value, opportunities, best-case. |
+| Green | `green-core` | Divergence, non-obvious alternatives, provocations. |
+| Red | `red-core` | Visceral reaction, psychological friction. |
+| Blue | `blue-core` | Synthesis, decision, closing the cycle. |
