@@ -24,7 +24,7 @@
 ## Fase 1 — Oracolo: contesto
 
 ```bash
-th run --member oracolo --task "Recupera tutto ciò che il Third Brain sa su: <tema>"
+th run --member <membro> --task "Usa la skill oracolo per recuperare tutto ciò che il Third Brain sa su: <tema>"
 ```
 
 Presenta il risultato. Se il TB è vuoto sull'argomento, dillo — il vuoto è informazione.
@@ -32,7 +32,9 @@ Presenta il risultato. Se il TB è vuoto sull'argomento, dillo — il vuoto è i
 ## Fase 2 — Socrate: tensione
 
 ```bash
-th run --member socrate --task "Tema: <tema>
+th run --member <membro> --task "Usa la skill socrate.
+
+Tema: <tema>
 
 Contesto dal Third Brain:
 <output fase 1>
@@ -52,7 +54,9 @@ Quando l'utente ha finito, vai alla fase 4.
 ## Fase 4 — Aristotele: integra
 
 ```bash
-th run --member aristotele --task "Tema: <tema>
+th run --member <membro> --task "Usa la skill aristotele.
+
+Tema: <tema>
 
 Domanda di Socrate:
 <domanda fase 2>
@@ -66,7 +70,7 @@ Integra nel Third Brain ciò che è nuovo. Se non c'è nulla di nuovo, dillo."
 ## Fase 5 — Oracolo: reverifica
 
 ```bash
-th run --member oracolo --task "Reverifica il grafo del Third Brain su: <tema> — mostra cosa è cambiato rispetto all'inizio del ciclo."
+th run --member <membro> --task "Usa la skill oracolo per reverificare il grafo del Third Brain su: <tema> — mostra cosa è cambiato rispetto all'inizio del ciclo."
 ```
 
 Poi chiedi: **Vuoi continuare il ciclo su questa tensione, o portare un'idea diversa?**

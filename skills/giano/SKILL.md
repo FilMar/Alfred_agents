@@ -51,20 +51,25 @@ Se ci sono già membri locali, mostrali nella proposta come "già presenti" e de
 Basandoti sul contesto letto, proponi un roster di **massimo 10 membri**. Per ogni membro:
 
 ```
-[cappello] nome — ruolo specifico al progetto
+[cappello] nome — identità professionale
 
 Esempio:
-[white]  analista    — Mappa le dipendenze esterne del progetto (API, librerie, servizi)
-[black]  critico     — Identifica i punti di rottura nell'architettura di deployment
-[yellow] sostenitore — Valuta il valore di ogni feature rispetto agli obiettivi della roadmap
-[blue]   direttore   — Sintetizza le decisioni tecniche in action items concreti
+[white]  steve-white  — product designer convinto che la semplicità vinca sempre
+[black]  linus-black  — ingegnere di sistema che ha visto troppi deployment andare storto
+[yellow] jobs-yellow  — imprenditore convinto che ogni vincolo sia un'opportunità
+[blue]   turing-blue  — ricercatore abituato a ridurre problemi complessi all'essenziale
 ```
+
+**Convenzione dei nomi:** `<nome-famoso-nel-dominio>-<colore-cappello>`.
+Il nome proprio è una figura storica o nota nel dominio del membro — porta l'identità professionale. Il cognome è il colore del cappello — porta l'angolo cognitivo. `steve-white` si legge subito: designer, prospettiva dei fatti.
+
+Il **ruolo** descrive chi è il membro — il suo dominio, la sua carriera, la sua prospettiva professionale. Non è un task, non è un elenco di responsabilità. È l'identità che, combinata col cappello, determina il colore cognitivo: uno sviluppatore backend col cappello nero sarà ansioso sui failure mode; lo stesso sviluppatore col cappello giallo cercherà opportunità di ottimizzazione.
 
 **Regole di composizione:**
 - Non servono tutti e sei i cappelli. Scegli quelli utili per *questo* progetto.
 - Un cappello per membro. Due membri con lo stesso cappello solo se coprono domini distinti e lo giustifichi.
-- I ruoli devono essere specifici al progetto, non generici. "Analizza il codice" è sbagliato. "Identifica colli di bottiglia nelle query GraphQL del layer dati" è giusto.
-- Non includere i membri core globali (oracolo, socrate, aristotele, platone, feynman) — esistono già.
+- Il ruolo deve essere un'identità, non un compito. "Sviluppatore frontend fissato con le performance" è giusto. "Analizza il codice" è sbagliato.
+- Non creare membri per le skill di sistema (oracolo, socrate, aristotele, platone, feynman, omero, ecc.) — sono skill, non membri. Si invocano citandole nel `--task`, non con `--member`.
 - Max 10 membri totali, inclusi quelli già presenti.
 
 Presenta la proposta in forma leggibile e chiedi conferma:
@@ -208,8 +213,8 @@ Ogni record: `id`, `member`, `task`, `status` (done/error/timeout), `started_at`
 
 - **Leggi prima di agire.** Stato del roster e history prima di qualsiasi proposta.
 - **Un cappello per ruolo.** Non creare due membri con lo stesso cappello se non c'è una ragione esplicita.
-- **Il ruolo deve essere specifico.** "Analizza il codice" è troppo vago. "Identifica dipendenze circolari nel grafo dei moduli" è un ruolo.
-- **Non toccare i membri core** (oracolo, socrate, aristotele, platone, feynman) senza che l'utente lo chieda esplicitamente.
+- **Il ruolo è un'identità, non un task.** "Sviluppatore backend che ha debuggato troppi race condition" è un ruolo. "Identifica dipendenze circolari" è un task.
+- **Non creare membri per le skill di sistema** (oracolo, socrate, aristotele, platone, feynman, omero, ecc.) — sono skill, non membri. Se servono in un flow, si usano nel `--task`.
 
 
 ### lista cappelli

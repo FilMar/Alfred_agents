@@ -37,12 +37,12 @@ Non procedere senza risposte concrete.
 ## Fase 1 — Architettura (parallelo)
 
 ```bash
-P_W=$(th run --member <white> --task "Analizza i requisiti: strutture dati, tipi, dipendenze esistenti da riusare, vincoli.
+P_W=$(th run --member <nome-white> --task "Analizza i requisiti: strutture dati, tipi, dipendenze esistenti da riusare, vincoli.
 
 Requisiti:
 <fase 0>" --detach)
 
-P_G=$(th run --member <green> --task "Proponi 2-3 architetture alternative con trade-off per:
+P_G=$(th run --member <nome-green> --task "Proponi 2-3 architetture alternative con trade-off per:
 <fase 0>
 
 Non scegliere — genera varianti." --detach)
@@ -64,7 +64,7 @@ Presenta entrambe le prospettive all'utente. Chiedi quale architettura adottare 
 Il membro coder deve avere `--tools read,write,edit,bash`.
 
 ```bash
-th run --member <coder> --task "Scrivi le firme e le strutture dati per:
+th run --member <nome-white> --task "Scrivi le firme e le strutture dati per:
 <architettura scelta>
 
 Regole:
@@ -82,7 +82,7 @@ Verifica manualmente che compili prima di andare avanti.
 Il membro black deve avere `--tools read,write,bash`.
 
 ```bash
-th run --member <black> --task "Scrivi i test comportamentali per queste firme:
+th run --member <nome-black> --task "Scrivi i test comportamentali per queste firme:
 <output fase 2>
 
 Regole:
@@ -102,7 +102,7 @@ Esegui il test runner e verifica che tutti i test falliscano. Se qualcuno passa 
 ERRORI="<output test runner iniziale>"
 
 while true; do
-  th run --member <coder> --task "Implementa le funzioni per far passare i test.
+  th run --member <nome-white> --task "Implementa le funzioni per far passare i test.
 
 Firme:
 <output fase 2>
@@ -126,12 +126,12 @@ Se dopo 3 iterazioni i test non passano, fermati e presenta il problema all'uten
 ## Fase 5 — Review (parallelo)
 
 ```bash
-P_B=$(th run --member <black> --task "Code review. Cerca: codice duplicato, nomi oscuri, logica nascosta, dead code.
+P_B=$(th run --member <nome-black> --task "Code review. Cerca: codice duplicato, nomi oscuri, logica nascosta, dead code.
 
 Codice:
 <implementazione>" --detach)
 
-P_W=$(th run --member <white> --task "Verifica conformità. Confronta requisiti e implementazione riga per riga. Non fare assunzioni.
+P_W=$(th run --member <nome-white> --task "Verifica conformità. Confronta requisiti e implementazione riga per riga. Non fare assunzioni.
 
 Requisiti:
 <fase 0>
@@ -154,7 +154,7 @@ Presenta i problemi trovati. Se ci sono fix non-triviali, torna alla fase 4.
 ## Fase 6 — Wiki
 
 ```bash
-th run --member omero --task "Aggiorna la wiki del progetto con la nuova funzionalità.
+th run --member <membro> --task "Usa la skill omero per aggiornare la wiki del progetto con la nuova funzionalità.
 
 Cosa è stato implementato:
 <sommario>

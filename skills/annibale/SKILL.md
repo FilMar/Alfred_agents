@@ -26,6 +26,20 @@ Non esegui il lavoro. Non gestisci i membri. Orchestri chi esegue.
 
 ---
 
+## Skill vs Membri
+
+**Le skill non sono membri.** `oracolo`, `socrate`, `aristotele`, `omero`, `feynman`, ecc. sono skill del sistema — non passarle mai come `--member` a `th run`.
+
+Per usare una skill, istruisci un membro reale nel `--task`:
+
+```bash
+th run --member <membro> --task "Usa la skill oracolo per recuperare ciò che il Third Brain sa su: <tema>"
+```
+
+Se non hai un membro adatto, usa un tmp neutro come tramite. L'importante è che la skill venga citata nel task, non nel flag `--member`.
+
+---
+
 ## 1. Leggi il roster
 
 Prima di tutto:
@@ -76,6 +90,7 @@ Flow disponibili nella skill annibale:
 |---|---|
 | `debate.md` | Esplorare un'idea o decisione via ciclo socratico sedimentato nel TB |
 | `tdd-coding.md` | Implementare una funzionalità con architettura esplicita, test-first e chiusura sulla wiki |
+| `council.md` | Analizzare un problema con un consiglio di esperti di dominio in parallelo, con sintesi e giri modulabili |
 
 Leggi il template pertinente con `Read` e seguilo. I template sono flow già validati.
 
@@ -99,13 +114,15 @@ Mostra il piano all'utente prima di eseguire:
 Lavoro: <descrizione>
 
 Roster:
-- <nome-membro> (cappello: white, fonte: locale) — <cosa farà>
-- <nome-membro> (cappello: black, fonte: globale) — <cosa farà>
-- <cappello>-tmp (cappello: green, fonte: tmp neutro) — <cosa farà>
-- <nome-membro> (cappello: blue, fonte: locale) — sintesi finale
+- steve-white  (cappello: white, fonte: locale) — <cosa farà>
+- knuth-black  (cappello: black, fonte: globale) — <cosa farà>
+- tesla-green  (cappello: green, fonte: tmp neutro) — <cosa farà>
+- turing-blue  (cappello: blue, fonte: locale) — sintesi finale
 
 Procedo?
 ```
+
+I nomi seguono la convenzione `<figura-nota-nel-dominio>-<colore-cappello>`.
 
 Aspetta conferma. Se l'utente modifica il flow, adattati prima di eseguire.
 
@@ -118,8 +135,8 @@ Aspetta conferma. Se l'utente modifica il flow, adattati prima di eseguire.
 Le prospettive si accumulano: ogni membro legge l'output del precedente. Cattura stdout.
 
 ```bash
-STEP1=$(th run --member <nome1> --task "<task>")
-STEP2=$(th run --member <nome2> --task "<task>
+STEP1=$(th run --member <nome-cappello1> --task "<task>")
+STEP2=$(th run --member <nome-cappello2> --task "<task>
 
 Contesto:
 $STEP1")
@@ -132,9 +149,9 @@ Se un passo fallisce (`th run` esce con errore), fermati e mostra l'errore all'u
 Quando le prospettive devono essere indipendenti. `--detach` scrive in `/tmp/` e restituisce JSON con i path.
 
 ```bash
-P1=$(th run --member <nome1> --task "<task>" --detach)
-P2=$(th run --member <nome2> --task "<task>" --detach)
-P3=$(th run --member <nome3> --task "<task>" --detach)
+P1=$(th run --member <nome-cappello1> --task "<task>" --detach)
+P2=$(th run --member <nome-cappello2> --task "<task>" --detach)
+P3=$(th run --member <nome-cappello3> --task "<task>" --detach)
 
 STATUS1=$(echo "$P1" | jq -r '.status')
 STATUS2=$(echo "$P2" | jq -r '.status')
@@ -150,7 +167,7 @@ OUT1=$(cat "$(echo "$P1" | jq -r '.out')")
 OUT2=$(cat "$(echo "$P2" | jq -r '.out')")
 OUT3=$(cat "$(echo "$P3" | jq -r '.out')")
 
-FINAL=$(th run --member <nome-blu> --task "<task>
+FINAL=$(th run --member <nome-blue> --task "<task>
 
 Prospettiva 1:
 $OUT1
