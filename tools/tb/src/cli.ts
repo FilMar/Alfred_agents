@@ -10,7 +10,7 @@ import { createNote, addRefs, changeKind, searchNotes, browseNotes, randomNote, 
 import type { NoteType, SearchOptions } from "./types.js";
 import { NOTE_TYPES } from "./types.js";
 
-// ─── Percorso compose ─────────────────────────────────────────────────────────
+// ─── Compose path ─────────────────────────────────────────────────────────────
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const COMPOSE_FILE = resolve(__dirname, "../../../scripts/compose.qdrant.yml");
@@ -38,11 +38,11 @@ async function requireServices(opts: { needsEmbedding?: boolean } = {}): Promise
   if (!status.qdrant) missing.push("Qdrant");
   if (opts.needsEmbedding !== false) {
     if (!status.ollama) missing.push("Ollama");
-    else if (!status.model) missing.push(`modello ${EMBED_MODEL}`);
+    else if (!status.model) missing.push(`model ${EMBED_MODEL}`);
   }
 
   if (missing.length > 0) {
-    die(`Servizi non disponibili: ${missing.join(", ")}.\nAvvia i servizi con: tb start`);
+    die(`Services unavailable: ${missing.join(", ")}.\nStart services with: tb start`);
   }
 }
 
@@ -59,7 +59,7 @@ function normalizeTags(tags: string[]): string[] {
 
 function validateKind(kind: string): asserts kind is NoteType {
   if (!NOTE_TYPES.includes(kind as NoteType)) {
-    die(`kind non valido: "${kind}". Valori ammessi: ${NOTE_TYPES.join(", ")}`);
+    die(`invalid kind: "${kind}". Allowed values: ${NOTE_TYPES.join(", ")}`);
   }
 }
 
@@ -74,17 +74,17 @@ const program = new Command();
 
 program
   .name("tb")
-  .description("CLI per la memoria semantica del Third Brain")
+  .description("CLI for semantic memory — Third Brain")
   .version("0.1.0");
 
 // ─── start ────────────────────────────────────────────────────────────────────
 
 program
   .command("start")
-  .description("Avvia Qdrant via Docker Compose e verifica Ollama")
+  .description("Start Qdrant via Docker Compose and verify Ollama")
   .action(async () => {
     const result = spawnSync("docker", ["compose", "-f", COMPOSE_FILE, "up", "-d"], { stdio: "inherit" });
-    if (result.status !== 0) die("docker compose up fallito. Verifica che Docker o Podman sia in esecuzione.");
+    if (result.status !== 0) die("docker compose up failed. Make sure Docker or Podman is running.");
 
     let qdrantUp = false;
     for (let i = 0; i < QDRANT_POLL_RETRIES; i++) {
@@ -94,22 +94,22 @@ program
     }
 
     if (!qdrantUp) {
-      process.stderr.write("Qdrant avviato ma non ancora raggiungibile. Riprova tra qualche secondo.\n");
+      process.stderr.write("Qdrant started but not yet reachable. Retry in a few seconds.\n");
       process.exit(1);
     }
 
     const final = await checkHealth();
     out({ qdrant: final.qdrant, ollama: final.ollama, model: final.model });
 
-    if (!final.ollama) process.stderr.write("Ollama non raggiungibile. Avvialo con: ollama serve\n");
-    else if (!final.model) process.stderr.write(`Modello mancante. Scaricalo con: ollama pull ${EMBED_MODEL}\n`);
+    if (!final.ollama) process.stderr.write("Ollama not reachable. Start it with: ollama serve\n");
+    else if (!final.model) process.stderr.write(`Model missing. Download it with: ollama pull ${EMBED_MODEL}\n`);
   });
 
 // ─── stop ─────────────────────────────────────────────────────────────────────
 
 program
   .command("stop")
-  .description("Ferma Qdrant")
+  .description("Stop Qdrant")
   .action(() => {
     const result = spawnSync("docker", ["compose", "-f", COMPOSE_FILE, "down"], { stdio: "inherit" });
     process.exit(result.status ?? 1);
@@ -119,7 +119,7 @@ program
 
 program
   .command("status")
-  .description("Mostra stato di Qdrant e Ollama")
+  .description("Show Qdrant and Ollama status")
   .action(async () => {
     const status = await checkHealth();
     out(status);
@@ -130,12 +130,12 @@ program
 
 program
   .command("save")
-  .description("Salva un'idea atomica nel Third Brain")
-  .requiredOption("--what <text>", "Contenuto: l'idea atomica")
-  .requiredOption("--why <text>", "Contesto: perché questa nota è nata")
-  .option("--kind <kind>", "Tipo semantico (dato|protocollo|sintesi|attrito|configurazione|indice)", "dato")
-  .option("--tags <tag>", "Etichetta (ripetibile)", collect, [] as string[])
-  .option("--source <uri>", "URI o riferimento alla fonte originale")
+  .description("Save an atomic idea to the Third Brain")
+  .requiredOption("--what <text>", "Content: the atomic idea")
+  .requiredOption("--why <text>", "Context: why this note was created")
+  .option("--kind <kind>", "Semantic type (dato|protocollo|sintesi|attrito|configurazione|indice)", "dato")
+  .option("--tags <tag>", "Tag (repeatable)", collect, [] as string[])
+  .option("--source <uri>", "URI or reference to the original source")
   .action(async (opts) => {
     validateKind(opts.kind);
     await requireServices({ needsEmbedding: true });
@@ -155,7 +155,7 @@ program
 
 program
   .command("tags")
-  .description("Lista i tag in uso, ordinati per frequenza")
+  .description("List tags in use, sorted by frequency")
   .action(async () => {
     await requireServices({ needsEmbedding: false });
     const tags = await listNoteTags();
@@ -166,11 +166,11 @@ program
 
 program
   .command("random")
-  .description("Restituisce una nota casuale dal Third Brain")
+  .description("Return a random note from the Third Brain")
   .action(async () => {
     await requireServices({ needsEmbedding: false });
     const note = await randomNote();
-    if (!note) die("Nessuna nota nel Third Brain.");
+    if (!note) die("No notes in the Third Brain.");
     out(note);
   });
 
@@ -178,12 +178,12 @@ program
 
 program
   .command("search <query>")
-  .description("Ricerca semantica nel Third Brain")
-  .option("--limit <n>", "Numero massimo di risultati", "10")
-  .option("--depth <n>", "Profondità traversal refs (0=solo vettoriale, 1=default)", "1")
-  .option("--hybrid", "Usa hybrid retrieval (dense + sparse + RRF)")
-  .option("--tags <tag>", "Filtra per tag (ripetibile)", collect, [] as string[])
-  .option("--kind <kind>", "Filtra per tipo semantico (ripetibile)", collect, [] as string[])
+  .description("Semantic search in the Third Brain")
+  .option("--limit <n>", "Maximum number of results", "10")
+  .option("--depth <n>", "Ref traversal depth (0=vector only, 1=default)", "1")
+  .option("--hybrid", "Use hybrid retrieval (dense + sparse + RRF)")
+  .option("--tags <tag>", "Filter by tag (repeatable)", collect, [] as string[])
+  .option("--kind <kind>", "Filter by semantic type (repeatable)", collect, [] as string[])
   .option("--evidence-only", "Restringe ai tipi evidence-oriented")
   .option("--include-hubs", "Includi note di tipo indice nella ricerca")
   .action(async (query: string, opts) => {
@@ -207,9 +207,9 @@ program
 
 program
   .command("update <id>")
-  .description("Aggiorna i campi mutabili di una nota")
-  .option("--kind <kind>", "Nuovo tipo semantico")
-  .option("--add-ref <id:reason>", "Aggiunge un ref (ripetibile, append-only)", collect, [] as string[])
+  .description("Update mutable fields of a note")
+  .option("--kind <kind>", "New semantic type")
+  .option("--add-ref <id:reason>", "Add a ref (repeatable, append-only)", collect, [] as string[])
   .action(async (id: string, opts) => {
     await requireServices({ needsEmbedding: false });
 
@@ -228,7 +228,7 @@ program
     if (opts.addRef.length > 0) {
       const newRefs = opts.addRef.map((raw: string) => {
         const colonIdx = raw.indexOf(":");
-        if (colonIdx === -1) die(`Formato --add-ref non valido: "${raw}". Atteso: <id:reason>`);
+        if (colonIdx === -1) die(`Invalid --add-ref format: "${raw}". Expected: <id:reason>`);
         return { id: raw.slice(0, colonIdx), reason: raw.slice(colonIdx + 1) };
       });
 
@@ -240,7 +240,7 @@ program
       }
     }
 
-    if (!updated) die("Nessun campo da aggiornare. Usa --kind o --add-ref.");
+    if (!updated) die("Nothing to update. Use --kind or --add-ref.");
 
     out({ id, updated: true });
   });
@@ -249,10 +249,10 @@ program
 
 program
   .command("browse")
-  .description("Naviga la memoria senza query semantica (scroll)")
-  .option("--kind <kind>", "Filtra per tipo semantico")
-  .option("--since <date>", "Data ISO minima di creazione (es. 2025-01-01)")
-  .option("--limit <n>", "Numero massimo di risultati", "20")
+  .description("Browse memory without a semantic query (scroll)")
+  .option("--kind <kind>", "Filter by semantic type")
+  .option("--since <date>", "Minimum ISO creation date (e.g. 2025-01-01)")
+  .option("--limit <n>", "Maximum number of results", "20")
   .action(async (opts) => {
     await requireServices({ needsEmbedding: false });
 
@@ -271,14 +271,14 @@ program
 
 program
   .command("graph")
-  .description("Visualizza il grafo del Third Brain nel browser")
+  .description("Open the Third Brain graph in the browser")
   .action(async () => {
     await requireServices({ needsEmbedding: false });
     serveGraph();
     const url = `http://localhost:${GRAPH_PORT}`;
     process.stdout.write(`Graph: ${url}\n`);
     spawnSync("xdg-open", [url], { stdio: "ignore" });
-    await new Promise(() => {}); // tieni in vita il processo
+    await new Promise(() => {}); // keep process alive
   });
 
 // ─── Parse ───────────────────────────────────────────────────────────────────

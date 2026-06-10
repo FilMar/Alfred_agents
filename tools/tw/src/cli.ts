@@ -25,15 +25,15 @@ const program = new Command();
 
 program
   .name("tw")
-  .description("CLI per la wiki locale di progetto — Third Wiki")
+  .description("CLI for local project wiki — Third Wiki")
   .version("0.1.0");
 
 // ─── init ─────────────────────────────────────────────────────────────────────
 
 program
   .command("init")
-  .description("Inizializza .wiki/ nel progetto corrente e registra la wiki globalmente")
-  .option("--name <name>", "Nome della wiki nel registro (default: nome della directory)")
+  .description("Initialize .wiki/ in the current project and register it globally")
+  .option("--name <name>", "Wiki name in the registry (default: directory name)")
   .action((opts) => {
     const cwd = process.cwd();
     const name: string = opts.name ?? basename(cwd);
@@ -50,8 +50,8 @@ program
 
 program
   .command("register")
-  .description("Registra la wiki locale nel registro globale (~/.pi/tw_registry.json)")
-  .option("--name <name>", "Nome nel registro (default: nome della directory)")
+  .description("Register the local wiki in the global registry (~/.pi/tw_registry.json)")
+  .option("--name <name>", "Registry name (default: directory name)")
   .action((opts) => {
     try {
       const wikiDir = requireWiki();
@@ -67,20 +67,20 @@ program
 
 program
   .command("wikis")
-  .description("Lista tutte le wiki registrate globalmente")
+  .description("List all globally registered wikis")
   .action(() => {
     const wikis = listWikis();
-    if (!wikis.length) die("Nessuna wiki registrata. Usa: tw init");
+    if (!wikis.length) die("No wikis registered. Use: tw init");
     out(wikis);
   });
 
 // ─── page ─────────────────────────────────────────────────────────────────────
 
-const page = new Command("page").description("Gestione pagine della wiki");
+const page = new Command("page").description("Wiki page management");
 
 page
   .command("list")
-  .description("Lista le pagine della wiki locale")
+  .description("List local wiki pages")
   .action(() => {
     try {
       const wikiDir = requireWiki();
@@ -92,7 +92,7 @@ page
 
 page
   .command("get <name>")
-  .description("Legge una pagina (raw markdown)")
+  .description("Read a page (raw markdown)")
   .action((name: string) => {
     try {
       const wikiDir = requireWiki();
@@ -105,9 +105,9 @@ page
 
 page
   .command("update <name>")
-  .description("Aggiorna una sezione di una pagina (scrittura atomica)")
-  .requiredOption("--section <section>", "Nome della sezione (senza ##)")
-  .requiredOption("--content <content>", "Nuovo contenuto della sezione (markdown)")
+  .description("Update a page section (atomic write)")
+  .requiredOption("--section <section>", "Section name (without ##)")
+  .requiredOption("--content <content>", "New section content (markdown)")
   .action((name: string, opts) => {
     try {
       const wikiDir = requireWiki();
@@ -120,8 +120,8 @@ page
 
 page
   .command("create <name>")
-  .description("Crea una nuova pagina nella wiki locale")
-  .option("--content <content>", "Contenuto iniziale della pagina", "")
+  .description("Create a new page in the local wiki")
+  .option("--content <content>", "Initial page content", "")
   .action((name: string, opts) => {
     try {
       const wikiDir = requireWiki();
@@ -136,12 +136,12 @@ program.addCommand(page);
 
 // ─── style ────────────────────────────────────────────────────────────────────
 
-const style = new Command("style").description("Gestione guide di stile e convenzioni del codice");
+const style = new Command("style").description("Style guide and code convention management");
 
 style
   .command("add <name>")
-  .description("Crea una nuova entry di stile con template standard")
-  .option("--desc <desc>", "Descrizione breve del pattern/convenzione", "")
+  .description("Create a new style entry with standard template")
+  .option("--desc <desc>", "Short description of the pattern/convention", "")
   .action((name: string, opts) => {
     try {
       const wikiDir = requireWiki();
@@ -154,12 +154,12 @@ style
 
 style
   .command("list")
-  .description("Lista tutte le entry di stile")
+  .description("List all style entries")
   .action(() => {
     try {
       const wikiDir = requireWiki();
       const styles = listStylePages(wikiDir);
-      if (!styles.length) die("Nessuna entry di stile.");
+      if (!styles.length) die("No style entries.");
       out(styles);
     } catch (err) {
       die(errorMessage(err));
@@ -168,7 +168,7 @@ style
 
 style
   .command("get <name>")
-  .description("Legge una entry di stile")
+  .description("Read a style entry")
   .action((name: string) => {
     try {
       const wikiDir = requireWiki();
@@ -181,9 +181,9 @@ style
 
 style
   .command("update <name>")
-  .description("Aggiorna una sezione di una entry di stile")
-  .requiredOption("--section <section>", "Nome della sezione (senza ##)")
-  .requiredOption("--content <content>", "Nuovo contenuto della sezione (markdown)")
+  .description("Update a section of a style entry")
+  .requiredOption("--section <section>", "Section name (without ##)")
+  .requiredOption("--content <content>", "New section content (markdown)")
   .action((name: string, opts) => {
     try {
       const wikiDir = requireWiki();
@@ -200,33 +200,33 @@ program.addCommand(style);
 
 program
   .command("search <query>")
-  .description("Cerca nella wiki (regex, case-insensitive)")
-  .option("--global", "Cerca in tutte le wiki registrate (sola lettura)")
-  .option("--wiki <name>", "Cerca in una wiki specifica del registro")
+  .description("Search the wiki (regex, case-insensitive)")
+  .option("--global", "Search all registered wikis (read-only)")
+  .option("--wiki <name>", "Search a specific wiki in the registry")
   .action((query: string, opts) => {
     try {
       if (opts.wiki) {
         const entry = findWikiByName(opts.wiki);
-        if (!entry) die(`Wiki non trovata nel registro: "${opts.wiki}"`);
+        if (!entry) die(`Wiki not found in registry: "${opts.wiki}"`);
         const results = searchWiki(entry.path, query, entry.name);
-        if (!results.length) die("Nessun risultato.");
+        if (!results.length) die("No results.");
         out(results);
         return;
       }
 
       if (opts.global) {
         const wikis = listWikis();
-        if (!wikis.length) die("Nessuna wiki registrata.");
+        if (!wikis.length) die("No wikis registered.");
         const results = wikis.flatMap((w) => searchWiki(w.path, query, w.name));
-        if (!results.length) die("Nessun risultato.");
+        if (!results.length) die("No results.");
         out(results);
         return;
       }
 
       const wikiDir = findWiki();
-      if (!wikiDir) die("Nessuna wiki trovata. Usa --global per cercare in tutte.");
+      if (!wikiDir) die("No wiki found. Use --global to search all.");
       const results = searchWiki(wikiDir, query);
-      if (!results.length) die("Nessun risultato.");
+      if (!results.length) die("No results.");
       out(results);
     } catch (err) {
       die(errorMessage(err));

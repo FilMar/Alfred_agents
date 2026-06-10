@@ -25,34 +25,34 @@ function splitCSV(val: string): string[] {
     return val.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
-// ─── Programma ────────────────────────────────────────────────────────────────
+// ─── Program ──────────────────────────────────────────────────────────────────
 
 const program = new Command();
 
 program
     .name("th")
-    .description("CLI per l'orchestrazione di agenti — Third Hand")
+    .description("CLI for agent orchestration — Third Hand")
     .version("0.1.0");
 
 // ─── member ───────────────────────────────────────────────────────────────────
 
-const member = new Command("member").description("Gestione membri");
+const member = new Command("member").description("Member management");
 
 member
     .command("create <name>")
-    .description("Crea un nuovo membro")
-    .option("--hat <hat>", "Cappello de Bono (es. blue-core, black-core)")
-    .option("--role <role>", "Descrizione del ruolo del membro")
-    .option("--tools <tools>", "Tool disponibili separati da virgola", "read,bash")
-    .option("--tmp", "Crea il membro in /tmp invece che nel progetto corrente")
-    .option("--from <global>", "Crea da un membro globale come base (ignora --hat, --role, --tools)")
+    .description("Create a new member")
+    .option("--hat <hat>", "de Bono hat (e.g. blue-core, black-core)")
+    .option("--role <role>", "Member role description")
+    .option("--tools <tools>", "Available tools, comma-separated", "read,bash")
+    .option("--tmp", "Create member in /tmp instead of the current project")
+    .option("--from <global>", "Create from a global member as base (ignores --hat, --role, --tools)")
     .action((name: string, opts) => {
         try {
             if (opts.from) {
                 out(createMemberFrom(name, opts.from));
             } else {
-                if (!opts.hat) die("--hat è richiesto (o usa --from <global>)");
-                if (!opts.role) die("--role è richiesto (o usa --from <global>)");
+                if (!opts.hat) die("--hat is required (or use --from <global>)");
+                if (!opts.role) die("--role is required (or use --from <global>)");
                 out(createMember(name, opts.hat, opts.role, splitCSV(opts.tools), [], opts.tmp));
             }
         } catch (err) {
@@ -62,21 +62,21 @@ member
 
 member
     .command("list")
-    .description("Lista membri (locale + globale + tmp per default)")
-    .option("--local", "Solo membri locali (.th/members/)")
-    .option("--global", "Solo membri globali (~/.th/members/)")
-    .option("--tmp", "Solo membri temporanei (/tmp/.th/members/)")
+    .description("List members (local + global + tmp by default)")
+    .option("--local", "Local members only (.th/members/)")
+    .option("--global", "Global members only (~/.th/members/)")
+    .option("--tmp", "Temporary members only (/tmp/.th/members/)")
     .action((opts) => {
         const groups = listMembers({ local: opts.local, global: opts.global, tmp: opts.tmp });
         const filtered = opts.local || opts.global || opts.tmp;
         if (filtered) {
             const key = opts.local ? "local" : opts.global ? "global" : "tmp";
             const list = groups[key];
-            if (list.length === 0) die(`Nessun membro ${key}.`);
+            if (list.length === 0) die(`No ${key} members.`);
             out(list);
         } else {
             if (!groups.local.length && !groups.global.length && !groups.tmp.length) {
-                die("Nessun membro. Usa: th member create <name>");
+                die("No members found. Use: th member create <name>");
             }
             out(groups);
         }
@@ -84,7 +84,7 @@ member
 
 member
     .command("get <name>")
-    .description("Mostra il dettaglio di un membro")
+    .description("Show member details")
     .action((name: string) => {
         try {
             out(getMember(name));
@@ -95,7 +95,7 @@ member
 
 member
     .command("delete <name>")
-    .description("Elimina un membro")
+    .description("Delete a member")
     .action((name: string) => {
         try {
             deleteMember(name);
@@ -107,8 +107,8 @@ member
 
 member
     .command("promote <name>")
-    .description("Promuove un membro locale o tmp a globale (~/.th/members/)")
-    .option("--force", "Sovrascrive il membro globale se esiste già")
+    .description("Promote a local or tmp member to global (~/.th/members/)")
+    .option("--force", "Overwrite the global member if it already exists")
     .action((name: string, opts) => {
         try {
             out(promoteMember(name, opts.force));
@@ -121,16 +121,16 @@ program.addCommand(member);
 
 // ─── hats ─────────────────────────────────────────────────────────────────────
 
-const hats = new Command("hats").description("Gestione cappelli de Bono");
+const hats = new Command("hats").description("de Bono hat management");
 
 hats
     .command("list")
-    .description("Lista i cappelli disponibili")
+    .description("List available hats")
     .action(() => out(listHats()));
 
 hats
     .command("get <name>")
-    .description("Mostra il contenuto di un cappello")
+    .description("Show hat content")
     .action((name: string) => {
         try {
             // raw markdown — intentionally not JSON
@@ -146,15 +146,15 @@ program.addCommand(hats);
 
 program
     .command("run")
-    .description("Esegue un task con un singolo membro")
-    .requiredOption("--member <name>", "Nome del membro")
-    .requiredOption("--task <task>", "Task da eseguire")
-    .option("--thinking <level>", "Livello di thinking esteso (off, minimal, low, medium, high, xhigh)")
-    .option("--model <provider/id>", "Modello da usare (es. anthropic/claude-opus-4-7)")
-    .option("--detach", "Esegui in background; ritorna subito i path di out/log/status")
-    .option("--timeout <secondi>", "Timeout in secondi — aborta la sessione se superato", (v) => {
+    .description("Run a task with a single member")
+    .requiredOption("--member <name>", "Member name")
+    .requiredOption("--task <task>", "Task to execute")
+    .option("--thinking <level>", "Extended thinking level (off, minimal, low, medium, high, xhigh)")
+    .option("--model <provider/id>", "Model to use (e.g. anthropic/claude-opus-4-7)")
+    .option("--detach", "Run in background; returns out/log/status paths immediately")
+    .option("--timeout <seconds>", "Timeout in seconds — aborts the session if exceeded", (v) => {
         const n = parseInt(v, 10);
-        if (isNaN(n) || n <= 0) throw new Error(`--timeout deve essere un intero positivo (ricevuto: "${v}")`);
+        if (isNaN(n) || n <= 0) throw new Error(`--timeout must be a positive integer (received: "${v}")`);
         return n;
     })
     .action(async (opts) => {
@@ -183,11 +183,11 @@ program
 
 program
     .command("models")
-    .description("Lista i modelli disponibili (con API key configurata)")
+    .description("List available models (with configured API key)")
     .action(async () => {
         try {
             const models = await listAvailableModels();
-            if (models.length === 0) die("Nessun modello disponibile. Configura una API key.");
+            if (models.length === 0) die("No models available. Configure an API key.");
             out(models);
         } catch (err) {
             die(errorMessage(err));
@@ -198,25 +198,25 @@ program
 
 program
     .command("history")
-    .description("Lista run recenti")
-    .option("--member <name>", "Filtra per membro")
-    .option("--limit <n>", "Numero massimo di risultati (default: 20)", (v) => {
+    .description("List recent runs")
+    .option("--member <name>", "Filter by member")
+    .option("--limit <n>", "Maximum number of results (default: 20)", (v) => {
         const n = parseInt(v, 10);
-        if (isNaN(n) || n <= 0) throw new Error(`--limit deve essere un intero positivo`);
+        if (isNaN(n) || n <= 0) throw new Error(`--limit must be a positive integer`);
         return n;
     })
     .action((opts) => {
         const runs = listRuns({ member: opts.member, limit: opts.limit });
-        if (!runs.length) die("Nessun run registrato.");
+        if (!runs.length) die("No runs recorded.");
         out(runs);
     });
 
 program
     .command("get <id>")
-    .description("Dettaglio di un run (output incluso se disponibile)")
+    .description("Run details (output included if available)")
     .action((id: string) => {
         const run = getRun(id);
-        if (!run) die(`Run non trovato: "${id}"`);
+        if (!run) die(`Run not found: "${id}"`);
         let output: string | null = null;
         if (run.out_path && existsSync(run.out_path)) {
             output = readFileSync(run.out_path, "utf8");
