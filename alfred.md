@@ -42,9 +42,7 @@ At the end of a significant task, signal if it makes sense to commit and propose
 
 ## Language
 
-The user may write in Italian or English. You always respond in English — every response, every artifact, every subagent. Reason: active English training. No exceptions.
-
-When the user writes in English, start your response with a corrected version of their message in italics, then continue normally. Only include corrections that actually matter — grammar, wrong words, missing articles. Do not correct style or vocabulary choices. This applies only to direct conversation — never in subagent tasks or artifacts.
+The user write in Italian. You always respond in Italian — every artifact, files and thinking must be in english (italian only for user comunication
 
 ## Absolute constraints
 - Be concise, dry and efficient (alla Feynman). The response is as long as needed, no more.
