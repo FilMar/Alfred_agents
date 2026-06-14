@@ -19,7 +19,7 @@ The CLI is called `th` (Third Hand), symmetric to `tb`. De Bono hats live in `to
 
 ### 2A — Member ✅
 
-- [x] **`th member create <name>`**: Creates a member with `--hat`, `--role`, `--tools`, `--skills`. Persists in `.th/members/<name>.md` as frontmatter + system prompt (role + hat).
+- [x] **`th member create <name>`**: Creates a member with `--hat`, `--role`, `--tools`. Persists in `.th/members/<name>.md` as frontmatter + role; the hat is stored by reference and resolved at load time (fixing a hat updates every member).
 - [x] **`--tmp`**: Optional flag — saves the member in `/tmp/.th/members/` instead of the project. Useful for throwaway members.
 - [x] **`th member list [--all]`**: Lists members of the current project; `--all` includes temporary ones too.
 - [x] **`th member get <name>`**: JSON detail of a member.
@@ -33,7 +33,7 @@ The CLI is called `th` (Third Hand), symmetric to `tb`. De Bono hats live in `to
 
 ### 2B — Single execution ✅
 
-- [x] **`th run --member <name> --task "..."`**: Loads the member, calls `createAgentSession()` with system prompt override (role + hat), member tools and skills. Streaming to stdout. `SessionManager.inMemory()`.
+- [x] **`th run --member <name> --task "..."`**: Loads the member, calls `createAgentSession()` with system prompt override (role + hat resolved by reference) and member tools. Streaming to stdout. `SessionManager.inMemory()`.
 - [x] **`--thinking <level>`**: Enables extended thinking (off, minimal, low, medium, high, xhigh). Internal reasoning is redirected to `/tmp/th-<member>-<timestamp>.log`; stdout receives only the final result.
 - [x] **`--model <provider/id>`**: Chooses the model to use (e.g. `anthropic/claude-opus-4-7`). Optional — default from pi settings.
 - [x] **`--output <file>`**: Saves the result to a file in addition to stdout. Useful for passing output between members in sequential execution.
@@ -78,20 +78,14 @@ CLI `td` (Third Done) with SQLite + JSON column for flexibility without migratio
 
 ---
 
-## Phase 5: Third Wiki (`tw`) ✅
+## Phase 5: Third Wiki (`.wiki/`) ✅
 **Status:** Done
 
-CLI `tw` with local wiki management per project in `.wiki/`. Global registry in `~/.pi/tw_registry.json`. Multi-wiki support with cross-wiki search.
+Local wiki per project in `.wiki/` — plain markdown pages, style guides and code conventions. Maintained entirely by the `omero` skill (Read/Write/Edit/Glob/Grep), with page/style templates.
 
-> **Note:** `tw` not yet in `setup.sh` — symlink `~/.local/bin/tw` missing. To be added.
-
-- [x] **`tw init`**: Initialises `.wiki/` in the current project and registers globally.
-- [x] **`tw register`**: Registers an existing wiki in the global registry.
-- [x] **`tw wikis`**: Lists all registered wikis.
-- [x] **`tw page list/get/update/create`**: Full CRUD on pages.
-- [x] **`tw style add/list/get/update`**: Style guides and conventions per project.
-- [x] **`tw search <query>`**: Regex search in the local wiki, `--global` across all registered wikis, `--wiki <name>` on a specific wiki.
-- [x] Skill `omero` — maintains the local wiki, health-check, index queries.
+- [x] Skill `omero` — ingest, query, style guides, health-check; operates directly on `.wiki/`.
+- [x] Page/style/index templates in `skills/omero/templates/`.
+- [x] Default conventions (page naming, sections, frontmatter, index/log) defined in the skill.
 
 ---
 

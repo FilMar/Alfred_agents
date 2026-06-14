@@ -1,5 +1,5 @@
 import { describe, it, expect, afterAll, beforeAll } from "bun:test";
-import { mkdirSync, rmSync, unlinkSync } from "node:fs";
+import { mkdirSync, rmSync, unlinkSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -12,8 +12,15 @@ process.env.TH_TMP_MEMBERS_DIR = join(TEST_BASE, "tmp");
 process.env.TH_GLOBAL_MEMBERS_DIR = join(TEST_BASE, "global");
 
 const { insertRun, finishRun, getRun, listRuns } = await import("../tools/th/src/db.ts");
-const { validateName, createMember, createMemberFrom, listMembers, promoteMember, ensureLocalMember, getMember } =
+const { validateName, createMember, createMemberFrom, listMembers, promoteMember, ensureLocalMember, getMember, loadMember } =
   await import("../tools/th/src/members.ts");
+const { waitForJobs } = await import("../tools/th/src/runner.ts");
+
+function statusFile(name: string, content: string): string {
+  const p = join(TEST_BASE, `status-${name}`);
+  writeFileSync(p, content);
+  return p;
+}
 
 beforeAll(() => {
   mkdirSync(join(TEST_BASE, "local"), { recursive: true });
@@ -97,6 +104,23 @@ describe("run history", () => {
     expect(result?.finished_at).toBeDefined();
   });
 
+  it("finishRun salva token e costo", () => {
+    const r = makeRun();
+    insertRun(r);
+    finishRun(r.id, "done", { inputTokens: 1200, outputTokens: 340, costUsd: 0.0123 });
+    const result = getRun(r.id);
+    expect(result?.input_tokens).toBe(1200);
+    expect(result?.output_tokens).toBe(340);
+    expect(result?.cost_usd).toBeCloseTo(0.0123);
+  });
+
+  it("finishRun senza usage lascia token a undefined", () => {
+    const r = makeRun();
+    insertRun(r);
+    finishRun(r.id, "done");
+    expect(getRun(r.id)?.input_tokens).toBeUndefined();
+  });
+
   it("listRuns ordine decrescente per started_at", () => {
     const r1 = makeRun({ started_at: "2024-01-01T00:00:00.000Z" });
     const r2 = makeRun({ started_at: "2024-01-02T00:00:00.000Z" });
@@ -114,33 +138,95 @@ describe("run history", () => {
   });
 });
 
+describe("waitForJobs", () => {
+  it("ritorna ok=true per tutti i job done", async () => {
+    const paths = [statusFile("a", "done"), statusFile("b", "done")];
+    const outcomes = await waitForJobs(paths, 5);
+    expect(outcomes.every(o => o.ok)).toBe(true);
+  });
+
+  it("non si appende su un job in errore e lo segna ok=false (regressione hang)", async () => {
+    const paths = [statusFile("ok", "done"), statusFile("ko", "error: boom")];
+    const outcomes = await waitForJobs(paths, 5);
+    expect(outcomes[0]?.ok).toBe(true);
+    expect(outcomes[1]?.ok).toBe(false);
+    expect(outcomes[1]?.status).toBe("error: boom");
+  });
+
+  it("tratta lo stato timeout come terminale", async () => {
+    const paths = [statusFile("t", "timeout")];
+    const outcomes = await waitForJobs(paths, 5);
+    expect(outcomes[0]?.ok).toBe(false);
+  });
+
+  it("capisce la transizione running → done", async () => {
+    const p = statusFile("trans", "running");
+    const waiting = waitForJobs([p], 10);
+    writeFileSync(p, "done");
+    const outcomes = await waiting;
+    expect(outcomes[0]?.ok).toBe(true);
+  });
+});
+
+describe("hat per riferimento", () => {
+  it("risolve l'hat a runtime: modificarlo aggiorna il member, niente snapshot", () => {
+    const hatsDir = join(TEST_BASE, "hats-ref");
+    mkdirSync(hatsDir, { recursive: true });
+    const prev = process.env.TH_HATS_DIR;
+    process.env.TH_HATS_DIR = hatsDir;
+    try {
+      const hatPath = join(hatsDir, "ref-core.md");
+      writeFileSync(hatPath, "HAT V1");
+      createMember("ref-test", "ref-core", "ruolo di prova", ["read"]);
+
+      // il file del member NON contiene il testo dell'hat: solo il riferimento
+      const fileContent = readFileSync(join(process.env.TH_MEMBERS_DIR!, "ref-test.md"), "utf8");
+      expect(fileContent).toContain("hat: ref-core");
+      expect(fileContent).not.toContain("HAT V1");
+
+      const v1 = loadMember("ref-test").systemPrompt;
+      expect(v1).toContain("ruolo di prova");
+      expect(v1).toContain("HAT V1");
+
+      // l'hat cambia; il member non viene ricreato → loadMember riflette la nuova versione
+      writeFileSync(hatPath, "HAT V2");
+      const v2 = loadMember("ref-test").systemPrompt;
+      expect(v2).toContain("HAT V2");
+      expect(v2).not.toContain("HAT V1");
+    } finally {
+      if (prev === undefined) delete process.env.TH_HATS_DIR;
+      else process.env.TH_HATS_DIR = prev;
+    }
+  });
+});
+
 describe("member globals", () => {
   it("promote sposta locale → globale", () => {
-    createMember("promo-test", "blue-core", "ruolo test", ["read"], []);
+    createMember("promo-test", "blue-core", "ruolo test", ["read"]);
     promoteMember("promo-test");
     const groups = listMembers({ global: true });
     expect(groups.global.some(m => m.name === "promo-test")).toBe(true);
   });
 
   it("promote fallisce se globale esiste già senza --force", () => {
-    createMember("promo-force", "blue-core", "ruolo", ["read"], []);
+    createMember("promo-force", "blue-core", "ruolo", ["read"]);
     promoteMember("promo-force");
     expect(() => promoteMember("promo-force")).toThrow(/esiste già/);
   });
 
   it("promote con --force sovrascrive", () => {
-    createMember("promo-overwrite", "blue-core", "originale", ["read"], []);
+    createMember("promo-overwrite", "blue-core", "originale", ["read"]);
     promoteMember("promo-overwrite");
     // crea nuovo locale con ruolo diverso e promuove con force
     const localPath = join(process.env.TH_MEMBERS_DIR!, "promo-overwrite.md");
     rmSync(localPath);
-    createMember("promo-overwrite", "black-core", "aggiornato", ["read"], []);
+    createMember("promo-overwrite", "black-core", "aggiornato", ["read"]);
     expect(() => promoteMember("promo-overwrite", true)).not.toThrow();
     expect(getMember("promo-overwrite").hat).toBe("black-core");
   });
 
   it("createMemberFrom crea locale da globale", () => {
-    createMember("base-global", "yellow-core", "ruolo base", ["read"], []);
+    createMember("base-global", "yellow-core", "ruolo base", ["read"]);
     promoteMember("base-global");
     createMemberFrom("local-from-global", "base-global");
     const groups = listMembers({ local: true });
@@ -152,12 +238,12 @@ describe("member globals", () => {
   });
 
   it("ensureLocalMember non fa nulla se esiste già in locale", () => {
-    createMember("already-local", "blue-core", "ruolo", ["read"], []);
+    createMember("already-local", "blue-core", "ruolo", ["read"]);
     expect(ensureLocalMember("already-local")).toBe(false);
   });
 
   it("ensureLocalMember auto-istanzia da globale se manca in locale/tmp", () => {
-    createMember("only-global", "blue-core", "ruolo", ["read"], []);
+    createMember("only-global", "blue-core", "ruolo", ["read"]);
     promoteMember("only-global");
     rmSync(join(process.env.TH_MEMBERS_DIR!, "only-global.md"));
     expect(ensureLocalMember("only-global")).toBe(true);

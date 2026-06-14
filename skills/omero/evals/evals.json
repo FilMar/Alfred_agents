@@ -3,37 +3,38 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "La skill omero è stata aggiornata: ora usa la CLI `tw` invece di operare direttamente sui file `.wiki/`. Il file aggiornato è `/home/filippo/.claude/skills/omero/SKILL.md`. Aggiorna la pagina wiki `agenti_skill` nel progetto `/home/filippo/git_projects/pi` per riflettere questo cambiamento — in particolare la descrizione di Omero e gli strumenti che usa.",
-      "expected_output": "La pagina agenti_skill viene aggiornata via `tw page update`, con la nuova descrizione di Omero che menziona la CLI tw. Il log viene aggiornato. Nessun Write/Edit diretto su file .wiki/.",
+      "prompt": "La skill omero è stata aggiornata: ora opera direttamente sui file `.wiki/` con Read/Write/Edit invece di una CLI. Aggiorna la pagina wiki `agenti_skill` nel progetto `/home/filippo/git_projects/pi` per riflettere questo cambiamento — in particolare la descrizione di Omero e gli strumenti che usa.",
+      "expected_output": "La pagina .wiki/agenti_skill.md viene letta e poi aggiornata con Edit sulla sezione interessata. Il log .wiki/log.md viene aggiornato con una nuova entry. Nessuna riscrittura integrale della pagina.",
       "files": [],
       "expectations": [
-        "Usa `tw page list` o `tw page get` prima di scrivere — non scrive alla cieca",
-        "Usa `tw page update agenti_skill --section` per aggiornare la pagina (non Write/Edit su file .wiki/)",
-        "Aggiorna il log con `tw page update log --section`",
-        "Non usa i tool Write o Edit su path dentro `.wiki/`"
+        "Legge `.wiki/agenti_skill.md` con Read prima di scrivere — non scrive alla cieca",
+        "Usa Edit per aggiornare la sezione interessata, non riscrive l'intera pagina",
+        "Aggiorna `.wiki/log.md` con una nuova entry sotto `## Log`",
+        "Opera solo dentro `.wiki/`, non tocca i sorgenti del progetto"
       ]
     },
     {
       "id": 2,
-      "prompt": "Sto lavorando nel progetto `/home/filippo/git_projects/pi`. Come si usano i task nella wiki? Cosa fa esattamente `tw task done` e come funziona il match parziale? C'è qualche task aperto nella wiki adesso?",
-      "expected_output": "Risposta basata sulla wiki: usa tw search e tw page get per trovare le info, poi risponde con citazioni. Controlla anche tw task list per i task aperti.",
+      "prompt": "Sto lavorando nel progetto `/home/filippo/git_projects/pi`. Come è strutturato l'orchestratore th e come si definisce un nuovo member? Rispondi basandoti sulla wiki.",
+      "expected_output": "Risposta basata sulla wiki: usa Grep su `.wiki/` e Read per trovare le info, poi risponde con citazioni alle pagine. Se la wiki non contiene la risposta, lo dichiara e propone di ingestare il materiale.",
       "files": [],
       "expectations": [
-        "Usa `tw search` per cercare nella wiki prima di rispondere",
-        "Usa `tw page get` per leggere le pagine rilevanti trovate",
-        "Cita pagine wiki nella risposta (es. cli_reference)",
-        "Esegue `tw task list` per verificare i task aperti correnti"
+        "Usa Grep su `.wiki/` per cercare prima di rispondere",
+        "Usa Read per leggere le pagine rilevanti trovate",
+        "Cita pagine wiki nella risposta con `[Testo](nome_pagina)`",
+        "Non legge i sorgenti del progetto per rispondere; se manca, lo dichiara"
       ]
     },
     {
       "id": 3,
-      "prompt": "Aggiungi un task alla wiki del progetto `/home/filippo/git_projects/pi`: 'ottimizzare il triggering della skill omero con run_loop'. Poi mostrami tutti i task aperti.",
-      "expected_output": "Usa tw task add per aggiungere il task, poi tw task list per mostrare i task aperti. Non usa Write/Edit.",
+      "prompt": "Nel progetto `/home/filippo/git_projects/pi` è emerso un pattern ricorrente: ogni CLI espone i comandi con commander e stampa output JSON con un helper `out()`. Documenta questa convenzione come style page.",
+      "expected_output": "Crea `.wiki/style_cli_output.md` dal template style, popolando le sezioni Description / How it is written / How to extend / Example. Aggiorna l'indice.",
       "files": [],
       "expectations": [
-        "Usa `tw task add` per aggiungere il task (non Write/Edit)",
-        "Usa `tw task list` per mostrare i task aperti dopo l'aggiunta",
-        "Non modifica `.wiki/` direttamente con Write o Edit"
+        "Crea una pagina `.wiki/style_<name>.md` partendo dal template `templates/style.md`",
+        "Popola le sezioni How it is written, How to extend, Example",
+        "Aggiorna `.wiki/index.md` con la nuova pagina",
+        "Usa Write per la nuova pagina ed Edit per l'indice"
       ]
     }
   ]

@@ -4,7 +4,7 @@
 
 tags: [roadmap, phases, status]
 sources: [roadmap.md]
-updated: 2026-06-06
+updated: 2026-06-14
 
 ## Phase status
 
@@ -14,14 +14,13 @@ updated: 2026-06-06
 | 2 | Third Hand (`th`) — Flow Engine | Done* |
 | 3 | Third Brain Integration | Done |
 | 4 | GTD Task Manager (`td`) | Done† |
-| 5 | Third Wiki (`tw`) | Done‡ |
+| 5 | Third Wiki (`.wiki/`) | Done |
 | 6 | Career Coach | Planned |
 | 7 | Per-hat metrics | Planned |
 | 8 | Personal Server + Remote Agent | Planned |
 
 *Aggregate per-hat metrics still missing (Phase 2C incomplete).
 †Source `tools/td/` absent from repo — broken symlink. DB exists in `~/.pi/td.db`.
-‡`tw` not yet in `setup.sh` — symlink `~/.local/bin/tw` to be added.
 
 ## Phase 2 — detail (in progress)
 
@@ -49,7 +48,6 @@ Self-hosted server with `pi-core` container (Qdrant + SQLite) and `openclaw`. Te
 
 ## Immediate todo
 
-- [ ] Add `tw` to `setup.sh` — symlink `~/.local/bin/tw` + `chmod +x`
 - [ ] Restore `tools/td/` in repo (missing source, broken symlink)
 - [ ] Aggregate per-hat metrics (`th stats`)
 

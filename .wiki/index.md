@@ -4,10 +4,9 @@
 
 | Page | Content |
 |------|---------|
-| [architettura](architettura) | The three layers: tb, th, tw — roles, boundaries, cooperation |
+| [architettura](architettura) | The layers: tb, th, the `.wiki/` (Omero) — roles, boundaries, cooperation |
 | [agenti](agenti) | Available agents, roles, triggers |
 | [th_cli](th_cli) | CLI reference for `th` — commands, flags, examples |
-| [tw_cli](tw_cli) | CLI reference for `tw` — commands, flags, examples |
 | [roadmap](roadmap) | Development phase status, what is done, what remains |
 | [log](log) | Wiki update history |
 
@@ -15,4 +14,4 @@
 
 tags: [pi, index, architecture]
 sources: [README.md, roadmap.md, alfred.md]
-updated: 2026-06-06
+updated: 2026-06-14

@@ -70,15 +70,14 @@ Problem:
 
 Analyse from your point of view. Be specific, not generic. Bring what only you can bring." --detach)
 
-STATUS1=$(echo "$P1" | jq -r '.status')
-STATUS2=$(echo "$P2" | jq -r '.status')
-STATUS3=$(echo "$P3" | jq -r '.status')
-
-until grep -q "^done$" "$STATUS1" 2>/dev/null \
-   && grep -q "^done$" "$STATUS2" 2>/dev/null \
-   && grep -q "^done$" "$STATUS3" 2>/dev/null; do
-  sleep 2
-done
+# Block until every expert is terminal. `th wait` never hangs on a failed job
+# and exits non-zero if any did not finish "done".
+if ! th wait \
+     "$(echo "$P1" | jq -r '.status')" \
+     "$(echo "$P2" | jq -r '.status')" \
+     "$(echo "$P3" | jq -r '.status')"; then
+  echo "An expert failed — inspect its .status/.log before synthesising." >&2
+fi
 
 OUT1=$(cat "$(echo "$P1" | jq -r '.out')")
 OUT2=$(cat "$(echo "$P2" | jq -r '.out')")

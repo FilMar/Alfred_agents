@@ -1,9 +1,10 @@
-import { openSync, writeSync, closeSync, writeFileSync } from "node:fs";
+import { openSync, writeSync, closeSync, writeFileSync, readFileSync } from "node:fs";
+import { setTimeout as sleep } from "node:timers/promises";
 import { spawn, spawnSync } from "node:child_process";
 import { tmpdir, homedir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { insertRun, finishRun } from "./db.js";
+import { insertRun, finishRun, type RunUsage } from "./db.js";
 import {
   AuthStorage,
   createAgentSession,
@@ -14,7 +15,7 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 import { getModel, getProviders } from "@earendil-works/pi-ai";
-import type { KnownProvider } from "@earendil-works/pi-ai";
+import type { KnownProvider, Usage } from "@earendil-works/pi-ai";
 import { ensureLocalMember, loadMember, validateName } from "./members.js";
 
 // ─── Sandbox (bwrap) ──────────────────────────────────────────────────────────
@@ -81,6 +82,23 @@ const LOG_RESULT_MAX = 500;
 
 function truncate(str: string, max: number): string {
   return str.length > max ? str.slice(0, max) + `… [+${str.length - max} chars]` : str;
+}
+
+/** Sum billed usage across every assistant message of a finished session.
+ *  Input is cumulative per API call (you pay context on each), so summing
+ *  reflects real billed usage rather than a single turn. */
+function sumUsage(messages: AgentSession["messages"]): RunUsage {
+  let inputTokens = 0;
+  let outputTokens = 0;
+  let costUsd = 0;
+  for (const m of messages) {
+    const u = (m as { usage?: Usage }).usage;
+    if (!u) continue;
+    inputTokens += (u.input ?? 0) + (u.cacheRead ?? 0) + (u.cacheWrite ?? 0);
+    outputTokens += u.output ?? 0;
+    costUsd += u.cost?.total ?? 0;
+  }
+  return { inputTokens, outputTokens, costUsd };
 }
 
 // ─── Public utilities ─────────────────────────────────────────────────────────
@@ -235,7 +253,7 @@ async function executeSession(
     writeFileSync(opts.statusPath, `error: ${err instanceof Error ? err.message : String(err)}`);
     throw err;
   } finally {
-    finishRun(opts.runId, runStatus);
+    finishRun(opts.runId, runStatus, sumUsage(session.messages));
   }
 }
 
@@ -266,4 +284,45 @@ export async function runMember(
   } finally {
     close();
   }
+}
+
+// ─── Waiting on detached jobs ───────────────────────────────────────────────────
+
+export type JobOutcome = { statusPath: string; status: string; ok: boolean };
+
+const POLL_INTERVAL_MS = 2000;
+
+/**
+ * A detached job's status file goes "running" → "done" | "error: <msg>".
+ * It is terminal once it is no longer "running" (or unreadable/missing, which
+ * we surface as a failure rather than wait on forever).
+ */
+function isTerminal(status: string): boolean {
+  return status === "done" || status.startsWith("error:") || status.startsWith("timeout");
+}
+
+function readStatus(path: string): string {
+  try {
+    return readFileSync(path, "utf8").trim();
+  } catch {
+    return "missing";
+  }
+}
+
+/**
+ * Block until every detached job reaches a terminal status, or until the global
+ * timeout elapses. Returns one outcome per status path. Never hangs: a failed
+ * job writes "error: …" (see detached-runner) and the deadline caps the wait.
+ */
+export async function waitForJobs(statusPaths: string[], timeoutSec = 600): Promise<JobOutcome[]> {
+  const deadline = Date.now() + timeoutSec * 1000;
+  for (;;) {
+    if (statusPaths.every((p) => isTerminal(readStatus(p)))) break;
+    if (Date.now() >= deadline) break;
+    await sleep(POLL_INTERVAL_MS);
+  }
+  return statusPaths.map((p) => {
+    const status = readStatus(p);
+    return { statusPath: p, status, ok: status === "done" };
+  });
 }

@@ -4,7 +4,7 @@
 
 tags: [agents, skills, th, hats]
 sources: [README.md, roadmap.md, skills/]
-updated: 2026-06-06
+updated: 2026-06-14
 
 ## Overview
 
@@ -28,7 +28,7 @@ The `SKILL.md` file contains:
 | `indiana` | Code archaeology: diagnoses patterns, debt, buried decisions | Black (critical) |
 | `ermes` | Extracts text from URLs (web articles and YouTube) | White (data) |
 | `prometeo` | Creates and improves skills, measures performance via evals and benchmarks | Green (creative) |
-| `omero` | Maintains the local project wiki in `.wiki/` via `tw` CLI | Blue (process) |
+| `omero` | Maintains the local project wiki in `.wiki/` (direct file edits) | Blue (process) |
 | `giano` | Designs and builds the th member team for a project | Blue (process) |
 
 ## De Bono hats

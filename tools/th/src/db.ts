@@ -16,16 +16,24 @@ function open(): Database {
 function migrate(db: Database): void {
   db.run(`
     CREATE TABLE IF NOT EXISTS runs (
-      id          TEXT PRIMARY KEY,
-      member      TEXT NOT NULL,
-      task        TEXT NOT NULL,
-      started_at  TEXT NOT NULL,
-      finished_at TEXT,
-      status      TEXT NOT NULL DEFAULT 'running',
-      out_path    TEXT,
-      log_path    TEXT
+      id            TEXT PRIMARY KEY,
+      member        TEXT NOT NULL,
+      task          TEXT NOT NULL,
+      started_at    TEXT NOT NULL,
+      finished_at   TEXT,
+      status        TEXT NOT NULL DEFAULT 'running',
+      out_path      TEXT,
+      log_path      TEXT,
+      input_tokens  INTEGER,
+      output_tokens INTEGER,
+      cost_usd      REAL
     )
   `);
+  // Add token columns to pre-existing databases created before this migration.
+  const cols = new Set((db.query("PRAGMA table_info(runs)").all() as { name: string }[]).map((c) => c.name));
+  if (!cols.has("input_tokens")) db.run("ALTER TABLE runs ADD COLUMN input_tokens INTEGER");
+  if (!cols.has("output_tokens")) db.run("ALTER TABLE runs ADD COLUMN output_tokens INTEGER");
+  if (!cols.has("cost_usd")) db.run("ALTER TABLE runs ADD COLUMN cost_usd REAL");
   db.run("CREATE INDEX IF NOT EXISTS idx_runs_member ON runs(member)");
   db.run("CREATE INDEX IF NOT EXISTS idx_runs_started ON runs(started_at)");
 }
@@ -41,6 +49,16 @@ export interface Run {
   status: "running" | "done" | "error" | "timeout";
   out_path?: string;
   log_path?: string;
+  input_tokens?: number;
+  output_tokens?: number;
+  cost_usd?: number;
+}
+
+/** Billed usage aggregated over every API call in a run. */
+export interface RunUsage {
+  inputTokens: number;
+  outputTokens: number;
+  costUsd: number;
 }
 
 export function insertRun(r: Omit<Run, "finished_at"> & { finished_at?: string }): void {
@@ -50,10 +68,10 @@ export function insertRun(r: Omit<Run, "finished_at"> & { finished_at?: string }
   );
 }
 
-export function finishRun(id: string, status: Run["status"]): void {
+export function finishRun(id: string, status: Run["status"], usage?: RunUsage): void {
   db.run(
-    "UPDATE runs SET finished_at = ?, status = ? WHERE id = ?",
-    [new Date().toISOString(), status, id]
+    "UPDATE runs SET finished_at = ?, status = ?, input_tokens = ?, output_tokens = ?, cost_usd = ? WHERE id = ?",
+    [new Date().toISOString(), status, usage?.inputTokens ?? null, usage?.outputTokens ?? null, usage?.costUsd ?? null, id]
   );
 }
 
@@ -81,5 +99,8 @@ function rowToRun(row: Record<string, unknown>): Run {
     status: row.status as Run["status"],
     out_path: row.out_path as string | undefined,
     log_path: row.log_path as string | undefined,
+    input_tokens: (row.input_tokens as number | null) ?? undefined,
+    output_tokens: (row.output_tokens as number | null) ?? undefined,
+    cost_usd: (row.cost_usd as number | null) ?? undefined,
   };
 }

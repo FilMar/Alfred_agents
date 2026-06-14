@@ -146,22 +146,20 @@ If a step fails (`th run` exits with an error), stop and show the error to the u
 
 ### Pattern B — Parallel
 
-When perspectives must be independent. `--detach` writes to `/tmp/` and returns JSON with the paths.
+When perspectives must be independent. `--detach` runs each member in the background (clean: no output on the terminal) and returns JSON with the `out`/`log`/`status` paths. `th wait` then blocks on the status files until every job is terminal — it never hangs on a failed job and exits non-zero if any did not finish `done`.
 
 ```bash
 P1=$(th run --member <name-hat1> --task "<task>" --detach)
 P2=$(th run --member <name-hat2> --task "<task>" --detach)
 P3=$(th run --member <name-hat3> --task "<task>" --detach)
 
-STATUS1=$(echo "$P1" | jq -r '.status')
-STATUS2=$(echo "$P2" | jq -r '.status')
-STATUS3=$(echo "$P3" | jq -r '.status')
-
-until grep -q "^done$" "$STATUS1" 2>/dev/null \
-   && grep -q "^done$" "$STATUS2" 2>/dev/null \
-   && grep -q "^done$" "$STATUS3" 2>/dev/null; do
-  sleep 2
-done
+if ! th wait \
+     "$(echo "$P1" | jq -r '.status')" \
+     "$(echo "$P2" | jq -r '.status')" \
+     "$(echo "$P3" | jq -r '.status')"; then
+  echo "A member failed — inspect its .status/.log before continuing." >&2
+  # surface the failure to the user; do not synthesise partial output silently
+fi
 
 OUT1=$(cat "$(echo "$P1" | jq -r '.out')")
 OUT2=$(cat "$(echo "$P2" | jq -r '.out')")

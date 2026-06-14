@@ -4,7 +4,7 @@
 
 **Nature**: guided — each phase produces concrete artefacts required by the next phase. Not a batch pipeline.
 
-**Prerequisites**: test runner available in the project. Wiki initialised (`tw init`).
+**Prerequisites**: test runner available in the project. Wiki (`.wiki/`) present, or Omero initialises it on first write.
 
 ---
 
@@ -47,9 +47,8 @@ P_G=$(th run --member <name-green> --task "Propose 2-3 alternative architectures
 
 Do not choose — generate variants." --detach)
 
-STATUS_W=$(echo "$P_W" | jq -r '.status')
-STATUS_G=$(echo "$P_G" | jq -r '.status')
-until grep -q "^done$" "$STATUS_W" 2>/dev/null && grep -q "^done$" "$STATUS_G" 2>/dev/null; do sleep 2; done
+th wait "$(echo "$P_W" | jq -r '.status')" "$(echo "$P_G" | jq -r '.status')" \
+  || echo "A member failed — inspect its .status/.log before continuing." >&2
 
 OUT_W=$(cat "$(echo "$P_W" | jq -r '.out')")
 OUT_G=$(cat "$(echo "$P_G" | jq -r '.out')")
@@ -139,9 +138,8 @@ Requirements:
 Code:
 <implementation>" --detach)
 
-STATUS_B=$(echo "$P_B" | jq -r '.status')
-STATUS_W=$(echo "$P_W" | jq -r '.status')
-until grep -q "^done$" "$STATUS_B" 2>/dev/null && grep -q "^done$" "$STATUS_W" 2>/dev/null; do sleep 2; done
+th wait "$(echo "$P_B" | jq -r '.status')" "$(echo "$P_W" | jq -r '.status')" \
+  || echo "A member failed — inspect its .status/.log before continuing." >&2
 
 OUT_B=$(cat "$(echo "$P_B" | jq -r '.out')")
 OUT_W=$(cat "$(echo "$P_W" | jq -r '.out')")

@@ -93,21 +93,21 @@ function resolveMemberPath(name: string): string {
   throw new Error(`Membro "${name}" non trovato (cercato in .th/members/, /tmp/.th/members/, ~/.th/members/).`);
 }
 
-function parseMemberContent(name: string, content: string): { member: Member; systemPrompt: string } {
+function parseMemberContent(name: string, content: string): { member: Member; body: string } {
   const meta = parseFrontmatter(content);
   const member: Member = {
     name: meta.name ?? name,
     hat: meta.hat ?? "",
     tools: parseList(meta.tools),
-    skills: parseList(meta.skills),
   };
-  const systemPrompt = content.replace(/^---\n[\s\S]*?\n---\n/, "").trim();
-  return { member, systemPrompt };
+  // body is the role section only — the hat is resolved by reference at load time
+  const body = content.replace(/^---\n[\s\S]*?\n---\n/, "").trim();
+  return { member, body };
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 
-export function createMember(name: string, hat: string, role: string, tools: string[], skills: string[], tmp = false): Member {
+export function createMember(name: string, hat: string, role: string, tools: string[], tmp = false): Member {
   validateName(name);
   if (role.includes("\n")) throw new Error(`Il ruolo non può contenere newline. Usa una riga singola.`);
 
@@ -116,29 +116,27 @@ export function createMember(name: string, hat: string, role: string, tools: str
 
   if (existsSync(memberPath)) throw new Error(`Membro "${name}" esiste già.`);
 
-  const hatContent = loadHat(hat);
+  // Validate the hat exists now (fail fast), but store it by reference only.
+  // The hat content is resolved at load time so fixing a hat updates every member.
+  loadHat(hat);
 
   const content = [
     `---`,
     `name: ${name}`,
     `hat: ${hat}`,
     `tools: [${tools.join(", ")}]`,
-    `skills: [${skills.join(", ")}]`,
     `---`,
     ``,
     `## Ruolo`,
     ``,
     role,
     ``,
-    `---`,
-    ``,
-    hatContent.trim(),
   ].join("\n");
 
   mkdirSync(dir, { recursive: true });
   writeFileSync(memberPath, content, "utf-8");
 
-  return { name, hat, tools, skills };
+  return { name, hat, tools };
 }
 
 type Scope = "local" | "global" | "tmp";
@@ -170,7 +168,11 @@ export function listMembers(opts: { local?: boolean; global?: boolean; tmp?: boo
 export function loadMember(name: string): { member: Member; systemPrompt: string } {
   const memberPath = resolveMemberPath(name);
   const content = readFileSync(memberPath, "utf-8");
-  return parseMemberContent(name, content);
+  const { member, body } = parseMemberContent(name, content);
+  // Resolve the hat by reference at load time and compose role + hat.
+  const hatContent = member.hat ? loadHat(member.hat).trim() : "";
+  const systemPrompt = hatContent ? `${body}\n\n---\n\n${hatContent}` : body;
+  return { member, systemPrompt };
 }
 
 export function getMember(name: string): Member {

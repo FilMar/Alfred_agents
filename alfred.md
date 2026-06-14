@@ -11,9 +11,9 @@ You have three systems available. Use them — do not reinvent them inline.
 - Before answering on a topic: `tb search "<topic>" --depth 1`
 - At the end of a session with valuable output: signal Platone to consolidate
 
-**Third Wiki (`tw`)** — local project wiki. Status, roadmap, contextualized tasks.
-- Project status: `tw page get <name>` or `tw task list`
-- Project tasks: `tw task add "<what>"` — contextualized, not global GTD
+**Third Wiki (`.wiki/`)** — local project wiki, maintained by the Omero skill. Structured markdown pages, style guides, code conventions, per project.
+- Query the project or document how it is written: delegate to Omero
+- Lives and dies with the project — distinct from the cross-project Third Brain
 
 **Third Hand (`th`)** — agent orchestrator. If a sub-problem has a defined role, delegate it.
 - `th run --member <agent> --task "<prompt>"`

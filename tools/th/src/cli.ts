@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { Command } from "commander";
 import { createMember, createMemberFrom, deleteMember, getHat, getMember, listHats, listMembers, promoteMember } from "./members.js";
-import { ensureSandboxed, listAvailableModels, makeJobPaths, runMember, spawnDetached, type RunMemberOpts } from "./runner.js";
+import { ensureSandboxed, listAvailableModels, makeJobPaths, runMember, spawnDetached, waitForJobs, type RunMemberOpts } from "./runner.js";
 import { getRun, listRuns } from "./db.js";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -53,7 +53,7 @@ member
             } else {
                 if (!opts.hat) die("--hat is required (or use --from <global>)");
                 if (!opts.role) die("--role is required (or use --from <global>)");
-                out(createMember(name, opts.hat, opts.role, splitCSV(opts.tools), [], opts.tmp));
+                out(createMember(name, opts.hat, opts.role, splitCSV(opts.tools), opts.tmp));
             }
         } catch (err) {
             die(errorMessage(err));
@@ -177,6 +177,22 @@ program
         } catch (err) {
             die(errorMessage(err));
         }
+    });
+
+// ─── wait ─────────────────────────────────────────────────────────────────────
+
+program
+    .command("wait <status...>")
+    .description("Wait for detached jobs to finish, by their status-file path")
+    .option("--timeout <seconds>", "Global timeout in seconds (default: 600)", (v) => {
+        const n = parseInt(v, 10);
+        if (isNaN(n) || n <= 0) throw new Error(`--timeout must be a positive integer (received: "${v}")`);
+        return n;
+    })
+    .action(async (statusPaths: string[], opts) => {
+        const outcomes = await waitForJobs(statusPaths, opts.timeout ?? 600);
+        out(outcomes);
+        if (outcomes.some((o) => !o.ok)) process.exit(1);
     });
 
 // ─── models ───────────────────────────────────────────────────────────────────
