@@ -53,7 +53,7 @@ export interface Note {
   why: string;
   /** Contenuto: l'idea atomica — immutabile */
   what: string;
-  /** Etichette per filtro — immutabili */
+  /** Etichette per filtro */
   tags: string[];
   /** Tipo semantico — immutabile dopo la creazione. */
   kind: NoteType;

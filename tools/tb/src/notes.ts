@@ -94,6 +94,12 @@ export async function changeKind(id: string, kind: NoteType): Promise<void> {
   await setPayload(id, { kind });
 }
 
+export async function changeTags(id: string, tags: string[]): Promise<void> {
+  const found = await getByIds([id]);
+  if (found.length === 0) throw new Error(`Nota non trovata: ${id}`);
+  await setPayload(id, { tags });
+}
+
 export async function searchNotes(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
   await ensureCollection();
   const vector = await embed(query);

@@ -23,7 +23,7 @@ You do not extract new knowledge. You work on what already exists.
 tb search "<query>" [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--include-hubs]
 tb browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
 tb save --what "<text>" --why "<context>" --kind <type> [--tags "tag1,tag2"]
-tb update <id> [--kind <kind>] [--add-ref <id:reason>]
+tb update <id> [--kind <kind>] [--tags <tag>] [--add-ref <id:reason>]
 tb tags                          # list tags by frequency — maps thematic clusters
 tb graph                         # visualise the graph in the browser (PCA 2D) — useful after structural interventions
 ```

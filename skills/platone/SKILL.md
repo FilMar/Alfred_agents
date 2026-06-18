@@ -62,7 +62,7 @@ Confirm? You can modify fields or add refs you see.
 
 The user can:
 - Confirm ("ok", "yes", "go ahead") → save as is
-- Modify a field ("change kind to attrito", "add tag decision") → apply and save
+- Modify a field ("change kind to attrito", "update tags to psychology,bias") → apply with `tb update --tags` and save
 - Add refs ("add ref to <id>: <reason>") → include in the save
 - Discard ("skip", "don't save") → move to the next one
 
@@ -70,7 +70,8 @@ Only after confirmation execute:
 ```bash
 tb save --what "<atomic idea>" --why "<reason>" --kind <type> --tags "tag1,tag2,tag3" [--source <uri>]
 # --tags: comma as separator in a single string. NEVER spaces: --tags "tag1 tag2".
-tb update <new-id> --add-ref "<id>:<reason>"   # for each confirmed ref
+tb update <new-id> --tags "tag1,tag2"              # if the user modified tags
+tb update <new-id> --add-ref "<id>:<reason>"       # for each confirmed ref
 ```
 
 **Absolute Constraints (Zero Tolerance):**

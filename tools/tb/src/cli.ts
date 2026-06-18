@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import { checkHealth, EMBED_MODEL } from "./infra.js";
 import { serveGraph, GRAPH_PORT } from "./graph/server.js";
-import { createNote, addRefs, changeKind, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
+import { createNote, addRefs, changeKind, changeTags, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
 import type { NoteType, SearchOptions } from "./types.js";
 import { NOTE_TYPES } from "./types.js";
 
@@ -209,6 +209,7 @@ program
   .command("update <id>")
   .description("Update mutable fields of a note")
   .option("--kind <kind>", "New semantic type")
+  .option("--tags <tag>", "Set tags (replaces existing)", collect, [] as string[])
   .option("--add-ref <id:reason>", "Add a ref (repeatable, append-only)", collect, [] as string[])
   .action(async (id: string, opts) => {
     await requireServices({ needsEmbedding: false });
@@ -219,6 +220,15 @@ program
       validateKind(opts.kind);
       try {
         await changeKind(id, opts.kind);
+        updated = true;
+      } catch (err) {
+        die(errorMessage(err));
+      }
+    }
+
+    if (opts.tags.length > 0) {
+      try {
+        await changeTags(id, normalizeTags(opts.tags));
         updated = true;
       } catch (err) {
         die(errorMessage(err));
@@ -240,7 +250,7 @@ program
       }
     }
 
-    if (!updated) die("Nothing to update. Use --kind or --add-ref.");
+    if (!updated) die("Nothing to update. Use --kind, --tags or --add-ref.");
 
     out({ id, updated: true });
   });
