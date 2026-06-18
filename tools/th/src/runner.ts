@@ -1,4 +1,4 @@
-import { openSync, writeSync, closeSync, writeFileSync, readFileSync } from "node:fs";
+import { openSync, writeSync, closeSync, writeFileSync, readFileSync, statSync } from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 import { spawn, spawnSync } from "node:child_process";
 import { tmpdir, homedir } from "node:os";
@@ -65,7 +65,7 @@ export function spawnSandboxed(
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type JobPaths = { out: string; log: string; status: string };
+type JobPaths = { out: string; log: string; status: string; pid: string };
 type AgentSession = Awaited<ReturnType<typeof createAgentSession>>["session"];
 type IOHandles = { emit: (text: string) => void; close: () => void };
 
@@ -101,11 +101,20 @@ function sumUsage(messages: AgentSession["messages"]): RunUsage {
   return { inputTokens, outputTokens, costUsd };
 }
 
+function createRegistry() {
+  const authStorage = AuthStorage.create();
+  return { authStorage, modelRegistry: ModelRegistry.create(authStorage) };
+}
+
+/** Strip ANSI escape codes and non-printable chars (keeps tab/LF/CR and printable ASCII/latin-1). */
+export function sanitize(s: string): string {
+  return s.replace(/\x1b\[[0-9;]*[A-Za-z]/g, "").replace(/[^\x09\x0a\x0d\x20-\x7e\x80-\xff]/g, "");
+}
+
 // ─── Public utilities ─────────────────────────────────────────────────────────
 
 export async function listAvailableModels(): Promise<Array<{ provider: string; id: string; name: string }>> {
-  const authStorage = AuthStorage.create();
-  const modelRegistry = ModelRegistry.create(authStorage);
+  const { modelRegistry } = createRegistry();
   const available = await modelRegistry.getAvailable();
   return available.map((m) => ({ provider: m.provider, id: m.id, name: m.name }));
 }
@@ -113,7 +122,7 @@ export async function listAvailableModels(): Promise<Array<{ provider: string; i
 export function makeJobPaths(memberName: string): JobPaths {
   validateName(memberName);
   const base = join(tmpdir(), `th-${memberName}-${Date.now()}`);
-  return { out: `${base}.out`, log: `${base}.log`, status: `${base}.status` };
+  return { out: `${base}.out`, log: `${base}.log`, status: `${base}.status`, pid: `${base}.pid` };
 }
 
 export function spawnDetached(
@@ -133,10 +142,30 @@ export function spawnDetached(
     JSON.stringify(opts),
   ], { detached: true, stdio: "ignore" });
   child.unref();
+  if (child.pid !== undefined) {
+    try {
+      writeFileSync(paths.pid, String(child.pid));
+    } catch (e) {
+      process.stderr.write(`warn: could not write .pid: ${e instanceof Error ? e.message : String(e)}\n`);
+    }
+  }
   return child.pid;
 }
 
 // ─── Session building ─────────────────────────────────────────────────────────
+
+function resolveModel(modelStr: string) {
+  const [provider, ...rest] = modelStr.split("/");
+  const modelId = rest.join("/");
+  if (!provider || !modelId) throw new Error(`Formato model non valido: usa "provider/model-id" (es. anthropic/claude-opus-4-5)`);
+  const knownProviders = getProviders();
+  if (!knownProviders.includes(provider as KnownProvider)) {
+    throw new Error(`Provider non valido: "${provider}". Provider disponibili: ${knownProviders.join(", ")}`);
+  }
+  const model = getModel(provider as KnownProvider, modelId as never);
+  if (!model) throw new Error(`Model non trovato: "${modelStr}". Usa: th models`);
+  return model;
+}
 
 async function buildSession(
   memberName: string,
@@ -145,18 +174,8 @@ async function buildSession(
   if (opts.thinkingLevel && !THINKING_LEVELS.includes(opts.thinkingLevel as ThinkingLevel)) {
     throw new Error(`Thinking level non valido: "${opts.thinkingLevel}". Valori accettati: ${THINKING_LEVELS.join(", ")}`);
   }
-  let model;
-  if (opts.modelStr) {
-    const [provider, ...rest] = opts.modelStr.split("/");
-    const modelId = rest.join("/");
-    if (!provider || !modelId) throw new Error(`Formato model non valido: usa "provider/model-id" (es. anthropic/claude-opus-4-5)`);
-    const knownProviders = getProviders();
-    if (!knownProviders.includes(provider as KnownProvider)) {
-      throw new Error(`Provider non valido: "${provider}". Provider disponibili: ${knownProviders.join(", ")}`);
-    }
-    model = getModel(provider as KnownProvider, modelId as never);
-    if (!model) throw new Error(`Model non trovato: "${opts.modelStr}". Usa: th models`);
-  }
+
+  const model = opts.modelStr ? resolveModel(opts.modelStr) : undefined;
 
   const autoInstantiated = ensureLocalMember(memberName);
   if (autoInstantiated) process.stderr.write(`info: istanziato "${memberName}" da globale in .th/members/\n`);
@@ -170,9 +189,7 @@ async function buildSession(
   });
   await loader.reload();
 
-  const authStorage = AuthStorage.create();
-  const modelRegistry = ModelRegistry.create(authStorage);
-
+  const { authStorage, modelRegistry } = createRegistry();
   const { session } = await createAgentSession({
     tools: member.tools,
     resourceLoader: loader,
@@ -192,7 +209,7 @@ function attachIO(session: AgentSession, paths: JobPaths): IOHandles {
   const logFd = openSync(paths.log, "w");
   const outputFd = openSync(paths.out, "w");
 
-  const log = (text: string) => writeSync(logFd, text);
+  const log = (text: string) => writeSync(logFd, sanitize(text));
   const emit = (text: string) => {
     process.stdout.write(text);
     writeSync(outputFd, text);
@@ -222,6 +239,18 @@ function attachIO(session: AgentSession, paths: JobPaths): IOHandles {
 
 // ─── Execution ────────────────────────────────────────────────────────────────
 
+async function promptWithTimeout(session: AgentSession, task: string, timeoutSec: number): Promise<void> {
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`Timeout dopo ${timeoutSec}s`)), timeoutSec * 1000)
+  );
+  try {
+    await Promise.race([session.prompt(task), timeoutPromise]);
+  } catch (err) {
+    await session.abort();
+    throw err;
+  }
+}
+
 async function executeSession(
   session: AgentSession,
   task: string,
@@ -229,23 +258,16 @@ async function executeSession(
 ): Promise<void> {
   let runStatus: "done" | "error" | "timeout" = "error";
   try {
-    const promptPromise = session.prompt(task);
-
     if (opts.timeoutSec) {
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout dopo ${opts.timeoutSec}s`)), opts.timeoutSec * 1000)
-      );
       try {
-        await Promise.race([promptPromise, timeoutPromise]);
+        await promptWithTimeout(session, task, opts.timeoutSec);
       } catch (err) {
-        await session.abort();
         if (err instanceof Error && err.message.startsWith("Timeout")) runStatus = "timeout";
         throw err;
       }
     } else {
-      await promptPromise;
+      await session.prompt(task);
     }
-
     runStatus = "done";
     opts.emit("\n");
     writeFileSync(opts.statusPath, "done");
@@ -286,17 +308,13 @@ export async function runMember(
   }
 }
 
-// ─── Waiting on detached jobs ───────────────────────────────────────────────────
+// ─── Waiting on detached jobs ─────────────────────────────────────────────────
 
 export type JobOutcome = { statusPath: string; status: string; ok: boolean };
 
 const POLL_INTERVAL_MS = 2000;
+export const OUT_STALE_MS = 60_000;
 
-/**
- * A detached job's status file goes "running" → "done" | "error: <msg>".
- * It is terminal once it is no longer "running" (or unreadable/missing, which
- * we surface as a failure rather than wait on forever).
- */
 function isTerminal(status: string): boolean {
   return status === "done" || status.startsWith("error:") || status.startsWith("timeout");
 }
@@ -309,18 +327,70 @@ function readStatus(path: string): string {
   }
 }
 
+function isPidAlive(pidPath: string): boolean {
+  try {
+    const pid = parseInt(readFileSync(pidPath, "utf8").trim(), 10);
+    if (isNaN(pid)) return false;
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function outMtimeMs(outPath: string): number {
+  try {
+    return statSync(outPath).mtimeMs;
+  } catch {
+    return 0;
+  }
+}
+
+function markCrashed(statusPath: string): void {
+  try { writeFileSync(statusPath, "error: process died unexpectedly"); } catch { /* non-fatal */ }
+}
+
+function pathFromStatus(statusPath: string, ext: string): string {
+  return statusPath.replace(/\.status$/, `.${ext}`);
+}
+
+type JobState = { mtime: number; lastChange: number };
+
+export function checkStaleness(statusPath: string, state: JobState, now: number, staleMs = OUT_STALE_MS): void {
+  const mtime = outMtimeMs(pathFromStatus(statusPath, "out"));
+  if (mtime !== state.mtime) {
+    state.mtime = mtime;
+    state.lastChange = now;
+  }
+  if (now - state.lastChange > staleMs && !isPidAlive(pathFromStatus(statusPath, "pid"))) {
+    markCrashed(statusPath);
+  }
+}
+
 /**
  * Block until every detached job reaches a terminal status, or until the global
- * timeout elapses. Returns one outcome per status path. Never hangs: a failed
- * job writes "error: …" (see detached-runner) and the deadline caps the wait.
+ * timeout elapses. Detects dead processes via PID liveness and .out mtime staleness.
  */
 export async function waitForJobs(statusPaths: string[], timeoutSec = 600): Promise<JobOutcome[]> {
   const deadline = Date.now() + timeoutSec * 1000;
+  const now0 = Date.now();
+  const jobState = new Map<string, JobState>(
+    statusPaths.map(p => [p, { mtime: outMtimeMs(pathFromStatus(p, "out")), lastChange: now0 }])
+  );
+
   for (;;) {
-    if (statusPaths.every((p) => isTerminal(readStatus(p)))) break;
-    if (Date.now() >= deadline) break;
+    const now = Date.now();
+    let allDone = true;
+    for (const p of statusPaths) {
+      if (isTerminal(readStatus(p))) continue;
+      allDone = false;
+      checkStaleness(p, jobState.get(p)!, now);
+    }
+    if (allDone) break;
+    if (now >= deadline) break;
     await sleep(POLL_INTERVAL_MS);
   }
+
   return statusPaths.map((p) => {
     const status = readStatus(p);
     return { statusPath: p, status, ok: status === "done" };

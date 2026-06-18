@@ -1,5 +1,5 @@
 import { describe, it, expect, afterAll, beforeAll } from "bun:test";
-import { mkdirSync, rmSync, unlinkSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdirSync, rmSync, unlinkSync, writeFileSync, readFileSync, utimesSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -14,7 +14,7 @@ process.env.TH_GLOBAL_MEMBERS_DIR = join(TEST_BASE, "global");
 const { insertRun, finishRun, getRun, listRuns } = await import("../tools/th/src/db.ts");
 const { validateName, createMember, createMemberFrom, listMembers, promoteMember, ensureLocalMember, getMember, loadMember } =
   await import("../tools/th/src/members.ts");
-const { waitForJobs } = await import("../tools/th/src/runner.ts");
+const { waitForJobs, sanitize, checkStaleness, makeJobPaths, OUT_STALE_MS } = await import("../tools/th/src/runner.ts");
 
 function statusFile(name: string, content: string): string {
   const p = join(TEST_BASE, `status-${name}`);
@@ -266,5 +266,86 @@ describe("member globals", () => {
     const groups = listMembers({ local: true });
     expect(groups.global).toHaveLength(0);
     expect(groups.tmp).toHaveLength(0);
+  });
+});
+
+describe("sanitize", () => {
+  it("rimuove ANSI escape codes", () => {
+    expect(sanitize("\x1b[31mrosso\x1b[0m")).toBe("rosso");
+    expect(sanitize("\x1b[1;32mbold green\x1b[0m")).toBe("bold green");
+  });
+
+  it("rimuove caratteri di controllo (tranne tab/LF/CR)", () => {
+    expect(sanitize("a\x01b\x02c")).toBe("abc");
+    expect(sanitize("a\tb\nc\rd")).toBe("a\tb\nc\rd");
+  });
+
+  it("rimuove caratteri Unicode sopra U+00FF", () => {
+    expect(sanitize("a→b")).toBe("ab");
+  });
+
+  it("non tocca testo ASCII printable", () => {
+    const s = "hello world [tool:Read] result 42";
+    expect(sanitize(s)).toBe(s);
+  });
+});
+
+describe("makeJobPaths", () => {
+  it("tutti i path condividono lo stesso base e hanno l'estensione corretta", () => {
+    const paths = makeJobPaths("test-member");
+    const base = paths.status.replace(/\.status$/, "");
+    expect(paths.out).toBe(`${base}.out`);
+    expect(paths.log).toBe(`${base}.log`);
+    expect(paths.pid).toBe(`${base}.pid`);
+  });
+});
+
+describe("checkStaleness (crash detection)", () => {
+  function staleState(lastChangeMsAgo: number) {
+    return { mtime: 0, lastChange: Date.now() - lastChangeMsAgo };
+  }
+
+  it("marca crashed se stale e PID morto", () => {
+    const statusPath = join(TEST_BASE, "cs-dead.status");
+    const pidPath = statusPath.replace(/\.status$/, ".pid");
+    writeFileSync(statusPath, "running");
+    writeFileSync(pidPath, "9999999");
+    const state = staleState(OUT_STALE_MS + 1000);
+    checkStaleness(statusPath, state, Date.now());
+    expect(readFileSync(statusPath, "utf8")).toBe("error: process died unexpectedly");
+  });
+
+  it("NON marca crashed se stale ma PID ancora vivo", () => {
+    const statusPath = join(TEST_BASE, "cs-alive.status");
+    const pidPath = statusPath.replace(/\.status$/, ".pid");
+    writeFileSync(statusPath, "running");
+    writeFileSync(pidPath, String(process.pid));
+    const state = staleState(OUT_STALE_MS + 1000);
+    checkStaleness(statusPath, state, Date.now());
+    expect(readFileSync(statusPath, "utf8")).toBe("running");
+  });
+
+  it("NON marca crashed se .out aggiornato di recente (non stale)", () => {
+    const statusPath = join(TEST_BASE, "cs-fresh.status");
+    const outPath = statusPath.replace(/\.status$/, ".out");
+    const pidPath = statusPath.replace(/\.status$/, ".pid");
+    writeFileSync(statusPath, "running");
+    writeFileSync(outPath, "output fresco");
+    writeFileSync(pidPath, "9999999");
+    const state = { mtime: 0, lastChange: Date.now() };
+    checkStaleness(statusPath, state, Date.now());
+    expect(readFileSync(statusPath, "utf8")).toBe("running");
+  });
+
+  it("aggiorna lastChange quando mtime di .out cambia", () => {
+    const statusPath = join(TEST_BASE, "cs-mtime.status");
+    const outPath = statusPath.replace(/\.status$/, ".out");
+    writeFileSync(statusPath, "running");
+    writeFileSync(outPath, "v1");
+    const oldMtime = 1000;
+    const state = { mtime: oldMtime, lastChange: Date.now() - OUT_STALE_MS - 1000 };
+    checkStaleness(statusPath, state, Date.now());
+    expect(state.mtime).not.toBe(oldMtime);
+    expect(Date.now() - state.lastChange).toBeLessThan(1000);
   });
 });
