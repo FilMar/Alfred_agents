@@ -1,0 +1,14 @@
+name: tone
+dice: 2d6
+entries:
+  2: "Oscuro — le ombre nascondono qualcosa di peggio"
+  3: "Decadente — tutto qui sa di ultimo atto"
+  4: "Ostile — l'ambiente stesso non ti accoglie"
+  5: "Carico — le cose non dette riempiono il silenzio"
+  6: "Teso — un filo sottile che trema ma non si spezza ancora"
+  7: "Ambiguo — nessuna intenzione è leggibile, nemmeno la tua"
+  8: "Malinconico — qualcosa è stato perso qui, tempo fa"
+  9: "Ordinario — eppure qualcosa non torna"
+  10: "Caldo — per una volta, qualcuno è davvero dalla tua parte"
+  11: "Ironico — la situazione ha qualcosa di assurdo, quasi comico"
+  12: "Aperto — tutto sembra ancora possibile, anche le cose buone"

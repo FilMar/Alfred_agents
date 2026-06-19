@@ -1,0 +1,14 @@
+name: events
+dice: 2d6
+entries:
+  2: "Qualcosa crolla — strutture, alleanze, o certezze"
+  3: "Qualcuno fugge — da cosa? da chi? perché adesso?"
+  4: "Un conflitto esplode senza preavviso"
+  5: "Qualcosa di prezioso viene perso o distrutto"
+  6: "Occhi che osservano — qualcuno tiene traccia di tutto"
+  7: "Uno scambio avviene — denaro, parole, o segreti"
+  8: "Un accordo viene proposto o siglato"
+  9: "Qualcuno (o qualcosa) arriva — aspettato o no?"
+  10: "Qualcuno (o qualcosa) parte — definitivamente?"
+  11: "Una scoperta cambia il quadro — di chi o di cosa?"
+  12: "Si festeggia — ma non tutti sono contenti di farlo"

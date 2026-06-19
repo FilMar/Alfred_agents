@@ -1,0 +1,18 @@
+name: impact
+dice: 2d6
+entries:
+  2: "Tutto peggiora insieme (due Ferite Lievi contestuali, zone a scelta + −1 dado globale per questa scena)"
+  3:
+    text: "Perdi qualcosa di importante (un oggetto equipaggiato va perso o distrutto — oppure perdi 2 Punti Preparazione)"
+    suggest: ["mvr pg prep -2 \"impatto\""]
+  4: "Sei costretto a reagire subito (salta il beat OBIETTIVO — agisci senza prepararti)"
+  5: "L'ambiente si fa ostile (−1 dado a tutte le prove fisiche finché esci da qui)"
+  6: "Qualcuno subisce le conseguenze al posto tuo (un PNG alleato prende una Ferita Lieve)"
+  7: "L'evento cambia il quadro ma non i tuoi dadi (nessun effetto meccanico — solo fiction)"
+  8: "Guadagni una posizione inaspettata (+1 dado alla prossima prova per l'elemento sorpresa)"
+  9: "L'interruzione ti rivela qualcosa (ottieni un indizio gratuito legato all'obiettivo lungo termine)"
+  10: "Trovi un alleato inatteso nell'evento (il PNG coinvolto da DIREZIONE è disposto ad aiutarti)"
+  11: "L'evento risolve un problema aperto (chiudi un contesto attivo a scelta)"
+  12:
+    text: "La corrente gira completamente (scala una Ferita attiva + tira FORTUNE)"
+    suggest: ["mvr roll fortune"]

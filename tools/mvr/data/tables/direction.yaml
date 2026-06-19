@@ -1,0 +1,16 @@
+name: direction
+dice: 2d6
+entries:
+  2: "Tocca te direttamente — sei nel centro di tutto"
+  3: "Coinvolge qualcuno della tua famiglia"
+  4: "Un tuo amico è al centro — può o vuole aiutarti?"
+  5: "Un conoscente di passaggio è implicato"
+  6: "Potrebbe riguardarti — forse è il momento di preoccuparsi"
+  7:
+    text: "⚡ Due fili si intrecciano (tira EVENTI due volte)"
+    suggest: ["mvr roll events", "mvr roll events"]
+  8: "Una singola persona agisce in modo deciso"
+  9: "Un gruppo si muove con un obiettivo comune"
+  10: "L'evento tocca il luogo dove sei — comunità, villaggio"
+  11: "L'intera regione ne sente l'eco"
+  12: "Il mondo intero ne parlerà"
