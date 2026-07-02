@@ -25,6 +25,7 @@ link() {
 mkdir -p "$HOME/.local/bin"
 mkdir -p "$PI"
 mkdir -p "$HOME/.pi"
+mkdir -p "$CLAUDE"
 
 # --- identity ---
 echo "identity (alfred.md)"
