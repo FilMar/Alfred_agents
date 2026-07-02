@@ -1,0 +1,46 @@
+{
+  "skill_name": "vasari",
+  "evals": [
+    {
+      "id": 0,
+      "name": "moderno-da-testo-libero",
+      "prompt": "Ti incollo il mio profilo, fammi un CV in Typst stile moderno. Sono Luca Ferrari, sviluppatore frontend a Bologna, 5 anni di esperienza. Ora lavoro in Nexi come Frontend Engineer dal 2022, prima ero in una web agency (Kreativ) dal 2019 al 2022 dove ho rifatto da zero il sito di tre clienti enterprise. Uso React, TypeScript, Next.js, Figma. Laurea triennale in Informatica a Bologna nel 2019. Email luca.ferrari@gmail.com, +39 340 5566778. Inglese buono, spagnolo scolastico.",
+      "expected_output": "Un file .typ basato sul template moderno con i dati reali di Luca Ferrari, che compila senza errori.",
+      "files": [],
+      "assertions": [
+        {"text": "Il file .typ generato compila senza errori con `typst compile`"},
+        {"text": "Non contiene dati d'esempio residui del template (Mario Rossi, Acme, mario.rossi@email.com)"},
+        {"text": "Contiene il nome reale 'Luca Ferrari' e le tecnologie citate (React, TypeScript, Next.js)"},
+        {"text": "Usa la variante moderno (colore d'accento e font DejaVu Sans, o comunque il layout sans compatto)"},
+        {"text": "Le due esperienze (Nexi, Kreativ) sono presenti con i rispettivi periodi"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "accademico-postdoc",
+      "prompt": "Devo candidarmi per un post-doc e mi serve un curriculum accademico in typst. Mi chiamo Giulia Conti, ho preso il dottorato in Fisica all'Università di Padova nel 2024, tesi sulla cromodinamica quantistica su reticolo. Ho tre pubblicazioni: una su Physical Review D nel 2023 e due a conferenze (Lattice 2022 e QCD@Work 2023). Ho fatto da tutor per Fisica 1 per due anni. So Python, C++, ROOT. Il mio orcid è 0000-0002-1234-5678, email g.conti@pd.infn.it. Parlo inglese C1 e francese B2.",
+      "expected_output": "Un file .typ basato sul template accademico con sezione pubblicazioni, che compila senza errori.",
+      "files": [],
+      "assertions": [
+        {"text": "Il file .typ generato compila senza errori con `typst compile`"},
+        {"text": "Non contiene dati d'esempio residui del template (Maria Bianchi, orcid 0000-0000-0000-0000)"},
+        {"text": "Contiene il nome reale 'Giulia Conti' e l'ORCID reale 0000-0002-1234-5678"},
+        {"text": "Usa la variante accademico e include una sezione Pubblicazioni con le tre pubblicazioni citate"},
+        {"text": "Include una sezione dedicata a didattica/tutoraggio"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "minimo-info-scarse",
+      "prompt": "mi serve un curriculum in typst ma non so bene da dove partire, faccio la graphic designer freelance a milano",
+      "expected_output": "La skill raccoglie l'essenziale (chiedendo o assumendo ragionevolmente) e produce comunque una bozza .typ che compila, segnalando le assunzioni fatte.",
+      "files": [],
+      "assertions": [
+        {"text": "Il file .typ generato compila senza errori con `typst compile`"},
+        {"text": "Non contiene dati d'esempio residui del template (Mario Rossi, Acme S.p.A.)"},
+        {"text": "Gestisce con grazia le informazioni scarse: chiede i dati mancanti oppure produce una bozza con assunzioni chiaramente segnalate all'utente"},
+        {"text": "Sceglie una variante coerente con il profilo (graphic designer: moderno plausibile) e lo motiva"}
+      ]
+    }
+  ]
+}
