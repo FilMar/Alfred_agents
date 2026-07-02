@@ -1,0 +1,10 @@
+{
+  "name": "pi-governance-portal",
+  "version": "0.1.0",
+  "description": "Overrides the built-in subagent tool to enforce project governance via Annibale.",
+  "main": "src/governance-portal.ts",
+  "type": "module",
+  "dependencies": {
+    "zod": "^3.23.0"
+  }
+}
