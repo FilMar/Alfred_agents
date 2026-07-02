@@ -4,9 +4,13 @@
 
 tags: [log, storico]
 sources: []
-updated: 2026-06-14
+updated: 2026-07-02
 
 ## Log
+
+## [2026-07-02] reconcile | Pulizia bin fantasma e allineamento inventario
+
+Rimossi i tool fantasma `td` (Third Done) e `mvr` (multiversal rules game): sorgenti assenti dal repo, voce `bin` di package.json e symlink `~/.local/bin/{td,mvr}` cancellati, `setup.sh` ripulito. `td` archiviato — sopravvive solo il DB legacy `~/.pi/td.db`; la skill `taiichi` non esiste più. Aggiornate: `architettura` (tabella a 3 layer vivi + nota archiviazione, storage), `agenti` (aggiunti `archimede` e `postino` → 13, allineati a `skills/`), `roadmap` (Phase 2 → Done, Phase 4 → Archived, metriche per-hat spostate a Phase 7, numerazione dettaglio fasi riallineata alla tabella). Le voci storiche su `tw` restano invariate. Fonti nel repo allineate in parallelo (README, roadmap, setup.sh, package.json).
 
 ## [2026-06-14] reconcile | Collasso del tool tw nella skill Omero
 

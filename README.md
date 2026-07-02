@@ -26,6 +26,7 @@ Personal cognitive augmentation system. Three orthogonal layers that cooperate w
 | `indiana` | Code archaeology: diagnoses patterns and technical debt |
 | `prometeo` | Creates and improves skills |
 | `omero` | Maintains the local project wiki in `.wiki/` |
+| `postino` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) |
 
 ## Setup
 

@@ -14,4 +14,4 @@
 
 tags: [pi, index, architecture]
 sources: [README.md, roadmap.md, alfred.md]
-updated: 2026-06-14
+updated: 2026-07-02

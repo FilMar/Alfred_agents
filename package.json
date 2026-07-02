@@ -5,8 +5,7 @@
   "private": true,
   "bin": {
     "tb": "./tools/tb/src/cli.ts",
-    "th": "./tools/th/src/cli.ts",
-    "mvr": "./tools/mvr/src/cli.ts"
+    "th": "./tools/th/src/cli.ts"
   },
   "scripts": {
     "test": "bun test tests/",

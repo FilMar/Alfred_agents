@@ -4,7 +4,7 @@
 
 tags: [agents, skills, th, hats]
 sources: [README.md, roadmap.md, skills/]
-updated: 2026-06-14
+updated: 2026-07-02
 
 ## Overview
 
@@ -30,6 +30,10 @@ The `SKILL.md` file contains:
 | `prometeo` | Creates and improves skills, measures performance via evals and benchmarks | Green (creative) |
 | `omero` | Maintains the local project wiki in `.wiki/` (direct file edits) | Blue (process) |
 | `giano` | Designs and builds the th member team for a project | Blue (process) |
+| `archimede` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md | — |
+| `postino` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) | — |
+
+`archimede` and `postino` are operational skills without a de Bono hat — invoked as Claude Code skills, not as `th` members. Total: 13 skills, matching `skills/`.
 
 ## De Bono hats
 

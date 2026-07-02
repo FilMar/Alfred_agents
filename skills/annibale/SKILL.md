@@ -86,13 +86,15 @@ Globals are auto-instantiated by `th run` — no need to create them. Use them d
 
 Flows available in the annibale skill:
 
-| File | When to use |
-|---|---|
-| `debate.md` | Explore an idea or decision via a Socratic cycle that sediments into the TB |
-| `tdd-coding.md` | Implement a feature with explicit architecture, test-first, and wiki closure |
-| `council.md` | Analyse a problem with a parallel council of domain experts, with synthesis and adjustable rounds |
+| File | Nature | How to use |
+|---|---|---|
+| `debate.md` | Interactive, Socratic | Read it and follow the steps — the user is in the loop between phases |
+| `tdd-coding.md` | Sequential, code-first | Read it and follow the steps |
+| `council.md` | Harness-driven | Read it for Phase 0 (roster selection), then launch `council.sh` |
 
-Read the relevant template with `Read` and follow it. Templates are already-validated flows.
+For `council`: your cognitive job is Phase 0 only — who sits at the table and with what problem. The script drives everything else: parallel fan-out, polling, validation, synthesis. Do not re-implement the fan-out manually. Read `council.md` for the full interface and launch instructions.
+
+For `debate` and `tdd-coding`: read the template and follow it step by step.
 
 ---
 

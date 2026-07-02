@@ -10,7 +10,7 @@ CLI `tb` with save, search, update, browse, random, tags, graph. Immutable assoc
 ---
 
 ## Phase 2: Third Hand (`th`) — Flow Engine
-**Status:** 🚧 In Progress
+**Status:** ✅ Done
 
 ### Objective
 Build an agent orchestration system with divergent cognitive identities (de Bono hats), configurable execution flows, performance evaluation and a suggested evolutionary cycle.
@@ -48,7 +48,7 @@ The CLI is called `th` (Third Hand), symmetric to `tb`. De Bono hats live in `to
 - [x] **Data layer**: SQLite via Bun (`~/.pi/th.db`). Schema: `runs` (id, member, task, started_at, finished_at, status, out_path, log_path).
 - [x] **`th history [--member <name>] [--limit <n>]`**: Lists recent runs in descending order.
 - [x] **`th get <runId>`**: Run metadata + output if still available on disk.
-- [ ] **Per-member performance**: aggregate metrics per hat over time (output quality, tokens, duration).
+- [→] **Per-member performance**: aggregate metrics per hat over time (output quality, tokens, duration). Deferred to Phase 7.
 
 ---
 
@@ -62,12 +62,12 @@ Alfred queries `tb search` before every flow. Platone is interactive: proposes n
 
 ---
 
-## Phase 4: GTD Task Manager (`td`) ✅
-**Status:** Done
+## Phase 4: GTD Task Manager (`td`) 🗄️
+**Status:** Archived — source `tools/td/` removed from repo; only `~/.pi/td.db` survives. Symlink and `taiichi` skill also gone. Kept here for history.
 
 CLI `td` (Third Done) with SQLite + JSON column for flexibility without migrations. Global DB in `~/.pi/td.db`. Two tables: `projects` (id, name, start, goal_end, real_end, data) and `tasks` (id, list, project_id, done_at, created_at, data). Task links via array in `data.links`.
 
-> **Note:** `tools/td/` not present in this repo — the symlink `~/.local/bin/td` points to a non-existent path. The DB exists (`~/.pi/td.db`), the source code does not.
+> **Note:** `tools/td/` not present in this repo. The broken `~/.local/bin/td` symlink has been removed. The DB survives (`~/.pi/td.db`); the source code does not.
 
 - [x] CLI `td` with `add`, `inbox`, `next`, `waiting`, `someday`, `list`, `move`, `done`, `get`
 - [x] **`td edit <id>`**: Post-creation patch of `what`, `context`, `due`, `notes`, `waiting-for`. Empty string deletes the field.

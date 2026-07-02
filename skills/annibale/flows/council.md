@@ -1,174 +1,98 @@
 # Flow: Council of Experts
 
-**When to use**: the user has a problem, decision or challenge that benefits from parallel, diverse domain perspectives. This is not a Socratic cycle — it is a council that convenes, reasons in parallel, then synthesises.
+**When to use**: the user has a problem, decision or challenge that benefits from parallel, diverse domain perspectives. Not for Socratic exploration — use `debate` for that.
 
-**Nature**: structured — each round produces concrete outputs that feed the next. The number of rounds is adjustable: one is often enough; more rounds are needed when the problem is complex or the first round opens new tensions.
-
----
-
-## The cycle
-
-```
-[0. SETUP]        → Annibale picks the experts based on the problem's domain
-[1. FIRST ROUND]  → each expert analyses the problem in parallel, independently
-[2. SYNTHESIS]    → blue synthesises perspectives into a concrete recommendation
-→ if more rounds needed: back to [1] with accumulated context
-[N. CLOSURE]      → blue closes with a final decision
-```
+**Nature**: structured and harness-driven. The code in `council.sh` runs the phases. Annibale's only cognitive job is Phase 0 — choosing who sits at the table and with what problem. After that, the script handles parallelism, polling, validation, and synthesis. The model cannot skip a phase, synthesise before all experts answer, or forget an output.
 
 ---
 
-## Phase 0 — Setup
+## Phase 0 — Annibale chooses the roster (the only cognitive step)
 
-Annibale picks experts from the available roster. Criteria:
-- **Domain**: who has the most relevant expertise for this problem?
-- **Divergence**: profiles must cover different angles, not overlapping ones
-- **Hat**: each expert brings their cognitive colour — a black engineer sees risks, a yellow one sees opportunities
+Pick members that cover different angles of the problem:
 
-Do not convene more than 5 experts per round. Three focused beats six generic.
+- **Domain coverage**: who brings a perspective the others cannot?
+- **Hat divergence**: cognitive variety, not redundancy — a black and a yellow on the same domain beat two blacks
+- **Size**: 2–5 members (hard cap; override with `COUNCIL_MAX_MEMBERS` env var)
+- **Synth**: default `von-neumann-blue`; swap if a domain-specific synthesiser fits better
 
-Propose the council to the user before proceeding:
+If a needed profile does not exist, create a temporary member first:
+
+```bash
+th member create <name> --hat <hat-core> --role "<role>" --tmp
+```
+
+Propose the roster to the user before launching:
 
 ```
 Problem: <description>
 
 Proposed council:
-- steve-white  — <domain> — <what they will analyse>
-- knuth-black  — <domain> — <what they will analyse>
-- tesla-green  — <domain> — <what they will analyse>
+- knuth-black   — <domain> — <what they will bring>
+- jobs-yellow   — <domain> — <what they will bring>
+- turing-green  — <domain> — <what they will bring>
 
-Planned rounds: 1 (expandable)
+Synth: von-neumann-blue
+Rounds: 1
 
 Proceed?
 ```
 
 ---
 
-## Phase 1 — First round (parallel)
+## Launching the script
 
-Each expert receives the problem without seeing the others. Total independence.
+Once the user confirms, run from the **project root**:
 
 ```bash
-P1=$(th run --member <name-hat1> --task "You are summoned as an expert in a council.
+./skills/annibale/flows/council.sh \
+  --task "<problem verbatim or refined>" \
+  --members "knuth-black,jobs-yellow,turing-green" \
+  [--rounds N]         # default 1; add rounds when first synthesis opens new tensions
+  [--synth <member>]   # default von-neumann-blue
+  [--run-id ID]        # omit on first run; reuse to resume a crashed run
+  [--timeout SEC]      # default 600 per member
+  [--dry-run]          # validate roster without spending any API calls
+```
 
-Problem:
-<problem>
+The script:
+1. Validates that every member exists (fail fast — no half-started runs)
+2. Launches all experts in parallel with `th run --detach`
+3. Blocks on `th wait` with crash detection until every expert is terminal
+4. Validates that every output is non-empty before synthesising
+5. Runs the synth member sequentially with all perspectives
+6. Accumulates the synthesis as context for round N+1
 
-Analyse from your point of view. Be specific, not generic. Bring what only you can bring." --detach)
+Final synthesis goes to stdout. Per-member logs and outputs are in `/tmp/th-flow/<run-id>/`.
 
-P2=$(th run --member <name-hat2> --task "You are summoned as an expert in a council.
+---
 
-Problem:
-<problem>
+## Resume
 
-Analyse from your point of view. Be specific, not generic. Bring what only you can bring." --detach)
+If a round fails or the process crashes, relaunch with the same `--run-id`. Completed steps are skipped; failed or missing ones are re-executed.
 
-P3=$(th run --member <name-hat3> --task "You are summoned as an expert in a council.
-
-Problem:
-<problem>
-
-Analyse from your point of view. Be specific, not generic. Bring what only you can bring." --detach)
-
-# Block until every expert is terminal. `th wait` never hangs on a failed job
-# and exits non-zero if any did not finish "done".
-if ! th wait \
-     "$(echo "$P1" | jq -r '.status')" \
-     "$(echo "$P2" | jq -r '.status')" \
-     "$(echo "$P3" | jq -r '.status')"; then
-  echo "An expert failed — inspect its .status/.log before synthesising." >&2
-fi
-
-OUT1=$(cat "$(echo "$P1" | jq -r '.out')")
-OUT2=$(cat "$(echo "$P2" | jq -r '.out')")
-OUT3=$(cat "$(echo "$P3" | jq -r '.out')")
+```bash
+./skills/annibale/flows/council.sh \
+  --task "<same problem>" \
+  --members "<same members>" \
+  --run-id council-20260702-143021   # printed by the first run
 ```
 
 ---
 
-## Phase 2 — Synthesis
+## When to add rounds
 
-```bash
-SYNTHESIS=$(th run --member <name-blue> --task "You have before you the analyses of a council of experts on the same problem.
+One round is usually enough. Add `--rounds 2` (or more) when:
+- The first synthesis surfaces a real tension worth exploring further
+- Perspectives are so divergent that a second pass narrows the decision
+- The user explicitly wants deeper exploration
 
-Problem:
-<problem>
-
-Expert analyses:
-
-<name-hat1>:
-$OUT1
-
-<name-hat2>:
-$OUT2
-
-<name-hat3>:
-$OUT3
-
-Synthesise: what tensions emerge, where they converge, what is the most solid recommendation. Do not average — decide.")
-```
-
-Present the synthesis to the user. Then ask:
-
-```
-Do you want another round? (experts will react to the synthesis and each other's positions)
-```
-
----
-
-## Additional round (optional, repeatable)
-
-If the user wants to go deeper, each expert receives the previous round's synthesis and the others' positions. They can now confirm, correct, or push further.
-
-```bash
-P1=$(th run --member <name-hat1> --task "You are in a council of experts. You have read the previous round's synthesis and the others' analyses.
-
-Original problem:
-<problem>
-
-Previous round synthesis:
-$SYNTHESIS
-
-Other experts' analyses:
-<name-hat2>: $OUT2
-<name-hat3>: $OUT3
-
-React: confirm, correct, or go deeper. Where did the synthesis get it wrong or miss something crucial?" --detach)
-
-# repeat for each expert, then update OUT1, OUT2, OUT3 and re-run synthesis
-```
-
-Repeat for as many rounds as needed. Each round accumulates context — experts become more precise, tensions sharpen.
-
----
-
-## Closure
-
-After the final round, blue closes with a final decision:
-
-```bash
-th run --member <name-blue> --task "Council concluded. You have all the material from previous rounds.
-
-Problem:
-<problem>
-
-Final synthesis from previous round:
-$SYNTHESIS
-
-Final expert analyses:
-<name-hat1>: $OUT1
-<name-hat2>: $OUT2
-<name-hat3>: $OUT3
-
-Close: one decision, its conditions, the residual risks. No open threads — the council is closed."
-```
+Each round feeds the previous synthesis into every expert's prompt — positions sharpen over rounds.
 
 ---
 
 ## Rules
 
-- **Independence in the first round.** Experts do not see each other's analyses until they have finished their own.
-- **Blue does not participate in analysis rounds.** It enters only for synthesis and closure.
-- **One round is often enough.** Add rounds only if the synthesis opens new tensions worth exploring.
-- **The number of rounds is decided by the user**, not Annibale.
-- **Closure is final.** No open flows at the end.
+- **Do not manually implement the parallel fan-out.** The script does this. Annibale's job ends when it calls the script.
+- **Do not synthesise before all experts have finished.** The script enforces this; the model never needs to.
+- **Blue does not participate in analysis rounds.** It enters only for synthesis.
+- **Rounds are the user's call.** Propose 1; let the user ask for more.

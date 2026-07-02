@@ -18,3 +18,5 @@
 - If the agent performs a task inline that should have been delegated:
   - User Command: `Violation: Rule [X] in CLAUDE.md. Restart via th.`
   - Action: Agent must immediately stop, acknowledge the mistake, and re-initiate the task using the correct `th` member.
+
+docs of PI agent: https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/index.md
