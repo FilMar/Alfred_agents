@@ -7,7 +7,7 @@
 | [architettura](architettura) | The layers: tb, th, the `.wiki/` (Omero) — roles, boundaries, cooperation |
 | [agenti](agenti) | Available agents, roles, triggers |
 | [th_cli](th_cli) | CLI reference for `th` — commands, flags, examples |
-| [orchestrator_overview](orchestrator_overview) | General system design and the four core pillars |
+| [orchestrator_overview](orchestrator_overview) | General system design and the five core pillars |
 | [roadmap_orchestrator](roadmap_orchestrator) | Implementation plan for the Raspberry Orchestrator service |
 | [log](log) | Wiki update history |
 
