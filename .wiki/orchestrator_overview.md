@@ -1,6 +1,6 @@
 ---
 tags: [architecture, raspberry, orchestrator]
-sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts]
+sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts, tools/orchestrator/src]
 updated: 2026-07-16
 ---
 
@@ -44,6 +44,7 @@ No database — filesystem as the source of truth for both the task catalog and 
 - **Run instances — the queue**: physical `.json` files moved between directories: `pending/` $\rightarrow$ `processing/` $\rightarrow$ `completed/` (or `failed/`). The directory a file sits in *is* its state, not a field inside it — a crash mid-run can't leave a record saying "running" for a process that's actually dead, because the state isn't an assertion, it's a physical location.
 - **Atomicity**: Transitions use `fs.renameSync`, ensuring that a task is never in two states at once.
 - **Recovery**: Upon startup, the orchestrator scans the directories to resume any interrupted tasks.
+- **Parse resilience (settled at implementation, Phase 1)**: filesystem-as-truth guarantees a crash mid-write will eventually leave a truncated JSON file — so every catalog/queue read skips and logs corrupt files instead of throwing. Without this, the design's own expected failure mode would brick the orchestrator on every restart.
 
 ### 3. Boot-Callback Pattern (The Connectivity)
 To eliminate the "Happy Path" fragility of synchronous polling (Ping loops), the system uses an asynchronous handshake bounded by a wake window, not an indefinite wait:
@@ -64,7 +65,7 @@ The system avoids the ambiguity of natural language for execution.
     - **CLI entrypoint (built)**: `th sandbox-exec -- <bin> <args...>` (`tools/th/src/cli.ts`) wraps an arbitrary binary in the bwrap sandbox, forwarding stdio and exit code via `sandboxExec` (`tools/th/src/runner.ts`). It **refuses with an explicit error if bwrap is missing** — an audited task must never silently run unsandboxed; the internal `ensureSandboxed`/`spawnSandboxed` fallbacks now warn on stderr too. See [th_cli](th_cli).
     - **Nothing extra ships to the Desktop for this**: the Rasp and the Desktop run the identical `pi`/`th` TypeScript stack, so `th sandbox-exec` is present on both nodes once built — no separate wrapper file needs to be transferred.
     - **Full remote sequence**: (1) `scp` the task script to the Desktop — unchanged from the original design, needed because the script is authored/audited on the Rasp and doesn't exist locally on the Desktop; (2) `ssh` into the Desktop and run `th sandbox-exec bun run <path-to-script>` instead of a bare `bun run <path-to-script>`. The two steps are orthogonal: `scp` moves the file, `sandbox-exec` decides how it's launched once it arrives. Locally on the Rasp, no CLI hop is needed — `spawnSandboxed` is called directly in-process.
-- **Metadata**: Scripts define their operational constraints as exported constants at the top of the file (`export const requiresDesktop = true`, `export const schedule = "..."`) — not JSDoc tags. These are read via **static parsing** (regex or the TS compiler API/AST), never via dynamic `import()` — see the no-execution-before-verdict principle in Pillar 1. Same reasoning as the audit itself: read the code, don't run it.
+- **Metadata**: Scripts define their operational constraints as exported constants at the top of the file (`export const requiresDesktop = true`, `export const schedule = "..."`) — not JSDoc tags. These are read via **static parsing** (regex or the TS compiler API/AST), never via dynamic `import()` — see the no-execution-before-verdict principle in Pillar 1. Same reasoning as the audit itself: read the code, don't run it. **Settled at implementation (Phase 1)**: `schedule` is a cron expression, parsed with the `croner` package and validated at ingestion — an invalid cron string is rejected with a 400 and never reaches the catalog. **Settled (2026-07-16)**: `schedule` is optional (a task without one is on-demand only, invocable via `run_task`), and after registration it is owned by the **catalog entry**, not the script — the exported constant is only the initial value, mutable via the Matrix commands `set_schedule`/`pause` without re-audit (the audit judges code, not timing); see [roadmap_orchestrator](roadmap_orchestrator), Phase 3.
 
 ### 5. Access Control (The Perimeter)
 No custom user/role system in the app — access is governed by who can reach the REST API, not by filesystem permissions:

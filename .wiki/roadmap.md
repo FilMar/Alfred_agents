@@ -51,7 +51,7 @@ Self-hosted server with `pi-core` container (Qdrant + SQLite). `openclaw` (an Op
 
 Three parallel worksites are now open beyond the numbered phases. Their dependency order:
 
-1. **Orchestrator Phase 1 skeleton** ([roadmap_orchestrator](roadmap_orchestrator)) — first, because the other two depend on a provisioned, running Rasp: catalog, FS-queue, scheduler, REST API.
+1. **Orchestrator Phase 1 skeleton** ([roadmap_orchestrator](roadmap_orchestrator)) — **done**: catalog, FS-queue, scheduler, REST API implemented in `tools/orchestrator/` and accepted after a full `th` review cycle. Next on this worksite: Phase 2 (WoL, `i_wake`, provisioning pipeline).
 2. **TB-on-Rasp migration** ([tb_on_rasp](tb_on_rasp)) — needs the Rasp provisioned (Qdrant + Ollama containers, see [rasp_node](rasp_node)); the mass re-embedding path additionally needs the orchestrator's WoL/`requiresDesktop` loop working.
 3. **Events table / procedural memory** ([procedural_memory_gaps](procedural_memory_gaps)) — independent of the Rasp, can start anytime; ordered last only because its value accrues slowly (it needs months of accumulated events before the downstream pieces make sense).
 

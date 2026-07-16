@@ -1,6 +1,6 @@
 ---
 tags: [roadmap, raspberry, orchestrator]
-sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts]
+sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts, tools/orchestrator/src, tests/orchestrator.test.ts]
 updated: 2026-07-16
 ---
 
@@ -8,16 +8,16 @@ updated: 2026-07-16
 
 Implementation plan for the event-driven, adversarial-guarded automation server.
 
-## Phase 1: The Skeleton (Core & Persistence)
+## Phase 1: The Skeleton (Core & Persistence) — DONE
 **Goal**: Establish the foundation where tasks can be stored and their state tracked without volatile memory.
 
-- [ ] **Task Type Definition**: Define `RaspberryTask` interface with metadata (schedule, requiresDesktop, timeout). Scripts carry this metadata as exported constants at the top of the file (`export const requiresDesktop = true`, `export const schedule = "..."`), read via static parsing (regex or TS compiler API/AST) — never via dynamic `import()`, to preserve the no-execution-before-audit guarantee (Pillar 1).
-- [ ] **Catalog Implementation (`available_tasks`)**: one JSON file per registered script (e.g. `/scripts/registered/<name>.json`) holding verdict, `schedule`, `requiresDesktop`. Presence of the file is the registration — no separate index.
-- [ ] **FS-Queue Implementation**: 
-    - Create directory structure: `/queue/pending`, `/queue/processing`, `/queue/completed`, `/queue/failed`.
-    - Implement atomic state transitions using `fs.renameSync`.
-- [ ] **Core Scheduler**: Basic Bun loop that scans `available_tasks` and matches task triggers against the current time.
-- [ ] **Basic REST API**: `Bun.serve` exposing `add_task`, `list_tasks`, `get_task_status <id>` — the entire ingestion and query surface. No other entry point (no filesystem drop, no scp-based submission). `run_task` is deliberately not part of this surface — see Phase 3, Matrix Bridge.
+**Status**: implemented in `tools/orchestrator/` (35 tests in `tests/orchestrator.test.ts`), accepted after a full `th` review cycle (builder efesto → parallel adversarial review knuth-black + coherence audit lusk-white → synthesis von-neumann-blue → fix round → probe-based re-verification: merge-ready). Base dir `ORCH_DIR` (default `~/.pi/orchestrator`), port `ORCH_PORT` (default 7717).
+
+- [x] **Task Type Definition** (`src/types.ts`, `src/metadata.ts`): `RaspberryTask` interface with metadata (schedule, requiresDesktop, timeoutSec, verdict). Metadata read from exported constants via static regex — never dynamic `import()`, preserving the no-execution-before-audit guarantee (Pillar 1); proven by sentinel tests on both `extractMetadata` and `registerTask`.
+- [x] **Catalog Implementation (`available_tasks`)** (`src/catalog.ts`): one JSON file per registered script in `<ORCH_DIR>/registered/<name>.json`, source in `<ORCH_DIR>/scripts/<name>.ts`. Presence of the file is the registration — no separate index. Entries start `UNAUDITED` (audit is Phase 3); duplicate names rejected; invalid cron rejected at ingestion (400); corrupt JSON entries skipped and logged, never crash.
+- [x] **FS-Queue Implementation** (`src/queue.ts`): `<ORCH_DIR>/queue/{pending,processing,completed,failed}`, atomic transitions via `fs.renameSync`, `recover()` moves processing orphans back to pending on startup, corrupt instance files skipped and logged.
+- [x] **Core Scheduler** (`src/scheduler.ts`): interval loop scanning the catalog; schedule format is a **cron expression parsed with the `croner` package** (settled at implementation time); only `verdict === "PASS"` is schedulable; dedup per `(task, slot)` scans all four queue states.
+- [x] **Basic REST API** (`src/server.ts`, entrypoint `src/main.ts`): `Bun.serve` exposing `add_task`, `list_tasks`, `get_task_status <id>` — the entire ingestion and query surface. No other entry point (no filesystem drop, no scp-based submission). `run_task` is deliberately not part of this surface — see Phase 3, Matrix Bridge; tests assert `/run_task` and `/i_wake` explicitly return 404.
 
 ## Phase 2: The Nervous System (Hardware & Connectivity)
 **Goal**: Implement the "Wake Window $\rightarrow$ Callback $\rightarrow$ Batch Dispatch" loop — bounded from the start, no indefinite wait state.
@@ -34,6 +34,7 @@ Implementation plan for the event-driven, adversarial-guarded automation server.
 - [ ] **Local Execution Path**: Implementation of `Bun.spawn` for tasks where `requiresDesktop: false`, calling `spawnSandboxed` directly in-process (same runtime, no CLI hop needed).
 - [ ] **Desktop Idle-Shutdown Service**: `systemd` idle-timer on the Desktop itself (poweroff after N min of no activity) — decided locally, not commanded remotely by the Rasp.
 - [x] **Network topology confirmed**: Rasp and Desktop are on the same physical LAN via Ethernet — WoL broadcast works with no Tailscale/WireGuard traversal needed. No implementation task remains here, just a design constraint now settled.
+- [ ] **Deferred from Phase 1 review** (to address when the executor makes these paths real): (a) check-then-enqueue TOCTOU race — only relevant if multi-instance or hot-restart ever enters the deployment model, which today is explicitly single-process; (b) `recover()` id-collision guard — `renameSync` silently overwrites a same-id pending file; negligible under UUID v4, becomes real if id generation ever changes.
 
 ## Phase 3: The Brain (Intelligence & Security)
 **Goal**: Integrate the adversarial guardrail and the human-in-the-loop surface.
@@ -48,6 +49,8 @@ Implementation plan for the event-driven, adversarial-guarded automation server.
     - Integration with `matrix-bot-sdk`.
     - Implementation of the `WARNING` state: notify user $\rightarrow$ await `SÌ/NO` $\rightarrow$ if confirmed, register in `available_tasks`; if rejected, discard like a `FAIL`. Homeserver runs on the Rasp itself, reachable only over Tailscale, single-user (the owner, from Desktop/laptop/phone) — no extra authorization layer needed beyond Pillar 5's existing perimeter.
     - Bidirectional commands: list scheduled/registered tasks (`list_tasks`, mirrors REST), wake the Desktop manually (separate, explicit trigger from the scheduler's automatic WoL in Phase 2 — don't fold the two into the same code path). `run_task` (launch a specific task ad-hoc) is the one command with **no REST counterpart** — it only exists as a Matrix command, only callable against already-registered tasks, never a bypass of the audit. Kept off the REST surface so ad-hoc execution can't be triggered by tailnet membership alone (see Pillar 5, `orchestrator_overview`).
+    - **Optional schedule / on-demand tasks (settled 2026-07-16)**: `schedule` becomes optional at registration — a task without one is registered and audited normally but never picked up by the scheduler; it is invocable only via `run_task`. This is the primary use case: tasks the user launches on demand rather than periodically.
+    - **Schedule control commands (settled 2026-07-16)**: `set_schedule <name> <cron>` (change a registered task's schedule) and `pause <name>` (unschedule — the task stays registered and audited, runnable only via `run_task`). After registration the **catalog entry owns the schedule**; the script's exported constant is only the initial value. Code (what the task does) is audited and immutable — policy (when it runs) is user-controlled and mutable, so rescheduling does **not** require re-audit. Both commands are Matrix-only, never REST, for the same reason as `run_task`: controlling the schedule is controlling execution (`set_schedule` to `* * * * * *` ≡ "run now"). No notification mechanism needed — the scheduler re-reads the catalog from disk every tick (10 s), so changes take effect on the next tick. Out of scope: stopping a *running* instance — executor territory (Phase 2/4), deferred until an executor exists. Implementation impact on Phase 1 code when this lands: `schedule` optional in the `metadata.ts` regex and in `RaspberryTask`, a skip-guard in `scheduler.ts` for schedule-less tasks, an `updateSchedule` in `catalog.ts` analogous to `updateVerdict`.
 - [ ] **pi Chat Relay**: bot-side relay forwarding Matrix room messages to a persistent `pi` session on the Desktop over SSH and replies back. One room = one session (context continuity, not one-shot prompts). Includes the `/await <duration>` command (explicit keepalive: timestamp file consulted by the idle-timer, or `systemd-inhibit` with timeout). Matrix-only like `run_task` — chatting with an agent is arbitrary execution (see Interactive pi Chat in [orchestrator_overview](orchestrator_overview)).
 - [ ] **Result Consolidation**: Capture stdout/stderr and move the task to `/completed` or `/failed` with an attached log.
 - [ ] **Access Control Setup**: no custom auth code — configuration only.
@@ -59,6 +62,8 @@ Implementation plan for the event-driven, adversarial-guarded automation server.
 - [ ] **Crash Recovery Test**: Force-kill the orchestrator during a task and verify it resumes from the FS-Queue.
 - [ ] **Resource Limits**: Implement the `@timeout` metadata to kill runaway scripts.
 - [ ] **Log Rotation**: Prevent the `/queue/completed` directory from filling the SSD.
+- [ ] **Scheduler per-task isolation (NF-1, from Phase 1 re-verification)**: wrap `tick()`'s per-task body in `try/catch` so one bad catalog entry (e.g. a PASS entry whose cron string was corrupted by a direct disk edit) skips instead of crashing the process. The ingestion gate already closes the API vector; this closes the on-disk one.
+- [ ] **Request body size limit on `add_task`** (deferred from Phase 1 review): unbounded `source` is a memory- and disk-fill vector; low likelihood inside the perimeter, hardening-tier.
 
 ## Cross-references
 - [architettura](architettura)
