@@ -1,7 +1,7 @@
 ---
 tags: [roadmap, raspberry, orchestrator]
-sources: [conversation]
-updated: 2026-07-15
+sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts]
+updated: 2026-07-16
 ---
 
 # Roadmap: Raspberry Orchestrator
@@ -30,7 +30,7 @@ Implementation plan for the event-driven, adversarial-guarded automation server.
     - On `i_wake`, batch-dispatch every task scheduled within the wake window (~30 min), not just the triggering one.
     - Logic to trigger `scp` of the `.ts` file to the target for each dispatched task.
     - SSH execution wrapper: run `th sandbox-exec bun run <path>` on the Desktop instead of a bare `bun run <path>` — same real bind profile as local execution.
-- [ ] **`th sandbox-exec` subcommand** (in `th` itself, `tools/th/src/cli.ts` — prerequisite for the SSH execution wrapper above): thin CLI wrapper around the existing `spawnSandboxed` (`tools/th/src/runner.ts`) that takes an arbitrary `<bin> <args...>` and forwards stdio/exit code. Today `spawnSandboxed` is only used internally to launch the `pi` agent; no generic entrypoint exists yet.
+- [x] **`th sandbox-exec` subcommand** (in `th` itself, `tools/th/src/cli.ts` — prerequisite for the SSH execution wrapper above): implemented as `th sandbox-exec -- <bin> <args...>` (`passThroughOptions`, flags after the binary pass through untouched), thin wrapper over `sandboxExec` in `tools/th/src/runner.ts` forwarding stdio and exit code. **Fails with an explicit error when bwrap is missing** — no silent unsandboxed degradation; `ensureSandboxed`/`spawnSandboxed` now also warn on stderr when falling back unsandboxed. See [th_cli](th_cli).
 - [ ] **Local Execution Path**: Implementation of `Bun.spawn` for tasks where `requiresDesktop: false`, calling `spawnSandboxed` directly in-process (same runtime, no CLI hop needed).
 - [ ] **Desktop Idle-Shutdown Service**: `systemd` idle-timer on the Desktop itself (poweroff after N min of no activity) — decided locally, not commanded remotely by the Rasp.
 - [x] **Network topology confirmed**: Rasp and Desktop are on the same physical LAN via Ethernet — WoL broadcast works with no Tailscale/WireGuard traversal needed. No implementation task remains here, just a design constraint now settled.
@@ -44,7 +44,6 @@ Implementation plan for the event-driven, adversarial-guarded automation server.
     - Same call also generates a short summary (description + numbered steps) of what the task does; sent to Matrix for every task loaded, regardless of verdict — informational, does not gate execution.
     - Implement the `PASS/FAIL` gate before moving tasks to `/pending`. `FAIL` scripts are deleted outright — no retention for audit trail.
     - *(Later, optional)* Evolve the audit from static analysis to sandboxed dynamic execution: run the script in an ephemeral, single-use Docker container with no egress network and a decoy filesystem mimicking production paths. Ship the static version first.
-}
 - [ ] **Matrix Bridge**:
     - Integration with `matrix-bot-sdk`.
     - Implementation of the `WARNING` state: notify user $\rightarrow$ await `SÌ/NO` $\rightarrow$ if confirmed, register in `available_tasks`; if rejected, discard like a `FAIL`. Homeserver runs on the Rasp itself, reachable only over Tailscale, single-user (the owner, from Desktop/laptop/phone) — no extra authorization layer needed beyond Pillar 5's existing perimeter.

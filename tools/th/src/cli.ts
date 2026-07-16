@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { Command } from "commander";
 import { createMember, createMemberFrom, deleteMember, getHat, getMember, listHats, listMembers, promoteMember } from "./members.js";
-import { ensureSandboxed, listAvailableModels, makeJobPaths, runMember, spawnDetached, waitForJobs, type RunMemberOpts } from "./runner.js";
+import { ensureSandboxed, listAvailableModels, makeJobPaths, runMember, sandboxExec, spawnDetached, waitForJobs, type RunMemberOpts } from "./runner.js";
 import { getRun, listRuns } from "./db.js";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -32,7 +32,8 @@ const program = new Command();
 program
     .name("th")
     .description("CLI for agent orchestration — Third Hand")
-    .version("0.1.0");
+    .version("0.1.0")
+    .enablePositionalOptions();
 
 // ─── member ───────────────────────────────────────────────────────────────────
 
@@ -193,6 +194,20 @@ program
         const outcomes = await waitForJobs(statusPaths, opts.timeout ?? 600);
         out(outcomes);
         if (outcomes.some((o) => !o.ok)) process.exit(1);
+    });
+
+// ─── sandbox-exec ─────────────────────────────────────────────────────────────
+
+program
+    .command("sandbox-exec <bin> [args...]")
+    .passThroughOptions()
+    .description("Run an arbitrary command inside the bwrap sandbox — fails if bwrap is missing (usage: th sandbox-exec -- <bin> <args...>)")
+    .action(async (bin: string, args: string[]) => {
+        try {
+            process.exit(await sandboxExec(bin, args));
+        } catch (err) {
+            die(errorMessage(err));
+        }
     });
 
 // ─── models ───────────────────────────────────────────────────────────────────

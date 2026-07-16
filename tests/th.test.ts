@@ -1,5 +1,6 @@
 import { describe, it, expect, afterAll, beforeAll } from "bun:test";
 import { mkdirSync, rmSync, unlinkSync, writeFileSync, readFileSync, utimesSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -14,7 +15,7 @@ process.env.TH_GLOBAL_MEMBERS_DIR = join(TEST_BASE, "global");
 const { insertRun, finishRun, getRun, listRuns } = await import("../tools/th/src/db.ts");
 const { validateName, createMember, createMemberFrom, listMembers, promoteMember, ensureLocalMember, getMember, loadMember } =
   await import("../tools/th/src/members.ts");
-const { waitForJobs, sanitize, checkStaleness, makeJobPaths, OUT_STALE_MS } = await import("../tools/th/src/runner.ts");
+const { waitForJobs, sanitize, checkStaleness, makeJobPaths, sandboxExec, OUT_STALE_MS } = await import("../tools/th/src/runner.ts");
 
 function statusFile(name: string, content: string): string {
   const p = join(TEST_BASE, `status-${name}`);
@@ -297,6 +298,24 @@ describe("makeJobPaths", () => {
     expect(paths.out).toBe(`${base}.out`);
     expect(paths.log).toBe(`${base}.log`);
     expect(paths.pid).toBe(`${base}.pid`);
+  });
+});
+
+describe("sandboxExec", () => {
+  const bwrapAvailable = spawnSync("which", ["bwrap"], { stdio: "ignore" }).status === 0;
+
+  it.skipIf(!bwrapAvailable)("esegue un binario e ritorna exit code 0", async () => {
+    expect(await sandboxExec("true", [])).toBe(0);
+  });
+
+  it.skipIf(!bwrapAvailable)("inoltra l'exit code non-zero", async () => {
+    expect(await sandboxExec("sh", ["-c", "exit 3"])).toBe(3);
+  });
+
+  it.skipIf(!bwrapAvailable)("il sandbox blocca le scritture fuori dai bind path", async () => {
+    // $HOME è ro-bind (solo ~/.pi, ~/.bun, cwd e /tmp sono scrivibili)
+    const code = await sandboxExec("sh", ["-c", `touch "$HOME/th-sandbox-test-${process.pid}" 2>/dev/null`]);
+    expect(code).not.toBe(0);
   });
 });
 

@@ -41,9 +41,16 @@ function bwrapArgs(): string[] {
   ];
 }
 
+const warnNoBwrap = () =>
+  process.stderr.write("warn: bwrap non disponibile — esecuzione SENZA sandbox\n");
+
 /** Re-exec il processo corrente sotto bwrap. Non ritorna se bwrap è disponibile. */
 export function ensureSandboxed(): void {
-  if (process.env[SANDBOXED] || !hasBwrap()) return;
+  if (process.env[SANDBOXED]) return;
+  if (!hasBwrap()) {
+    warnNoBwrap();
+    return;
+  }
   const r = spawnSync("bwrap", [...bwrapArgs(), ...process.argv], {
     stdio: "inherit",
     env: { ...process.env, [SANDBOXED]: "1" },
@@ -56,10 +63,26 @@ export function spawnSandboxed(
   args: string[],
   opts: Parameters<typeof spawn>[2],
 ): ReturnType<typeof spawn> {
-  if (!hasBwrap()) return spawn(bin, args, opts);
+  if (!hasBwrap()) {
+    warnNoBwrap();
+    return spawn(bin, args, opts);
+  }
   return spawn("bwrap", [...bwrapArgs(), bin, ...args], {
     ...opts,
     env: { ...process.env, [SANDBOXED]: "1" },
+  });
+}
+
+/** Esegue un binario arbitrario nel sandbox inoltrando stdio ed exit code.
+ *  Senza bwrap rifiuta: chi chiama sandbox-exec vuole il sandbox, non un degrado silenzioso. */
+export function sandboxExec(bin: string, args: string[]): Promise<number> {
+  if (!hasBwrap()) {
+    throw new Error("bwrap non trovato: sandbox-exec rifiuta di eseguire senza sandbox. Installa bubblewrap.");
+  }
+  return new Promise((resolve, reject) => {
+    const child = spawnSandboxed(bin, args, { stdio: "inherit" });
+    child.on("error", reject);
+    child.on("exit", (code) => resolve(code ?? 1));
   });
 }
 

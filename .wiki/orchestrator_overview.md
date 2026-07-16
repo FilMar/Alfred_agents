@@ -1,6 +1,6 @@
 ---
 tags: [architecture, raspberry, orchestrator]
-sources: [conversation]
+sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts]
 updated: 2026-07-16
 ---
 
@@ -61,7 +61,7 @@ The system avoids the ambiguity of natural language for execution.
     - **Local**: `Bun.spawn` on the Raspberry for light tasks.
     - **Remote**: `ssh` + `bun run` on the Desktop for heavy tasks.
 - **Execution sandbox**: Both paths run wrapped in `th`'s existing bwrap sandbox (`spawnSandboxed`, `tools/th/src/runner.ts`), reusing its real bind profile as-is (`cwd`, `~/.pi`, `~/.bun`, `/tmp`) — no decoy paths, no network isolation, since these are already-audited (`PASS`-verdict) tasks that need to write real data. This is a separate sandbox from the audit sandbox in Pillar 1 (Docker, ephemeral, decoy filesystem, no egress, used *before* queueing): Docker for adversarial testing, bwrap for the actual trusted execution after.
-    - **Missing CLI entrypoint**: `spawnSandboxed` is exported but today used only internally by `th run` to launch the `pi` agent — `th`'s CLI (`tools/th/src/cli.ts`) exposes no subcommand for wrapping an arbitrary binary. A new `th sandbox-exec -- <bin> <args...>` subcommand is needed: a thin wrapper that calls the existing `spawnSandboxed` and forwards stdio/exit code.
+    - **CLI entrypoint (built)**: `th sandbox-exec -- <bin> <args...>` (`tools/th/src/cli.ts`) wraps an arbitrary binary in the bwrap sandbox, forwarding stdio and exit code via `sandboxExec` (`tools/th/src/runner.ts`). It **refuses with an explicit error if bwrap is missing** — an audited task must never silently run unsandboxed; the internal `ensureSandboxed`/`spawnSandboxed` fallbacks now warn on stderr too. See [th_cli](th_cli).
     - **Nothing extra ships to the Desktop for this**: the Rasp and the Desktop run the identical `pi`/`th` TypeScript stack, so `th sandbox-exec` is present on both nodes once built — no separate wrapper file needs to be transferred.
     - **Full remote sequence**: (1) `scp` the task script to the Desktop — unchanged from the original design, needed because the script is authored/audited on the Rasp and doesn't exist locally on the Desktop; (2) `ssh` into the Desktop and run `th sandbox-exec bun run <path-to-script>` instead of a bare `bun run <path-to-script>`. The two steps are orthogonal: `scp` moves the file, `sandbox-exec` decides how it's launched once it arrives. Locally on the Rasp, no CLI hop is needed — `spawnSandboxed` is called directly in-process.
 - **Metadata**: Scripts define their operational constraints as exported constants at the top of the file (`export const requiresDesktop = true`, `export const schedule = "..."`) — not JSDoc tags. These are read via **static parsing** (regex or the TS compiler API/AST), never via dynamic `import()` — see the no-execution-before-verdict principle in Pillar 1. Same reasoning as the audit itself: read the code, don't run it.

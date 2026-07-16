@@ -1,5 +1,3 @@
-## [2026-07-14] ingest | orchestrator_overview
-## [2026-07-14] ingest | roadmap_orchestrator
 # Log
 
 ## Frontmatter
@@ -9,6 +7,10 @@ sources: []
 updated: 2026-07-02
 
 ## Log
+
+## [2026-07-16] reconcile | th sandbox-exec implementato, fallback del sandbox reso rumoroso
+
+Implementato il sottocomando `th sandbox-exec -- <bin> <args...>` (`tools/th/src/cli.ts`, `passThroughOptions`): wrapper sottile su `sandboxExec` (`tools/th/src/runner.ts`) che esegue un binario arbitrario nel bwrap sandbox inoltrando stdio ed exit code. A differenza di `th run`, rifiuta con errore esplicito se bwrap manca — un task auditato non deve mai girare senza sandbox in silenzio. Contestualmente eliminato il degrado silenzioso pre-esistente: `ensureSandboxed` e `spawnSandboxed` ora avvisano su stderr quando ripiegano sull'esecuzione non sandboxata. Verificato E2E: exit code propagato, scritture fuori dai bind path bloccate (filesystem read-only), 41 test verdi. Corretta anche una `}` orfana in `roadmap_orchestrator` Fase 3. Aggiornate: `roadmap_orchestrator` (Fase 2, task spuntato), `orchestrator_overview` (pilastro 4, entrypoint da mancante a costruito), `th_cli` (nuova sezione sandbox-exec, nota sul warning di `th run`, cross-reference).
 
 ## [2026-07-16] ingest | Chat interattiva con pi via Matrix relay: /wake, /await, room-session
 
@@ -93,6 +95,10 @@ Semplificato il Boot-Callback Pattern: niente più attesa indefinita (`AWAITING_
 Chiarito l'Adversarial Audit (pilastro 1): l'implementazione attuale è analisi statica (l'agente cloud `pi` legge il codice e ragiona in modo adversariale, nessuna esecuzione). Documentata come evoluzione futura opzionale l'esecuzione dinamica in sandbox Docker effimera (nessuna rete in uscita, filesystem-esca che imita i path di produzione) — da implementare dopo la versione statica, non al suo posto.
 
 Aggiornate: `orchestrator_overview` (pilastri 1 e 3), `roadmap_orchestrator` (Fasi 2, 3, 4).
+
+## [2026-07-14] ingest | orchestrator_overview
+
+## [2026-07-14] ingest | roadmap_orchestrator
 
 ## [2026-07-02] reconcile | Pulizia bin fantasma e allineamento inventario
 
