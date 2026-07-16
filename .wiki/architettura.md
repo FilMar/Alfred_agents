@@ -3,8 +3,8 @@
 ## Frontmatter
 
 tags: [architecture, tb, th, layer]
-sources: [README.md, roadmap.md, setup.sh, alfred.md]
-updated: 2026-07-02
+sources: [README.md, setup.sh, alfred.md, tools/tb/src/infra.ts]
+updated: 2026-07-16
 
 ## The three layers
 
@@ -12,7 +12,7 @@ Pi is a personal cognitive augmentation system. Two orthogonal CLIs plus a skill
 
 | Access | Name | Purpose |
 |--------|------|---------|
-| `tb` (CLI) | Third Brain | Semantic memory: ideas, concepts, connections. Immutable associative graph with backrefs and hybrid search. |
+| `tb` (CLI) | Third Brain | Semantic memory: ideas, concepts, connections. Additive associative graph with backrefs and hybrid search — notes are never deleted, but refs and tags can be updated (`tb update`). |
 | `th` (CLI) | Third Hand | Agent orchestration with de Bono hats. Sequential and parallel flows, bwrap sandbox, SQLite tracking. |
 | `.wiki/` (Omero skill) | Third Wiki | Local project wiki: structured markdown pages, style guides, code conventions. Maintained by the Omero skill (Read/Write/Edit/Glob/Grep). |
 
@@ -38,6 +38,10 @@ The layers do not overlap by design:
 /tmp/.th/members/  # temporary members
 ```
 
+### tb backing services
+
+The `tb` CLI holds no local state: notes live as payloads in **Qdrant** (vectors + full note content) and query embeddings are computed by **Ollama**, both reached over HTTP (`QDRANT_URL`, `OLLAMA_URL` — `tools/tb/src/infra.ts`). Currently these run locally; the target is to host both on the Rasp so every client (desktop, laptop, Matrix bot) points at a single source of truth — see [tb_on_rasp](tb_on_rasp) and [rasp_node](rasp_node).
+
 ## Sandbox
 
 Each `th run` is executed under `bwrap` if available. The filesystem is read-only except for:
@@ -61,3 +65,5 @@ The wiki needs no install — it is plain markdown in `.wiki/`, maintained by th
 - [agenti](agenti) — available agents and roles
 - [th_cli](th_cli) — full `th` CLI
 - [roadmap](roadmap) — development phase status
+- [tb_on_rasp](tb_on_rasp) — tb backing services moving to the Rasp
+- [rasp_node](rasp_node) — everything running on the Rasp

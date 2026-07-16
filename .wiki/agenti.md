@@ -3,8 +3,8 @@
 ## Frontmatter
 
 tags: [agents, skills, th, hats]
-sources: [README.md, roadmap.md, skills/]
-updated: 2026-07-02
+sources: [README.md, skills/]
+updated: 2026-07-16
 
 ## Overview
 
@@ -32,8 +32,9 @@ The `SKILL.md` file contains:
 | `giano` | Designs and builds the th member team for a project | Blue (process) |
 | `archimede` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md | — |
 | `postino` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) | — |
+| `vasari` | Generates a Typst CV from free conversation or an existing CV/text | — |
 
-`archimede` and `postino` are operational skills without a de Bono hat — invoked as Claude Code skills, not as `th` members. Total: 13 skills, matching `skills/`.
+`archimede`, `postino` and `vasari` are operational skills without a de Bono hat — invoked as Claude Code skills, not as `th` members. Total: 14 skills, matching `skills/`.
 
 ## De Bono hats
 
@@ -78,3 +79,4 @@ th run --member aristotele --task "find clusters in..." --detach
 
 - [architettura](architettura) — system overview and sandbox
 - [th_cli](th_cli) — full `th` commands
+- [procedural_memory_gaps](procedural_memory_gaps) — why skills and `th` members don't yet learn from outcomes

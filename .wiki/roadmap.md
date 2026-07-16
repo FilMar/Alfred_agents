@@ -3,8 +3,8 @@
 ## Frontmatter
 
 tags: [roadmap, phases, status]
-sources: [roadmap.md]
-updated: 2026-07-02
+sources: [conversation]
+updated: 2026-07-16
 
 ## Phase status
 
@@ -41,9 +41,21 @@ Works better with an already-rich TB. Will consult TB before every response. Not
 
 Data already ready (Phase 2C). Command `th stats [--member <name>]`.
 
+**Scope note**: this phase is a scoring layer, not procedural memory — it aggregates how well a member/hat performs, it does not extract or revise reusable procedures, and it does not touch skills at all. See [procedural_memory_gaps](procedural_memory_gaps).
+
 ## Phase 8 — Personal Server
 
-Self-hosted server with `pi-core` container (Qdrant + SQLite) and `openclaw`. Telegram interface with separate topics (GTD, ThirdBrain, Dev, Recap, Alfred, Files). Nightly backup to Mega via `megacmd`.
+Self-hosted server with `pi-core` container (Qdrant + SQLite). `openclaw` (an OpenClaw-style agent from the original plan) is **dropped**: the orchestrator's scheduler plus Matrix as control surface ([orchestrator_overview](orchestrator_overview), [rasp_node](rasp_node)) covers everything an agent of that kind would have done — scheduled tasks, ad-hoc triggers, notifications, and interactive agent chat via the `pi` relay (Interactive pi Chat in [orchestrator_overview](orchestrator_overview)) — inside the Tailscale perimeter. Interface: **Matrix dedicated bot** — originally planned as Telegram with separate topics (GTD, ThirdBrain, Dev, Recap, Alfred, Files), revised because a Telegram bot would expose the TB outside the Tailscale perimeter to anyone holding the token (see Pillar 5 rationale in [orchestrator_overview](orchestrator_overview) and [tb_on_rasp](tb_on_rasp)). Nightly backup to Mega via `megacmd`.
+
+## Worksites & order
+
+Three parallel worksites are now open beyond the numbered phases. Their dependency order:
+
+1. **Orchestrator Phase 1 skeleton** ([roadmap_orchestrator](roadmap_orchestrator)) — first, because the other two depend on a provisioned, running Rasp: catalog, FS-queue, scheduler, REST API.
+2. **TB-on-Rasp migration** ([tb_on_rasp](tb_on_rasp)) — needs the Rasp provisioned (Qdrant + Ollama containers, see [rasp_node](rasp_node)); the mass re-embedding path additionally needs the orchestrator's WoL/`requiresDesktop` loop working.
+3. **Events table / procedural memory** ([procedural_memory_gaps](procedural_memory_gaps)) — independent of the Rasp, can start anytime; ordered last only because its value accrues slowly (it needs months of accumulated events before the downstream pieces make sense).
+
+Shared component: the **Matrix layer** serves both the orchestrator (notifications, `run_task`, wake) and the TB (`!tb search`). The homeserver and bot plumbing are built once; whether the two command families live in one bot or a dedicated TB bot ([tb_on_rasp](tb_on_rasp) leans dedicated) is an implementation detail to settle then.
 
 ## Immediate todo
 
@@ -53,3 +65,5 @@ Self-hosted server with `pi-core` container (Qdrant + SQLite) and `openclaw`. Te
 
 - [architettura](architettura) — system overview
 - [agenti](agenti) — completed operative skills
+- [procedural_memory_gaps](procedural_memory_gaps) — what Phase 2C/7 still leave uncovered
+- [tb_on_rasp](tb_on_rasp) — TB hosted on the Rasp, Matrix bot for agent-free reads (revises Phase 8)
