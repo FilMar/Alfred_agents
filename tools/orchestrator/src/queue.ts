@@ -97,9 +97,19 @@ export function recover(base = resolveBaseDir()): number {
   if (!existsSync(processingDir)) return 0;
 
   const orphans = readdirSync(processingDir).filter((f) => f.endsWith(".json"));
+  let recoveredCount = 0;
+
   for (const f of orphans) {
     const id = f.replace(/\.json$/, "");
-    renameSync(join(processingDir, f), instancePath(base, "pending", id));
+    const pendingPath = instancePath(base, "pending", id);
+    
+    if (existsSync(pendingPath)) {
+      console.error(`[orchestrator] Recovery collision: ${id}.json already exists in pending/. Leaving orphan in processing/.`);
+      continue;
+    }
+
+    renameSync(join(processingDir, f), pendingPath);
+    recoveredCount++;
   }
-  return orphans.length;
+  return recoveredCount;
 }

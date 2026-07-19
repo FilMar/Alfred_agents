@@ -1,7 +1,7 @@
 ---
 tags: [architecture, raspberry, orchestrator]
 sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts, tools/orchestrator/src]
-updated: 2026-07-16
+updated: 2026-07-17
 ---
 
 # Raspberry Orchestrator: System Overview
@@ -47,11 +47,12 @@ No database — filesystem as the source of truth for both the task catalog and 
 - **Parse resilience (settled at implementation, Phase 1)**: filesystem-as-truth guarantees a crash mid-write will eventually leave a truncated JSON file — so every catalog/queue read skips and logs corrupt files instead of throwing. Without this, the design's own expected failure mode would brick the orchestrator on every restart.
 
 ### 3. Boot-Callback Pattern (The Connectivity)
-To eliminate the "Happy Path" fragility of synchronous polling (Ping loops), the system uses an asynchronous handshake bounded by a wake window, not an indefinite wait:
-- **The Wake Window**: The Rasp computes the earliest scheduled task needing the Desktop and sends a single Wake-on-LAN (WoL) packet ahead of it (e.g. 30 min lead time), then returns to its main loop.
+To eliminate the "Happy Path" fragility of synchronous polling (Ping loops), the system uses an asynchronous handshake bounded by a wake window, not an indefinite wait. What is rejected is the ping as a *wait mechanism* — a one-shot ping as a *level check* ("is the machine reachable right now?") is part of the design since Phase 2, see Ping Reconciliation below:
+- **The Wake Window**: The Rasp computes the earliest scheduled task needing the Desktop and sends a single Wake-on-LAN (WoL) packet ahead of it (e.g. 30 min lead time), then returns to its main loop. **Settled at implementation (Phase 2)**: the window is computed from the *catalog's* upcoming cron runs (`nextRun` within `ORCH_WAKE_LEAD_MIN`), not from the pending queue — run instances only materialize once due, so only the catalog can see ahead. Wake bookkeeping lives in a single `<ORCH_DIR>/wake.json` (`{sentAt, attempts, alerted}`), deleted on `i_wake` or when the window empties; it is the only persistent state Phase 2 added.
 - **The Call-Home**: The Desktop PC, via a `systemd` service at boot, calls the Rasp's `i_wake` REST endpoint: *"I am awake and ready"*.
 - **The Dispatch**: Upon receiving the `i_wake` call, the Rasp dispatches every task scheduled within the following wake window (~30 min), not just the one that triggered the wake — batching avoids repeated wake cycles for nearby tasks.
-- **Failure bound**: If no callback arrives by the task's deadline, the Rasp retries the WoL once, then alerts via Matrix. A single threshold check, not a polling/retry loop.
+- **Ping Reconciliation (settled 2026-07-17)**: every scheduler tick, when desktop work is relevant (pending desktop instances, or an upcoming run within the lead window), the Rasp sends **one** ping to `DESKTOP_HOST` (`ping -c 1 -W 2`, injectable as `ExecutorDeps.pingHost`). If the Desktop answers, pending desktop instances are dispatched directly and `wake.json` is cleared — no WoL, no callback wait. This is a level check, not a loop: it reads the current state once per tick instead of waiting for it to change. It closes two holes of the pure event-driven design: (a) a task becoming due while the Desktop is already awake was never dispatched, because dispatch was coupled exclusively to the `i_wake` boot event — WoL went out to an awake machine whose boot callback would never fire again; (b) a Desktop woken ahead of schedule found an empty `pending/` at `i_wake` (instances only materialize once due) and idled back to shutdown — now the tick dispatches the instance the moment it materializes, as long as the machine is still up.
+- **Failure bound**: runs only when the ping reports the Desktop down. If it stays unreachable, the Rasp retries the WoL once, then alerts via Matrix. A single threshold check, not a polling/retry loop. **Settled (2026-07-17, supersedes the Phase 2 due-time deadline)**: the deadline is `sentAt + ORCH_BOOT_TIMEOUT_MIN` (default 5 min) — the time granted to the machine to boot after a WoL. The previous semantics (earliest desktop task's due time) was tautological: an instance materializes only once its due time has passed, so the deadline was already expired at the first check and the alert fired ~30 s after the first WoL. The alert still fires exactly once per wake attempt (`alerted` flag); the alert hook is injectable, `console.error` until the Matrix bridge (Phase 3) exists.
 - **Shutdown**: Decided locally on the Desktop by a `systemd` idle-timer service (poweroff after N minutes of no activity) — not commanded remotely by the Rasp, since the Desktop is the one that can see its own real idle state.
 - **Network topology (confirmed)**: Rasp and Desktop are connected via Ethernet on the same physical LAN, ~10cm apart. The WoL magic packet travels as a local L2 broadcast — it never crosses the Tailscale/WireGuard overlay. Tailscale is used exclusively for *external* access to the orchestrator (from laptop and phone), not for Rasp↔Desktop communication.
 
@@ -85,7 +86,7 @@ No custom user/role system in the app — access is governed by who can reach th
 **Execution (every run instance)**
 4. **Trigger**: Either the internal scheduler matches a catalog entry's `schedule` against the current time, or a `run_task` Matrix command is issued ad-hoc against an already-registered task — there is no REST path for this.
 5. **Activation**:
-    - If `requiresDesktop: true` (read from the catalog entry) $\rightarrow$ send WoL $\rightarrow$ wait for the Desktop's `i_wake` callback.
+    - If `requiresDesktop: true` (read from the catalog entry) $\rightarrow$ one-shot ping: if the Desktop is up, dispatch directly; if down, send WoL $\rightarrow$ wait for the Desktop's `i_wake` callback (or the next tick's ping to find it up).
     - If `false` $\rightarrow$ proceed to execution directly.
 6. **Deployment**: `scp` the `.ts` file to the target node (only needed for the Desktop path — the script doesn't exist there yet).
 7. **Run**: Execute via `bun run` (wrapped in the bwrap sandbox, Pillar 4) $\rightarrow$ capture stdout/stderr.

@@ -1,0 +1,16 @@
+# Orchestrator Call-Home Service (Desktop)
+# Triggered on boot to notify Raspberry Pi orchestrator.
+
+[Unit]
+Description=Orchestrator Call-Home
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Replace <ORCH_HOST> and <ORCH_PORT> with actual values (e.g. pi.local:7717)
+ExecStart=/usr/bin/curl --retry 5 --retry-delay 2 -X POST http://<ORCH_HOST>:<ORCH_PORT>/i_wake
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

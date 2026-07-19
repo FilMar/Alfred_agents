@@ -1,0 +1,15 @@
+# Idle-Shutdown Service (Desktop)
+# Shuts down the machine after inactivity.
+
+[Unit]
+Description=Desktop Idle Shutdown
+After=network.target
+
+[Service]
+Type=simple
+# Ensure /usr/local/bin/idle-shutdown-detector.sh is installed and configured
+ExecStart=/usr/local/bin/idle-shutdown-detector.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

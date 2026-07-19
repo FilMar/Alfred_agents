@@ -1,10 +1,20 @@
 import { getBaseDir, listTasks, registerTask, validateName } from "./catalog.js";
-import { locate } from "./queue.js";
-import { ensureQueueDirs } from "./queue.js";
+import { locate, ensureQueueDirs } from "./queue.js";
+import { clearWakeState } from "./wake.js";
+import { dispatchWake } from "./executor.js";
+import type { ExecutorDeps } from "./types.js";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 export const DEFAULT_PORT = 7717;
+
+// ─── Default Deps ─────────────────────────────────────────────────────────────
+
+const defaultDeps: ExecutorDeps = {
+  sendWol: async () => {},
+  pingHost: async () => false,
+  runCommand: async () => ({ exitCode: 0 }),
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -20,6 +30,16 @@ function errorResponse(status: number, message: string): Response {
 }
 
 // ─── Handlers ─────────────────────────────────────────────────────────────────
+
+async function handleWakeCallback(base: string, deps: ExecutorDeps): Promise<Response> {
+  try {
+    clearWakeState(base);
+    await dispatchWake(deps, base);
+    return jsonResponse(200, { status: "ok" });
+  } catch (e) {
+    return errorResponse(500, (e as Error).message);
+  }
+}
 
 function handleAddTask(body: unknown, base: string): Response {
   if (typeof body !== "object" || body === null) {
@@ -58,10 +78,17 @@ function handleGetTaskStatus(id: string, base: string): Response {
 
 export interface Server {
   stop(): void;
+  setDeps(deps: ExecutorDeps): void;
 }
 
-export function startServer(port = process.env.ORCH_PORT ? parseInt(process.env.ORCH_PORT, 10) : DEFAULT_PORT, base = getBaseDir()): Server {
+export function startServer(
+  port = process.env.ORCH_PORT ? parseInt(process.env.ORCH_PORT, 10) : DEFAULT_PORT, 
+  base = getBaseDir(), 
+  deps = defaultDeps
+): Server {
   ensureQueueDirs(base);
+
+  let currentDeps = deps;
 
   const server = Bun.serve({
     port,
@@ -69,6 +96,10 @@ export function startServer(port = process.env.ORCH_PORT ? parseInt(process.env.
       const url = new URL(req.url);
       const path = url.pathname;
       const method = req.method;
+
+      if (method === "POST" && path === "/i_wake") {
+        return handleWakeCallback(base, currentDeps);
+      }
 
       if (method === "POST" && path === "/add_task") {
         let body: unknown;
@@ -96,6 +127,9 @@ export function startServer(port = process.env.ORCH_PORT ? parseInt(process.env.
   return {
     stop() {
       server.stop(true);
+    },
+    setDeps(newDeps) {
+      currentDeps = newDeps;
     },
   };
 }

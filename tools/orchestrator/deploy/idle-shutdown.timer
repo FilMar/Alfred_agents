@@ -1,0 +1,14 @@
+# Idle-Shutdown Timer (Desktop)
+# Controls the frequency of the idle check.
+
+[Unit]
+Description=Run Idle-Shutdown Check
+
+[Timer]
+# TODO: Define check interval (e.g. every 5 min)
+OnBootSec=5min
+OnUnitActiveSec=5min
+Unit=idle-shutdown.service
+
+[Install]
+WantedBy=timers.target

@@ -1,7 +1,7 @@
 ---
 tags: [roadmap, raspberry, orchestrator]
-sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts, tools/orchestrator/src, tests/orchestrator.test.ts]
-updated: 2026-07-16
+sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts, tools/orchestrator/src, tests/orchestrator.test.ts, tests/orchestrator.phase2.test.ts]
+updated: 2026-07-17
 ---
 
 # Roadmap: Raspberry Orchestrator
@@ -19,22 +19,22 @@ Implementation plan for the event-driven, adversarial-guarded automation server.
 - [x] **Core Scheduler** (`src/scheduler.ts`): interval loop scanning the catalog; schedule format is a **cron expression parsed with the `croner` package** (settled at implementation time); only `verdict === "PASS"` is schedulable; dedup per `(task, slot)` scans all four queue states.
 - [x] **Basic REST API** (`src/server.ts`, entrypoint `src/main.ts`): `Bun.serve` exposing `add_task`, `list_tasks`, `get_task_status <id>` — the entire ingestion and query surface. No other entry point (no filesystem drop, no scp-based submission). `run_task` is deliberately not part of this surface — see Phase 3, Matrix Bridge; tests assert `/run_task` and `/i_wake` explicitly return 404.
 
-## Phase 2: The Nervous System (Hardware & Connectivity)
+## Phase 2: The Nervous System (Hardware & Connectivity) — DONE
 **Goal**: Implement the "Wake Window $\rightarrow$ Callback $\rightarrow$ Batch Dispatch" loop — bounded from the start, no indefinite wait state.
 
-- [ ] **Wake Window Scheduler**: Compute the earliest task needing the Desktop, send a single WoL lead time (e.g. 30 min) ahead of it.
-- [ ] **WoL Module**: Implementation of Magic Packet sending to the Desktop MAC. MAC is parametric via environment variable — value TBD at implementation time.
-- [ ] **`i_wake` Endpoint + Call-Home Agent**: Create a minimal systemd service for the Desktop PC that calls the Rasp's `i_wake` REST endpoint upon boot.
-- [ ] **Boot-Timeout / Retry**: If no `i_wake` call arrives by a task's deadline, retry the WoL once, then alert via Matrix — a single threshold check, not a polling loop. (Moved up from Phase 4 — this is part of the core loop, not hardening.)
-- [ ] **Provisioning Pipeline**: 
-    - On `i_wake`, batch-dispatch every task scheduled within the wake window (~30 min), not just the triggering one.
-    - Logic to trigger `scp` of the `.ts` file to the target for each dispatched task.
-    - SSH execution wrapper: run `th sandbox-exec bun run <path>` on the Desktop instead of a bare `bun run <path>` — same real bind profile as local execution.
+**Status**: implemented in `tools/orchestrator/` (new modules `wol.ts`, `wake.ts`, `dispatch.ts`, `executor.ts`; 23 new tests in `tests/orchestrator.phase2.test.ts`, 58 total green), accepted after a full `th` review cycle (architecture lusk-white + turing-green → stub/implement efesto → tests black-writer → parallel review knuth-black + lusk-white → fix round → probe-based re-verification: merge-ready). Architecture: "pure data pipeline" — side effects (WoL, scp, ssh) built as pure data (magic-packet bytes, argv arrays) and executed by injectable deps; dispatch is event-driven on `i_wake`; the only new persistent state is a single `<ORCH_DIR>/wake.json` (`{sentAt, attempts, alerted}`), cleared on `i_wake` or when the wake window becomes irrelevant. Env: `DESKTOP_MAC`, `DESKTOP_HOST`, `ORCH_WAKE_LEAD_MIN` (default 30), `ORCH_BOOT_TIMEOUT_MIN` (default 5), `ORCH_WOL_BROADCAST` (default 255.255.255.255).
+
+- [x] **Wake Window Scheduler**: computed from the **catalog's upcoming cron runs** (`nextRun` within the lead window), not from the pending queue — instances only enter `pending/` once already due, so a queue-based trigger could never fire ahead of time (caught in review as a conformity deviation and fixed). Already-due desktop instances also trigger a wake.
+- [x] **WoL Module** (`wol.ts`): magic packet built by hand (6×0xFF + 16×MAC, 102 bytes) over `node:dgram` UDP broadcast — zero new dependencies. MAC parametric via `DESKTOP_MAC`, broadcast address via `ORCH_WOL_BROADCAST`.
+- [x] **`i_wake` Endpoint + Call-Home Agent**: `POST /i_wake` wired into the router (Phase 1's 404 assertion retired); clears `wake.json` and triggers the batch dispatch. Desktop-side systemd template in `deploy/orchestrator-call-home.service` (manual install).
+- [x] **Boot-Timeout / Retry**: single threshold check inside the scheduler tick, entered only when the one-shot ping reports the Desktop down — deadline is `sentAt + ORCH_BOOT_TIMEOUT_MIN` (**revised 2026-07-17**, supersedes the due-time deadline: an instance's due time is already past when it materializes, so the alert fired ~30 s after the first WoL), retry capped at one (`attempts < 2`), alert fires once (`alerted` flag prevents spam). Alert hook injectable — Matrix in Phase 3, `console.error` until then.
+- [x] **Ping Reconciliation (2026-07-17)**: every tick, if desktop work is relevant, one-shot ping of `DESKTOP_HOST` (`ExecutorDeps.pingHost`, prod: `ping -c 1 -W 2`). Desktop up → dispatch pending desktop instances directly, clear `wake.json`, no WoL. Fixes tasks due while the Desktop is already awake (dispatch was coupled exclusively to `i_wake`) and the early-wake hole (`i_wake` ahead of the due slot found `pending/` empty). Level check, not a wait loop — the boot callback remains the wake-up event. Scheduler tick also hardened: in-flight tick guard (no overlap) + caught rejections.
+- [x] **Provisioning Pipeline** (`dispatch.ts` + `executor.ts`): on `i_wake`, `dispatchWake` batch-dispatches **all** pending PASS desktop instances; `buildDispatchPlan` produces pure `scpArgv`/`sshArgv` data (remote command: `th sandbox-exec -- bun run <path>`); `executeRemote` runs scp then ssh, transitions by exit code, scp failure short-circuits to `failed/`.
 - [x] **`th sandbox-exec` subcommand** (in `th` itself, `tools/th/src/cli.ts` — prerequisite for the SSH execution wrapper above): implemented as `th sandbox-exec -- <bin> <args...>` (`passThroughOptions`, flags after the binary pass through untouched), thin wrapper over `sandboxExec` in `tools/th/src/runner.ts` forwarding stdio and exit code. **Fails with an explicit error when bwrap is missing** — no silent unsandboxed degradation; `ensureSandboxed`/`spawnSandboxed` now also warn on stderr when falling back unsandboxed. See [th_cli](th_cli).
-- [ ] **Local Execution Path**: Implementation of `Bun.spawn` for tasks where `requiresDesktop: false`, calling `spawnSandboxed` directly in-process (same runtime, no CLI hop needed).
-- [ ] **Desktop Idle-Shutdown Service**: `systemd` idle-timer on the Desktop itself (poweroff after N min of no activity) — decided locally, not commanded remotely by the Rasp.
+- [x] **Local Execution Path**: `executeLocal` calls `spawnSandboxed` directly in-process with the absolute script path (no `th` CLI hop — an earlier draft routed through the CLI and used a cwd-relative path; both caught in review). Only `PASS` tasks execute; claim-first `renameSync` to `processing/` means a lost claim (tick vs `i_wake` race) skips silently instead of double-executing.
+- [x] **Desktop Idle-Shutdown Service**: `deploy/idle-shutdown.service` + `.timer` templates — decided locally on the Desktop, manual install, not commanded by the Rasp.
 - [x] **Network topology confirmed**: Rasp and Desktop are on the same physical LAN via Ethernet — WoL broadcast works with no Tailscale/WireGuard traversal needed. No implementation task remains here, just a design constraint now settled.
-- [ ] **Deferred from Phase 1 review** (to address when the executor makes these paths real): (a) check-then-enqueue TOCTOU race — only relevant if multi-instance or hot-restart ever enters the deployment model, which today is explicitly single-process; (b) `recover()` id-collision guard — `renameSync` silently overwrites a same-id pending file; negligible under UUID v4, becomes real if id generation ever changes.
+- [x] **Deferred from Phase 1 review** — both resolved with the executor: (a) check-then-enqueue TOCTOU — documented, not coded around: still single-process, and the executor's claim-first atomic `renameSync` already makes the execution side race-safe; (b) `recover()` id-collision guard — on collision the orphan now **stays in `processing/`** with an explicit log (a first attempt created `<id>-<timestamp>.json` recovery copies, rejected in review: a filename that differs from the instance id breaks `locate`/`transition` and creates a duplicate executable instance).
 
 ## Phase 3: The Brain (Intelligence & Security)
 **Goal**: Integrate the adversarial guardrail and the human-in-the-loop surface.
@@ -64,6 +64,12 @@ Implementation plan for the event-driven, adversarial-guarded automation server.
 - [ ] **Log Rotation**: Prevent the `/queue/completed` directory from filling the SSD.
 - [ ] **Scheduler per-task isolation (NF-1, from Phase 1 re-verification)**: wrap `tick()`'s per-task body in `try/catch` so one bad catalog entry (e.g. a PASS entry whose cron string was corrupted by a direct disk edit) skips instead of crashing the process. The ingestion gate already closes the API vector; this closes the on-disk one.
 - [ ] **Request body size limit on `add_task`** (deferred from Phase 1 review): unbounded `source` is a memory- and disk-fill vector; low likelihood inside the perimeter, hardening-tier.
+- [ ] **O(N) queue scans / tick drift (noted in Phase 2 review)**: `alreadyEnqueued` and the executor scan queue directories on every 10 s tick — O(files) per tick, fine at this scale but degrades as `completed/` grows on a slow SD card. Mitigation is the Log Rotation item above, **not** a database: the reviewer's SQLite proposal was rejected as contradicting the settled filesystem-as-truth pillar (see [orchestrator_overview](orchestrator_overview), Pillar 2) for a single-user, dozens-of-tasks scale. Interacts with the dedup caveat: pruning `completed/` before an infrequent task's next slot would re-enqueue that slot.
+- [ ] **Pre-existing `tools/th/src/db.ts` type error**: exposed (not caused) by the orchestrator now importing `spawnSandboxed` from `tools/th/src/runner.ts` — `tsc -p tools/orchestrator` type-checks the imported tree. One-line fix in `th`, outside orchestrator scope.
+
+## Future Ideas
+- **Active Heartbeat**: Replace or complement state inference (ping + timeout) with a fixed active heartbeat from the desktop side. Implement a `POST /task_heartbeat/<id>` endpoint called periodically by the executing task to signal "still working", reusing the `/i_wake` pattern.
+  - *Note*: This is for future evaluation; the team will first verify the current MVP (timeout + log capture, without heartbeat) before introducing this safeguard.
 
 ## Cross-references
 - [architettura](architettura)
