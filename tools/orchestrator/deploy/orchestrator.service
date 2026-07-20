@@ -1,0 +1,24 @@
+# Orchestrator Service (Raspberry Pi)
+# The always-on control plane itself — runs main.ts directly on the host
+# filesystem (no container: nested bwrap sandboxing + a filesystem-as-truth
+# design both want the host disk, not a mounted volume).
+
+[Unit]
+Description=Raspberry Orchestrator
+After=network.target
+
+[Service]
+Type=simple
+User=filippo
+WorkingDirectory=/home/filippo/git_projects/pi
+# Replace ORCH_PORT/DESKTOP_MAC/DESKTOP_HOST as needed; ORCH_DIR defaults to
+# ~/.pi/orchestrator if unset. See tools/orchestrator/src/main.ts.
+# Environment=ORCH_PORT=7717
+# Environment=DESKTOP_MAC=aa:bb:cc:dd:ee:ff
+# Environment=DESKTOP_HOST=desktop.local
+ExecStart=/usr/bin/bun run tools/orchestrator/src/main.ts
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

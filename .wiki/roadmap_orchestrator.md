@@ -1,7 +1,7 @@
 ---
 tags: [roadmap, raspberry, orchestrator]
 sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts, tools/orchestrator/src, tests/orchestrator.test.ts, tests/orchestrator.phase2.test.ts]
-updated: 2026-07-17
+updated: 2026-07-20
 ---
 
 # Roadmap: Raspberry Orchestrator
@@ -66,10 +66,12 @@ Implementation plan for the event-driven, adversarial-guarded automation server.
 - [ ] **Request body size limit on `add_task`** (deferred from Phase 1 review): unbounded `source` is a memory- and disk-fill vector; low likelihood inside the perimeter, hardening-tier.
 - [ ] **O(N) queue scans / tick drift (noted in Phase 2 review)**: `alreadyEnqueued` and the executor scan queue directories on every 10 s tick — O(files) per tick, fine at this scale but degrades as `completed/` grows on a slow SD card. Mitigation is the Log Rotation item above, **not** a database: the reviewer's SQLite proposal was rejected as contradicting the settled filesystem-as-truth pillar (see [orchestrator_overview](orchestrator_overview), Pillar 2) for a single-user, dozens-of-tasks scale. Interacts with the dedup caveat: pruning `completed/` before an infrequent task's next slot would re-enqueue that slot.
 - [ ] **Pre-existing `tools/th/src/db.ts` type error**: exposed (not caused) by the orchestrator now importing `spawnSandboxed` from `tools/th/src/runner.ts` — `tsc -p tools/orchestrator` type-checks the imported tree. One-line fix in `th`, outside orchestrator scope.
+- [ ] **`dueSlot()` year-rollover bug (found and reproduced 2026-07-20)**: `scheduler.ts` finds the due slot via `cron.previousRuns(1, now)` — the most recent past match of the pattern. A 5-field cron (`min hour day month *`) has no year field, so it recurs every year. Scheduling a task for a specific future time *today* (e.g. testing with an absolute day+month+hour+minute) makes the scheduler find *last year's* occurrence of that same day/hour as "due now" and run it immediately — then run it again for real when today's slot actually arrives (dedup is per exact `taskName + scheduledFor`, not per "task + today"). Harmless for genuinely recurring schedules (daily/weekly patterns never reach this edge case) — deferred, not fixed, because the only production use case so far is recurring. **Do not fix by reusing `schedule`/cron for one-shot tasks** — if on-demand absolute-date scheduling is ever needed (beyond Matrix's `run_task`, which sidesteps this entirely by not using cron), it needs a separate `runAt: ISO timestamp` field, not a cron expression.
 
 ## Future Ideas
 - **Active Heartbeat**: Replace or complement state inference (ping + timeout) with a fixed active heartbeat from the desktop side. Implement a `POST /task_heartbeat/<id>` endpoint called periodically by the executing task to signal "still working", reusing the `/i_wake` pattern.
   - *Note*: This is for future evaluation; the team will first verify the current MVP (timeout + log capture, without heartbeat) before introducing this safeguard.
+- **Event-driven task activation — Matrix, not NATS (decided 2026-07-20)**: for triggering a task from an external event, route through Matrix (already the control surface, see Phase 3 above) rather than introducing NATS as a message broker. Rationale: personal-scale system, low volume, single consumer today — NATS would be a second piece of infrastructure to run and secure without a concrete fan-out need. A future external trigger (e.g. a public-facing site) would sit behind an authenticated HTTP API regardless — the internal bus/control-plane should never be exposed directly to the public internet — and that API can write into Matrix exactly as easily as into NATS. Explicitly deferred, not ruled out: reconsider only if a genuine multi-consumer fan-out requirement appears (several independent services needing to react to the same event stream).
 
 ## Cross-references
 - [architettura](architettura)

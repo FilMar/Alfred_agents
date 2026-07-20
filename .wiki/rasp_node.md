@@ -5,7 +5,7 @@
 ```yaml
 tags: [raspberry, infrastructure, provisioning]
 sources: [conversation]
-updated: 2026-07-16
+updated: 2026-07-20
 ```
 
 ## Role
@@ -34,7 +34,7 @@ Not yet built — the target stack, in dependency order:
 1. Tailscale + ACL tags (perimeter first — nothing else should come up before it)
 2. conduwuit container (Matrix homeserver)
 3. Qdrant + Ollama containers (TB migration, [tb_on_rasp](tb_on_rasp))
-4. Orchestrator service (Bun/TS, [roadmap_orchestrator](roadmap_orchestrator) Phase 1)
+4. Orchestrator service (Bun/TS, [roadmap_orchestrator](roadmap_orchestrator) Phase 1) — kept alive via a native systemd unit (`tools/orchestrator/deploy/orchestrator.service`, `Restart=always`), **not** a container, unlike conduwuit/Qdrant/Ollama above: the orchestrator's own filesystem-as-truth state and its use of `bwrap` for task sandboxing ([orchestrator_overview](orchestrator_overview) Pillar 2 and Pillar 4) both want the host disk directly — nested sandboxing inside a container adds privilege friction for no benefit on a single always-on machine. Placeholders in the unit file (`User`, `WorkingDirectory`, `bun` path, `Environment=`) must be filled in for the actual Rasp deploy.
 5. Matrix bot (shared plumbing for orchestrator commands and `!tb search` — see Worksites & order in [roadmap](roadmap))
 
 ## Cross-references
