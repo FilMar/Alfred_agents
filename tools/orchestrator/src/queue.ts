@@ -37,10 +37,15 @@ export function createPending(instance: RunInstance, base = resolveBaseDir()): v
 
 // ─── Transitions ──────────────────────────────────────────────────────────────
 
+/** Thrown when the source instance file is missing — the expected race when
+ *  another actor already claimed it. Any other transition failure is a real
+ *  fault and must not be confused with this one. */
+export class InstanceNotFoundError extends Error {}
+
 export function transition(id: string, from: QueueState, to: QueueState, base = resolveBaseDir()): void {
   const src = instancePath(base, from, id);
   if (!existsSync(src)) {
-    throw new Error(`Istanza "${id}" non trovata in stato "${from}".`);
+    throw new InstanceNotFoundError(`Istanza "${id}" non trovata in stato "${from}".`);
   }
   renameSync(src, instancePath(base, to, id));
 }

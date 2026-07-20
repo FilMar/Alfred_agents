@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { getBaseDir, listTasks } from "./catalog.js";
-import { transition, listByState } from "./queue.js";
+import { transition, listByState, InstanceNotFoundError } from "./queue.js";
 import { buildDispatchPlan } from "./dispatch.js";
 import type { RunInstance, RaspberryTask, DispatchPlanEntry, ExecutorDeps } from "./types.js";
 import { spawnSandboxed } from "../../th/src/runner.js";
@@ -18,8 +18,10 @@ export async function executeLocal(
 ): Promise<void> {
   try {
     transition(instance.id, "pending", "processing", base);
-  } catch {
-    return; // Another actor claimed the instance
+  } catch (e) {
+    if (e instanceof InstanceNotFoundError) return; // Another actor claimed the instance
+    console.error(`[orchestrator] Failed to claim instance ${instance.id}: ${(e as Error).message}`);
+    return;
   }
 
   const absPath = join(base, "scripts", `${task.name}.ts`);
@@ -51,8 +53,10 @@ export async function executeRemote(
 ): Promise<void> {
   try {
     transition(planEntry.instanceId, "pending", "processing", base);
-  } catch {
-    return; // Another actor claimed the instance
+  } catch (e) {
+    if (e instanceof InstanceNotFoundError) return; // Another actor claimed the instance
+    console.error(`[orchestrator] Failed to claim instance ${planEntry.instanceId}: ${(e as Error).message}`);
+    return;
   }
 
   try {
