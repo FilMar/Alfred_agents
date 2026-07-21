@@ -54,9 +54,17 @@ Three moves, cheapest first:
 
 **Next concrete step** when work starts: schema of the `events` table + the skill-invocation hook, to be founded as a new module via Archimede (project governance).
 
+**Update (2026-07-21) — move 1 founded as `tl`**: [tl_module](tl_module) (Third Log) is move 1 above, concretized — refined from "extend `th.db` with an events table" to a standalone REST service on the Rasp (`POST /event`/`GET /events`, single table, fixed envelope + free-form `metadata`), shared by `th`, `tb` (writes only), and `ti` (writes only). `th.db` is removed entirely rather than extended. Still open exactly as scoped at founding: **gap 1 (skill telemetry) is not closed** — the Claude Code hook for skill invocations was explicitly deferred, not designed; and because `tb`/`ti` only log writes, not `search`, read-pattern analytics (which contexts get queried, not just which get written) stay uncovered. `tl` itself never judges or distills (that boundary is `ti`'s, see below) — it only makes the raw facts available in one place.
+
+**Update (2026-07-21)**: [ti_module](ti_module) (Third Identity) was founded as a concrete, narrower resolution of gaps 3 and 4 — a dedicated Qdrant collection (`if`/`do`/`tags`) for context→action rules, separate from `tb`'s `kind: protocollo`. It does not resolve gaps 1, 2, 5, 6 (still no unified event log, no automatic extraction, no cross-store bridge, no promotion pipeline) — the merge/dedup judgment in `ti` stays human/agent-in-the-loop by design, not automated, consistent with the "log first, intelligence after" principle above. Populated by extraction at the end of each session (same trigger principle already used by Platone for `kind: protocollo`), not by the `events` table move 1 describes — the two are complementary, not the same mechanism.
+
+**Update (2026-07-21) — `do` generalized to a context router**: `ti`'s `do` was widened from "observed behavior" to a general action string, covering three forms: behavior/attitude, dispatch to a skill or `th` member, or a `tb` lookup hint (search term, not a note id — see [ti_module](ti_module)). This *strengthens* gap 3's resolution: the trigger-indexed store now also routes to skills/members, derived from real use rather than the hand-written descriptions skills rely on today. It does **not** close gap 5. Gap 5 needs a bridge with a feedback loop — an event recording that a dispatched action was executed and what its outcome was, flowing back into the store. `ti`'s router only gives the outbound half (context → what to do/check); nothing records whether a dispatched skill/member run succeeded, or whether a suggested `tb` lookup was useful — that return path stays unbuilt, still dependent on the `events` table in move 1 above, regardless of this generalization.
+
 ## Cross-references
 
 - [roadmap](roadmap) — Phase 2C, Phase 7, Phase 8 planning this extends
 - [agenti](agenti) — skills vs. `th` members distinction
 - [architettura](architettura) — the three layers (`tb`, `th`, `.wiki/`) and why they don't overlap
 - [th_cli](th_cli) — `th.db` schema and `th history`/`th stats` commands
+- [ti_module](ti_module) — the context→behavior store founded as a partial resolution of gaps 3-4
+- [tl_module](tl_module) — move 1 (the unified event log), founded as a standalone REST service

@@ -10,6 +10,8 @@ updated: 2026-07-16
 
 `th` (Third Hand) — agent orchestrator. Each `th run` executes a Claude Code agent in a bwrap sandbox with a specialised system prompt (role + de Bono hat) and tracks the run in SQLite (`~/.pi/th.db`).
 
+**Forward-looking (not yet implemented, 2026-07-21)**: [tl_module](tl_module) (Third Log) was founded to replace this local tracking entirely — `th.db` will be removed, `th` will post one event per run to `tl`'s REST API instead (fire-and-forget, never blocking a run). When that lands, `history`/`get` below become empty/stub commands until rewired to query `tl`.
+
 ## member
 
 ```bash
@@ -107,3 +109,4 @@ th run --member indiana --task "analyse this codebase" --thinking high --timeout
 - [architettura](architettura) — sandbox and filesystem structure
 - [orchestrator_overview](orchestrator_overview) — Pillar 4 uses `sandbox-exec` as the execution wrapper for audited tasks
 - [roadmap_orchestrator](roadmap_orchestrator) — Phase 2, where the subcommand was tracked
+- [tl_module](tl_module) — planned replacement for `th.db`/`history`/`stats`

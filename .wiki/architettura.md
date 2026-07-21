@@ -15,6 +15,8 @@ Pi is a personal cognitive augmentation system. Two orthogonal CLIs plus a skill
 | `tb` (CLI) | Third Brain | Semantic memory: ideas, concepts, connections. Additive associative graph with backrefs and hybrid search — notes are never deleted, but refs and tags can be updated (`tb update`). |
 | `th` (CLI) | Third Hand | Agent orchestration with de Bono hats. Sequential and parallel flows, bwrap sandbox, SQLite tracking. |
 | `.wiki/` (Omero skill) | Third Wiki | Local project wiki: structured markdown pages, style guides, code conventions. Maintained by the Omero skill (Read/Write/Edit/Glob/Grep). |
+| `ti` (CLI) | Third Identity | Context→behavior memory: dedicated Qdrant collection `pi_identity`, distinct from `tb`'s semantic memory. Founded 2026-07-21, not yet implemented — see [ti_module](ti_module). |
+| `tl` (REST API, not a CLI) | Third Log | Unified structured event log for `th`/`tb`/`ti`, extracted from `th`'s local SQLite tracking. Hosted on the Rasp, called via `curl`/HTTP — no `tl` command. Founded 2026-07-21, not yet implemented — see [tl_module](tl_module). |
 
 The layers do not overlap by design:
 - **Third Brain**: ideas that have value beyond the project — principles, patterns, cognitive tensions. No code, no technical documentation.
@@ -67,3 +69,5 @@ The wiki needs no install — it is plain markdown in `.wiki/`, maintained by th
 - [roadmap](roadmap) — development phase status
 - [tb_on_rasp](tb_on_rasp) — tb backing services moving to the Rasp
 - [rasp_node](rasp_node) — everything running on the Rasp
+- [ti_module](ti_module) — the new context→behavior memory layer
+- [tl_module](tl_module) — the new unified event log, replacing `th.db`

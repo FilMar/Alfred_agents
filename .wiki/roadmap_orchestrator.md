@@ -8,6 +8,8 @@ updated: 2026-07-20
 
 Implementation plan for the event-driven, adversarial-guarded automation server.
 
+**Status: paused (2026-07-21).** No real recurring tasks currently justify finishing Phase 3/4 — priority shifted to the memory stack (`tb` + the new [ti_module](ti_module)). This is a status note, not a design reversal: Phase 1/2 code and decisions below stand as documented, work is just not actively continuing.
+
 ## Phase 1: The Skeleton (Core & Persistence) — DONE
 **Goal**: Establish the foundation where tasks can be stored and their state tracked without volatile memory.
 
@@ -76,3 +78,4 @@ Implementation plan for the event-driven, adversarial-guarded automation server.
 ## Cross-references
 - [architettura](architettura)
 - [orchestrator_overview](orchestrator_overview)
+- [ti_module](ti_module) — the work this was paused in favor of
