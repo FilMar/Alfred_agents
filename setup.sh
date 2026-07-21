@@ -37,11 +37,13 @@ echo "skills"
 link "$REPO/skills" "$CLAUDE/skills" "~/.claude/skills"
 link "$REPO/skills" "$PI/skills"     "~/.pi/agent/skills"
 
-# --- tools (tb, th) ---
-echo "tools (tb, th)"
+# --- tools (tb, th, ti) ---
+echo "tools (tb, th, ti)"
 cd "$REPO" && bun install --silent
 echo "  [ok]   bun install done"
 chmod +x "$REPO/tools/tb/src/cli.ts"
 chmod +x "$REPO/tools/th/src/cli.ts"
+chmod +x "$REPO/tools/ti/src/cli.ts"
 link "$REPO/tools/tb/src/cli.ts"  "$HOME/.local/bin/tb"  "~/.local/bin/tb"
 link "$REPO/tools/th/src/cli.ts"  "$HOME/.local/bin/th"  "~/.local/bin/th"
+link "$REPO/tools/ti/src/cli.ts"  "$HOME/.local/bin/ti"  "~/.local/bin/ti"
