@@ -24,6 +24,15 @@ The module is implemented following a layered architecture to maintain consisten
 - **ID Generation**: `addEntry` generates point IDs client-side via `crypto.randomUUID()` to ensure tracking before upsert, as Qdrant's response does not return generated IDs in the expected shape.
 - **Error Handling**: `appendDo` was hardened to throw an explicit "No entry found with id: \<id>" error instead of a `TypeError` when operating on non-existent entries.
 
+**Live smoke test (2026-07-21), against the real Qdrant/Ollama instance on the Rasp** — found and fixed three real response-shape bugs the mocked test suite could not catch, since the mocks had been written to match the code's assumptions rather than the actual API:
+- `query`/`scroll` responses wrap results in `result.points`, not a bare `result` array — `queryPoints`/`scrollPoints` callers (`searchEntries`, `listEntries`) read the wrong path and always saw an empty/broken list.
+- The `query` endpoint does not include `payload` in its results unless `with_payload: true` is set explicitly — added to the request.
+- The single-point GET (`getPointById`) returns an object at `result`, not an array — `appendDo` read `result?.[0]`, which is always `undefined` on a real response. This was a genuine blocking bug: `appendDo` would have thrown "No entry found" on **any** existing id in production, never just on missing ones.
+
+All three fixed in `qdrant.ts`/`identity.ts`; unit test mocks in `tests/ti.test.ts` updated to match the real shapes; full add → search → list → append-do → delete cycle re-verified against the live instance after the fix.
+
+**Packaging (done 2026-07-21)**: `ti` registered in root `package.json`'s `bin.ti`, symlinked at `~/.local/bin/ti` (matching `tb`/`th`), and added to `setup.sh` alongside them — verified idempotent on a second run.
+
 ## Why a separate collection
 
 `tb` answers "what do I know about X" (semantic retrieval over concepts/notes, including the existing `kind: protocollo`). It does not cleanly answer "how have I behaved, given a context like X" — mixing the two retrieval patterns into one collection degrades both: behavioral queries get diluted by semantic noise, semantic queries get cluttered with situational one-offs. `ti` extends the analysis already in [procedural_memory_gaps](procedural_memory_gaps): gap 3 (no trigger-indexed procedure store) and gap 4 (no dedup/versioning loop) are what `ti`'s schema and workflow concretely resolve — see below.
@@ -67,8 +76,16 @@ Reuses `tools/tb/src/infra.ts` as a library (`HttpClient`, `QDRANT_URL`, `OLLAMA
 
 ## Pending Work
 
-- Collection provisioning script (idempotent create-if-missing for `pi_identity`).
-- Packaging (binary registration, root `tsconfig` entry).
+- None outstanding on `ti` itself — collection provisioning (`ensureCollection`, idempotent create-if-missing), packaging (bin registration, `setup.sh`), and the response-shape bugs above are all done and verified live.
+
+## Open — governance gap
+
+`ti` is a new procedural-memory system standing alongside `tb` (semantic memory), but this is **not yet reflected upstream** — flagged here as a follow-up, not yet actioned:
+
+- **Skills** (`~/.claude/skills`): Platone (memory consolidation) currently only knows how to write to `tb`. It has no notion of `ti`'s if/do rules, so procedural decisions surfaced in a session are not routed there.
+- **`alfred.md`** (the user's global identity/instructions file): documents Third Brain (`tb`) and Third Hand (`th`) as the two memory/orchestration systems, but does not mention Third Identity (`ti`) at all.
+
+Both need updating to actually teach the system to use `ti` for procedural if/do rules — otherwise `ti` remains a working tool nobody is instructed to call.
 
 ## Cross-references
 
