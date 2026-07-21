@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { COLLECTION, DENSE_VECTOR_NAME, SPARSE_VECTOR_NAME, VECTOR_SIZE, SNIPPET_MAX_LEN, qdrantClient, HttpError } from "./infra.js";
+import { COLLECTION, DENSE_VECTOR_NAME, SPARSE_VECTOR_NAME, VECTOR_SIZE, SNIPPET_MAX_LEN, qdrantClient, HttpError, getCollectionInfo, createCollection } from "./infra.js";
 import type { Note, NoteType, SearchOptions, SearchResult } from "./types.js";
 import { NOTE_TYPES, isEvidence, noteToText } from "./types.js";
 
@@ -67,10 +67,10 @@ async function createIndices(only?: string[]): Promise<void> {
 }
 
 export async function ensureCollection(): Promise<void> {
-  const check = await qdrantClient.fetch("GET", `/collections/${COLLECTION}`);
+  const check = await getCollectionInfo(COLLECTION);
 
-  if (check.ok) {
-    const info = await check.json() as {
+  if (check.exists) {
+    const info = check.info as {
       result?: {
         config?: { params?: { sparse_vectors?: unknown } };
         payload_schema?: Record<string, unknown>;
@@ -89,20 +89,12 @@ export async function ensureCollection(): Promise<void> {
       if (missing.length > 0) await createIndices(missing);
       return;
     }
-  } else if (check.status !== 404) {
-    const text = await check.text();
-    throw new Error(`Qdrant: errore su GET collection — ${check.status} ${text}`);
   }
 
-  const create = await qdrantClient.fetch("PUT", `/collections/${COLLECTION}`, {
+  await createCollection(COLLECTION, {
     vectors: { [DENSE_VECTOR_NAME]: { size: VECTOR_SIZE, distance: "Cosine" } },
     sparse_vectors: { [SPARSE_VECTOR_NAME]: { modifier: "idf" } },
   });
-
-  if (!create.ok && create.status !== 409) {
-    const text = await create.text();
-    throw new Error(`Qdrant: impossibile creare la collezione — ${create.status} ${text}`);
-  }
 
   await createIndices();
 }

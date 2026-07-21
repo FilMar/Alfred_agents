@@ -15,6 +15,9 @@ describe("Third Identity (ti) Behavioral Tests", () => {
   beforeEach(() => {
     spyOn(qdrantClient, "request").mockReset();
     spyOn(ollamaClient, "request").mockReset();
+    // ensureCollection() checks existence via fetch before every operation — mock it
+    // as "already exists" so it's a no-op passthrough for these behavioural tests.
+    spyOn(qdrantClient, "fetch").mockResolvedValue({ ok: true, json: async () => ({}) } as any);
   });
 
   describe("addEntry", () => {

@@ -79,6 +79,33 @@ export async function embed(text: string): Promise<number[]> {
   return vector;
 }
 
+// ─── Collections ─────────────────────────────────────────────────────────────
+
+export interface CollectionCheck {
+  exists: boolean;
+  info?: unknown;
+}
+
+// GET /collections/{name}. Throws on any status other than 200/404 — an ambiguous
+// Qdrant error must not be read as "collection missing".
+export async function getCollectionInfo(name: string): Promise<CollectionCheck> {
+  const check = await qdrantClient.fetch("GET", `/collections/${name}`);
+  if (check.ok) return { exists: true, info: await check.json() };
+  if (check.status === 404) return { exists: false };
+  const text = await check.text();
+  throw new Error(`Qdrant: errore su GET collection — ${check.status} ${text}`);
+}
+
+// PUT /collections/{name} with an arbitrary body (vectors config, etc). 409 (already
+// exists, e.g. a concurrent creator) is not an error — anything else is.
+export async function createCollection(name: string, body: unknown): Promise<void> {
+  const create = await qdrantClient.fetch("PUT", `/collections/${name}`, body);
+  if (!create.ok && create.status !== 409) {
+    const text = await create.text();
+    throw new Error(`Qdrant: impossibile creare la collezione — ${create.status} ${text}`);
+  }
+}
+
 // ─── Health ──────────────────────────────────────────────────────────────────
 
 export interface HealthStatus {

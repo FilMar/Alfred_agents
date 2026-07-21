@@ -10,6 +10,7 @@ import type { IdentityEntry, SearchOptions } from "./types.js";
  * - Side effect: writes to Qdrant.
  */
 export async function addEntry(ifText: string, doText: string, tags: string[]): Promise<IdentityEntry> {
+  await qdrant.ensureCollection();
   const data = await ollamaClient.request<{ embeddings: number[][] }>("POST", "/api/embed", { model: EMBED_MODEL, input: ifText });
   const vector = data.embeddings[0];
   
@@ -34,6 +35,7 @@ export async function addEntry(ifText: string, doText: string, tags: string[]): 
  * - Must not call an LLM.
  */
 export async function searchEntries(query: string, options: SearchOptions): Promise<IdentityEntry[]> {
+  await qdrant.ensureCollection();
   const data = await ollamaClient.request<{ embeddings: number[][] }>("POST", "/api/embed", { model: EMBED_MODEL, input: query });
   const vector = data.embeddings[0];
   
@@ -55,6 +57,7 @@ export async function searchEntries(query: string, options: SearchOptions): Prom
  * - No semantic ranking involved.
  */
 export async function listEntries(tags?: string[]): Promise<IdentityEntry[]> {
+  await qdrant.ensureCollection();
   const filter = tags?.length ? { must: [{ key: "tags", match: { any: tags } }] } : undefined;
   const res = await qdrant.scrollPoints({ filter });
   
@@ -71,6 +74,7 @@ export async function listEntries(tags?: string[]): Promise<IdentityEntry[]> {
  * - Must handle non-existent IDs gracefully (no-op or error based on Qdrant response).
  */
 export async function deleteEntry(id: string): Promise<void> {
+  await qdrant.ensureCollection();
   await qdrant.deletePoints([id]);
 }
 
@@ -82,6 +86,7 @@ export async function deleteEntry(id: string): Promise<void> {
  * - Must not modify the `if` or `vector` fields.
  */
 export async function appendDo(id: string, doText: string): Promise<IdentityEntry> {
+  await qdrant.ensureCollection();
   const res = await qdrant.getPointById(id);
   const point = res.result?.[0];
   
