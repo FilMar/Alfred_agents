@@ -96,7 +96,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
       ];
 
       spyOn(ollamaClient, "request").mockResolvedValue({ embeddings: [mockVector] } as any);
-      spyOn(qdrantClient, "request").mockResolvedValue({ result: mockResults } as any);
+      spyOn(qdrantClient, "request").mockResolvedValue({ result: { points: mockResults } } as any);
 
       const results = await searchEntries(query, { tags });
 
@@ -123,7 +123,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
 
     it("should not call an LLM during search", async () => {
       spyOn(ollamaClient, "request").mockResolvedValue({ embeddings: [[0.1]] } as any);
-      spyOn(qdrantClient, "request").mockResolvedValue({ result: [] } as any);
+      spyOn(qdrantClient, "request").mockResolvedValue({ result: { points: [] } } as any);
 
       await searchEntries("test", {});
 
@@ -142,7 +142,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
         { id: "1", payload: { if: "a", do: ["1"], tags: ["work"] } },
         { id: "2", payload: { if: "b", do: ["2"], tags: ["work"] } },
       ];
-      spyOn(qdrantClient, "request").mockResolvedValue({ points: mockPoints } as any);
+      spyOn(qdrantClient, "request").mockResolvedValue({ result: { points: mockPoints } } as any);
 
       const results = await listEntries(tags);
 
@@ -189,7 +189,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
       };
 
       spyOn(qdrantClient, "request")
-        .mockResolvedValueOnce({ result: [ { id, payload: existingEntry, vector: existingEntry.vector } ] } as any) // GET
+        .mockResolvedValueOnce({ result: { id, payload: existingEntry, vector: existingEntry.vector } } as any) // GET
         .mockResolvedValueOnce({ status: "ok" } as any); // PUT
 
       const result = await appendDo(id, newDo);

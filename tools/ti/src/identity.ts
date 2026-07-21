@@ -41,8 +41,8 @@ export async function searchEntries(query: string, options: SearchOptions): Prom
   
   const filter = options.tags?.length ? { must: [{ key: "tags", match: { any: options.tags } }] } : undefined;
   const res = await qdrant.queryPoints(vector, { limit: options.limit ?? 10, filter });
-  
-  return (res.result ?? []).map((hit: any) => ({
+
+  return (res.result?.points ?? []).map((hit: any) => ({
     id: hit.id,
     vector: hit.vector ?? [],
     ...hit.payload,
@@ -60,8 +60,8 @@ export async function listEntries(tags?: string[]): Promise<IdentityEntry[]> {
   await qdrant.ensureCollection();
   const filter = tags?.length ? { must: [{ key: "tags", match: { any: tags } }] } : undefined;
   const res = await qdrant.scrollPoints({ filter });
-  
-  return (res.points ?? []).map((p: any) => ({
+
+  return (res.result?.points ?? []).map((p: any) => ({
     id: p.id,
     vector: p.vector ?? [],
     ...p.payload,
@@ -88,7 +88,7 @@ export async function deleteEntry(id: string): Promise<void> {
 export async function appendDo(id: string, doText: string): Promise<IdentityEntry> {
   await qdrant.ensureCollection();
   const res = await qdrant.getPointById(id);
-  const point = res.result?.[0];
+  const point = res.result;
   
   if (!point) {
     throw new Error(`No entry found with id: ${id}`);

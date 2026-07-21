@@ -21,12 +21,13 @@ export async function upsertPoint(id: string, vector: number[], payload: any): P
 export async function queryPoints(vector: number[], options: { limit?: number; filter?: any }): Promise<any> {
   return qdrantClient.request("POST", "/collections/pi_identity/points/query", {
     vector,
+    with_payload: true,
     ...options,
   });
 }
 
 export async function scrollPoints(options: { filter?: any }): Promise<any> {
-  return qdrantClient.request("POST", "/collections/pi_identity/points/scroll", options);
+  return qdrantClient.request("POST", "/collections/pi_identity/points/scroll", { with_payload: true, ...options });
 }
 
 export async function deletePoints(ids: string[]): Promise<any> {
