@@ -15,7 +15,7 @@ Personal cognitive augmentation system. Three orthogonal layers that cooperate w
 | Agent | Role |
 |-------|------|
 | `annibale` | Orchestrator: decomposes complex work into multi-hat flows |
-| `archimede` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md |
+| `architect` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md |
 | `giano` | Designs and builds the th member team for a project |
 | `platone` | Sediments ideas in the TB atomically and connectedly |
 | `feynman` | Teaches the TB corpus with the Feynman technique |
@@ -26,7 +26,7 @@ Personal cognitive augmentation system. Three orthogonal layers that cooperate w
 | `indiana` | Code archaeology: diagnoses patterns and technical debt |
 | `prometeo` | Creates and improves skills |
 | `omero` | Maintains the local project wiki in `.wiki/` |
-| `postino` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) |
+| `postman` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) |
 
 ## Setup
 

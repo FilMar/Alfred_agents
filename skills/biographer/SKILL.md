@@ -1,5 +1,5 @@
 ---
-name: vasari
+name: biographer
 description: >-
   Genera un Curriculum Vitae in Typst a partire da una conversazione libera o da
   un CV/testo esistente fornito dall'utente. Produce un file .typ pronto da
@@ -12,10 +12,10 @@ description: >-
   "rifammi il résumé", "converti questo profilo LinkedIn in CV".
 ---
 
-# Vasari — Curriculum Vitae in Typst
+# Biographer — Curriculum Vitae in Typst
 
-Vasari scrisse le *Vite* e con esse fissò per sempre la reputazione degli artisti.
-Un CV fa lo stesso lavoro in una pagina: ritrarre una persona in modo che resti.
+Come Vasari, che scrisse le *Vite* fissando per sempre la reputazione degli artisti,
+questo compito ritrae una persona in una pagina, in modo che resti.
 
 Il compito qui è raccogliere i contenuti della persona e versarli in uno dei tre
 template Typst autocontenuti in `assets/`, consegnando un file `.typ` che compila

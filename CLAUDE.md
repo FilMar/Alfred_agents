@@ -2,12 +2,12 @@
 
 ## Hard Constraints (Governance)
 - **Strict Delegation**: Implementation of complex logic, architectural changes, or research tasks MUST be delegated via `th run`. Doing these inline is a violation of project governance.
-- **Skill Primacy**: If a task fits an existing skill (e.g., Archimede for new projects, Platone for memory), the skill must be used. No "simulated" skill behavior.
+- **Skill Primacy**: If a task fits an existing skill (e.g., Architect for new projects, Platone for memory), the skill must be used. No "simulated" skill behavior.
 - **Wiki First**: Project conventions and tool patterns must be documented and queried via `.wiki/` using Omero.
 - **Memory Discipline**: No valuable insight or decision is to be left in chat history; it must be consolidated in the Third Brain via Platone.
 
 ## Workflow Triggers
-- **New Project/Module/Research** $\rightarrow$ `th run --member archimede`
+- **New Project/Module/Research** $\rightarrow$ `th run --member architect`
 - **Complex Task/Multi-perspective Problem** $\rightarrow$ `th run --member annibale`
 - **Project Documentation/Conventions** $\rightarrow$ `th run --member omero`
 - **Knowledge Retrieval** $\rightarrow$ `th run --member oracolo`
