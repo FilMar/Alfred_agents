@@ -2,11 +2,11 @@
 
 **When to use**: the user has a problem, decision or challenge that benefits from parallel, diverse domain perspectives. Not for Socratic exploration — use `debate` for that.
 
-**Nature**: structured and harness-driven. The code in `council.sh` runs the phases. Annibale's only cognitive job is Phase 0 — choosing who sits at the table and with what problem. After that, the script handles parallelism, polling, validation, and synthesis. The model cannot skip a phase, synthesise before all experts answer, or forget an output.
+**Nature**: structured and harness-driven. The code in `council.sh` runs the phases. Quartermaster's only cognitive job is Phase 0 — choosing who sits at the table and with what problem. After that, the script handles parallelism, polling, validation, and synthesis. The model cannot skip a phase, synthesise before all experts answer, or forget an output.
 
 ---
 
-## Phase 0 — Annibale chooses the roster (the only cognitive step)
+## Phase 0 — Quartermaster chooses the roster (the only cognitive step)
 
 Pick members that cover different angles of the problem:
 
@@ -44,7 +44,7 @@ Proceed?
 Once the user confirms, run from the **project root**:
 
 ```bash
-./skills/annibale/flows/council.sh \
+./skills/quartermaster/flows/council.sh \
   --task "<problem verbatim or refined>" \
   --members "knuth-black,jobs-yellow,turing-green" \
   [--rounds N]         # default 1; add rounds when first synthesis opens new tensions
@@ -71,7 +71,7 @@ Final synthesis goes to stdout. Per-member logs and outputs are in `/tmp/th-flow
 If a round fails or the process crashes, relaunch with the same `--run-id`. Completed steps are skipped; failed or missing ones are re-executed.
 
 ```bash
-./skills/annibale/flows/council.sh \
+./skills/quartermaster/flows/council.sh \
   --task "<same problem>" \
   --members "<same members>" \
   --run-id council-20260702-143021   # printed by the first run
@@ -92,7 +92,7 @@ Each round feeds the previous synthesis into every expert's prompt — positions
 
 ## Rules
 
-- **Do not manually implement the parallel fan-out.** The script does this. Annibale's job ends when it calls the script.
+- **Do not manually implement the parallel fan-out.** The script does this. Quartermaster's job ends when it calls the script.
 - **Do not synthesise before all experts have finished.** The script enforces this; the model never needs to.
 - **Blue does not participate in analysis rounds.** It enters only for synthesis.
 - **Rounds are the user's call.** Propose 1; let the user ask for more.

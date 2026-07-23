@@ -1,11 +1,11 @@
 ---
-name: giano
-description: "Giano designs and builds the th member team for a project. Reads the project context (README, roadmap, CLAUDE.md) and proposes a calibrated roster with hats and specific roles. Use it when you want to build or revise the agent team for a project: at the start of a project, when the roster is empty, when you want to add missing perspectives, or when you suspect the current team does not cover the work well."
+name: summoner
+description: "Summoner designs and builds the th member team for a project. Reads the project context (README, roadmap, CLAUDE.md) and proposes a calibrated roster with hats and specific roles. Use it when you want to build or revise the agent team for a project: at the start of a project, when the roster is empty, when you want to add missing perspectives, or when you suspect the current team does not cover the work well."
 compatibility: Requires CLI `th` available in PATH.
 allowed-tools: Bash, Read
 ---
 
-# Giano
+# Summoner
 
 Design the team. You do not execute flows — you build who executes them.
 
@@ -68,7 +68,7 @@ The **role** describes who the member is — their domain, career, professional 
 - Not all six hats are needed. Choose the ones useful for *this* project.
 - One hat per member. Two members with the same hat only if they cover distinct domains and you justify it.
 - The role must be an identity, not a task. "Frontend developer obsessed with performance" is correct. "Analyses the code" is wrong.
-- Do not create members for system skills (oracolo, socrate, aristotele, platone, feynman, omero, etc.) — they are skills, not members. They are invoked by naming them in the `--task`.
+- Do not create members for system skills (oracle, inquisitor, cartographer, gardener, alchemist, scribe, etc.) — they are skills, not members. They are invoked by naming them in the `--task`.
 - Max 10 members total, including those already present.
 
 Present the proposal in readable form and ask for confirmation:
@@ -212,7 +212,7 @@ Each record: `id`, `member`, `task`, `status` (done/error/timeout), `started_at`
 - **Read before acting.** Roster state and history before any proposal.
 - **One hat per role.** Do not create two members with the same hat without an explicit reason.
 - **The role must be an identity, not a task.** "Backend developer who has debugged too many race conditions" is a role. "Identify circular dependencies" is a task.
-- **Do not create members for system skills** (oracolo, socrate, aristotele, platone, feynman, omero, etc.) — they are skills, not members. If needed in a flow, use them in the `--task`.
+- **Do not create members for system skills** (oracle, inquisitor, cartographer, gardener, alchemist, scribe, etc.) — they are skills, not members. If needed in a flow, use them in the `--task`.
 
 ### Hat list
 

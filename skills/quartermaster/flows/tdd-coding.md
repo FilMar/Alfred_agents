@@ -4,27 +4,27 @@
 
 **Nature**: guided — each phase produces concrete artefacts required by the next phase. Not a batch pipeline.
 
-**Prerequisites**: test runner available in the project. Wiki (`.wiki/`) present, or Omero initialises it on first write.
+**Prerequisites**: test runner available in the project. Wiki (`.wiki/`) present, or Scribe initialises it on first write.
 
 ---
 
 ## The cycle
 
 ```
-[0. CLARIFICATION] → Annibale collects precise requirements
+[0. CLARIFICATION] → Quartermaster collects precise requirements
 [1. ARCHITECTURE]  → white + green: structures, signatures, trade-offs
 [2. STUB]          → coder writes signatures + TODOs — must compile
 [3. TESTS]         → black writes behavioural tests — must fail
 [4. IMPLEMENT]     → loop: coder implements until tests pass
 [5. REVIEW]        → black + white: DRY, cleanup, conformity
-[6. WIKI]          → omero updates the project wiki
+[6. WIKI]          → scribe updates the project wiki
 ```
 
 ---
 
 ## Phase 0 — Clarification
 
-Annibale asks directly, without delegating:
+Quartermaster asks directly, without delegating:
 - Expected behaviour? (concrete inputs/outputs)
 - Performance, compatibility, style constraints?
 - Where does the code go? (file, module, package)
@@ -152,7 +152,7 @@ Present issues found. If there are non-trivial fixes, go back to phase 4.
 ## Phase 6 — Wiki
 
 ```bash
-th run --member <member> --task "Use the omero skill to update the project wiki with the new feature.
+th run --member <member> --task "Use the scribe skill to update the project wiki with the new feature.
 
 What was implemented:
 <summary>
@@ -172,4 +172,4 @@ Architectural decisions:
 - **Tests fail before implementing.** A test that passes without implementation is broken.
 - **The loop has a limit.** After 3 fruitless iterations, escalate to the user.
 - **Review is separate from implementation.** Do not review during the loop.
-- **Omero always closes.** The wiki is part of the deliverable, not an option.
+- **Scribe always closes.** The wiki is part of the deliverable, not an option.

@@ -1,5 +1,5 @@
 ---
-name: oracolo
+name: oracle
 description: "The Oracle retrieves knowledge from the Third Brain on a given topic. Does not interpret, does not recommend actions — returns what has already been learned and sedimented, with the depth needed to cover connected concepts as well."
 compatibility: Requires access to the `tb` CLI (bash).
 allowed-tools: Bash

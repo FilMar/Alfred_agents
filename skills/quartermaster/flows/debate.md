@@ -11,28 +11,28 @@
 ## The cycle
 
 ```
-[1. ORACOLO]    → retrieves context on the topic from the TB
-[2. SOCRATE]    → finds the tension, asks the uncomfortable question
+[1. ORACLE]    → retrieves context on the topic from the TB
+[2. INQUISITOR]    → finds the tension, asks the uncomfortable question
 [3. USER]       → responds, reflects, pushes
-[4. ARISTOTELE] → integrates what is new into the Third Brain
-[5. ORACOLO]    → verifies the updated connections
+[4. CARTOGRAPHER] → integrates what is new into the Third Brain
+[5. ORACLE]    → verifies the updated connections
 → back to [2] or close
 ```
 
 ---
 
-## Phase 1 — Oracolo: context
+## Phase 1 — Oracle: context
 
 ```bash
-th run --member <member> --task "Use the oracolo skill to retrieve everything the Third Brain knows about: <topic>"
+th run --member <member> --task "Use the oracle skill to retrieve everything the Third Brain knows about: <topic>"
 ```
 
 Present the result. If the TB has nothing on the topic, say so — the void is information.
 
-## Phase 2 — Socrate: tension
+## Phase 2 — Inquisitor: tension
 
 ```bash
-th run --member <member> --task "Use the socrate skill.
+th run --member <member> --task "Use the inquisitor skill.
 
 Topic: <topic>
 
@@ -51,14 +51,14 @@ Present the question. Wait. Do not interrupt.
 
 When the user is done, go to phase 4.
 
-## Phase 4 — Aristotele: integrate
+## Phase 4 — Cartographer: integrate
 
 ```bash
-th run --member <member> --task "Use the aristotele skill.
+th run --member <member> --task "Use the cartographer skill.
 
 Topic: <topic>
 
-Socrates' question:
+Inquisitor's question:
 <phase 2 question>
 
 User's response:
@@ -67,10 +67,10 @@ User's response:
 Integrate what is new into the Third Brain. If nothing is new, say so."
 ```
 
-## Phase 5 — Oracolo: re-verify
+## Phase 5 — Oracle: re-verify
 
 ```bash
-th run --member <member> --task "Use the oracolo skill to re-verify the Third Brain graph on: <topic> — show what has changed since the start of the cycle."
+th run --member <member> --task "Use the oracle skill to re-verify the Third Brain graph on: <topic> — show what has changed since the start of the cycle."
 ```
 
 Then ask: **Do you want to continue the cycle on this tension, or bring a different idea?**

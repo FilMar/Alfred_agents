@@ -2,7 +2,7 @@
 # Flow harness: Council of Experts.
 #
 # Code drives the phases; the AI reasons only inside `th run` calls.
-# Annibale picks the roster and launches this script — it cannot skip
+# Quartermaster picks the roster and launches this script — it cannot skip
 # a phase, forget an output, or synthesise before every expert answered.
 #
 # Usage:

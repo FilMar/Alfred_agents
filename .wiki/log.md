@@ -8,6 +8,8 @@ updated: 2026-07-02
 
 ## Log
 
+## [2026-07-23] ingest | tb serve / ti serve — dual CLI+HTTP API entrypoint
+
 ## [2026-07-22] ingest | Skill rename decision: mythological figures to professions
 
 Documented in [agenti](agenti) the decision to rename all 14 skills from mythological/historical-figure names to professions (mix of historical/real and fantastical). Full 1:1 mapping recorded in the "Available agents" table's new "Planned rename" column and expanded in the new section "Naming rename — mythological figures to professions". Two alternatives were considered and rejected first: plain functional names (technically sufficient for dispatch, which matches on description not name, but flattens per-role personality) and D&D classes (fully mapped, rejected as unconvincing). Decision record only — no `skills/`, `SKILL.md`, `th` member, `alfred.md`, or `CLAUDE.md` file has been touched yet; the actual rename proceeds incrementally, skill by skill, in follow-up sessions.

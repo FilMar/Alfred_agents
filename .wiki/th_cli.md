@@ -91,18 +91,18 @@ Runs tracked in `~/.pi/th.db` (table `runs`): id, member, task (truncated to 300
 
 ```bash
 # Simple execution
-th run --member oracolo --task "what do I know about Zettelkasten?"
+th run --member oracle --task "what do I know about Zettelkasten?"
 
 # With saved output for pipeline
-th run --member oracolo --task "retrieve on X" > /tmp/out.txt
-th run --member feynman --task "$(cat /tmp/out.txt)"
+th run --member oracle --task "retrieve on X" > /tmp/out.txt
+th run --member alchemist --task "$(cat /tmp/out.txt)"
 
 # Parallel background
-th run --member socrate --task "find gaps in this idea: ..." --detach
-th run --member aristotele --task "suggest hubs for TB cluster" --detach
+th run --member inquisitor --task "find gaps in this idea: ..." --detach
+th run --member cartographer --task "suggest hubs for TB cluster" --detach
 
 # With high thinking and timeout
-th run --member indiana --task "analyse this codebase" --thinking high --timeout 300
+th run --member prospector --task "analyse this codebase" --thinking high --timeout 300
 ```
 
 ## Cross-references

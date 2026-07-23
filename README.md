@@ -8,24 +8,24 @@ Personal cognitive augmentation system. Three orthogonal layers that cooperate w
 |--------|------|---------|
 | `tb` (CLI) | Third Brain | Semantic memory: ideas, concepts, connections. Immutable associative graph with hybrid search and hubs. |
 | `th` (CLI) | Third Hand | Agent orchestration with de Bono hats. Project members, sequential and parallel flows. |
-| `.wiki/` (Omero skill) | Third Wiki | Local project wiki: pages, style guides, code conventions. Plain markdown, maintained by Omero. Lives and dies with the project. |
+| `.wiki/` (Scribe skill) | Third Wiki | Local project wiki: pages, style guides, code conventions. Plain markdown, maintained by Scribe. Lives and dies with the project. |
 
 ## Agents
 
 | Agent | Role |
 |-------|------|
-| `annibale` | Orchestrator: decomposes complex work into multi-hat flows |
+| `quartermaster` | Orchestrator: decomposes complex work into multi-hat flows |
 | `architect` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md |
-| `giano` | Designs and builds the th member team for a project |
-| `platone` | Sediments ideas in the TB atomically and connectedly |
-| `feynman` | Teaches the TB corpus with the Feynman technique |
-| `socrate` | Generates cognitive friction: finds contradictions and gaps, never closes |
-| `aristotele` | Curates TB syntheses: hubs, missing connections, clusters |
-| `oracolo` | Retrieves knowledge from the TB without interpreting |
-| `ermes` | Extracts text from URLs (web articles and YouTube) |
-| `indiana` | Code archaeology: diagnoses patterns and technical debt |
-| `prometeo` | Creates and improves skills |
-| `omero` | Maintains the local project wiki in `.wiki/` |
+| `summoner` | Designs and builds the th member team for a project |
+| `gardener` | Sediments ideas in the TB atomically and connectedly |
+| `alchemist` | Teaches the TB corpus with the Feynman technique |
+| `inquisitor` | Generates cognitive friction: finds contradictions and gaps, never closes |
+| `cartographer` | Curates TB syntheses: hubs, missing connections, clusters |
+| `oracle` | Retrieves knowledge from the TB without interpreting |
+| `courier` | Extracts text from URLs (web articles and YouTube) |
+| `prospector` | Code archaeology: diagnoses patterns and technical debt |
+| `blacksmith` | Creates and improves skills |
+| `scribe` | Maintains the local project wiki in `.wiki/` |
 | `postman` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) |
 
 ## Setup
@@ -50,23 +50,23 @@ Before answering on a topic that might be in the TB:
 tb search "<topic>" --depth 1
 ```
 
-For complex problems that benefit from multiple perspectives: Annibale orchestrates a multi-hat flow via `th run`.
-To extract content from URLs or videos: Ermes.
+For complex problems that benefit from multiple perspectives: Quartermaster orchestrates a multi-hat flow via `th run`.
+To extract content from URLs or videos: Courier.
 
-### On a project — Omero
+### On a project — Scribe
 
-Omero maintains the local wiki in `.wiki/` — plain markdown pages, style guides and code conventions. Delegate to Omero to ingest material, ask about the project, or document how the code is written. The skill operates on the files directly.
+Scribe maintains the local wiki in `.wiki/` — plain markdown pages, style guides and code conventions. Delegate to Scribe to ingest material, ask about the project, or document how the code is written. The skill operates on the files directly.
 
-### End of session — Platone (10 min)
+### End of session — Gardener (10 min)
 
-If there has been valuable output (a decision, an idea, a pattern): Platone sediments into the TB.
-If the work was on a project with a wiki: Omero updates `.wiki/`.
+If there has been valuable output (a decision, an idea, a pattern): Gardener sediments into the TB.
+If the work was on a project with a wiki: Scribe updates `.wiki/`.
 
 The rule: if you do not sediment it now, it does not exist tomorrow.
 
-### Periodically — Aristotele
+### Periodically — Cartographer
 
-When the TB starts to feel dense (every 2-4 weeks): Aristotele creates hubs and connects isolated notes.
+When the TB starts to feel dense (every 2-4 weeks): Cartographer creates hubs and connects isolated notes.
 
 ---
 
@@ -74,6 +74,6 @@ When the TB starts to feel dense (every 2-4 weeks): Aristotele creates hubs and 
 
 **Third Brain** (`tb`): ideas that have value beyond the project — principles, patterns, cognitive tensions. No code blocks, no detailed technical documentation.
 
-**Local wiki** (`.wiki/`, via Omero): project-specific documentation — commands, flows, architecture, conventions, lore. Lives and dies with the project.
+**Local wiki** (`.wiki/`, via Scribe): project-specific documentation — commands, flows, architecture, conventions, lore. Lives and dies with the project.
 
 The two systems complement each other, they do not overlap.
