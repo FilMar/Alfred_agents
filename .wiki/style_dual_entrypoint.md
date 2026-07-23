@@ -51,3 +51,4 @@ app.post("/search", async (c) => {
 - [architettura](architettura) — the layer table and `cli.ts → notes.ts` dependency direction
 - [ti_module](ti_module) — `ti`'s own architecture, now including `serve`/`api.ts`
 - [tb_on_rasp](tb_on_rasp) — `tb`'s client/server model, which this pattern extends with a third client type (HTTP tool consumers, not just CLI callers)
+- [th_cli](th_cli) — planned extension to `th`; diverges here because `run` is long-running, so the API needs detached-job polling (`GET /runs/:id`, `/out`, `/log`) instead of the sync request/response used by `tb`/`ti` — and unlike `tb`/`ti`, the polling routes read straight from `/tmp` files, not a database (`th.db` is being phased out in favor of [tl_module](tl_module) for history; in-progress status never needed a DB in the first place)

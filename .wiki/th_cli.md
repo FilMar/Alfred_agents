@@ -105,6 +105,25 @@ th run --member cartographer --task "suggest hubs for TB cluster" --detach
 th run --member prospector --task "analyse this codebase" --thinking high --timeout 300
 ```
 
+## HTTP API (planned, not yet implemented — agreed 2026-07-23)
+
+Following the [style_dual_entrypoint](style_dual_entrypoint) pattern already built for `tb`/`ti`, but **not** a 1:1 mirror: `th run` is a long-running agent execution, not a fast CRUD call, so the API surface is scoped to what a remote caller needs to launch a member and poll it — not full CLI parity (`sandbox-exec`, `models`, `delete`/`promote`/`--from` on member are deliberately excluded as local-only conveniences).
+
+Planned routes:
+- `POST /run` — always detached (never blocking a request on a multi-minute agent run), returns `{ id, out, log, status }`
+- `GET /runs?status=&member=&limit=` — list/filter runs **in progress or recent**, scoped to what's on disk in `/tmp` — see "No DB for this" below
+- `GET /runs/:id` — status only, read from the `.status` file — cheap for polling
+- `GET /runs/:id/out` — content of the `.out` file
+- `GET /runs/:id/log` — content of the `.log` file
+- `POST /member` — create (`name`, `hat`, `role`, `tools`)
+- `GET /member` — list
+- `GET /member/:name` — detail
+- `GET /hats` — list, needed client-side to pick `--hat` when creating a member
+
+Design note: status and output are split into separate GETs (`/runs/:id` vs `/runs/:id/out`/`/log`) specifically so a polling client isn't forced to pull potentially large output just to check if a run is still going.
+
+**No DB for this (revised 2026-07-23, same day as the initial note)**: the user's separate intention to remove `th.db` entirely (see Overview above — history moves to [tl_module](tl_module)) turns out to simplify this API rather than complicate it. "What's in progress right now" is inherently ephemeral, per-run local state, and it's *already* file-backed independent of the DB: every `--detach` run writes `.status`/`.out`/`.log` to `/tmp` (filename `th-<member>-<ts>.status` etc., see "Output files" above) regardless of whether `db.ts` exists. So `GET /runs` becomes a `glob` over `/tmp/th-*.status` plus reading each file's content — the `member` filter is free since it's already embedded in the filename — with no index to keep in sync. `GET /runs/:id`, `/out`, `/log` read directly from those same three files. None of this touches `db.ts`/`listRuns()`; that plan is superseded. Historical runs beyond what's still on disk in `/tmp` are out of scope for `th`'s own API — that's exactly the gap [tl_module](tl_module) is meant to fill once the fire-and-forget event posting lands.
+
 ## Cross-references
 
 - [agenti](agenti) — agent list and hats
@@ -112,3 +131,4 @@ th run --member prospector --task "analyse this codebase" --thinking high --time
 - [orchestrator_overview](orchestrator_overview) — Pillar 4 uses `sandbox-exec` as the execution wrapper for audited tasks
 - [roadmap_orchestrator](roadmap_orchestrator) — Phase 2, where the subcommand was tracked
 - [tl_module](tl_module) — planned replacement for `th.db`/`history`/`stats`
+- [style_dual_entrypoint](style_dual_entrypoint) — the CLI+API pattern this planned work extends to `th`, with the async/job-polling divergence from `tb`/`ti`

@@ -1,4 +1,5 @@
-#!/usr/bin/env bun
+#!/home/filrasp/.bun/bin/bun
+
 import { Command } from "commander";
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";

@@ -60,6 +60,7 @@ Shared component: the **Matrix layer** serves both the orchestrator (notificatio
 ## Immediate todo
 
 - [ ] Aggregate per-hat metrics (`th stats`) — Phase 7
+- [ ] `th` HTTP API entrypoint (`POST /run` detached + `GET /runs`, `/runs/:id`, `/runs/:id/out|log` — file-backed via `/tmp`, no DB — + member/hats routes) — scope agreed 2026-07-23, revised same day, see [th_cli](th_cli)
 
 ## Cross-references
 

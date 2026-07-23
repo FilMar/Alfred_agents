@@ -1,4 +1,5 @@
-#!/usr/bin/env bun
+#!/home/filrasp/.bun/bin/bun
+
 import { Command } from "commander";
 import { checkHealth, EMBED_MODEL } from "../../tb/src/infra.js";
 import * as identity from "./identity.js";

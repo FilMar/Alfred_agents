@@ -8,6 +8,14 @@ updated: 2026-07-02
 
 ## Log
 
+## [2026-07-23] revision | th HTTP API — dropped th.db dependency, polling goes straight to /tmp
+
+Same-day revision of the note below. The user separately confirmed intent to remove `th.db` (SQLite) entirely, moving run history to [tl_module](tl_module) via fire-and-forget REST events. Rather than complicating the planned `GET /runs` routes, this simplified them: "in progress" status is inherently ephemeral local state that was already file-backed (`.status`/`.out`/`.log` in `/tmp`, written by `spawnDetached` independent of the DB), so `GET /runs` becomes a glob over `/tmp/th-*.status` instead of a `listRuns()`/`db.ts` extension. That plan is superseded. Historical runs beyond what's on disk stay explicitly out of scope for `th`'s own API — that gap is `tl`'s to fill once wired up. Updated in [th_cli](th_cli), [roadmap](roadmap), [style_dual_entrypoint](style_dual_entrypoint).
+
+## [2026-07-23] ingest | th HTTP API — planned scope (POST /run detached + polling routes)
+
+Design discussion, not yet implemented. Agreed with the user that `th`'s HTTP API is not a 1:1 mirror of the `tb`/`ti` pattern in [style_dual_entrypoint](style_dual_entrypoint): `th run` is long-running, so `POST /run` is always detached, and status/output are split across `GET /runs/:id` (row only), `/runs/:id/out`, `/runs/:id/log` so polling stays cheap. `GET /runs` gains a `status` filter alongside the existing `member` filter. Member/hats creation routes (`POST /member`, `GET /member`, `GET /member/:name`, `GET /hats`) included since the API must be usable without local CLI access to pre-existing members. `sandbox-exec`, `models`, `delete`/`promote`/`--from` explicitly excluded as local-only. Recorded in [th_cli](th_cli), tracked in [roadmap](roadmap) immediate todo.
+
 ## [2026-07-23] ingest | tb serve / ti serve — dual CLI+HTTP API entrypoint
 
 ## [2026-07-22] ingest | Skill rename decision: mythological figures to professions
