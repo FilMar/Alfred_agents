@@ -2,6 +2,8 @@
 import { Command } from "commander";
 import { checkHealth, EMBED_MODEL } from "../../tb/src/infra.js";
 import * as identity from "./identity.js";
+import { serveApi, API_PORT } from "./api.js";
+import { normalizeTags, errorMessage } from "./types.js";
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
 
@@ -36,10 +38,6 @@ async function requireServices(opts: { needsEmbedding?: boolean } = {}): Promise
 function collect(val: string, acc: string[]): string[] {
   acc.push(val);
   return acc;
-}
-
-function normalizeTags(tags: string[]): string[] {
-  return tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean);
 }
 
 // ─── Programma ────────────────────────────────────────────────────────────────
@@ -106,6 +104,16 @@ program
     out(entry);
   });
 
+program
+  .command("serve")
+  .description("Start the HTTP API (OpenAPI-compatible, for tool integrations)")
+  .action(async () => {
+    await requireServices({ needsEmbedding: false });
+    serveApi();
+    process.stdout.write(`API: http://localhost:${API_PORT} (spec: /openapi.json)\n`);
+    await new Promise(() => {}); // keep process alive
+  });
+
 program.parseAsync(process.argv).catch((err) => {
-  die(err instanceof Error ? err.message : String(err));
+  die(errorMessage(err));
 });

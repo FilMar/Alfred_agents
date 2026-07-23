@@ -51,7 +51,7 @@ No note-linking (no `refs`/`backrefs` like `tb`): entries are atomic condition�
 
 `do` entries are not restricted to one kind. Three concrete forms settled in conversation:
 - **behavior/attitude** — "keep commits surgical, no unrelated cleanup";
-- **dispatch** to a skill or `th` member — "use skill Platone", "run member knuth-black for audit";
+- **dispatch** to a skill or `th` member — "use skill Gardener", "run member knuth-black for audit";
 - **lookup hint** into `tb` — a topic/search term worth checking for this context, never a frozen note id: an id goes stale as `tb` accumulates new relevant notes on the same topic over time, a search term stays valid.
 
 This makes `ti` a general **context router**, not just a behavior log. Its value is encoding non-obvious associations — a context that wouldn't semantically surface a related skill, member, or `tb` note on its own. If the association were obvious, plain `tb search` would already find it and `ti` would add nothing.
@@ -73,6 +73,7 @@ Reuses `tools/tb/src/infra.ts` as a library (`HttpClient`, `QDRANT_URL`, `OLLAMA
 - `list`: Returns all entries, optionally filtered by tags.
 - `delete <id>`: Removes a rule by ID.
 - `append-do <id>`: Appends a new action to an existing rule without modifying the trigger.
+- `serve`: Starts an HTTP API (Hono) mirroring the CLI commands 1:1, plus a static `/openapi.json` — for registering `ti` as an OpenAPI Tool Server in HTTP clients (e.g. OpenWebUI). Port 8789, override with `TI_API_PORT`. Added 2026-07-23 — see [style_dual_entrypoint](style_dual_entrypoint).
 
 ## Pending Work
 
@@ -82,7 +83,7 @@ Reuses `tools/tb/src/infra.ts` as a library (`HttpClient`, `QDRANT_URL`, `OLLAMA
 
 `ti` is a new procedural-memory system standing alongside `tb` (semantic memory), but this is **not yet reflected upstream** — flagged here as a follow-up, not yet actioned:
 
-- **Skills** (`~/.claude/skills`): Platone (memory consolidation) currently only knows how to write to `tb`. It has no notion of `ti`'s if/do rules, so procedural decisions surfaced in a session are not routed there.
+- **Skills** (`~/.claude/skills`): Gardener (memory consolidation, renamed from Platone) now proposes `ti add` for context→action decisions alongside `tb save` for semantic concepts — resolved 2026-07-23.
 - **`alfred.md`** (the user's global identity/instructions file): documents Third Brain (`tb`) and Third Hand (`th`) as the two memory/orchestration systems, but does not mention Third Identity (`ti`) at all.
 
 Both need updating to actually teach the system to use `ti` for procedural if/do rules — otherwise `ti` remains a working tool nobody is instructed to call.
@@ -94,3 +95,4 @@ Both need updating to actually teach the system to use `ti` for procedural if/do
 - [tb_on_rasp](tb_on_rasp) — the Qdrant/Ollama instance `ti` shares with `tb`
 - [roadmap_orchestrator](roadmap_orchestrator) — the orchestrator work `ti` took priority over
 - [agenti](agenti) — skills and `th` members `ti` can dispatch to
+- [style_dual_entrypoint](style_dual_entrypoint) — the CLI+API pattern behind `ti serve`, shared with `tb serve`

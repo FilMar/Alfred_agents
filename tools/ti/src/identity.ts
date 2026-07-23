@@ -17,12 +17,12 @@ export async function addEntry(ifText: string, doText: string, tags: string[]): 
   const id = crypto.randomUUID();
   await qdrant.upsertPoint(id, vector, { if: ifText, do: [doText], tags });
   
-  return { 
-    id, 
-    vector, 
-    if: ifText, 
-    do: [doText], 
-    tags 
+  return {
+    id,
+    vector: [],
+    if: ifText,
+    do: [doText],
+    tags
   };
 }
 
@@ -106,7 +106,7 @@ export async function appendDo(id: string, doText: string): Promise<IdentityEntr
   
   return {
     id,
-    vector,
+    vector: [],
     if: existingEntry.if,
     do: updatedDo,
     tags: existingEntry.tags,

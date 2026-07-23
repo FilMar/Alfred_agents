@@ -18,7 +18,7 @@ tags: string[]  # free-form scoping (project, domain, agent) — payload filter
 
 `do` entries are action strings, not restricted to one kind — a `do` can be:
 - an observed **behavior/attitude** ("keep commits surgical, no unrelated cleanup"),
-- a **dispatch** to a skill or `th` member ("use skill Platone", "run member knuth-black for audit"),
+- a **dispatch** to a skill or `th` member ("use skill Gardener", "run member knuth-black for audit"),
 - a **lookup hint** into `tb` — a topic/search term worth checking for this context, not a frozen note id (ids go stale as `tb` accumulates new relevant notes over time; a search term stays valid).
 
 This makes `ti` a general context router, not just a behavior log — the value is encoding non-obvious associations (a context that wouldn't semantically surface a related skill, member, or `tb` note on its own). If the association is obvious, plain `tb search` already finds it and `ti` adds nothing.

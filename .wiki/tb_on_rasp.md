@@ -18,7 +18,7 @@ Host the Third Brain on the Rasp and query it from anywhere via a dedicated Matr
 
 ## Agent-free reads
 
-Reading the TB needs no intelligence: `tb search` is deterministic retrieval. A dedicated Matrix bot command (e.g. `!tb search <query>`) runs the query and returns formatted results. The agent is needed for distillation/consolidation (writes, via Platone) — not for querying. Writes stay agent-mediated and can come later.
+Reading the TB needs no intelligence: `tb search` is deterministic retrieval. A dedicated Matrix bot command (e.g. `!tb search <query>`) runs the query and returns formatted results. The agent is needed for distillation/consolidation (writes, via Gardener) — not for querying. Writes stay agent-mediated and can come later.
 
 ## Target configuration
 

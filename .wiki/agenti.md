@@ -19,22 +19,34 @@ The `SKILL.md` file contains:
 
 | Agent | Role | Hat |
 |-------|------|-----|
-| `annibale` | Orchestrator: decomposes complex work into multi-agent flows with de Bono hats | Blue (process) |
-| `oracolo` | Retrieves knowledge from the TB without interpreting | White (data) |
-| `socrate` | Generates cognitive friction: finds contradictions and gaps, never closes | Black (critical) |
-| `aristotele` | Curates TB syntheses: hubs, missing connections, dense clusters | Yellow (synthesis) |
-| `platone` | Sediments ideas in the TB atomically and connectedly, with serendipity | Green (creative) |
-| `feynman` | Teaches the TB corpus with the three-level Feynman technique | White + Yellow |
-| `indiana` | Code archaeology: diagnoses patterns, debt, buried decisions | Black (critical) |
-| `ermes` | Extracts text from URLs (web articles and YouTube) | White (data) |
-| `prometeo` | Creates and improves skills, measures performance via evals and benchmarks | Green (creative) |
-| `omero` | Maintains the local project wiki in `.wiki/` (direct file edits) | Blue (process) |
-| `giano` | Designs and builds the th member team for a project | Blue (process) |
-| `archimede` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md | — |
-| `postino` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) | — |
-| `vasari` | Generates a Typst CV from free conversation or an existing CV/text | — |
+| `quartermaster` | Orchestrator: decomposes complex work into multi-agent flows with de Bono hats | Blue (process) |
+| `oracle` | Retrieves knowledge from the TB without interpreting | White (data) |
+| `inquisitor` | Generates cognitive friction: finds contradictions and gaps, never closes | Black (critical) |
+| `cartographer` | Curates TB syntheses: hubs, missing connections, dense clusters | Yellow (synthesis) |
+| `gardener` | Sediments ideas in the TB atomically and connectedly, with serendipity | Green (creative) |
+| `alchemist` | Teaches the TB corpus with the three-level Feynman technique | White + Yellow |
+| `prospector` | Code archaeology: diagnoses patterns, debt, buried decisions | Black (critical) |
+| `courier` | Extracts text from URLs (web articles and YouTube) | White (data) |
+| `blacksmith` | Creates and improves skills, measures performance via evals and benchmarks | Green (creative) |
+| `scribe` | Maintains the local project wiki in `.wiki/` (direct file edits) | Blue (process) |
+| `summoner` | Designs and builds the th member team for a project | Blue (process) |
+| `architect` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md | — |
+| `postman` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) | — |
+| `biographer` | Generates a Typst CV from free conversation or an existing CV/text | — |
 
-`archimede`, `postino` and `vasari` are operational skills without a de Bono hat — invoked as Claude Code skills, not as `th` members. Total: 14 skills, matching `skills/`.
+`architect`, `postman` and `biographer` are operational skills without a de Bono hat — invoked as Claude Code skills, not as `th` members. Total: 14 skills, matching `skills/`.
+
+## Naming rename — mythological figures to professions (done, 2026-07-23)
+
+Decision (2026-07-22): drop the mythological/historical-figure names (Annibale, Oracolo, ...) in favour of professions — a mix of historical/real (architect, cartographer, courier, scribe, gardener, postman, biographer, quartermaster, oracle) and fantastical/evocative (alchemist, summoner, prospector, blacksmith, inquisitor). Goal: keep personality per role (unlike flat function names such as `consolidate-memory`) while making the name itself hint at what the role does, which a proper noun cannot.
+
+Two earlier options were tried and rejected before this one:
+- Plain functional names (e.g. `consolidate-memory`, `orchestrate`) — technically sufficient since Skill/`th` dispatch matches on *description*, not name, but flattens the per-role personality the mythological names carried.
+- D&D classes (Fighter, Wizard, Cleric, ...) — rejected by the user as unconvincing, even after a full 1:1 mapping across all 14 skills.
+
+Naming collisions to note: `oracolo → oracle` and `postino → postman` are near-identical translations, kept because the original name already *was* the job title in spirit — no rename was actually needed there for meaning, only for cross-language/style consistency with the rest of the roster.
+
+Status: executed. All 14 `skills/<name>/` directories, `SKILL.md` frontmatter, `th` member names, and every reference in `alfred.md` / `CLAUDE.md` (workflow trigger table) and `.wiki/` now use the profession names. Old mythological names survive only in dated `.wiki/log.md` entries (historical record) and in this decision record itself.
 
 ## De Bono hats
 
@@ -55,18 +67,18 @@ Hats live in `tools/th/src/` (directory `hats/`). Use `th hats list` to see them
 
 **Sequential** (one's output → next one's context):
 ```bash
-th run --member oracolo --task "retrieve everything on X" --output /tmp/oracolo.out
-th run --member feynman --task "$(cat /tmp/oracolo.out) — teach"
+th run --member oracle --task "retrieve everything on X" --output /tmp/oracle.out
+th run --member alchemist --task "$(cat /tmp/oracle.out) — teach"
 ```
 
 **Parallel** with `--detach`:
 ```bash
-th run --member socrate --task "find gaps in..." --detach
-th run --member aristotele --task "find clusters in..." --detach
+th run --member inquisitor --task "find gaps in..." --detach
+th run --member cartographer --task "find clusters in..." --detach
 # poll on /tmp/th-*.status, then synthesise
 ```
 
-**Annibale** automatically orchestrates the right pattern by decomposing the problem into sub-tasks.
+**Quartermaster** automatically orchestrates the right pattern by decomposing the problem into sub-tasks.
 
 ## Member lifecycle
 

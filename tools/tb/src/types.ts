@@ -28,6 +28,21 @@ export function isEvidence(kind: NoteType): boolean {
   return kind === "dato";
 }
 
+/** Type guard: valida un kind arbitrario contro l'enum NOTE_TYPES. */
+export function isValidKind(kind: string): kind is NoteType {
+  return (NOTE_TYPES as readonly string[]).includes(kind);
+}
+
+/** Normalizza una lista di tag: split su virgola, trim, rimuove vuoti. */
+export function normalizeTags(tags: string[]): string[] {
+  return tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean);
+}
+
+/** Estrae un messaggio leggibile da un errore di tipo sconosciuto. */
+export function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 /** Testo canonico da vettorizzare per una nota: contesto + contenuto. */
 export function noteToText(note: Pick<Note, "why" | "what">): string {
   return `${note.why}\n\n${note.what}`;

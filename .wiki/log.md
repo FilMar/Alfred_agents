@@ -8,6 +8,12 @@ updated: 2026-07-02
 
 ## Log
 
+## [2026-07-23] ingest | tb serve / ti serve — dual CLI+HTTP API entrypoint
+
+## [2026-07-22] ingest | Skill rename decision: mythological figures to professions
+
+Documented in [agenti](agenti) the decision to rename all 14 skills from mythological/historical-figure names to professions (mix of historical/real and fantastical). Full 1:1 mapping recorded in the "Available agents" table's new "Planned rename" column and expanded in the new section "Naming rename — mythological figures to professions". Two alternatives were considered and rejected first: plain functional names (technically sufficient for dispatch, which matches on description not name, but flattens per-role personality) and D&D classes (fully mapped, rejected as unconvincing). Decision record only — no `skills/`, `SKILL.md`, `th` member, `alfred.md`, or `CLAUDE.md` file has been touched yet; the actual rename proceeds incrementally, skill by skill, in follow-up sessions.
+
 ## [2026-07-21] implement | Third Identity (ti): live smoke test, bug fixes, packaging done
 Live-tested `ti` end-to-end against the real Qdrant/Ollama instance on the Rasp (add → search → list → append-do → delete). Found and fixed three real bugs invisible to the mocked test suite (mocks matched the code's assumptions, not the API): `query`/`scroll` responses wrap points in `result.points`, not a bare `result` array; `query` needs `with_payload: true` explicit to return payload; single-point GET returns an object at `result`, not an array — `appendDo` read `result?.[0]` and would have thrown "No entry found" on **any** real existing id, a genuine blocking bug. Fixed in `qdrant.ts`/`identity.ts`, test mocks updated, full cycle re-verified live. Packaging closed out: `ti` registered in `package.json`'s `bin`, symlinked at `~/.local/bin/ti`, added to `setup.sh` alongside `tb`/`th` (idempotent on re-run). Flagged, not yet actioned: `ti` is a new procedural-memory system that neither the skills (`~/.claude/skills`, esp. Platone) nor `alfred.md` know about yet — both need updating to actually route procedural if/do decisions into `ti`. See [ti_module](ti_module).
 

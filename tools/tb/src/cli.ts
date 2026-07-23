@@ -6,9 +6,10 @@ import { fileURLToPath } from "node:url";
 
 import { checkHealth, EMBED_MODEL } from "./infra.js";
 import { serveGraph, GRAPH_PORT } from "./graph/server.js";
+import { serveApi, API_PORT } from "./api.js";
 import { createNote, addRefs, changeKind, changeTags, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
 import type { NoteType, SearchOptions } from "./types.js";
-import { NOTE_TYPES } from "./types.js";
+import { NOTE_TYPES, isValidKind, normalizeTags, errorMessage } from "./types.js";
 
 // ─── Compose path ─────────────────────────────────────────────────────────────
 
@@ -53,18 +54,10 @@ function collect(val: string, acc: string[]): string[] {
   return acc;
 }
 
-function normalizeTags(tags: string[]): string[] {
-  return tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean);
-}
-
 function validateKind(kind: string): asserts kind is NoteType {
-  if (!NOTE_TYPES.includes(kind as NoteType)) {
+  if (!isValidKind(kind)) {
     die(`invalid kind: "${kind}". Allowed values: ${NOTE_TYPES.join(", ")}`);
   }
-}
-
-function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 
@@ -288,6 +281,18 @@ program
     const url = `http://localhost:${GRAPH_PORT}`;
     process.stdout.write(`Graph: ${url}\n`);
     spawnSync("xdg-open", [url], { stdio: "ignore" });
+    await new Promise(() => {}); // keep process alive
+  });
+
+// ─── serve ────────────────────────────────────────────────────────────────────
+
+program
+  .command("serve")
+  .description("Start the HTTP API (OpenAPI-compatible, for tool integrations)")
+  .action(async () => {
+    await requireServices({ needsEmbedding: false });
+    serveApi();
+    process.stdout.write(`API: http://localhost:${API_PORT} (spec: /openapi.json)\n`);
     await new Promise(() => {}); // keep process alive
   });
 
