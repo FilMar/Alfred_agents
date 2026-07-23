@@ -1,0 +1,10 @@
+[Unit]
+Description=tb HTTP API
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/tb serve
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

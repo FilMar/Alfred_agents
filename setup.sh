@@ -47,3 +47,11 @@ chmod +x "$REPO/tools/ti/src/cli.ts"
 link "$REPO/tools/tb/src/cli.ts"  "$HOME/.local/bin/tb"  "~/.local/bin/tb"
 link "$REPO/tools/th/src/cli.ts"  "$HOME/.local/bin/th"  "~/.local/bin/th"
 link "$REPO/tools/ti/src/cli.ts"  "$HOME/.local/bin/ti"  "~/.local/bin/ti"
+
+# --- systemd user services (tb, ti HTTP API) ---
+echo "systemd user services (tb, ti)"
+mkdir -p "$HOME/.config/systemd/user"
+link "$REPO/tools/tb/tb.service" "$HOME/.config/systemd/user/tb.service" "~/.config/systemd/user/tb.service"
+link "$REPO/tools/ti/ti.service" "$HOME/.config/systemd/user/ti.service" "~/.config/systemd/user/ti.service"
+systemctl --user daemon-reload
+echo "  [ok]   linked, not enabled. To start: systemctl --user enable --now tb.service ti.service"
