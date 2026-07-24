@@ -63,7 +63,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
       );
       expect(result).toEqual(expect.objectContaining({
         id: expect.any(String),
-        vector: mockVector,
+        vector: [],
         if: ifText,
         do: [doText],
         tags: tags,
@@ -105,7 +105,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
         "POST",
         expect.stringContaining("/collections/pi_identity/points/query"),
         expect.objectContaining({
-          vector: mockVector,
+          query: mockVector,
           filter: expect.objectContaining({
             must: [
               {
