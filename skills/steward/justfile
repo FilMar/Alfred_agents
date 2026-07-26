@@ -1,0 +1,126 @@
+# Taskwarrior wrapper for the gtd skill.
+# All GTD operations go through these recipes — do not call `task` directly.
+
+default:
+    @just --list
+
+# Cattura rapida: aggiungi un task con descrizione e modificatori opzionali
+# es: just add "Comprare pane" +errands due:tomorrow
+add desc *mods:
+    task add '{{desc}}' {{mods}}
+
+# Lista task pending con filtro opzionale
+# es: just list, just list project:Home, just list +weekend due.before:eom
+list *filter:
+    task {{filter}} list
+
+# Task piu' urgenti (sorted by urgency)
+next:
+    task next
+
+# Dettagli completi di un task (incluso change history)
+info id:
+    task {{id}} info
+
+# Completa un task
+done id:
+    task {{id}} done
+
+# Elimina un task
+delete id:
+    task {{id}} delete
+
+# Inizia a lavorare su un task
+start id:
+    task {{id}} start
+
+# Ferma il lavoro su un task
+stop id:
+    task {{id}} stop
+
+# Modifica generica: passa qualsiasi modificatore taskwarrior
+# es: just modify 12 due:eom priority:H
+modify id *mods:
+    task {{id}} modify {{mods}}
+
+# Assegna un progetto a un task
+proj id project:
+    task {{id}} modify project:'{{project}}'
+
+# Aggiungi un tag a un task
+tag id tag:
+    task {{id}} modify +{{tag}}
+
+# Rimuovi un tag da un task
+untag id tag:
+    task {{id}} modify -{{tag}}
+
+# Imposta la scadenza di un task
+# es: just due 12 tomorrow, just due 12 eom, just due 12 2025-07-15
+due id date:
+    task {{id}} modify due:{{date}}
+
+# Rimuovi la scadenza di un task
+nodue id:
+    task {{id}} modify due:
+
+# Imposta la priorita' (H, M, L, o vuota)
+prio id level:
+    task {{id}} modify priority:{{level}}
+
+# Rimuovi la priorita'
+noprio id:
+    task {{id}} modify priority:
+
+# Aggiungi un'annotazione a un task
+annotate id text:
+    task {{id}} annotate '{{text}}'
+
+# Lista tutti i progetti con conteggio task
+projects:
+    task projects
+
+# Lista tutti i tag in uso
+tags:
+    task tags
+
+# Task in ritardo (oltre la scadenza)
+overdue:
+    task +OVERDUE list
+
+# Task avviati (started ma non completati)
+active:
+    task active
+
+# Task in attesa (wait date nel futuro)
+waiting:
+    task +WAITING list
+
+# Task completati
+completed *filter:
+    task {{filter}} completed
+
+# Calendario con scadenze
+calendar:
+    task calendar
+
+# Attiva un contesto
+context-set name:
+    task context {{name}}
+
+# Disattiva il contesto corrente
+context-none:
+    task context none
+
+# Lista contesti disponibili
+context-list:
+    task context list
+
+# Esporta task in JSON (per elaborazione programmatica)
+export *filter:
+    task {{filter}} export
+
+# Escape hatch: passa qualsiasi comando a taskwarrior
+# es: just raw burndown.weekly, just raw 12 duplicate
+raw *args:
+    task {{args}}
