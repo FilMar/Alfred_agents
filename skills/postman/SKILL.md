@@ -3,6 +3,8 @@ name: postman
 description: "Manages emails via Himalaya: triage and auto-sort INBOX, search by any field, browse folders, compose email drafts to file (user sends manually). No deletion, no sending."
 ---
 
+Use the recipes in this skill's `justfile` instead of calling `himalaya` directly — it wraps account handling (`filippo` default, `lavoro`) and folder/id plumbing. Run `just --list` from this directory to see all recipes with their argument order (just takes positional args, not `name=value`).
+
 ## Operations
 
 ### 1. Triage
@@ -11,7 +13,7 @@ No fixed classification script. Sender/subject → folder rules live in `ti` (ta
 
 1. Fetch envelopes:
    ```bash
-   himalaya envelope list --page-size 200 -o json -f INBOX
+   just inbox filippo INBOX 200
    ```
 2. Group by sender address/domain (dedupe — one lookup per sender, not per email).
 3. For each sender, check for a known rule:
@@ -20,8 +22,7 @@ No fixed classification script. Sender/subject → folder rules live in `ti` (ta
    ```
 4. High-confidence match (score clearly high, e.g. > 0.85) → apply its `do` (target folder) directly:
    ```bash
-   himalaya folder create '<folder>'   # idempotent, ignore error if it exists
-   himalaya message move -f INBOX '<folder>' <id1> <id2> ...
+   just move filippo INBOX '<folder>' <id1> <id2> ...
    ```
 5. No match, or low-confidence: show the sender + subjects to the user, ask which folder they belong to (or "leave in INBOX" / "delete manually"). Do not guess silently.
 6. Once the user decides, move the emails **and** persist the rule so it is never asked again:
@@ -39,10 +40,10 @@ ti list --tags mail,triage
 
 ### 2. Cerca
 
-Use Himalaya's query syntax. Always use `-o json` and format the output as a table.
+Use Himalaya's query syntax, passed through the `search` recipe. Always format the output as a table.
 
 ```bash
-himalaya envelope list -o json [QUERY]
+just search filippo INBOX [QUERY]
 ```
 
 Query syntax:
@@ -55,9 +56,9 @@ Query syntax:
 
 Examples:
 ```bash
-himalaya envelope list -o json 'from paypal and after 2026-01-01'
-himalaya envelope list -o json -f pagamenti 'subject fattura'
-himalaya envelope list -o json 'not flag seen and after 2026-06-01'
+just search filippo INBOX from paypal and after 2026-01-01
+just search filippo pagamenti subject fattura
+just search filippo INBOX not flag seen and after 2026-06-01
 ```
 
 Show results as a readable table: ID, from, subject, date.
@@ -67,41 +68,34 @@ Show results as a readable table: ID, from, subject, date.
 ### 3. Sfoglia
 
 ```bash
-himalaya envelope list -o json -f "<folder>"
+just inbox filippo "<folder>"
 ```
 
 Available folders (list dynamically if unsure):
 ```bash
-himalaya folder list
+just folders filippo
 ```
 
 ---
 
 ### 4. Componi
 
-Write an email draft to file. **Do NOT send it.** The user will send manually.
+Write an email template to file. **Do NOT send it.** The user will send manually. This is a local `.mml` template, not a server-side draft — there is no reason to save it to the IMAP Drafts folder for this workflow.
 
-Save the file to `~/mail/outbox/<slug>.mml` (create the directory if it does not exist).
-
-Format (MML — himalaya template format):
-```
-From: filippo.ufficiale <filippo.ufficiale@gmail.com>
-To: <recipient>
-Subject: <subject>
-
-<body>
-```
-
-For the account `lavoro` use the appropriate From address (check with `himalaya account list` if unsure).
-
-After writing the file, print:
-```
-Draft saved: ~/mail/outbox/<filename>.mml
-To send: himalaya template send < ~/mail/outbox/<filename>.mml
-```
-
-If replying to an existing email, generate the reply template with:
 ```bash
-himalaya template reply <id>
+just template filippo <to> "<subject>" "<body>"
 ```
-Then fill in the body, save to `~/mail/outbox/reply-<id>.mml`, and show the send command.
+
+This saves to `~/mail/outbox/<slug>.mml` via `himalaya template write`, which prefills the correct From header and signature for the given account. To read it back:
+```bash
+just show-template ~/mail/outbox/<slug>.mml
+```
+
+If replying to an existing email, generate the reply template instead — this already saves to `~/mail/outbox/reply-<id>.mml`, prefilled with the quoted original and the account's signature:
+```bash
+just reply filippo <id>
+```
+Edit the file to fill in the body (`show-template` to read it, then Edit as usual), then show the send command:
+```bash
+just send-cmd ~/mail/outbox/reply-<id>.mml
+```
