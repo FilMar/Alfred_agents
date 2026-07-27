@@ -18,6 +18,44 @@ list *filter:
 next:
     task next
 
+# Next actions (con tag +next)
+next-actions:
+    task +next next
+
+# Inbox - task da chiarire (senza stato workflow)
+inbox:
+    task -next -waiting -someday -routine list
+
+# By Area of Focus
+emotion:
+    task +emotion next
+cura:
+    task +cura next
+amministrazione:
+    task +amministrazione next
+personale:
+    task +personale next
+lavoro:
+    task +lavoro next
+
+# By energy required
+focus:
+    task +focus next
+exec:
+    task +execute exec
+reflect:
+    task +reflect next
+rest:
+    task +rest next
+
+# By workflow state
+waiting-list:
+    task +waiting list
+someday:
+    task +someday list
+routine:
+    task +routine list
+
 # Dettagli completi di un task (incluso change history)
 info id:
     task {{id}} info
