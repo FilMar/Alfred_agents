@@ -5,7 +5,7 @@ description: >
   start a new project from scratch — software, product, tool, library, research, content —
   and needs to clarify its purpose, constraints and structure before writing code or documentation.
   Strong triggers: "I want to create", "I'm starting a project", "how would I structure", "help me
-  define", "new project", "where do I begin". At the end it produces README.md, ROADMAP.md and
+  define", "new project", "where do I begin". At the end it produces README.md, a justfile and
   CLAUDE.md calibrated to the specific project — not generic templates.
 ---
 
@@ -49,6 +49,7 @@ Areas to cover before proceeding:
 - Scope: what the project is NOT, what it must not become
 - Stack/approach: language, framework, tools and why
 - Constraints: time, dependencies, compatibility
+- Recurring operations: commands the user will run often or mechanical steps they described (setup, test, build, or anything project-specific like pipelines, codegen, seeding) — this feeds the justfile
 - AI rules: how they want AI to collaborate on this project
 
 **Generate friction with substance**: if an assumption is weak, say so and propose the concrete alternative. Do not agree out of courtesy.
@@ -59,7 +60,7 @@ Continue the loop until the open questions list is exhausted or you have enough 
 
 When you have all the material, say explicitly:
 
-> "I have everything I need. Shall I proceed with README.md, ROADMAP.md and CLAUDE.md?"
+> "I have everything I need. Shall I proceed with README.md, justfile and CLAUDE.md?"
 
 Do not generate the files before receiving explicit assent.
 
@@ -91,22 +92,28 @@ Only after confirmation, write the three files in the **current directory**.
 [How to start, test, contribute — specific to this project]
 ```
 
-#### ROADMAP.md
+#### justfile
 
-Organised by logical phases or functional areas, not by feature. Exact format:
+Not a roadmap: the roadmap is Omero's job, later, in `.wiki/`. This file is operational — recipes for the recurring commands this specific project will need, so nobody has to remember or re-derive them.
 
-```markdown
-# Roadmap
+Derive recipes from what came out of the dialogue (stack, approach, constraints):
+- Base recipes almost every project needs: `setup` (install/prepare), `test`, `run`, `build` — only include the ones that make sense for this stack. Don't pad with recipes that do nothing.
+- Project-specific deterministic operations that surfaced in the dialogue — e.g. a data pipeline step, a codegen command, a migration runner, a fixture seeder. If the user described a recurring mechanical task, give it a recipe rather than leaving it as prose knowledge.
 
-## [Category 1]
-- [ ] concrete and actionable task
-- [ ] concrete and actionable task
+```makefile
+# [one-line comment: what this justfile is for]
 
-## [Category 2]
-- [ ] concrete and actionable task
+setup:
+    [command]
+
+test:
+    [command]
+
+run:
+    [command]
 ```
 
-Tasks are specific ("implement JWT authentication with refresh token", not "add auth").
+Only real, runnable commands — no placeholders left for the user to fill in. If a recipe can't be made concrete from the dialogue (e.g. the exact test command is unknown), ask rather than guessing.
 
 #### CLAUDE.md
 
@@ -144,5 +151,6 @@ If detailed conventions emerge during the dialogue (e.g. architecture, DB schema
 - **Fixed structure every turn**: observations + open questions. Always, until you have everything.
 - **Do not generate files before confirmation.** Not even drafts or previews.
 - **Friction with substance.** If you challenge something, propose the concrete alternative.
-- **Specific files.** README, ROADMAP and CLAUDE must be calibrated to this project — not templates with substituted names.
+- **Specific files.** README, justfile and CLAUDE must be calibrated to this project — not templates with substituted names.
+- **No roadmap.** Piano does not produce a roadmap. That belongs to Omero, later, in `.wiki/` — do not create ROADMAP.md or a wiki roadmap page yourself, even if the dialogue surfaces phased plans.
 - **No padding.** Empty sections do not go in the final files.
