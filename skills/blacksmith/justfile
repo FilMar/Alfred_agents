@@ -1,0 +1,47 @@
+# Blacksmith — skill authoring and evaluation recipes.
+# This skill wraps its own Python scripts and the agent runner. SKILL.md
+# references only these recipes; it never invokes scripts or the runner CLI
+# directly.
+
+set fallback := true
+
+SMITH_DIR := justfile_directory()
+
+default:
+    @just --list
+
+# Validate a skill folder (SKILL.md frontmatter, required files).
+validate skill_path:
+    cd "{{SMITH_DIR}}" && python3 -m scripts.quick_validate $(realpath -m "{{invocation_directory()}}/{{skill_path}}")
+
+# Run a skill file as a sandboxed test session.
+test-skill skill_path *FLAGS:
+    cd "{{invocation_directory()}}" && th run --skill {{skill_path}} {{FLAGS}}
+
+# Aggregate benchmark results from an iteration workspace into benchmark.json/.md.
+aggregate workspace iteration skill_name:
+    cd "{{SMITH_DIR}}" && python3 -m scripts.aggregate_benchmark "{{invocation_directory()}}/{{workspace}}/iteration-{{iteration}}" --skill-name {{skill_name}}
+
+# Generate a static eval-review HTML file for an iteration workspace.
+review workspace iteration skill_name previous_iteration="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ws="{{invocation_directory()}}/{{workspace}}/iteration-{{iteration}}"
+    out="$ws/review.html"
+    args=("$ws" --skill-name "{{skill_name}}")
+    if [ -f "$ws/benchmark.json" ]; then
+      args+=(--benchmark "$ws/benchmark.json")
+    fi
+    if [ -n "{{previous_iteration}}" ]; then
+      args+=(--previous-workspace "{{invocation_directory()}}/{{workspace}}/iteration-{{previous_iteration}}")
+    fi
+    cd "{{SMITH_DIR}}" && python3 eval-viewer/generate_review.py "${args[@]}" --static "$out"
+    echo "$out"
+
+# Optimize the skill description for triggering accuracy.
+optimize-description eval_set skill_path model *FLAGS:
+    cd "{{SMITH_DIR}}" && python3 -m scripts.run_loop --eval-set "{{invocation_directory()}}/{{eval_set}}" --skill-path "{{invocation_directory()}}/{{skill_path}}" --model {{model}} {{FLAGS}}
+
+# Package a skill into a distributable .skill file.
+package skill_path output_dir=".":
+    cd "{{SMITH_DIR}}" && python3 -m scripts.package_skill "{{invocation_directory()}}/{{skill_path}}" "{{invocation_directory()}}/{{output_dir}}"

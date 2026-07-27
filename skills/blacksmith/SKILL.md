@@ -224,9 +224,9 @@ Once all runs are done:
 
 1. **Grade each run** — spawn a grader subagent (or grade inline) that reads `agents/grader.md` and evaluates each assertion against the outputs. Save results to `grading.json` in each run directory. The grading.json expectations array must use the fields `text`, `passed`, and `evidence` (not `name`/`met`/`details` or other variants) — the viewer depends on these exact field names. For assertions that can be checked programmatically, write and run a script rather than eyeballing it — scripts are faster, more reliable, and can be reused across iterations.
 
-2. **Aggregate into benchmark** — run the aggregation script from the skill-creator directory:
+2. **Aggregate into benchmark** — use this skill's justfile:
    ```bash
-   python -m scripts.aggregate_benchmark <workspace>/iteration-N --skill-name <name>
+   just -f skills/blacksmith/justfile aggregate <workspace> <iteration> <skill-name>
    ```
    This produces `benchmark.json` and `benchmark.md` with pass_rate, time, and tokens for each configuration, with mean ± stddev and the delta. If generating benchmark.json manually, see `references/schemas.md` for the exact schema the viewer expects.
 Put each with_skill version before its baseline counterpart.
@@ -235,18 +235,11 @@ Put each with_skill version before its baseline counterpart.
 
 4. **Launch the viewer** with both qualitative outputs and quantitative data:
    ```bash
-   nohup python <skill-creator-path>/eval-viewer/generate_review.py \
-     <workspace>/iteration-N \
-     --skill-name "my-skill" \
-     --benchmark <workspace>/iteration-N/benchmark.json \
-     > /dev/null 2>&1 &
-   VIEWER_PID=$!
+   just -f skills/blacksmith/justfile review <workspace> <iteration> <skill-name> [<previous-iteration>]
    ```
-   For iteration 2+, also pass `--previous-workspace <workspace>/iteration-<N-1>`.
+   For iteration 2+, pass the previous iteration number as the fourth argument.
 
-   **Cowork / headless environments:** If `webbrowser.open()` is not available or the environment has no display, use `--static <output_path>` to write a standalone HTML file instead of starting a server. Feedback will be downloaded as a `feedback.json` file when the user clicks "Submit All Reviews". After download, copy `feedback.json` into the workspace directory for the next iteration to pick up.
-
-Note: please use generate_review.py to create the viewer; there's no need to write custom HTML.
+   **Cowork / headless environments:** The `review` recipe always writes a static HTML file instead of starting a server. Feedback is downloaded as a `feedback.json` file when the user clicks "Submit All Reviews". After download, copy `feedback.json` into the workspace directory for the next iteration to pick up.
 
 5. **Tell the user** something like: "I've opened the results in your browser. There are two tabs — 'Outputs' lets you click through each test case and leave feedback, 'Benchmark' shows the quantitative comparison. When you're done, come back here and let me know."
 
@@ -379,12 +372,7 @@ Tell the user: "This will take some time — I'll run the optimization loop in t
 Save the eval set to the workspace, then run in the background:
 
 ```bash
-python -m scripts.run_loop \
-  --eval-set <path-to-trigger-eval.json> \
-  --skill-path <path-to-skill> \
-  --model <model-id-powering-this-session> \
-  --max-iterations 5 \
-  --verbose
+just -f skills/blacksmith/justfile optimize-description <path-to-trigger-eval.json> <path-to-skill> <model-id> --max-iterations 5 --verbose
 ```
 
 Use the model ID from your system prompt (the one powering the current session) so the triggering test matches what the user actually experiences.
@@ -399,7 +387,7 @@ Understanding the triggering mechanism helps design better eval queries. In pi, 
 
 This means your eval queries should be substantive enough that the model would actually benefit from reading the skill. Simple queries are poor test cases — they won't trigger regardless of description quality.
 
-The `--model` argument uses pi's format: `provider/model-id` (e.g. `anthropic/claude-sonnet-4-6`). Test runs are sandboxed via `th run --skill <path>`.
+The `--model` argument uses pi's format: `provider/model-id` (e.g. `anthropic/claude-sonnet-4-6`). Test runs are sandboxed via `just -f skills/blacksmith/justfile test-skill <path>`.
 
 ### Step 4: Apply the result
 
@@ -409,10 +397,10 @@ Take `best_description` from the JSON output and update the skill's SKILL.md fro
 
 ### Package and Present (only if `present_files` tool is available)
 
-Check whether you have access to the `present_files` tool. If you don't, skip this step. If you do, package the skill and present the .skill file to the user:
+Check whether you have access to the `present_files` tool. If you don't, skip this step. If you do, package the skill with this skill's justfile and present the .skill file to the user:
 
 ```bash
-python -m scripts.package_skill <path/to/skill-folder>
+just -f skills/blacksmith/justfile package <path/to/skill-folder> [<output-directory>]
 ```
 
 After packaging, direct the user to the resulting `.skill` file path so they can install it.
@@ -431,7 +419,7 @@ In Claude.ai, the core workflow is the same (draft → test → review → impro
 
 **The iteration loop**: Same as before — improve the skill, rerun the test cases, ask for feedback — just without the browser reviewer in the middle. You can still organize results into iteration directories on the filesystem if you have one.
 
-**Description optimization**: This section requires `pi` and `th` CLI tools. Skip it if they are not available.
+**Description optimization**: This section requires the `pi` CLI tool and this skill's justfile. Skip it if they are not available.
 
 **Blind comparison**: Requires subagents. Skip it.
 

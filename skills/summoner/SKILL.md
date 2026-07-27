@@ -1,7 +1,7 @@
 ---
 name: summoner
-description: "Summoner designs and builds the th member team for a project. Reads the project context (README, roadmap, CLAUDE.md) and proposes a calibrated roster with hats and specific roles. Use it when you want to build or revise the agent team for a project: at the start of a project, when the roster is empty, when you want to add missing perspectives, or when you suspect the current team does not cover the work well."
-compatibility: Requires CLI `th` available in PATH.
+description: "Summoner designs and builds the member team for a project. Reads the project context (README, roadmap, CLAUDE.md) and proposes a calibrated roster with hats and specific roles. Use it when you want to build or revise the agent team for a project: at the start of a project, when the roster is empty, when you want to add missing perspectives, or when you suspect the current team does not cover the work well."
+compatibility: Requires this skill's justfile and the underlying member runner available in PATH.
 allowed-tools: Bash, Read
 ---
 
@@ -10,6 +10,8 @@ allowed-tools: Bash, Read
 Design the team. You do not execute flows — you build who executes them.
 
 Your job is to read the project, understand what perspectives it needs, propose a calibrated team, gather feedback, and then generate all members in one shot.
+
+All member-management commands in this skill are issued through its justfile. Never invoke the member runner CLI directly from these instructions.
 
 ---
 
@@ -34,12 +36,12 @@ Do not invent context. If the files are missing or empty, say so and ask the use
 ## 2. Read the current roster state
 
 ```bash
-th member list
+just members
 ```
 
 Classify:
 - **local** — already calibrated for this project
-- **global** — available everywhere, candidates for `--from`
+- **global** — available everywhere, candidates for cloning
 - **none** — empty roster, start from scratch
 
 If local members already exist, show them in the proposal as "already present" and decide whether to keep or replace them.
@@ -68,7 +70,7 @@ The **role** describes who the member is — their domain, career, professional 
 - Not all six hats are needed. Choose the ones useful for *this* project.
 - One hat per member. Two members with the same hat only if they cover distinct domains and you justify it.
 - The role must be an identity, not a task. "Frontend developer obsessed with performance" is correct. "Analyses the code" is wrong.
-- Do not create members for system skills (oracle, inquisitor, cartographer, gardener, alchemist, scribe, etc.) — they are skills, not members. They are invoked by naming them in the `--task`.
+- Do not create members for system skills (oracle, inquisitor, cartographer, gardener, alchemist, scribe, etc.) — they are skills, not members. They are invoked by naming them in the task passed to the runner.
 - Max 10 members total, including those already present.
 
 Present the proposal in readable form and ask for confirmation:
@@ -98,35 +100,34 @@ Do not create anything until the user approves. Incorporate requested changes, r
 For each approved member, first check whether a global with a compatible hat and role exists:
 
 ```bash
-th member list --global
-th member get <global-name>   # if it looks suitable
+just members --global
+just member-get <global-name>   # if it looks suitable
 ```
 
 If the global's hat **and role** are compatible:
+
 ```bash
-th member create <name> --from <global-name>
+just clone <name> <global-name>
 ```
 
 Otherwise create from scratch:
+
 ```bash
-th member create <name> \
-  --hat <hat-core> \
-  --role "<project-specific role>" \
-  --tools read,bash
+just create <name> <hat-core> "<project-specific role>" --tools read,bash
 ```
 
-Create all members in sequence. After each creation, confirm with the `th member create` output.
+Create all members in sequence. After each creation, confirm with the output.
 
 ---
 
 ## Updating an existing member
 
-There is no `th member update`. To modify:
+There is no direct update. To modify:
 
 ```bash
-th member get <name>      # read current state
-th member delete <name>   # delete
-th member create <name> --hat <hat> --role "<new role>" --tools read,bash
+just member-get <name>      # read current state
+just delete <name>          # delete
+just create <name> <hat> "<new role>" --tools read,bash
 ```
 
 ---
@@ -134,9 +135,9 @@ th member create <name> --hat <hat> --role "<new role>" --tools read,bash
 ## Reading stats to improve the team
 
 ```bash
-th history
-th history --member <name>   # filter by member
-th history --limit <n>       # change number of runs
+just history
+just history --member <name>   # filter by member
+just history --limit <n>       # change number of runs
 ```
 
 For each run: `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`.
@@ -148,59 +149,58 @@ If a member has repeated errors or timeouts → the role is probably too vague o
 ## Promoting a member to global
 
 ```bash
-th member promote <name>           # copies to ~/.th/members/
-th member promote <name> --force   # overwrites if already exists
+just promote <name>          # copies to ~/.th/members/
+just promote <name> --force  # overwrites if already exists
 ```
 
 ---
 
 ## Command reference
 
-### `th member`
+### Members
 
 ```bash
 # List members
-th member list                    # local + global + tmp
-th member list --local            # only .th/members/
-th member list --global           # only ~/.th/members/
-th member list --tmp              # only /tmp/.th/members/
+just members                    # local + global + tmp
+just members --local            # only .th/members/
+just members --global           # only ~/.th/members/
+just members --tmp              # only /tmp/.th/members/
 
 # Detail
-th member get <name>              # full JSON: hat, role, tools, skills, scope
+just member-get <name>         # full JSON: hat, role, tools, skills, scope
 
 # Creation
-th member create <name> \
-  --hat <hat-core> \              # required (or --from)
-  --role "<role>" \               # required (or --from)
-  --tools read,bash \             # default: read,bash
-  --tmp                           # creates in /tmp instead of .th/members/
+just create <name> <hat-core> "<role>" [FLAGS]
+# available flags:
+#   --tools read,bash    # default tools for the member
+#   --tmp                # creates in /tmp instead of .th/members/
 
-th member create <name> \
-  --from <global-name>            # inherits hat+role+tools from global
+just clone <name> <global-name>   # inherits hat+role+tools from global
 
 # Deletion
-th member delete <name>           # removes the member file
+just delete <name>             # removes the member file
 
 # Promotion to global
-th member promote <name>          # copies to ~/.th/members/
-th member promote <name> --force  # overwrites if already exists
+just promote <name>             # copies to ~/.th/members/
+just promote <name> --force   # overwrites if already exists
 ```
 
-### `th hats`
+### Hats
 
 ```bash
-th hats list                      # list all available hats
-th hats get <hat-core>            # show the full hat markdown
+just hats                        # list all available hats
+just hat <hat-core>             # show the full hat markdown
 ```
 
-Use `th hats get <hat>` if you have doubts about the exact cognitive role before assigning it to a member.
+Use `just hat <hat>` if you have doubts about the exact cognitive role before assigning it to a member.
 
-### `th history`
+### History
 
 ```bash
-th history                        # last 20 runs (JSON)
-th history --member <name>        # filter by specific member
-th history --limit <n>            # change number of runs returned
+just history                     # last 20 runs (JSON)
+just history --member <name>   # filter by specific member
+just history --limit <n>       # change number of runs returned
+just get <run_id>              # metadata + output if still on disk
 ```
 
 Each record: `id`, `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`, `out_path`, `log_path`.
@@ -212,7 +212,7 @@ Each record: `id`, `member`, `task`, `status` (done/error/timeout), `started_at`
 - **Read before acting.** Roster state and history before any proposal.
 - **One hat per role.** Do not create two members with the same hat without an explicit reason.
 - **The role must be an identity, not a task.** "Backend developer who has debugged too many race conditions" is a role. "Identify circular dependencies" is a task.
-- **Do not create members for system skills** (oracle, inquisitor, cartographer, gardener, alchemist, scribe, etc.) — they are skills, not members. If needed in a flow, use them in the `--task`.
+- **Do not create members for system skills** (oracle, inquisitor, cartographer, gardener, alchemist, scribe, etc.) — they are skills, not members. If needed in a flow, use them in the task.
 
 ### Hat list
 

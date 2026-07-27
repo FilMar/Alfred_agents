@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Flow harness: Council of Experts.
 #
-# Code drives the phases; the AI reasons only inside `th run` calls.
+# Code drives the phases; the AI reasons only inside member runs.
 # Quartermaster picks the roster and launches this script — it cannot skip
 # a phase, forget an output, or synthesise before every expert answered.
 #
@@ -15,6 +15,8 @@
 # Exit codes: 0 ok, 1 execution/validation failure, 2 usage error.
 
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+JUSTFILE="$SCRIPT_DIR/../justfile"
 
 # ─── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -61,15 +63,15 @@ IFS=',' read -ra MEMBERS <<< "$MEMBERS_CSV"
 (( ${#MEMBERS[@]} <= MAX_MEMBERS ))  || die "${#MEMBERS[@]} members > max $MAX_MEMBERS (override with COUNCIL_MAX_MEMBERS)"
 
 command -v jq >/dev/null || die "jq is required"
-command -v th >/dev/null || die "th not found in PATH"
+command -v just >/dev/null || die "just not found in PATH"
 
 # ─── Pre-flight: every member must exist (fail fast, not mid-run) ─────────────
 
-# NB: th resolves project members from the cwd (.th/members/) — launch this
-# script from the project root, not from the flows directory.
+# The harness delegates member existence checks to the quartermaster justfile.
+# Launch this script from the project root.
 for m in "${MEMBERS[@]}" "$SYNTH"; do
-  th member get "$m" >/dev/null 2>&1 \
-    || die "member not found: '$m'. Project members are resolved from the cwd — are you in the project root? (or create it: th member create)"
+  just -f "$JUSTFILE" member-exists "$m" >/dev/null 2>&1 \
+    || die "member not found: '$m'. Project members are resolved from the cwd — are you in the project root? (or create it via the summoner skill)"
 done
 
 # ─── Run dir (deterministic names → resume) ───────────────────────────────────
@@ -147,7 +149,7 @@ ${CONTEXT}
     prompt+="
 Analyse from your point of view only. Be specific, not generic. Bring what only you can bring."
 
-    th run --member "$m" --task "$prompt" --timeout "$TIMEOUT" --detach > "$job"
+    just -f "$JUSTFILE" run-detached "$m" "$prompt" --timeout "$TIMEOUT" > "$job"
     pending_status+=("$(jq -r .status "$job")")
     pending_members+=("$m")
     echo "  [launch] $m" >&2
@@ -155,7 +157,7 @@ Analyse from your point of view only. Be specific, not generic. Bring what only 
 
   # Phase 2 — WAIT: native poll with crash detection; never synthesise early
   if (( ${#pending_status[@]} > 0 )); then
-    th wait "${pending_status[@]}" --timeout "$TIMEOUT" > "$RUN_DIR/r${round}-wait.json" || true
+    just -f "$JUSTFILE" wait --timeout "$TIMEOUT" "${pending_status[@]}" > "$RUN_DIR/r${round}-wait.json" || true
   fi
 
   # Phase 3 — VALIDATE + COLLECT: every expert must have produced output
@@ -184,7 +186,7 @@ $(cat "$RUN_DIR/r${round}-${m}.md")
 "
     done
     echo "  [synth] $SYNTH" >&2
-    th run --member "$SYNTH" --timeout "$TIMEOUT" --task "You are the synthesiser of a council of experts. Round ${round}.
+    synth_prompt="You are the synthesiser of a council of experts. Round ${round}.
 
 Problem:
 ${TASK}
@@ -192,7 +194,8 @@ ${TASK}
 Independent perspectives collected:
 ${perspectives}
 
-Synthesise into ONE concrete recommendation: points of agreement, real tensions, decision. Do not flatten disagreements — surface them." > "$synth_md"
+Synthesise into ONE concrete recommendation: points of agreement, real tensions, decision. Do not flatten disagreements — surface them."
+    just -f "$JUSTFILE" run "$SYNTH" "$synth_prompt" --timeout "$TIMEOUT" > "$synth_md"
     step_done "$synth_md" || die "synthesis produced no output — resume with: --run-id $RUN_ID"
   fi
 

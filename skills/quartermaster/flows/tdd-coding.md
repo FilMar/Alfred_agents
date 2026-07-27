@@ -37,17 +37,17 @@ Do not proceed without concrete answers.
 ## Phase 1 — Architecture (parallel)
 
 ```bash
-P_W=$(th run --member <name-white> --task "Analyse the requirements: data structures, types, existing dependencies to reuse, constraints.
+P_W=$(just run-detached <name-white> "Analyse the requirements: data structures, types, existing dependencies to reuse, constraints.
 
 Requirements:
-<phase 0>" --detach)
+<phase 0>")
 
-P_G=$(th run --member <name-green> --task "Propose 2-3 alternative architectures with trade-offs for:
+P_G=$(just run-detached <name-green> "Propose 2-3 alternative architectures with trade-offs for:
 <phase 0>
 
-Do not choose — generate variants." --detach)
+Do not choose — generate variants.")
 
-th wait "$(echo "$P_W" | jq -r '.status')" "$(echo "$P_G" | jq -r '.status')" \
+just wait "$(echo "$P_W" | jq -r '.status')" "$(echo "$P_G" | jq -r '.status')" \
   || echo "A member failed — inspect its .status/.log before continuing." >&2
 
 OUT_W=$(cat "$(echo "$P_W" | jq -r '.out')")
@@ -63,7 +63,7 @@ Present both perspectives to the user. Ask which architecture to adopt before co
 The coder member must have `--tools read,write,edit,bash`.
 
 ```bash
-th run --member <name-white> --task "Write the signatures and data structures for:
+just run <name-white> "Write the signatures and data structures for:
 <chosen architecture>
 
 Rules:
@@ -81,7 +81,7 @@ Manually verify it compiles before moving on.
 The black member must have `--tools read,write,bash`.
 
 ```bash
-th run --member <name-black> --task "Write behavioural tests for these signatures:
+just run <name-black> "Write behavioural tests for these signatures:
 <phase 2 output>
 
 Rules:
@@ -101,7 +101,7 @@ Run the test runner and verify all tests fail. If any already pass, the test is 
 ERRORS="<initial test runner output>"
 
 while true; do
-  th run --member <name-white> --task "Implement the functions to make the tests pass.
+  just run <name-white> "Implement the functions to make the tests pass.
 
 Signatures:
 <phase 2 output>
@@ -125,20 +125,20 @@ If after 3 iterations the tests still don't pass, stop and present the problem t
 ## Phase 5 — Review (parallel)
 
 ```bash
-P_B=$(th run --member <name-black> --task "Code review. Look for: duplicated code, obscure names, hidden logic, dead code.
+P_B=$(just run-detached <name-black> "Code review. Look for: duplicated code, obscure names, hidden logic, dead code.
 
 Code:
-<implementation>" --detach)
+<implementation>")
 
-P_W=$(th run --member <name-white> --task "Verify conformity. Compare requirements and implementation line by line. Do not make assumptions.
+P_W=$(just run-detached <name-white> "Verify conformity. Compare requirements and implementation line by line. Do not make assumptions.
 
 Requirements:
 <phase 0>
 
 Code:
-<implementation>" --detach)
+<implementation>")
 
-th wait "$(echo "$P_B" | jq -r '.status')" "$(echo "$P_W" | jq -r '.status')" \
+just wait "$(echo "$P_B" | jq -r '.status')" "$(echo "$P_W" | jq -r '.status')" \
   || echo "A member failed — inspect its .status/.log before continuing." >&2
 
 OUT_B=$(cat "$(echo "$P_B" | jq -r '.out')")
@@ -152,7 +152,7 @@ Present issues found. If there are non-trivial fixes, go back to phase 4.
 ## Phase 6 — Wiki
 
 ```bash
-th run --member <member> --task "Use the scribe skill to update the project wiki with the new feature.
+just run <member> "Use the scribe skill to update the project wiki with the new feature.
 
 What was implemented:
 <summary>
