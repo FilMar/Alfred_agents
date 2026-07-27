@@ -10,6 +10,8 @@ description: >-
   contesto, o che chieda di trasformare le proprie esperienze in un curriculum
   tipografico. Attivala anche per "fammi il CV", "curriculum in typst",
   "rifammi il résumé", "converti questo profilo LinkedIn in CV".
+compatibility: Requires this skill's justfile and `typst` available in PATH.
+allowed-tools: Bash, Read, Write, Edit
 ---
 
 # Biographer — Curriculum Vitae in Typst
@@ -69,10 +71,11 @@ Copia il template nella working directory dell'utente con un nome sensato (es.
 residui.
 
 ### 4. Verifica che compili
-Se `typst` è disponibile (`which typst`), **compila sempre** prima di consegnare:
+
+Se `typst` è disponibile, **compila sempre** prima di consegnare:
 
 ```bash
-typst compile cv_mario_rossi.typ
+just compile cv_mario_rossi.typ
 ```
 
 Se dà errore, leggilo e correggi il `.typ` — un CV che non compila è inutile.
@@ -81,8 +84,14 @@ e dillo all'utente, suggerendogli come installarlo (`https://typst.app` o il
 binario da GitHub `typst/typst`).
 
 ### 5. Consegna
-Dai all'utente il percorso del `.typ` e il comando per compilarlo
-(`typst compile cv_mario_rossi.typ` produce il PDF; `typst watch` per l'anteprima
+
+Dai all'utente il percorso del `.typ` e il comando per compilarlo:
+
+```bash
+just compile cv_mario_rossi.typ
+```
+
+(`typst compile` produce il PDF; `just watch cv_mario_rossi.typ` per l'anteprima
 live). Ricordagli che i dati stanno tutti nel blocco DATI, così può ritoccarli da
 solo.
 

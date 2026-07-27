@@ -1,6 +1,6 @@
 ---
 name: blacksmith
-description: "Blacksmith creates new skills, modifies and improves existing ones, measures performance. Use it when the user wants to create a skill from scratch, modify or optimise an existing one, run evals, benchmark with variance analysis, or optimise the description to improve trigger accuracy. This skill also enforces the project convention: every operational skill is a SKILL.md plus a justfile, and SKILL.md never calls external CLIs directly."
+description: "Use this skill when the user wants to create, build, modify, test, evaluate, benchmark, package, or debug a skill — where skill means a reusable Claude Code skill (SKILL.md + justfile). Covers: turning a workflow or idea into a reusable skill; improving or editing an existing skill; running evals and benchmarks; fixing skill triggering problems; optimizing skill descriptions; packaging skills for distribution; and enforcing the convention that operational skills use a justfile and never call external CLIs directly from SKILL.md. If the user is talking about a skill as something to make, fix, improve, test, ship, or standardize — use this skill."
 ---
 
 # Blacksmith π
