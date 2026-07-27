@@ -1,6 +1,6 @@
 ---
 name: blacksmith
-description: "Blacksmith creates new skills, modifies and improves existing ones, measures performance. Use it when the user wants to create a skill from scratch, modify or optimise an existing one, run evals, benchmark with variance analysis, or optimise the description to improve trigger accuracy."
+description: "Blacksmith creates new skills, modifies and improves existing ones, measures performance. Use it when the user wants to create a skill from scratch, modify or optimise an existing one, run evals, benchmark with variance analysis, or optimise the description to improve trigger accuracy. This skill also enforces the project convention: every operational skill is a SKILL.md plus a justfile, and SKILL.md never calls external CLIs directly."
 ---
 
 # Blacksmith π
@@ -65,23 +65,27 @@ Based on the user interview, fill in these components:
 
 - **name**: Skill identifier
 - **description**: When to trigger, what it does. This is the primary triggering mechanism - include both what the skill does AND specific contexts for when to use it. All "when to use" info goes here, not in the body. Note: currently Claude has a tendency to "undertrigger" skills -- to not use them when they'd be useful. To combat this, please make the skill descriptions a little bit "pushy". So for instance, instead of "How to build a simple fast dashboard to display internal Anthropic data.", you might write "How to build a simple fast dashboard to display internal Anthropic data. Make sure to use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data, even if they don't explicitly ask for a 'dashboard.'"
-- **compatibility**: Required tools, dependencies (optional, rarely needed)
-- **the rest of the skill :)**
+- **compatibility**: Required tools, dependencies. If the skill wraps an external CLI (e.g. `tb`, `ti`, `th`, `gh`, `himalaya`, `taskwarrior`, `python` scripts), include the skill's own `justfile` here. The `SKILL.md` must never invoke the CLI directly; it references only `just` recipes.
 
-### Skill Writing Guide
+### Skill / member boundary
 
-#### Anatomy of a Skill
+A skill is executed **inline** by reading `SKILL.md` and applying it. A `th` member is a separate agent invoked only by orchestrator skills (`quartermaster`).
 
-```
-skill-name/
-├── SKILL.md (required)
+- Never write `th run --member <skill-name>`.
+- Never pass a skill name as `--member` to `th`.
+- If a skill needs to delegate to an external tool, create a `justfile` recipe and call `just <recipe>` from `SKILL.md`.
+
 │   ├── YAML frontmatter (name, description required)
-│   └── Markdown instructions
+│   └── Markdown instructions — only `just` commands in code blocks
+├── justfile (required if the skill wraps an external CLI)
+│   └── Semantic recipes that hide the underlying binary
 └── Bundled Resources (optional)
     ├── scripts/    - Executable code for deterministic/repetitive tasks
     ├── references/ - Docs loaded into context as needed
     └── assets/     - Files used in output (templates, icons, fonts)
 ```
+
+See `.wiki/skill_pattern.md` for the full convention and the list of skills already following it.
 
 #### Progressive Disclosure
 
