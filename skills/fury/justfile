@@ -1,46 +1,62 @@
 # Fury — member team management recipes.
 # This skill wraps the underlying agent runner. SKILL.md references only
 # these recipes; it never invokes the runner CLI directly.
+#
+# [no-cd] everywhere: th resolves .th/members/ relative to cwd (local vs
+# global scope). just's default is to chdir into this justfile's own
+# directory before running a recipe, which would make every `th` call
+# below operate on skills/fury/.th instead of the caller's project.
+# [no-cd] keeps the recipe running from wherever `just` was invoked.
 
 default:
     @just --list
 
 # List members: local, global and tmp by default. Pass --local, --global or --tmp to filter.
+[no-cd]
 members *FLAGS:
     th member list {{FLAGS}}
 
 # Create a member. Use scope="--tmp" for temporary members.
+[no-cd]
 create name hat role *FLAGS:
     th member create {{name}} --hat {{hat}} --role "{{role}}" {{FLAGS}}
 
 # Show the full JSON for a member.
+[no-cd]
 member-get name:
     th member get {{name}}
 
 # Clone an existing global member under a new name.
+[no-cd]
 clone name from:
     th member create {{name}} --from {{from}}
 
 # Delete a member.
+[no-cd]
 delete name:
     th member delete {{name}}
 
 # Promote a local or tmp member to global.
+[no-cd]
 promote name *FLAGS:
     th member promote {{name}} {{FLAGS}}
 
 # List available hats.
+[no-cd]
 hats:
     th hats list
 
 # Show the full markdown for a hat.
+[no-cd]
 hat name:
     th hats get {{name}}
 
 # Show run history. Default limit is 20.
+[no-cd]
 history *FLAGS:
     th history {{FLAGS}}
 
 # Show the full metadata and output for a run id, if still available.
+[no-cd]
 get run_id:
     th get {{run_id}}
