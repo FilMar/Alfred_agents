@@ -1,0 +1,10 @@
+# Alchemist — Third Brain teaching recipes.
+# This skill wraps the underlying memory CLI. SKILL.md references only these
+# recipes; it never invokes the CLI directly.
+
+default:
+    @just --list
+
+# Search the Third Brain for material on a topic.
+search query *FLAGS:
+    tb search "{{query}}" {{FLAGS}}

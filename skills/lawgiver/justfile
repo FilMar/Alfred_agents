@@ -1,0 +1,26 @@
+# Lawgiver — Third Identity rule recipes.
+# This skill wraps the underlying identity CLI. SKILL.md references only these
+# recipes; it never invokes the CLI directly.
+
+default:
+    @just --list
+
+# Search existing rules.
+search query *FLAGS:
+    ti search "{{query}}" {{FLAGS}}
+
+# List rules, optionally filtered by tags.
+list *FLAGS:
+    ti list {{FLAGS}}
+
+# Add a new rule.
+add context action *FLAGS:
+    ti add --if "{{context}}" --do "{{action}}" {{FLAGS}}
+
+# Append a second action to an existing rule by id.
+append-do id action:
+    ti append-do {{id}} --do "{{action}}"
+
+# Browse Third Brain notes of a given kind (used when distilling from TB).
+tb-browse *FLAGS:
+    tb browse {{FLAGS}}

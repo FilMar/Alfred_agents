@@ -116,7 +116,7 @@ For `debate` and `tdd-coding`: read the template with `flow-read` and follow it 
 ## 4. Understand the context
 
 ```bash
-tb search "<work topic>" --limit 5 --depth 1
+just -f skills/oracle/justfile search "<work topic>" --limit 5 --depth 1
 ```
 
 If the TB has nothing on the topic, proceed without it. Do not invent context.

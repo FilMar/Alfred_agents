@@ -1,7 +1,7 @@
 ---
 name: prospector
 description: "Prospector is the Code Archaeologist. Digs into software projects — new and old — to extract artefacts: hidden structural patterns, technical debt, buried architectural decisions. Does not fix — diagnoses."
-compatibility: Requires Bash access to the project filesystem and the `tb` CLI.
+compatibility: Requires this skill's justfile, Bash access to the project filesystem and the underlying memory CLI.
 allowed-tools: Bash, Read
 ---
 
@@ -27,30 +27,28 @@ Every analysis answers three questions:
 
 ### 1. Reconnaissance (Map the Territory)
 
-Before reading a line of code, understand the context:
+Before reading a line of code, understand the context using this skill's justfile:
 
 ```bash
-# High-level structure
-find <path> -maxdepth 2 -type f | sort
-find <path> -maxdepth 3 -type d | sort
+just files <path>            # high-level structure (maxdepth 2)
+just dirs <path>             # directory tree (maxdepth 3)
 
 # Languages and frameworks
-cat <path>/package.json 2>/dev/null || cat <path>/requirements.txt 2>/dev/null || cat <path>/Cargo.toml 2>/dev/null || cat <path>/go.mod 2>/dev/null || cat <path>/pom.xml 2>/dev/null
+read <path>/package.json || read <path>/requirements.txt || read <path>/Cargo.toml || read <path>/go.mod || read <path>/pom.xml
 
 # Project history
-git -C <path> log --oneline -20
-git -C <path> log --stat --oneline -5
-git -C <path> shortlog -sn --no-merges | head -10
+bash "git -C {{path}} log --oneline -20"
+bash "git -C {{path}} log --stat --oneline -5"
+bash "git -C {{path}} shortlog -sn --no-merges | head -10"
 
 # Immediate health signals
-find <path> -name "*.md" | head -5
-find <path> -name "TODO" -o -name "FIXME" -o -name "HACK" | head -10
-grep -r "TODO\|FIXME\|HACK\|XXX" <path> --include="*.py" --include="*.ts" --include="*.go" --include="*.js" -l 2>/dev/null | head -20
+just files <path> --maxdepth 1 '*.md'   # markdown docs
+just pain <path>                      # TODO/FIXME/HACK comments
 ```
 
 Then search the Third Brain for what you already know about these stacks:
 ```bash
-tb search "<main language or framework>" --limit 5
+just tb-search "<main language or framework>" --limit 5
 ```
 
 ### 2. Stratigraphic Dig (Layer Analysis)
@@ -65,26 +63,25 @@ Read the project in layers, from general to particular:
 **Layer 2 — Real architecture**
 ```bash
 # Entry points
-find <path> -name "main.*" -o -name "index.*" -o -name "app.*" | grep -v node_modules | grep -v ".git"
+bash "find <path> \( -name 'main.*' -o -name 'index.*' -o -name 'app.*' \) | grep -v node_modules | grep -v '.git'"
 
 # Where is the business logic? Compare with where it should be.
-find <path>/src -type f | wc -l 2>/dev/null
-find <path> -name "*.test.*" -o -name "*_test.*" -o -name "*spec*" | grep -v node_modules | wc -l
+just counts <path>/src
 
 # External dependencies
-grep -r "import\|require\|from" <path>/src --include="*.ts" --include="*.py" --include="*.go" | grep -v "node_modules\|\.git" | sed 's/.*from //' | sort | uniq -c | sort -rn | head -20 2>/dev/null
+bash "grep -r 'import\|require\|from' <path>/src --include='*.ts' --include='*.py' --include='*.go' | grep -v 'node_modules\|\.git' | sed 's/.*from //' | sort | uniq -c | sort -rn | head -20"
 ```
 
 **Layer 3 — Debt signals**
 ```bash
 # Largest files (God objects?)
-find <path> -name "*.py" -o -name "*.ts" -o -name "*.go" -o -name "*.js" | grep -v node_modules | xargs wc -l 2>/dev/null | sort -rn | head -15
+just giants <path>
 
 # Most-modified files (hotspots)
-git -C <path> log --format=format: --name-only | grep -v "^$" | sort | uniq -c | sort -rn | head -15
+just hotspots <path>
 
 # Pain comments
-grep -rn "TODO\|FIXME\|HACK\|XXX\|workaround\|kludge\|hotfix" <path> --include="*.py" --include="*.ts" --include="*.go" --include="*.js" 2>/dev/null | grep -v node_modules | head -30
+just pain <path>
 ```
 
 ### 3. Trap Identification

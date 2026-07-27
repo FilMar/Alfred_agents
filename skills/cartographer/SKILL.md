@@ -1,7 +1,7 @@
 ---
 name: cartographer
 description: "Cartographer is the Synthesis Curator. Analyses the Third Brain graph looking for dense clusters, missing connections and isolated notes to link. Creates Hubs (kind: indice) to compress saturated clusters, adds refs between logically connected notes."
-compatibility: Requires access to the `tb` CLI (bash).
+compatibility: Requires this skill's justfile and the underlying memory CLI available in PATH.
 allowed-tools: Bash
 ---
 
@@ -17,22 +17,22 @@ You do not extract new knowledge. You work on what already exists.
 
 ---
 
-## Available commands
+## Available recipes
 
 ```bash
-tb search "<query>" [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--include-hubs]
-tb browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
-tb save --what "<text>" --why "<context>" --kind <type> [--tags "tag1,tag2"]
-tb update <id> [--kind <kind>] [--tags <tag>] [--add-ref <id:reason>]
-tb tags                          # list tags by frequency — maps thematic clusters
-tb graph                         # visualise the graph in the browser (PCA 2D) — useful after structural interventions
+just search "<query>" [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--include-hubs]
+just browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
+just save --what "<text>" --why "<context>" --kind <type> [--tags "tag1,tag2"]
+just update <id> [--kind <kind>] [--tags <tag>] [--add-ref "<id:reason>"]
+just tags                          # list tags by frequency — maps thematic clusters
+just graph                         # visualise the graph in the browser
 ```
 
 ### Output format
 
-- **`tb search`** → array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `refs`, `backrefs` are **under `.note`**.
-- **`tb browse`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
-- Note: `tb browse --kind` accepts a single value per call (not repeatable); `tb search --kind` is repeatable.
+- **`just search`** → array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `refs`, `backrefs` are **under `.note`**.
+- **`just browse`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
+- Note: `just browse --kind` accepts a single value per call (not repeatable); `just search --kind` is repeatable.
 
 ---
 
@@ -43,24 +43,24 @@ tb graph                         # visualise the graph in the browser (PCA 2D) �
 Before intervening, understand what is there. Start from the tag map to understand the dominant thematic clusters:
 
 ```bash
-tb tags
+just tags
 ```
 
 Then explore by type:
 
 ```bash
-tb browse --kind dato --limit 50
-tb browse --kind attrito --limit 20
-tb browse --kind sintesi --limit 20
+just browse --kind dato --limit 50
+just browse --kind attrito --limit 20
+just browse --kind sintesi --limit 20
 ```
 
 Map existing Hubs — without `--include-hubs` they are invisible in both `search` and `browse`:
 
 ```bash
-tb browse --kind indice --limit 50
+just browse --kind indice --limit 50
 ```
 
-Finally use `tb search` with `--depth 2` and `--include-hubs` to see existing connections and already-formed clusters.
+Finally use `just search` with `--depth 2` and `--include-hubs` to see existing connections and already-formed clusters.
 
 Look for:
 - **Dense clusters**: groups of notes with many refs/backrefs in common — Hub candidates
@@ -74,13 +74,13 @@ After scanning, classify opportunities in priority order:
 | Operation | When |
 |---|---|
 | **Create a Hub** (`kind: indice`) | Cluster with 5+ correlated notes without a compression node |
-| **Add refs** (`tb update --add-ref`) | Two logically connected notes without an explicit link |
-| **Link isolated note** (`tb update --add-ref`) | A note without refs/backrefs that has logical connections not yet explicit |
-| **Create a synthesis** (`tb save --kind sintesi`) | A pattern emerges from 3+ notes but has not yet been explicitly articulated |
+| **Add refs** (`just update --add-ref`) | Two logically connected notes without an explicit link |
+| **Link isolated note** (`just update --add-ref`) | A note without refs/backrefs that has logical connections not yet explicit |
+| **Create a synthesis** (`just save --kind sintesi`) | A pattern emerges from 3+ notes but has not yet been explicitly articulated |
 
 ### 3. Distil before saving
 
-Before executing any `tb save`, isolate the concept from its origin. Ask yourself: **if I had found this idea in a book, how would I formulate it?**
+Before executing any `just save`, isolate the concept from its origin. Ask yourself: **if I had found this idea in a book, how would I formulate it?**
 
 The `--why` test: it must answer "why does this concept deserve to exist in the graph" — not "how it emerged". If the natural answer is "it emerged from a discussion about X" or "in response to Y", stop. Either dig deeper until you find the epistemic foundation, or the concept is not yet mature.
 
@@ -102,15 +102,13 @@ Before writing `what` and `why`, read all the notes in the cluster. The Hub is n
 - produces a non-obvious statement that would not fit in any single note
 
 ```bash
-tb save \
-  --what "<synthetic statement that captures the cluster pattern — not a title, a thesis>" \
+just save --what "<synthetic statement that captures the cluster pattern — not a title, a thesis>" \
   --why "<what emerges from the whole: what is confirmed, what is contradicted, where the productive tension lies>" \
   --kind indice \
   --tags <common-tag>
 
-# link cluster notes to the Hub (bidirectional):
-tb update <note-id-1> --add-ref "<hub-id>:<why this note contributes to the pattern>"
-tb update <note-id-2> --add-ref "<hub-id>:<why this note contributes to the pattern>"
+just update <note-id-1> --add-ref "<hub-id>:<why this note contributes to the pattern>"
+just update <note-id-2> --add-ref "<hub-id>:<why this note contributes to the pattern>"
 # ...
 ```
 
@@ -119,13 +117,12 @@ Right example — `what`: "The mind does not perceive reality — it builds fast
 
 **Adding a missing ref:**
 ```bash
-tb update <note-A-id> --add-ref "<note-B-id>:<explicit reason for the connection>"
+just update <note-A-id> --add-ref "<note-B-id>:<explicit reason for the connection>"
 ```
 
 **Creating a synthesis:**
 ```bash
-tb save \
-  --what "<the pattern articulated as a non-obvious statement>" \
+just save --what "<the pattern articulated as a non-obvious statement>" \
   --why "<why this pattern deserves to be made explicit>" \
   --kind sintesi
 ```
@@ -135,7 +132,7 @@ tb save \
 If you have executed significant structural interventions (new Hubs, many refs), you can visualise the updated graph:
 
 ```bash
-tb graph
+just graph
 ```
 
 At the end, list compactly:
@@ -153,5 +150,5 @@ Then indicate **the structurally most significant change** and why.
 - **`--why` is foundation, not provenance**: never use the `--why` field to describe how or where the concept emerged. It must explain why it exists — what it clarifies, what it enables, what it is in tension with.
 - **Refs with explicit reason**: the `reason` field in `--add-ref` must explain *why* the two notes are connected, not just that they are.
 - **Hubs only on saturated clusters**: do not create a Hub for 2-3 notes — it is premature. Wait until the cluster has weight.
-- **Kind is immutable**: never use `tb update --kind` to change a note's type. The kind describes what the note is ontologically, not how mature it is. A `dato` stays `dato`, an `attrito` stays `attrito`. Link them to the notes that use or address them — do not change them.
+- **Kind is immutable**: never use `just update --kind` to change a note's type. The kind describes what the note is ontologically, not how mature it is. A `dato` stays `dato`, an `attrito` stays `attrito`. Link them to the notes that use or address them — do not change them.
 - **Refs limit**: each note has a `REFS_LIMIT` refs limit. If you are about to saturate it, consider whether the note has itself become a Hub candidate.

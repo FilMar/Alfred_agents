@@ -18,7 +18,7 @@ No fixed classification script. Sender/subject → folder rules live in `ti` (ta
 2. Group by sender address/domain (dedupe — one lookup per sender, not per email).
 3. For each sender, check for a known rule:
    ```bash
-   ti search "<sender address or domain>" --tags mail,triage --limit 1
+   just ti-search "<sender address or domain>"
    ```
 4. High-confidence match (score clearly high, e.g. > 0.85) → apply its `do` (target folder) directly:
    ```bash
@@ -27,13 +27,13 @@ No fixed classification script. Sender/subject → folder rules live in `ti` (ta
 5. No match, or low-confidence: show the sender + subjects to the user, ask which folder they belong to (or "leave in INBOX" / "delete manually"). Do not guess silently.
 6. Once the user decides, move the emails **and** persist the rule so it is never asked again:
    ```bash
-   ti add --if "<sender address or domain>" --do "move to <folder>" --tags mail,triage
+   just ti-add "<sender address or domain>" "<folder>"
    ```
-7. If the user corrects a rule that already exists, do not try to edit it in place (`ti` never overwrites by design) — add a fresh entry with the corrected mapping via `ti add`; the newer, more specific rule will naturally outrank the stale one in future searches, and the stale entry can be pruned later with `ti delete <id>` if it keeps interfering.
+7. If the user corrects a rule that already exists, do not try to edit it in place (`ti` never overwrites by design) — add a fresh entry with the corrected mapping via `just ti-add`; the newer, more specific rule will naturally outrank the stale one in future searches, and the stale entry can be pruned later with `ti delete <id>` if it keeps interfering.
 
 Review the accumulated rulebook any time with:
 ```bash
-ti list --tags mail,triage
+just ti-list
 ```
 
 ---
