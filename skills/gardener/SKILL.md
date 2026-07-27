@@ -1,7 +1,7 @@
 ---
 name: gardener
 description: "Gardener is the Memory Cultivator. Activate at the end of every session or task to extract value from the work done. Analyses the output to distil atomic concepts, saving them in the Third Brain following the Feynman method. After each save, launches a serendipity challenge: extracts a random note with tb random and builds an explicit bridge if a real connection exists."
-compatibility: Requires access to the `tb` CLI (bash).
+compatibility: Requires this skill's justfile and the underlying memory/identity CLIs available in PATH.
 allowed-tools: Bash
 ---
 
@@ -13,7 +13,7 @@ You are the Gardener. Your mission is not to summarise what was done, but to **e
 
 ## The Distillation Process
 
-Your work follows a rigorous sequence: **Identification $\to$ Simplification $\to$ Sedimentation $\to$ Proposition**.
+Your work follows a rigorous sequence: **Identification → Simplification → Sedimentation → Proposition**.
 
 ### 1. Identification (The Sieve)
 Analyse the task output and identify the concepts that pass the quality filter. A concept is valid only if it meets three requirements:
@@ -24,7 +24,7 @@ Analyse the task output and identify the concepts that pass the quality filter. 
 ### 2. Simplification (The Feynman Filter)
 Before saving, apply the Richard Feynman method to remove the illusion of complexity:
 - **The Twelve-Year-Old Test**: rewrite the concept as if you had to explain it to a 12-year-old. Use plain and direct language.
-- **Mechanism $\gt$ Label**: do not just name something (e.g. "Adversarial Synergy"). Describe *how the mechanism works*. Understanding resides in the process, not the term.
+- **Mechanism > Label**: do not just name something (e.g. "Adversarial Synergy"). Describe *how the mechanism works*. Understanding resides in the process, not the term.
 - **Jargon Extermination**: if you must use a technical term, explain it immediately in simple words. If a word only serves to "seem smart", eliminate it.
 
 ### 3. Sedimentation (Interactive proposal)
@@ -33,8 +33,8 @@ For each distilled concept, **do not save immediately**. Propose to the user and
 
 **Step 3a — Check for duplicates:**
 ```bash
-tb tags                                        # tag vocabulary — consult first
-tb search "<key concept>" --limit 5        # search for similar ideas semantically
+just tags                                        # tag vocabulary — consult first
+just search "<key concept>" --limit 5        # search for similar ideas semantically
 ```
 
 **Step 3b — Propose the note:**
@@ -62,16 +62,16 @@ Confirm? You can modify fields or add refs you see.
 
 The user can:
 - Confirm ("ok", "yes", "go ahead") → save as is
-- Modify a field ("change kind to attrito", "update tags to psychology,bias") → apply with `tb update --tags` and save
+- Modify a field ("change kind to attrito", "update tags to psychology,bias") → apply with `just update --tags` and save
 - Add refs ("add ref to <id>: <reason>") → include in the save
 - Discard ("skip", "don't save") → move to the next one
 
 Only after confirmation execute:
 ```bash
-tb save --what "<atomic idea>" --why "<reason>" --kind <type> --tags "tag1,tag2,tag3" [--source <uri>]
+just save --what "<atomic idea>" --why "<reason>" --kind <type> --tags "tag1,tag2,tag3" [--source <uri>]
 # --tags: comma as separator in a single string. NEVER spaces: --tags "tag1 tag2".
-tb update <new-id> --tags "tag1,tag2"              # if the user modified tags
-tb update <new-id> --add-ref "<id>:<reason>"       # for each confirmed ref
+just update <new-id> --tags "tag1,tag2"              # if the user modified tags
+just update <new-id> --add-ref "<id>:<reason>"       # for each confirmed ref
 ```
 
 **Absolute Constraints (Zero Tolerance):**
@@ -83,7 +83,7 @@ tb update <new-id> --add-ref "<id>:<reason>"       # for each confirmed ref
 **Field Configuration:**
 - **`what`**: the atomic idea described simply and transparently. It must be a value statement understandable ten years from now without reading the session logs.
 - **`why`**: the reason why the idea is relevant regardless of the current debate.
-- **`tags`**: before choosing tags, call `tb tags` to see the existing vocabulary. Rules:
+- **`tags`**: before choosing tags, call `just tags` to see the existing vocabulary. Rules:
     - **Reuse before inventing**: if a similar tag exists, use it — convergence is more useful than precision.
     - **Nouns, lowercase, singular**: `psychology` not `psychological` or `Psychology`.
     - **Domain level**: neither too specific (`fear-of-judgment`) nor too generic (`mind`).
@@ -105,13 +105,13 @@ tb update <new-id> --add-ref "<id>:<reason>"       # for each confirmed ref
     **Golden rule for book/research context**: when processing content from a book or educational video, most notes will be `dato` or `protocollo`. Use `sintesi` only if you are adding a bridge the source does not make explicitly. Use `attrito` for limitations, exceptions and paradoxes in the presented model — they are often the most fertile notes.
 
 ### 3b. Serendipity (The Random Bridge)
-After each `tb save`, call `tb random` to extract a random note from the Third Brain.
+After each `just save`, call `just random` to extract a random note from the Third Brain.
 
 Ask yourself: **is there a real connection between the just-saved note and this one?** Do not look for an answer. Actually look for it.
 
 - If the connection exists: articulate it in a precise sentence, then add the ref:
   ```bash
-  tb update <new-note-id> --add-ref "<random-id>:<explicit reason>"
+  just update <new-note-id> --add-ref "<random-id>:<explicit reason>"
   ```
 - If it does not exist: do not force it. Move to the next note.
 
@@ -136,16 +136,16 @@ When activated:
 
 1. **Analyse the entire thread** and the final output.
 2. **Execute the distillation**: apply the Feynman Filter and Purity Constraints to each identified concept. Keep the list in mind — do not save anything yet.
-3. **Consult the tags**: call `tb tags` once only.
+3. **Consult the tags**: call `just tags` once only.
 4. **For each concept**, in sequence:
-   a. Call `tb search "<key concept>" --limit 5` — search for duplicates and connections.
+   a. Call `just search "<key concept>" --limit 5` — search for duplicates and connections.
    b. If semantic duplicate: do not propose. If partial variation: propose adding a ref to the existing note.
    c. **Propose** the note to the user (format: Step 3b above) with the connections found.
    d. **Wait for confirmation** — do not move to the next concept until the user responds.
    e. Apply changes requested by the user (fields, additional refs).
-   f. Execute `tb save` and any `tb update --add-ref`.
-   g. Call `tb random` — if a real bridge exists, propose adding it as a ref.
-5. **Check for procedural knowledge**: if the session produced a non-obvious context→action decision (not a semantic concept — a recurring "in situation X, do Y"), propose it via `ti add --if "<context>" --do "<action>" --tags <tag1>,<tag2>` instead of `tb save`. `tb` is for knowledge, `ti` is for procedure — do not conflate the two stores.
+   f. Execute `just save` and any `just update --add-ref`.
+   g. Call `just random` — if a real bridge exists, propose adding it as a ref.
+5. **Check for procedural knowledge**: if the session produced a non-obvious context→action decision (not a semantic concept — a recurring "in situation X, do Y"), propose it via `just ti-add "<context>" "<action>" --tags <tag1> --tags <tag2>` instead of `just save`. `tb` is for knowledge, `ti` is for procedure — do not conflate the two stores.
 6. **At the end**, present the pearls in chat (the most fertile concepts among those saved).
 
 ---

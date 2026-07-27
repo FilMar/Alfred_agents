@@ -1,0 +1,30 @@
+# Cartographer — Third Brain structural recipes.
+# This skill wraps the underlying memory CLI. SKILL.md references only these
+# recipes; it never invokes the CLI directly.
+
+default:
+    @just --list
+
+# Search the Third Brain.
+search query *FLAGS:
+    tb search "{{query}}" {{FLAGS}}
+
+# Browse notes by kind, date, etc.
+browse *FLAGS:
+    tb browse {{FLAGS}}
+
+# List tags by frequency.
+tags:
+    tb tags
+
+# Save a new note.
+save what why kind *FLAGS:
+    tb save --what "{{what}}" --why "{{why}}" --kind {{kind}} {{FLAGS}}
+
+# Update an existing note (tags, refs, etc.).
+update id *FLAGS:
+    tb update {{id}} {{FLAGS}}
+
+# Open the graph visualisation in the browser.
+graph:
+    tb graph

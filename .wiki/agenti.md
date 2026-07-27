@@ -29,7 +29,7 @@ The `SKILL.md` file contains:
 | `courier` | Extracts text from URLs (web articles and YouTube) | White (data) |
 | `blacksmith` | Creates and improves skills, measures performance via evals and benchmarks | Green (creative) |
 | `scribe` | Maintains the local project wiki in `.wiki/` (direct file edits) | Blue (process) |
-| `summoner` | Designs and builds the th member team for a project | Blue (process) |
+| `summoner` | Designs and builds the agent member team for a project | Blue (process) |
 | `architect` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md | — |
 | `postman` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) | — |
 | `biographer` | Generates a Typst CV from free conversation or an existing CV/text | — |

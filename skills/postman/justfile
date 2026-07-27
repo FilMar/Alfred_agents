@@ -64,10 +64,21 @@ template account to subject body:
     himalaya template write -a {{account}} -H "To:{{to}}" -H "Subject:{{subject}}" "{{body}}" > "$file"
     echo "Template saved: $file"
 
+# Third Identity recipes for mail triage rules.
+
+# Search existing triage rules for a sender.
+ti-search sender:
+    ti search "{{sender}}" --tags mail,triage --limit 1
+
+# Add a triage rule that moves mail from a sender to a folder.
+ti-add sender folder *FLAGS:
+    ti add --if "{{sender}}" --do "move to {{folder}}" --tags mail,triage {{FLAGS}}
+
+# List all mail triage rules.
+ti-list:
+    ti list --tags mail,triage
+
 # Stampa a schermo il contenuto di un template già scritto in outbox
 show-template file:
     @cat {{file}}
 
-# Stampa il comando per inviare un file .mml già scritto in outbox (non invia mai da solo)
-send-cmd file:
-    @echo "himalaya template send < {{file}}"

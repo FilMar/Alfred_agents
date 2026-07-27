@@ -1,6 +1,6 @@
 ---
 name: blacksmith
-description: "Blacksmith creates new skills, modifies and improves existing ones, measures performance. Use it when the user wants to create a skill from scratch, modify or optimise an existing one, run evals, benchmark with variance analysis, or optimise the description to improve trigger accuracy."
+description: "Use this skill when the user wants to create, build, modify, test, evaluate, benchmark, package, or debug a skill — where skill means a reusable Claude Code skill (SKILL.md + justfile). Covers: turning a workflow or idea into a reusable skill; improving or editing an existing skill; running evals and benchmarks; fixing skill triggering problems; optimizing skill descriptions; packaging skills for distribution; and enforcing the convention that operational skills use a justfile and never call external CLIs directly from SKILL.md. If the user is talking about a skill as something to make, fix, improve, test, ship, or standardize — use this skill."
 ---
 
 # Blacksmith π
@@ -65,23 +65,27 @@ Based on the user interview, fill in these components:
 
 - **name**: Skill identifier
 - **description**: When to trigger, what it does. This is the primary triggering mechanism - include both what the skill does AND specific contexts for when to use it. All "when to use" info goes here, not in the body. Note: currently Claude has a tendency to "undertrigger" skills -- to not use them when they'd be useful. To combat this, please make the skill descriptions a little bit "pushy". So for instance, instead of "How to build a simple fast dashboard to display internal Anthropic data.", you might write "How to build a simple fast dashboard to display internal Anthropic data. Make sure to use this skill whenever the user mentions dashboards, data visualization, internal metrics, or wants to display any kind of company data, even if they don't explicitly ask for a 'dashboard.'"
-- **compatibility**: Required tools, dependencies (optional, rarely needed)
-- **the rest of the skill :)**
+- **compatibility**: Required tools, dependencies. If the skill wraps an external CLI (e.g. `tb`, `ti`, `th`, `gh`, `himalaya`, `taskwarrior`, `python` scripts), include the skill's own `justfile` here. The `SKILL.md` must never invoke the CLI directly; it references only `just` recipes.
 
-### Skill Writing Guide
+### Skill / member boundary
 
-#### Anatomy of a Skill
+A skill is executed **inline** by reading `SKILL.md` and applying it. A `th` member is a separate agent invoked only by orchestrator skills (`quartermaster`).
 
-```
-skill-name/
-├── SKILL.md (required)
+- Never write `th run --member <skill-name>`.
+- Never pass a skill name as `--member` to `th`.
+- If a skill needs to delegate to an external tool, create a `justfile` recipe and call `just <recipe>` from `SKILL.md`.
+
 │   ├── YAML frontmatter (name, description required)
-│   └── Markdown instructions
+│   └── Markdown instructions — only `just` commands in code blocks
+├── justfile (required if the skill wraps an external CLI)
+│   └── Semantic recipes that hide the underlying binary
 └── Bundled Resources (optional)
     ├── scripts/    - Executable code for deterministic/repetitive tasks
     ├── references/ - Docs loaded into context as needed
     └── assets/     - Files used in output (templates, icons, fonts)
 ```
+
+See `.wiki/skill_pattern.md` for the full convention and the list of skills already following it.
 
 #### Progressive Disclosure
 
@@ -224,9 +228,9 @@ Once all runs are done:
 
 1. **Grade each run** — spawn a grader subagent (or grade inline) that reads `agents/grader.md` and evaluates each assertion against the outputs. Save results to `grading.json` in each run directory. The grading.json expectations array must use the fields `text`, `passed`, and `evidence` (not `name`/`met`/`details` or other variants) — the viewer depends on these exact field names. For assertions that can be checked programmatically, write and run a script rather than eyeballing it — scripts are faster, more reliable, and can be reused across iterations.
 
-2. **Aggregate into benchmark** — run the aggregation script from the skill-creator directory:
+2. **Aggregate into benchmark** — use this skill's justfile:
    ```bash
-   python -m scripts.aggregate_benchmark <workspace>/iteration-N --skill-name <name>
+   just -f skills/blacksmith/justfile aggregate <workspace> <iteration> <skill-name>
    ```
    This produces `benchmark.json` and `benchmark.md` with pass_rate, time, and tokens for each configuration, with mean ± stddev and the delta. If generating benchmark.json manually, see `references/schemas.md` for the exact schema the viewer expects.
 Put each with_skill version before its baseline counterpart.
@@ -235,18 +239,11 @@ Put each with_skill version before its baseline counterpart.
 
 4. **Launch the viewer** with both qualitative outputs and quantitative data:
    ```bash
-   nohup python <skill-creator-path>/eval-viewer/generate_review.py \
-     <workspace>/iteration-N \
-     --skill-name "my-skill" \
-     --benchmark <workspace>/iteration-N/benchmark.json \
-     > /dev/null 2>&1 &
-   VIEWER_PID=$!
+   just -f skills/blacksmith/justfile review <workspace> <iteration> <skill-name> [<previous-iteration>]
    ```
-   For iteration 2+, also pass `--previous-workspace <workspace>/iteration-<N-1>`.
+   For iteration 2+, pass the previous iteration number as the fourth argument.
 
-   **Cowork / headless environments:** If `webbrowser.open()` is not available or the environment has no display, use `--static <output_path>` to write a standalone HTML file instead of starting a server. Feedback will be downloaded as a `feedback.json` file when the user clicks "Submit All Reviews". After download, copy `feedback.json` into the workspace directory for the next iteration to pick up.
-
-Note: please use generate_review.py to create the viewer; there's no need to write custom HTML.
+   **Cowork / headless environments:** The `review` recipe always writes a static HTML file instead of starting a server. Feedback is downloaded as a `feedback.json` file when the user clicks "Submit All Reviews". After download, copy `feedback.json` into the workspace directory for the next iteration to pick up.
 
 5. **Tell the user** something like: "I've opened the results in your browser. There are two tabs — 'Outputs' lets you click through each test case and leave feedback, 'Benchmark' shows the quantitative comparison. When you're done, come back here and let me know."
 
@@ -379,12 +376,7 @@ Tell the user: "This will take some time — I'll run the optimization loop in t
 Save the eval set to the workspace, then run in the background:
 
 ```bash
-python -m scripts.run_loop \
-  --eval-set <path-to-trigger-eval.json> \
-  --skill-path <path-to-skill> \
-  --model <model-id-powering-this-session> \
-  --max-iterations 5 \
-  --verbose
+just -f skills/blacksmith/justfile optimize-description <path-to-trigger-eval.json> <path-to-skill> <model-id> --max-iterations 5 --verbose
 ```
 
 Use the model ID from your system prompt (the one powering the current session) so the triggering test matches what the user actually experiences.
@@ -399,7 +391,7 @@ Understanding the triggering mechanism helps design better eval queries. In pi, 
 
 This means your eval queries should be substantive enough that the model would actually benefit from reading the skill. Simple queries are poor test cases — they won't trigger regardless of description quality.
 
-The `--model` argument uses pi's format: `provider/model-id` (e.g. `anthropic/claude-sonnet-4-6`). Test runs are sandboxed via `th run --skill <path>`.
+The `--model` argument uses pi's format: `provider/model-id` (e.g. `anthropic/claude-sonnet-4-6`). Test runs are sandboxed via `just -f skills/blacksmith/justfile test-skill <path>`.
 
 ### Step 4: Apply the result
 
@@ -409,10 +401,10 @@ Take `best_description` from the JSON output and update the skill's SKILL.md fro
 
 ### Package and Present (only if `present_files` tool is available)
 
-Check whether you have access to the `present_files` tool. If you don't, skip this step. If you do, package the skill and present the .skill file to the user:
+Check whether you have access to the `present_files` tool. If you don't, skip this step. If you do, package the skill with this skill's justfile and present the .skill file to the user:
 
 ```bash
-python -m scripts.package_skill <path/to/skill-folder>
+just -f skills/blacksmith/justfile package <path/to/skill-folder> [<output-directory>]
 ```
 
 After packaging, direct the user to the resulting `.skill` file path so they can install it.
@@ -431,7 +423,7 @@ In Claude.ai, the core workflow is the same (draft → test → review → impro
 
 **The iteration loop**: Same as before — improve the skill, rerun the test cases, ask for feedback — just without the browser reviewer in the middle. You can still organize results into iteration directories on the filesystem if you have one.
 
-**Description optimization**: This section requires `pi` and `th` CLI tools. Skip it if they are not available.
+**Description optimization**: This section requires the `pi` CLI tool and this skill's justfile. Skip it if they are not available.
 
 **Blind comparison**: Requires subagents. Skip it.
 

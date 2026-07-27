@@ -50,7 +50,7 @@ Before answering on a topic that might be in the TB:
 tb search "<topic>" --depth 1
 ```
 
-For complex problems that benefit from multiple perspectives: Quartermaster orchestrates a multi-hat flow via `th run`.
+For complex problems that benefit from multiple perspectives: Quartermaster orchestrates a multi-hat flow via its justfile.
 To extract content from URLs or videos: Courier.
 
 ### On a project — Scribe

@@ -1,0 +1,46 @@
+# Summoner — member team management recipes.
+# This skill wraps the underlying agent runner. SKILL.md references only
+# these recipes; it never invokes the runner CLI directly.
+
+default:
+    @just --list
+
+# List members: local, global and tmp by default. Pass --local, --global or --tmp to filter.
+members *FLAGS:
+    th member list {{FLAGS}}
+
+# Create a member. Use scope="--tmp" for temporary members.
+create name hat role *FLAGS:
+    th member create {{name}} --hat {{hat}} --role "{{role}}" {{FLAGS}}
+
+# Show the full JSON for a member.
+member-get name:
+    th member get {{name}}
+
+# Clone an existing global member under a new name.
+clone name from:
+    th member create {{name}} --from {{from}}
+
+# Delete a member.
+delete name:
+    th member delete {{name}}
+
+# Promote a local or tmp member to global.
+promote name *FLAGS:
+    th member promote {{name}} {{FLAGS}}
+
+# List available hats.
+hats:
+    th hats list
+
+# Show the full markdown for a hat.
+hat name:
+    th hats get {{name}}
+
+# Show run history. Default limit is 20.
+history *FLAGS:
+    th history {{FLAGS}}
+
+# Show the full metadata and output for a run id, if still available.
+get run_id:
+    th get {{run_id}}

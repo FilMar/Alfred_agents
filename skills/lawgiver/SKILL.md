@@ -1,7 +1,7 @@
 ---
 name: lawgiver
 description: "Lawgiver is the Rule Legislator. Writes atomic context→action rules for Third Identity (`ti`) — the store of what to DO given a situation, distinct from Third Brain which stores what is KNOWN. Use it whenever the user wants to add a behavioural rule, turn a lesson or mistake into a rule, extract rules from Third Brain notes or session output, or clean up / deduplicate the ti store. Strong triggers: 'add a rule', 'ti add', 'make this a rule', 'ricordati di fare X quando Y', 'populate ti', 'extract rules from tb', any 'when X happens, do Y' the user wants persisted."
-compatibility: Requires access to the `ti` CLI (bash); `tb` CLI for distillation from Third Brain.
+compatibility: Requires this skill's justfile and access to the `ti` and `tb` CLIs.
 allowed-tools: Bash
 ---
 
@@ -54,16 +54,28 @@ The litmus test: **can you phrase it so that doing it and not doing it look diff
 
 ---
 
+## Available recipes
+
+```bash
+just search "<draft context>" --limit 5
+just add "<context>" "<action>" --tags <tag1> --tags <tag2>
+just append-do <id> "<new action>"
+just list [--tags <tag>] [--limit <n>]
+just tb-browse --kind protocollo --limit 50
+```
+
+---
+
 ## Workflow A — Creating a rule from user input
 
 1. **Extract the pair.** From what the user says, identify context and action. If the context is missing ("ricordati di usare staging areas"), ask: *in which situation?* A `do` without a sharp `if` is a rule that never fires.
 2. **Draft** the rule applying the anatomy above. Splitting into multiple rules is normal — say so.
 3. **Dedupe** (mandatory, before proposing):
    ```bash
-   ti search "<draft context>" --limit 5
+   just search "<draft context>" --limit 5
    ```
    - Same context, same action → nothing to do; tell the user.
-   - Same context, new action → propose `ti append-do <id> --do "<action>"` instead of a new rule.
+   - Same context, new action → propose `just append-do <id> "<action>"` instead of a new rule.
    - Overlapping context → sharpen the draft `if` until the two situations are distinguishable, or merge.
 4. **Propose and wait.** Show the rule in this format and do not save until confirmed:
    ```
@@ -75,11 +87,11 @@ The litmus test: **can you phrase it so that doing it and not doing it look diff
    ```
 5. **Save** after confirmation:
    ```bash
-   ti add --if "<context>" --do "<action>" --tags <tag1> --tags <tag2>
+   just add "<context>" "<action>" --tags <tag1> --tags <tag2>
    ```
    Note the syntax: `--tags` is **repeatable, one tag per flag** — not comma-separated (that is `tb`'s convention, not `ti`'s).
 
-**Tags**: lowercase singular nouns, max 3, reuse the vocabulary already in `ti list` before inventing. Tags are a filter (`ti search --tags`), not a taxonomy — choose the ones someone would actually filter by.
+**Tags**: lowercase singular nouns, max 3, reuse the vocabulary already in `just list` before inventing. Tags are a filter (`just search --tags`), not a taxonomy — choose the ones someone would actually filter by.
 
 ## Workflow B — Distilling rules from existing material
 
@@ -87,7 +99,7 @@ Source can be Third Brain notes, a work session, a post-mortem, a document.
 
 1. **Harvest candidates.** For `tb`: notes of kind `protocollo` are rules almost by definition; `attrito` notes often hide a rule ("questo modello fallisce quando X" → "se X, non usare questo modello"); `dato`/`sintesi` yield a rule only when a clear behavioural consequence exists — most do not, and forcing one produces vague advice. Do not convert knowledge for completeness' sake: a small store of sharp rules beats a large store of noise, because every weak rule pollutes retrieval for the good ones.
    ```bash
-   tb browse --kind protocollo --limit 50
+   just tb-browse --kind protocollo --limit 50
    ```
 2. **Convert** each candidate through the anatomy: find the situation in which the protocol applies (that is the `if`), compress the instruction into a dry imperative `do` — drop the note's `why` entirely, it stays in `tb`. Cross-project only — project-specific protocols stay out.
 3. **Dedupe against `ti` and within the batch**, same as Workflow A step 3. When several notes yield the same context, that is one rule with multiple `do` entries, not several rules.
