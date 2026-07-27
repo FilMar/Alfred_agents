@@ -1,0 +1,40 @@
+{
+  "skill_name": "foreman",
+  "evals": [
+    {
+      "id": 1,
+      "name": "recap-creation",
+      "prompt": "fammi vedere a che punto siamo con lo sviluppo",
+      "expected_output": "L'agente legge la skill foreman, esegue `just recap` dalla directory della skill, e presenta il risultato: breakdown dello status del progetto SVILUPPO con conteggi e barre, lista item in progress, PR aperte e branch aperti.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "issue-list-and-view",
+      "prompt": "fammi vedere le issue aperte su server_api e poi mostrami i dettagli della piu' recente",
+      "expected_output": "L'agente usa `just issue-list server_api` per listare le issue aperte, identifica il numero della piu' recente, poi usa `just issue-view server_api <numero>` per mostrare i dettagli.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "status-filter-and-move",
+      "prompt": "mostrami cosa c'e' in backlog nel progetto e poi sposta la issue 'smembrare in vari servizi fast api' su ready",
+      "expected_output": "L'agente prima esegue `just proj-by-status Backlog` per mostrare gli item, identifica l'item ID della issue cercata, poi esegue `just proj-move <item-id> Ready`. Se la issue non e' in Backlog (potrebbe essere gia' in Ready), l'agente lo segnala.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "pr-status-check",
+      "prompt": "quante PR aperte abbiamo adesso e chi le ha aperte?",
+      "expected_output": "L'agente esegue `just prs` e presenta i risultati in forma leggibile: numero di PR aperte, per ciascuna repo, numero, titolo, autore e data.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "repo-discovery",
+      "prompt": "quali repo abbiamo in Emotion-SRL?",
+      "expected_output": "L'agente esegue `just repos` e presenta la lista dei repo con visibilita' e data di ultimo aggiornamento.",
+      "files": []
+    }
+  ]
+}
