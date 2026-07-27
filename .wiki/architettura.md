@@ -14,13 +14,13 @@ Pi is a personal cognitive augmentation system. Two orthogonal CLIs plus a skill
 |--------|------|---------|
 | `tb` (CLI + HTTP API) | Third Brain | Semantic memory: ideas, concepts, connections. Additive associative graph with backrefs and hybrid search — notes are never deleted, but refs and tags can be updated (`tb update`). `tb serve` exposes the same operations over HTTP (Hono, port 8788) with a static `/openapi.json`, for registering `tb` as a Tool Server in OpenAPI-compatible clients — see [style_dual_entrypoint](style_dual_entrypoint). |
 | `th` (CLI) | Third Hand | Agent orchestration with de Bono hats. Sequential and parallel flows, bwrap sandbox, SQLite tracking. |
-| `.wiki/` (Scribe skill) | Third Wiki | Local project wiki: structured markdown pages, style guides, code conventions. Maintained by the Scribe skill (Read/Write/Edit/Glob/Grep). |
+| `.wiki/` (Omero skill) | Third Wiki | Local project wiki: structured markdown pages, style guides, code conventions. Maintained by the Omero skill (Read/Write/Edit/Glob/Grep). |
 | `ti` (CLI + HTTP API) | Third Identity | Context→behavior memory: dedicated Qdrant collection `pi_identity`, distinct from `tb`'s semantic memory. See [ti_module](ti_module). `ti serve` mirrors `tb serve` (port 8789) — see [style_dual_entrypoint](style_dual_entrypoint). |
 | `tl` (REST API, not a CLI) | Third Log | Unified structured event log for `th`/`tb`/`ti`, extracted from `th`'s local SQLite tracking. Hosted on the Rasp, called via `curl`/HTTP — no `tl` command. Founded 2026-07-21, not yet implemented — see [tl_module](tl_module). |
 
 The layers do not overlap by design:
 - **Third Brain**: ideas that have value beyond the project — principles, patterns, cognitive tensions. No code, no technical documentation.
-- **Local wiki** (`.wiki/`, via Scribe): project-specific documentation — commands, flows, architecture, conventions. Plain markdown. Lives and dies with the project.
+- **Local wiki** (`.wiki/`, via Omero): project-specific documentation — commands, flows, architecture, conventions. Plain markdown. Lives and dies with the project.
 
 > **Archived — Third Done (`td`)**: a GTD CLI once lived here as a fourth layer. Source `tools/td/` and the `~/.local/bin/td` symlink were removed; only the legacy DB `~/.pi/td.db` survives. It is no longer an active layer, and its `taiichi` skill is gone. Likewise removed: the `mvr` tool (multiversal rules game) — `bin` entry and symlink deleted.
 
@@ -34,7 +34,7 @@ The layers do not overlap by design:
 
 ~/.local/bin/      # symlinks: tb, th (setup.sh)
 
-.wiki/             # local project wiki (markdown, managed by Scribe)
+.wiki/             # local project wiki (markdown, managed by Omero)
 .th/members/       # local project members
 ~/.th/members/     # global members
 /tmp/.th/members/  # temporary members
@@ -60,7 +60,7 @@ The agent cannot write outside these paths.
 ./setup.sh   # installs tb/th symlinks in ~/.local/bin/, links alfred.md and skills/
 ```
 
-The wiki needs no install — it is plain markdown in `.wiki/`, maintained by the Scribe skill.
+The wiki needs no install — it is plain markdown in `.wiki/`, maintained by the Omero skill.
 
 ## Cross-references
 

@@ -1,0 +1,20 @@
+# Vinci — CV Typst recipes.
+# This skill wraps the underlying Typst compiler and templates. SKILL.md
+# references only these recipes; it never invokes typst directly.
+
+VINCI_DIR := justfile_directory()
+
+default:
+    @just --list
+
+# Compile a .typ file to PDF. Produces <stem>.pdf next to the source.
+compile typ_file:
+    cd "{{invocation_directory()}}" && typst compile "{{typ_file}}"
+
+# Watch a .typ file for live preview.
+watch typ_file:
+    cd "{{invocation_directory()}}" && typst watch "{{typ_file}}"
+
+# List available templates.
+templates:
+    @ls -1 "{{VINCI_DIR}}/assets/"

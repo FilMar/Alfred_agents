@@ -89,20 +89,22 @@ Runs tracked in `~/.pi/th.db` (table `runs`): id, member, task (truncated to 300
 
 ## Typical examples
 
+`<member>` below is a `th` member (`<name>-<hat>`, e.g. `knuth-black`) — never a skill name; skills run inline, not via `--member` (see [agenti](agenti)).
+
 ```bash
 # Simple execution
-th run --member oracle --task "what do I know about Zettelkasten?"
+th run --member <member> --task "what do I know about Zettelkasten?"
 
 # With saved output for pipeline
-th run --member oracle --task "retrieve on X" > /tmp/out.txt
-th run --member alchemist --task "$(cat /tmp/out.txt)"
+th run --member <member> --task "retrieve on X" > /tmp/out.txt
+th run --member <other-member> --task "$(cat /tmp/out.txt)"
 
 # Parallel background
-th run --member inquisitor --task "find gaps in this idea: ..." --detach
-th run --member cartographer --task "suggest hubs for TB cluster" --detach
+th run --member <member> --task "find gaps in this idea: ..." --detach
+th run --member <other-member> --task "suggest hubs for TB cluster" --detach
 
 # With high thinking and timeout
-th run --member prospector --task "analyse this codebase" --thinking high --timeout 300
+th run --member <member> --task "analyse this codebase" --thinking high --timeout 300
 ```
 
 ## HTTP API (planned, not yet implemented — agreed 2026-07-23)

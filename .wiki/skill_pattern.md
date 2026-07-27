@@ -42,7 +42,7 @@ It also prevents the model from confusing **skill** with **member**. A skill is 
 - Handles all flag plumbing, defaults, quoting, and multi-step commands.
 - For multi-word arguments uses `just` positional parameters or `variadic *FLAGS`.
 
-Example from `skills/oracle/justfile`:
+Example from `skills/christopher/justfile`:
 
 ```just
 default:
@@ -84,9 +84,9 @@ When creating or updating a skill:
 
 Some skills do not wrap a CLI and do not need a `justfile`:
 
-- `architect` — pure dialogue, produces markdown files via Claude tools.
-- `biographer` — pure file editing inside Typst templates.
-- `scribe` — uses Claude native tools (`Read`, `Write`, `Edit`, `Glob`, `Grep`) on `.wiki/`.
+- `piano` — pure dialogue, produces markdown files via Claude tools.
+- `vinci` — pure file editing inside Typst templates.
+- `omero` — uses Claude native tools (`Read`, `Write`, `Edit`, `Glob`, `Grep`) on `.wiki/`.
 
 If a later evolution adds an external dependency, add a `justfile` then.
 
@@ -96,26 +96,26 @@ If a later evolution adds an external dependency, add a `justfile` then.
 
 | Skill | justfile wraps |
 |---|---|
-| foreman | `gh` |
-| postman | `himalaya`, `ti` (triage rules) |
-| steward | `taskwarrior` |
-| quartermaster | `th` (member/run/flow orchestration) |
-| summoner | `th` (member management) |
-| blacksmith | `th`, `pi`, Python scripts |
-| oracle | `tb` read |
-| alchemist | `tb` search |
-| inquisitor | `tb` read |
-| cartographer | `tb` read/write |
-| gardener | `tb`, `ti add` |
-| lawgiver | `ti` |
-| courier | `python3` scripts |
-| prospector | `find`, `grep`, `git`, `tb` search |
+| linus | `gh` |
+| ermes | `himalaya`, `ti` (triage rules) |
+| jobs | `taskwarrior` |
+| annibale | `th` (member/run/flow orchestration) |
+| fury | `th` (member management) |
+| efesto | `th`, `pi`, Python scripts |
+| christopher | `tb` read |
+| feynman | `tb` search |
+| socrate | `tb` read |
+| aristotele | `tb` read/write |
+| platone | `tb`, `ti add` |
+| mose | `ti` |
+| polo | `python3` scripts |
+| indiana | `find`, `grep`, `git`, `tb` search |
 
 ---
 
 ## Anti-patterns
 
-- **Skill calls a member directly**: `th run --member oracle ...` inside a skill is wrong. Use the skill itself inline, or route through `quartermaster` recipes.
+- **Skill calls a member directly**: `th run --member christopher ...` inside a skill is wrong. Use the skill itself inline, or route through `annibale` recipes.
 - **Direct binary in SKILL.md**: `tb search ...`, `gh issue create ...`, etc. belong in `justfile`, not in the markdown instructions.
 - **No justfile for a CLI-wrapping skill**: the skill is not yet complete.
 
@@ -124,5 +124,5 @@ If a later evolution adds an external dependency, add a `justfile` then.
 ## Related
 
 - [agenti](agenti) — list of available skills and their roles
-- [th_cli](th_cli) — the runner that lives behind quartermaster/summoner justfiles
+- [th_cli](th_cli) — the runner that lives behind annibale/fury justfiles
 - [architettura](architettura) — the three layers: `tb`, `th`, `.wiki/`

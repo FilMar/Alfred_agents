@@ -12,7 +12,7 @@ updated: 2026-07-21
 
 ## Implementation
 
-The module is implemented following a layered architecture to maintain consistency with the `tb` module (`tools/tb/CLAUDE.md`), deviating from the initial single-file design:
+The module is implemented following a layered architecture to maintain consistency with the `tb` module (see [style_tb_ti_layering](style_tb_ti_layering)), deviating from the initial single-file design:
 
 - `cli.ts`: Commander-based CLI surface (`add`, `search`, `list`, `delete`, `append-do`). No direct infrastructure calls.
 - `identity.ts`: Core business logic. Each function includes a `CONTRACT` comment defining pre/postconditions and side effects.
@@ -51,7 +51,7 @@ No note-linking (no `refs`/`backrefs` like `tb`): entries are atomic condition�
 
 `do` entries are not restricted to one kind. Three concrete forms settled in conversation:
 - **behavior/attitude** — "keep commits surgical, no unrelated cleanup";
-- **dispatch** to a skill or `th` member — "use skill Gardener", "run member knuth-black for audit";
+- **dispatch** to a skill or `th` member — "use skill Platone", "run member knuth-black for audit";
 - **lookup hint** into `tb` — a topic/search term worth checking for this context, never a frozen note id: an id goes stale as `tb` accumulates new relevant notes on the same topic over time, a search term stays valid.
 
 This makes `ti` a general **context router**, not just a behavior log. Its value is encoding non-obvious associations — a context that wouldn't semantically surface a related skill, member, or `tb` note on its own. If the association were obvious, plain `tb search` would already find it and `ti` would add nothing.
@@ -83,7 +83,7 @@ Reuses `tools/tb/src/infra.ts` as a library (`HttpClient`, `QDRANT_URL`, `OLLAMA
 
 `ti` is a new procedural-memory system standing alongside `tb` (semantic memory), but this is **not yet reflected upstream** — flagged here as a follow-up, not yet actioned:
 
-- **Skills** (`~/.claude/skills`): Gardener (memory consolidation, renamed from Platone) now proposes `ti add` for context→action decisions alongside `tb save` for semantic concepts — resolved 2026-07-23.
+- **Skills** (`~/.claude/skills`): Platone (memory consolidation; called `gardener` during the profession-naming era) now proposes `ti add` for context→action decisions alongside `tb save` for semantic concepts — resolved 2026-07-23.
 - **`alfred.md`** (the user's global identity/instructions file): documents Third Brain (`tb`) and Third Hand (`th`) as the two memory/orchestration systems, but does not mention Third Identity (`ti`) at all.
 
 Both need updating to actually teach the system to use `ti` for procedural if/do rules — otherwise `ti` remains a working tool nobody is instructed to call.
@@ -96,3 +96,4 @@ Both need updating to actually teach the system to use `ti` for procedural if/do
 - [roadmap_orchestrator](roadmap_orchestrator) — the orchestrator work `ti` took priority over
 - [agenti](agenti) — skills and `th` members `ti` can dispatch to
 - [style_dual_entrypoint](style_dual_entrypoint) — the CLI+API pattern behind `ti serve`, shared with `tb serve`
+- [style_tb_ti_layering](style_tb_ti_layering) — the layered architecture and coding standards `ti` follows
