@@ -1,0 +1,70 @@
+# Annibale — agent orchestration recipes.
+# This skill wraps the underlying agent runner. SKILL.md and flows reference
+# only these recipes; they never invoke the runner CLI directly.
+#
+# [no-cd] everywhere: th resolves .th/members/ relative to cwd (local vs
+# global scope). just's default is to chdir into this justfile's own
+# directory before running a recipe, which would make every `th` call
+# below operate on skills/annibale/.th instead of the caller's project.
+# [no-cd] keeps the recipe running from wherever `just` was invoked.
+
+default:
+    @just --list
+
+# Run a single member synchronously. If the member does not exist locally,
+# the runner auto-instantiates it from a global member or the skill creates
+# a temporary one (see member-tmp below).
+[no-cd]
+run member task *FLAGS:
+    th run --member {{member}} --task "{{task}}" {{FLAGS}}
+
+# Run a member in the background. Returns JSON with pid, out, log, status.
+[no-cd]
+run-detached member task *FLAGS:
+    th run --member {{member}} --task "{{task}}" --detach {{FLAGS}}
+
+# Wait for detached runs to finish. Pass status-file paths; optional flags
+# like --timeout come after the paths.
+[no-cd]
+wait *ARGS:
+    th wait {{ARGS}}
+
+# List available members (local, global and tmp).
+[no-cd]
+members:
+    th member list
+
+# Create a temporary member in /tmp/.th/members/.
+[no-cd]
+member-tmp name hat role *FLAGS:
+    th member create {{name}} --hat {{hat}} --role "{{role}}" --tmp {{FLAGS}}
+
+# Promote a local/tmp member to global (~/.th/members/).
+[no-cd]
+promote name *FLAGS:
+    th member promote {{name}} {{FLAGS}}
+
+# Check whether a member is available (exit 0 if yes, 1 if no).
+[no-cd]
+member-exists name:
+    th member get {{name}} >/dev/null 2>&1
+
+# ─── Flow recipes ────────────────────────────────────────────────────────────
+
+# List available flow templates (markdown-only flows, plus harness scripts).
+flow-list:
+    @find "{{justfile_directory()}}/flows" -type f \( -name '*.md' -o -name '*.sh' \) -printf '%f\n' | sed 's/\.md$//;s/\.sh$//' | sort -u
+
+# Read the documentation for a flow template.
+flow-read name:
+    @cat "{{justfile_directory()}}/flows/{{name}}.md"
+
+# Run the Council of Experts flow harness. council.sh calls back into this
+# same justfile (run-detached/wait/run/member-exists) — [no-cd] here keeps
+# the whole chain anchored to the caller's project.
+[no-cd]
+council task members *FLAGS:
+    "{{justfile_directory()}}/flows/council.sh" \
+      --task "{{task}}" \
+      --members "{{members}}" \
+      {{FLAGS}}

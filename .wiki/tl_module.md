@@ -55,7 +55,7 @@ Every producer posts with a short timeout (~1-2s) and zero retry, swallowing fai
 ## Explicitly out of scope (this founding)
 
 - **Skill invocation logging** — would need a Claude Code hook; deferred, not designed here. Gap 1 (skill telemetry) stays open until this is built.
-- **Storing full dialogues/conversations** — rejected earlier in the same design conversation: different volume and purpose, contradicts the project's existing distill-don't-hoard philosophy (Gardener extracts atomic notes from sessions, it doesn't archive them raw).
+- **Storing full dialogues/conversations** — rejected earlier in the same design conversation: different volume and purpose, contradicts the project's existing distill-don't-hoard philosophy (Platone extracts atomic notes from sessions, it doesn't archive them raw).
 - **Migrating `th.db`'s existing history** — never used or validated, starting fresh.
 - `th history`/`th stats` become empty/stub commands for now, not rewired to query `tl` yet.
 

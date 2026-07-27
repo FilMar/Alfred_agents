@@ -1,0 +1,22 @@
+# Christopher — Third Brain read-only recipes.
+# This skill wraps the underlying memory CLI. SKILL.md references only these
+# recipes; it never invokes the CLI directly.
+
+default:
+    @just --list
+
+# Search the Third Brain.
+search query *FLAGS:
+    tb search "{{query}}" {{FLAGS}}
+
+# Browse notes by kind, date, etc.
+browse *FLAGS:
+    tb browse {{FLAGS}}
+
+# Return a random note for lateral exploration.
+random:
+    tb random
+
+# List tags by frequency.
+tags:
+    tb tags

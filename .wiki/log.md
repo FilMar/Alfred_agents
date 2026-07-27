@@ -8,6 +8,10 @@ updated: 2026-07-02
 
 ## Log
 
+## [2026-07-27] ingest | tb/ti coding standards migrated from tools/*/CLAUDE.md
+
+`tools/tb/CLAUDE.md` (layered architecture, constants placement, dead code, DRY, file size, readability) had no wiki equivalent — migrated verbatim into [style_tb_ti_layering](style_tb_ti_layering). `tools/ti/CLAUDE.md` and `tools/tl/CLAUDE.md` were already fully covered by [ti_module](ti_module) and [tl_module](tl_module) respectively; only a stale cross-reference in `ti_module` (pointing at `tools/tb/CLAUDE.md` by path) was repointed to the new page. All three `tools/*/CLAUDE.md` files removed — the wiki is now the single source for these conventions.
+
 ## [2026-07-23] revision | th HTTP API — dropped th.db dependency, polling goes straight to /tmp
 
 Same-day revision of the note below. The user separately confirmed intent to remove `th.db` (SQLite) entirely, moving run history to [tl_module](tl_module) via fire-and-forget REST events. Rather than complicating the planned `GET /runs` routes, this simplified them: "in progress" status is inherently ephemeral local state that was already file-backed (`.status`/`.out`/`.log` in `/tmp`, written by `spawnDetached` independent of the DB), so `GET /runs` becomes a glob over `/tmp/th-*.status` instead of a `listRuns()`/`db.ts` extension. That plan is superseded. Historical runs beyond what's on disk stay explicitly out of scope for `th`'s own API — that gap is `tl`'s to fill once wired up. Updated in [th_cli](th_cli), [roadmap](roadmap), [style_dual_entrypoint](style_dual_entrypoint).

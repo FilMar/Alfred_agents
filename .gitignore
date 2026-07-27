@@ -2,3 +2,7 @@ node_modules/
 *.log
 .alfred/
 pi-docs/
+
+# Python bytecode cache
+__pycache__/
+*.pyc

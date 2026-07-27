@@ -4,7 +4,7 @@
 
 | Page | Content |
 |------|---------|
-| [architettura](architettura) | The layers: tb, th, the `.wiki/` (Scribe) — roles, boundaries, cooperation |
+| [architettura](architettura) | The layers: tb, th, the `.wiki/` (Omero) — roles, boundaries, cooperation |
 | [agenti](agenti) | Available agents, roles, triggers |
 | [th_cli](th_cli) | CLI reference for `th` — commands, flags, examples |
 | [orchestrator_overview](orchestrator_overview) | General system design and the five core pillars |
@@ -16,10 +16,11 @@
 | [rasp_node](rasp_node) | The Rasp as a node: all services it hosts and provisioning order |
 | [skill_pattern](skill_pattern) | Conventions for `SKILL.md` + `justfile` — every operational skill must follow this |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI+HTTP API pattern (Hono) shared by `tb serve`/`ti serve` |
+| [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards shared by `tb`/`ti` |
 | [log](log) | Wiki update history |
 
 ## Frontmatter
 
 tags: [pi, index, architecture]
 sources: [README.md, alfred.md]
-updated: 2026-07-23
+updated: 2026-07-27

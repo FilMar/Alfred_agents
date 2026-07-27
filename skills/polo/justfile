@@ -1,0 +1,23 @@
+# Polo — external content extraction recipes.
+# This skill wraps the underlying Python scripts. SKILL.md references only
+# these recipes; it never invokes the scripts directly.
+
+POLO_DIR := justfile_directory()
+
+default:
+    @just --list
+
+# Extract transcript from one or more YouTube URLs.
+youtube +urls:
+    python3 "{{POLO_DIR}}/scripts/youtube.py" {{urls}}
+
+# Extract clean article text from a web URL.
+article url:
+    python3 "{{POLO_DIR}}/scripts/article.py" {{url}}
+
+# Download a raw GitHub file (converts blob to raw automatically).
+raw-github url:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    raw=$(echo "{{url}}" | sed -E 's|github\.com/([^/]+)/([^/]+)/blob/|raw.githubusercontent.com/\1/\2/|')
+    curl -s "$raw"

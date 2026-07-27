@@ -3,50 +3,42 @@
 ## Frontmatter
 
 tags: [agents, skills, th, hats]
-sources: [README.md, skills/]
-updated: 2026-07-16
+sources: [README.md, skills/, annibale/SKILL.md]
+updated: 2026-07-27
 
 ## Overview
 
-Agents are Claude Code instances with a specialised system prompt (role + de Bono hat). They live in `skills/<name>/SKILL.md` and are executed via `th run --member <name>` or as Claude Code skills.
+Two distinct things share the word "agent" here — kept separate on purpose (see [Cross-references](#cross-references) → `th_cli` for the full boundary):
 
-The `SKILL.md` file contains:
+- **Skills** — live in `skills/<name>/SKILL.md`, one per role (e.g. platone, omero, annibale). Executed inline: read the `SKILL.md`, follow its protocol directly. Never run via `th run --member`.
+- **`th` members** — the project's agent roster (role + de Bono hat), a separate concept from skills. Executed only through annibale, never simulated inline and never invoked by naming a skill as `--member`.
+
+A `SKILL.md` file contains:
 - Who the agent is (identity, behaviour)
 - When to trigger it (implicit triggers)
 - How it operates (work protocol)
 
 ## Available agents
 
-| Agent | Role | Hat |
-|-------|------|-----|
-| `quartermaster` | Orchestrator: decomposes complex work into multi-agent flows with de Bono hats | Blue (process) |
-| `oracle` | Retrieves knowledge from the TB without interpreting | White (data) |
-| `inquisitor` | Generates cognitive friction: finds contradictions and gaps, never closes | Black (critical) |
-| `cartographer` | Curates TB syntheses: hubs, missing connections, dense clusters | Yellow (synthesis) |
-| `gardener` | Sediments ideas in the TB atomically and connectedly, with serendipity | Green (creative) |
-| `alchemist` | Teaches the TB corpus with the three-level Feynman technique | White + Yellow |
-| `prospector` | Code archaeology: diagnoses patterns, debt, buried decisions | Black (critical) |
-| `courier` | Extracts text from URLs (web articles and YouTube) | White (data) |
-| `blacksmith` | Creates and improves skills, measures performance via evals and benchmarks | Green (creative) |
-| `scribe` | Maintains the local project wiki in `.wiki/` (direct file edits) | Blue (process) |
-| `summoner` | Designs and builds the agent member team for a project | Blue (process) |
-| `architect` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md | — |
-| `postman` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) | — |
-| `biographer` | Generates a Typst CV from free conversation or an existing CV/text | — |
+The roster is deliberately **not** tabled here — a copy in the wiki goes stale (a previous table claimed 14 skills while `skills/` held 17). The single source of truth is the filesystem; print it on demand:
 
-`architect`, `postman` and `biographer` are operational skills without a de Bono hat — invoked as Claude Code skills, not as `th` members. Total: 14 skills, matching `skills/`.
+```
+just -f skills/efesto/justfile roster
+```
 
-## Naming rename — mythological figures to professions (done, 2026-07-23)
+One line per skill (name + first sentence of its `SKILL.md` description), derived from the frontmatter at print time — renames and additions show up automatically.
 
-Decision (2026-07-22): drop the mythological/historical-figure names (Annibale, Oracolo, ...) in favour of professions — a mix of historical/real (architect, cartographer, courier, scribe, gardener, postman, biographer, quartermaster, oracle) and fantastical/evocative (alchemist, summoner, prospector, blacksmith, inquisitor). Goal: keep personality per role (unlike flat function names such as `consolidate-memory`) while making the name itself hint at what the role does, which a proper noun cannot.
+Historical note: the old table also assigned a de Bono hat to each skill. Hats are a property of `th` members, not of skills (skills are never run as `--member`); per-member hats live in the member definitions (see [th_cli](th_cli)).
 
-Two earlier options were tried and rejected before this one:
-- Plain functional names (e.g. `consolidate-memory`, `orchestrate`) — technically sufficient since Skill/`th` dispatch matches on *description*, not name, but flattens the per-role personality the mythological names carried.
-- D&D classes (Fighter, Wizard, Cleric, ...) — rejected by the user as unconvincing, even after a full 1:1 mapping across all 14 skills.
+## Naming — three eras (current: figures, 2026-07-27)
 
-Naming collisions to note: `oracolo → oracle` and `postino → postman` are near-identical translations, kept because the original name already *was* the job title in spirit — no rename was actually needed there for meaning, only for cross-language/style consistency with the rest of the roster.
+1. **Figures, first era (original)** — mythological/historical proper nouns (Platone, Annibale, Oracolo, ...).
+2. **Professions (2026-07-22)** — English profession names (gardener, quartermaster, oracle, ...) so the name itself hints at the function. Two options tried and rejected on the way: plain functional names (`consolidate-memory` — technically sufficient since dispatch matches on *description*, but flattens per-role personality) and D&D classes (unconvincing even after a full mapping).
+3. **Figures, second era (2026-07-27, current)** — professions turned out functional but flavourless. New rule: **the most famous figure whose iconic trait coincides with the skill's function — any pantheon (myth, history, science, pop), single word, and it must pass the "bar test": hearing the name, you guess the function without footnotes.** This restores the personality of era 1 while keeping the name→function link that motivated era 2. Some originals returned to the same posts (platone, annibale).
 
-Status: executed. All 14 `skills/<name>/` directories, `SKILL.md` frontmatter, `th` member names, and every reference in `alfred.md` / `CLAUDE.md` (workflow trigger table) and `.wiki/` now use the profession names. Old mythological names survive only in dated `.wiki/log.md` entries (historical record) and in this decision record itself.
+Mapping (profession era → current): quartermaster→annibale, architect→piano, summoner→fury, gardener→platone, alchemist→feynman, inquisitor→socrate, cartographer→aristotele, oracle→christopher, courier→polo, prospector→indiana, blacksmith→efesto, scribe→omero, postman→ermes, biographer→vinci, foreman→linus, lawgiver→mose, steward→jobs.
+
+Status: executed 2026-07-27 on branch `refactoring/skill-rename` — `skills/<name>/` directories, `SKILL.md` frontmatter, `alfred.md`, `CLAUDE.md`, `README.md` and `.wiki/` references. Profession names survive only in dated log entries and in this record.
 
 ## De Bono hats
 
@@ -65,20 +57,22 @@ Hats live in `tools/th/src/` (directory `hats/`). Use `th hats list` to see them
 
 ## Execution patterns
 
+These apply to `th` members (e.g. `knuth-black`, `turing-green` — real names follow `<name>-<hat>`), never to skills — a skill is never passed as `--member`. A member's `--task` can still ask it to *use* a skill (annibale does this throughout its flows, e.g. `"Use the christopher skill to retrieve..."`) — that's the member following a skill's protocol as instructed, not the harness dispatching to it.
+
 **Sequential** (one's output → next one's context):
 ```bash
-th run --member oracle --task "retrieve everything on X" --output /tmp/oracle.out
-th run --member alchemist --task "$(cat /tmp/oracle.out) — teach"
+th run --member knuth-black --task "retrieve everything on X" --output /tmp/knuth.out
+th run --member turing-green --task "$(cat /tmp/knuth.out) — build on it"
 ```
 
 **Parallel** with `--detach`:
 ```bash
-th run --member inquisitor --task "find gaps in..." --detach
-th run --member cartographer --task "find clusters in..." --detach
+th run --member lusk-white --task "find gaps in..." --detach
+th run --member von-neumann-blue --task "find clusters in..." --detach
 # poll on /tmp/th-*.status, then synthesise
 ```
 
-**Quartermaster** automatically orchestrates the right pattern by decomposing the problem into sub-tasks.
+**Annibale** automatically orchestrates the right pattern by decomposing the problem into sub-tasks.
 
 ## Member lifecycle
 
