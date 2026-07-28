@@ -1,0 +1,18 @@
+[Unit]
+Description=MEGA Backup Completo
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/just -f /home/filrasp/.pi/agent/skills/mega/justfile mega-backup-all
+WorkingDirectory=/home/filrasp
+Environment=PATH=/usr/bin:/bin:/usr/sbin:/sbin
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mega-backup
+
+[Install]
+WantedBy=default.target

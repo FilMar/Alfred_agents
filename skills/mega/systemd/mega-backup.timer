@@ -1,0 +1,12 @@
+[Unit]
+Description=Weekly MEGA Backup Qdrant Timer
+Documentation=https://github.com/meganz/MEGAcmd
+
+[Timer]
+# Every Monday at 04:00
+OnCalendar=Mon *-*-* 04:00:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
