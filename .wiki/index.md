@@ -23,4 +23,4 @@
 
 tags: [pi, index, architecture]
 sources: [README.md, alfred.md]
-updated: 2026-07-27
+updated: 2026-07-28

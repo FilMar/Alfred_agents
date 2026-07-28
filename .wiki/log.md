@@ -8,6 +8,10 @@ updated: 2026-07-02
 
 ## Log
 
+## [2026-07-28] ingest | Proposal: search score-cutoff (ti/tb) + UserPromptSubmit hook for structural rule retrieval
+
+Design discussion, not yet implemented, documented in [ti_module](ti_module). Two items: (1) add a `--min-score` option natively to `search` in `tools/ti/src/` and `tools/tb/src/` (currently only `--limit`/`--tags` exist, no relevance threshold) — filtering belongs in the tool source, not as a `jq` post-filter in the wrapping `mose`/`christopher` justfiles; (2) a Claude Code `UserPromptSubmit` hook that runs `ti search`/`tb search` (with the cutoff above) on every incoming prompt and injects the results as context, replacing pull-based retrieval (agent must remember to query `ti`) with structural injection. Motivated by two new `ti` rules added this session on justfile discipline (never bypass a skill's justfile for its underlying CLI; propose a new recipe rather than an ad-hoc command when one is missing) — the concrete case that exposed the "rule is lost if nobody queries `ti`" gap already flagged in `ti_module`'s governance section. Open questions: relevance-threshold tuning, added per-prompt latency.
+
 ## [2026-07-27] ingest | tb/ti coding standards migrated from tools/*/CLAUDE.md
 
 `tools/tb/CLAUDE.md` (layered architecture, constants placement, dead code, DRY, file size, readability) had no wiki equivalent — migrated verbatim into [style_tb_ti_layering](style_tb_ti_layering). `tools/ti/CLAUDE.md` and `tools/tl/CLAUDE.md` were already fully covered by [ti_module](ti_module) and [tl_module](tl_module) respectively; only a stale cross-reference in `ti_module` (pointing at `tools/tb/CLAUDE.md` by path) was repointed to the new page. All three `tools/*/CLAUDE.md` files removed — the wiki is now the single source for these conventions.

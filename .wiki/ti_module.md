@@ -3,7 +3,7 @@
 ```yaml
 tags: [architecture, memory, ti, qdrant]
 sources: [conversation, tools/ti/src/types.ts, tools/ti/src/identity.ts, tools/ti/src/qdrant.ts, tools/ti/src/cli.ts, tests/ti.test.ts]
-updated: 2026-07-21
+updated: 2026-07-28
 ```
 
 ## Overview
@@ -77,7 +77,7 @@ Reuses `tools/tb/src/infra.ts` as a library (`HttpClient`, `QDRANT_URL`, `OLLAMA
 
 ## Pending Work
 
-- None outstanding on `ti` itself — collection provisioning (`ensureCollection`, idempotent create-if-missing), packaging (bin registration, `setup.sh`), and the response-shape bugs above are all done and verified live.
+- **Score-cutoff parameter for `search`** (design discussion, not yet implemented): `ti search` currently only supports `--limit` and `--tags` — no relevance threshold, so a query far from any stored `if` still returns its `--limit` best matches, diluting results with low-score noise. Proposed: a `--min-score` (or similarly named) option on `search`, added natively in `tools/ti/src/identity.ts`/`cli.ts` (and the equivalent `tools/tb/src/notes.ts`/`cli.ts` for `tb search`, same gap there) rather than as a post-hoc `jq` filter in the wrapping skill justfiles (`mose`, `christopher`) — the tool is real TS source in this repo, filtering belongs at the source of the score, not bolted onto a caller. Once native, the `mose`/`christopher` justfile `search` recipes should expose the same flag through to the CLI.
 
 ## Open — governance gap
 
@@ -87,6 +87,8 @@ Reuses `tools/tb/src/infra.ts` as a library (`HttpClient`, `QDRANT_URL`, `OLLAMA
 - **`alfred.md`** (the user's global identity/instructions file): documents Third Brain (`tb`) and Third Hand (`th`) as the two memory/orchestration systems, but does not mention Third Identity (`ti`) at all.
 
 Both need updating to actually teach the system to use `ti` for procedural if/do rules — otherwise `ti` remains a working tool nobody is instructed to call.
+
+**Proposal (design discussion, not yet implemented): `UserPromptSubmit` hook to force retrieval structurally.** Concrete instance of the gap above: two rules were added to `ti` this session (justfile discipline — never bypass a skill's justfile for the underlying CLI, and propose a new recipe rather than an ad-hoc command when one is missing), but `ti` retrieval is pull-based — a rule only surfaces if the agent thinks to run `ti search` in that moment, which is not guaranteed. Proposed fix: a Claude Code `UserPromptSubmit` hook (type `command`) that receives the user prompt via stdin, runs `ti search "<prompt>"` (and possibly `tb search`) with the score-cutoff above applied, and whose stdout is injected as additional context before the prompt is processed — turning retrieval from something the agent must remember into something structurally attached to every turn. Two open design questions: relevance-threshold tuning (without the cutoff, an unrelated prompt still returns its nearest low-score match as noise) and the added latency/cost of one extra search per prompt turn.
 
 ## Cross-references
 
