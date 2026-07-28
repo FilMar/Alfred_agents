@@ -1,6 +1,12 @@
 # GitHub management for Emotion-SRL / SVILUPPO project.
 # All operations go through these recipes — the skill never calls gh directly.
 # Run `just --list` from this directory to see all recipes.
+#
+# KNOWN BUG: recipes that interpolate {{title}}/{{body}} into a single-quoted
+# shell string (issue-create-body, proj-draft-create) break if the value
+# contains an apostrophe (e.g. "tower's") — it closes the quote early and
+# whatever follows, if it includes a "(", causes a bash syntax error. Avoid
+# apostrophes in titles/bodies until the recipes escape this properly.
 
 ORG := "Emotion-SRL"
 PROJECT_NUM := "4"
@@ -155,6 +161,17 @@ proj-add repo issue_num:
         echo "Check that issue #{{issue_num}} exists in Emotion-SRL/{{repo}}"
         exit 1
     fi
+
+# Create a draft item directly in SVILUPPO, not linked to any repo issue (status=Backlog)
+# Usage: just proj-draft-create "Title" "Body text"
+proj-draft-create title body:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ITEM_ID=$(gh project item-create 4 --owner Emotion-SRL --title '{{title}}' --body '{{body}}' --format json -q .id)
+    gh project item-edit --id "$ITEM_ID" --project-id PVT_kwDOBGn_Wc4BZ0Ec \
+        --field-id PVTSSF_lADOBGn_Wc4BZ0EczhUwJEU \
+        --single-select-option-id f75ad846 2>/dev/null
+    echo "Draft item created in SVILUPPO (Backlog). Item ID: $ITEM_ID"
 
 # === RECAP ===
 

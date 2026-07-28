@@ -28,6 +28,10 @@ read account id folder="INBOX":
 preview account id folder="INBOX":
     himalaya message read {{id}} -f {{folder}} -a {{account}} --preview
 
+# Esporta il messaggio raw e stampa la parte text/html (utile per estrarre link persi nella resa in testo)
+html account id folder="INBOX":
+    himalaya message export {{id}} -f {{folder}} -a {{account}} -F
+
 # Aggiunge flag (es. seen, flagged, answered) a uno o più id — mescola id e nomi flag come vuole himalaya
 flag-add account folder *ids_and_flags:
     himalaya flag add {{ids_and_flags}} -f {{folder}} -a {{account}}
