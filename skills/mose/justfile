@@ -1,26 +1,55 @@
 # Mosè — Third Identity rule recipes.
 # This skill wraps the underlying identity CLI. SKILL.md references only these
 # recipes; it never invokes the CLI directly.
+#
+# Positional args only. Fixed-arity recipes start with scripts/guard.sh,
+# which rejects flag-style (--x) and NAME=value invocations: just would
+# silently map them into positional slots and corrupt the call.
+
+set positional-arguments
+
+guard := justfile_directory() / "scripts/guard.sh"
 
 default:
     @just --list
 
-# Search existing rules.
-search query *FLAGS:
-    ti search "{{query}}" {{FLAGS}}
+# Search existing rules. Usage: just search "<query>" [limit]
+search query limit="5":
+    @"{{guard}}" 'Usage: just search "<query>" [limit]' "$@"
+    @ti search "$1" --limit "$2"
 
-# List rules, optionally filtered by tags.
-list *FLAGS:
-    ti list {{FLAGS}}
+# List rules, optionally filtered by tags. Usage: just list ["tag1,tag2"]
+list tags="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    "{{guard}}" 'Usage: just list ["tag1,tag2"]' "$@"
+    args=()
+    IFS=',' read -ra ts <<< "${1:-}"
+    for t in "${ts[@]}"; do
+        t="$(printf '%s' "$t" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+        [ -n "$t" ] && args+=(--tags "$t")
+    done
+    exec ti list "${args[@]}"
 
-# Add a new rule.
-add context action *FLAGS:
-    ti add --if "{{context}}" --do "{{action}}" {{FLAGS}}
+# Add a new rule. Usage: just add "<context>" "<action>" ["tag1,tag2"]
+add context action tags="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    "{{guard}}" 'Usage: just add "<context>" "<action>" ["tag1,tag2"]' "$@"
+    args=(--if "$1" --do "$2")
+    IFS=',' read -ra ts <<< "${3:-}"
+    for t in "${ts[@]}"; do
+        t="$(printf '%s' "$t" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+        [ -n "$t" ] && args+=(--tags "$t")
+    done
+    exec ti add "${args[@]}"
 
-# Append a second action to an existing rule by id.
+# Append a second action to an existing rule by id. Usage: just append-do <id> "<new action>"
 append-do id action:
-    ti append-do {{id}} --do "{{action}}"
+    @"{{guard}}" 'Usage: just append-do <id> "<new action>"' "$@"
+    @ti append-do "$1" --do "$2"
 
-# Browse Third Brain notes of a given kind (used when distilling from TB).
-tb-browse *FLAGS:
-    tb browse {{FLAGS}}
+# Browse Third Brain notes of a given kind (used when distilling from TB). Usage: just tb-browse <kind> [limit]
+tb-browse kind limit="50":
+    @"{{guard}}" 'Usage: just tb-browse <kind> [limit]' "$@"
+    @tb browse --kind "$1" --limit "$2"

@@ -3,7 +3,7 @@ name: ermes
 description: "Manages emails via Himalaya: triage and auto-sort INBOX, search by any field, browse folders, compose email drafts to file (user sends manually). No deletion, no sending."
 ---
 
-Use the recipes in this skill's `justfile` instead of calling `himalaya` directly — it wraps account handling (`filippo` default, `lavoro`) and folder/id plumbing. Run `just --list` from this directory to see all recipes with their argument order (just takes positional args, not `name=value`).
+Use the recipes in this skill's `justfile` instead of calling `himalaya` or `ti` directly — it wraps account handling (`filippo` default, `lavoro`) and folder/id plumbing. Run `just --list` from this directory to see all recipes with their argument order. Arguments are **positional only**: a flag-style (`--x`) or `NAME=value` argument aborts with the correct usage.
 
 ## Operations
 
@@ -29,7 +29,7 @@ No fixed classification script. Sender/subject → folder rules live in `ti` (ta
    ```bash
    just ti-add "<sender address or domain>" "<folder>"
    ```
-7. If the user corrects a rule that already exists, do not try to edit it in place (`ti` never overwrites by design) — add a fresh entry with the corrected mapping via `just ti-add`; the newer, more specific rule will naturally outrank the stale one in future searches, and the stale entry can be pruned later with `ti delete <id>` if it keeps interfering.
+7. If the user corrects a rule that already exists, do not try to edit it in place (`ti` never overwrites by design) — add a fresh entry with the corrected mapping via `just ti-add`; the newer, more specific rule will naturally outrank the stale one in future searches, and the stale entry can be pruned later with `just ti-delete <id>` if it keeps interfering.
 
 Review the accumulated rulebook any time with:
 ```bash
@@ -95,7 +95,7 @@ If replying to an existing email, generate the reply template instead — this a
 ```bash
 just reply filippo <id>
 ```
-Edit the file to fill in the body (`show-template` to read it, then Edit as usual), then show the send command:
+Edit the file to fill in the body (`show-template` to read it, then Edit as usual), then show the user the command they can run to send it — the recipe only prints it, it never sends:
 ```bash
-just send-cmd ~/mail/outbox/reply-<id>.mml
+just send-cmd ~/mail/outbox/reply-<id>.mml [account]
 ```

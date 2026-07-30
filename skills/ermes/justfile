@@ -1,5 +1,14 @@
 # Himalaya CLI wrapper for the ermes skill.
-# Accounts: "filippo" (default) and "lavoro" — pass account="lavoro" to target the other one.
+# Accounts: "filippo" (default) and "lavoro" — pass the account name as the
+# first positional argument to target the other one.
+#
+# Positional args only. Fixed-arity recipes start with scripts/guard.sh,
+# which rejects flag-style (--x) and NAME=value invocations: just would
+# silently map them into positional slots and corrupt the call.
+
+set positional-arguments
+
+guard := justfile_directory() / "scripts/guard.sh"
 
 default:
     @just --list
@@ -10,10 +19,12 @@ accounts:
 
 # Elenca le cartelle disponibili
 folders account="filippo":
+    @"{{guard}}" 'Usage: just folders [account]' "$@"
     himalaya folder list -o json -a {{account}}
 
 # Lista envelope dell'INBOX (o cartella indicata)
 inbox account="filippo" folder="INBOX" page="200":
+    @"{{guard}}" 'Usage: just inbox [account] [folder] [page-size]' "$@"
     himalaya envelope list --page-size {{page}} -o json -f {{folder}} -a {{account}}
 
 # Ricerca con la query syntax di Himalaya (es: 'from paypal and after 2026-01-01')
@@ -22,14 +33,17 @@ search account="filippo" folder="INBOX" *query:
 
 # Legge il corpo di un messaggio (marca automaticamente come "seen")
 read account id folder="INBOX":
+    @"{{guard}}" 'Usage: just read <account> <id> [folder]' "$@"
     himalaya message read {{id}} -f {{folder}} -a {{account}}
 
 # Legge un messaggio senza marcarlo come letto
 preview account id folder="INBOX":
+    @"{{guard}}" 'Usage: just preview <account> <id> [folder]' "$@"
     himalaya message read {{id}} -f {{folder}} -a {{account}} --preview
 
 # Esporta il messaggio raw e stampa la parte text/html (utile per estrarre link persi nella resa in testo)
 html account id folder="INBOX":
+    @"{{guard}}" 'Usage: just html <account> <id> [folder]' "$@"
     himalaya message export {{id}} -f {{folder}} -a {{account}} -F
 
 # Aggiunge flag (es. seen, flagged, answered) a uno o più id — mescola id e nomi flag come vuole himalaya
@@ -53,6 +67,7 @@ move account src dst *ids:
 reply account id folder="INBOX":
     #!/usr/bin/env bash
     set -euo pipefail
+    "{{guard}}" 'Usage: just reply <account> <id> [folder]' "$@"
     mkdir -p ~/mail/outbox
     file=~/mail/outbox/reply-{{id}}.mml
     himalaya template reply {{id}} -f {{folder}} -a {{account}} > "$file"
@@ -62,27 +77,40 @@ reply account id folder="INBOX":
 template account to subject body:
     #!/usr/bin/env bash
     set -euo pipefail
+    "{{guard}}" 'Usage: just template <account> <to> "<subject>" "<body>"' "$@"
     mkdir -p ~/mail/outbox
     slug=$(echo "{{subject}}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-//;s/-$//')
     file=~/mail/outbox/"$slug".mml
     himalaya template write -a {{account}} -H "To:{{to}}" -H "Subject:{{subject}}" "{{body}}" > "$file"
     echo "Template saved: $file"
 
+# Stampa (NON esegue) il comando che l'utente può lanciare per inviare un template
+send-cmd file account="filippo":
+    @"{{guard}}" 'Usage: just send-cmd <file> [account]' "$@"
+    @echo "himalaya template send -a {{account}} < {{file}}"
+
+# Stampa a schermo il contenuto di un template già scritto in outbox
+show-template file:
+    @"{{guard}}" 'Usage: just show-template <file>' "$@"
+    @cat {{file}}
+
 # Third Identity recipes for mail triage rules.
 
 # Search existing triage rules for a sender.
 ti-search sender:
-    ti search "{{sender}}" --tags mail,triage --limit 1
+    @"{{guard}}" 'Usage: just ti-search "<sender address or domain>"' "$@"
+    ti search "{{sender}}" --tags mail --tags triage --limit 1
 
 # Add a triage rule that moves mail from a sender to a folder.
-ti-add sender folder *FLAGS:
-    ti add --if "{{sender}}" --do "move to {{folder}}" --tags mail,triage {{FLAGS}}
+ti-add sender folder:
+    @"{{guard}}" 'Usage: just ti-add "<sender address or domain>" "<folder>"' "$@"
+    ti add --if "{{sender}}" --do "move to {{folder}}" --tags mail --tags triage
 
 # List all mail triage rules.
 ti-list:
-    ti list --tags mail,triage
+    ti list --tags mail --tags triage
 
-# Stampa a schermo il contenuto di un template già scritto in outbox
-show-template file:
-    @cat {{file}}
-
+# Delete a stale triage rule by id.
+ti-delete id:
+    @"{{guard}}" 'Usage: just ti-delete <id>' "$@"
+    ti delete {{id}}

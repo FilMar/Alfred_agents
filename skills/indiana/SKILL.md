@@ -42,13 +42,13 @@ bash "git -C {{path}} log --stat --oneline -5"
 bash "git -C {{path}} shortlog -sn --no-merges | head -10"
 
 # Immediate health signals
-just files <path> --maxdepth 1 '*.md'   # markdown docs
+just files <path> 1 '*.md'              # markdown docs
 just pain <path>                      # TODO/FIXME/HACK comments
 ```
 
 Then search the Third Brain for what you already know about these stacks:
 ```bash
-just tb-search "<main language or framework>" --limit 5
+just tb-search "<main language or framework>"
 ```
 
 ### 2. Stratigraphic Dig (Layer Analysis)

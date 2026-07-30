@@ -56,12 +56,14 @@ The litmus test: **can you phrase it so that doing it and not doing it look diff
 
 ## Available recipes
 
+All recipes take **positional args** in the order shown — never `--flags`. A flag-style or `NAME=value` argument aborts with the correct usage.
+
 ```bash
-just search "<draft context>" --limit 5
-just add "<context>" "<action>" --tags <tag1> --tags <tag2>
+just search "<draft context>" [limit]      # default limit 5
+just add "<context>" "<action>" ["tag1,tag2"]
 just append-do <id> "<new action>"
-just list [--tags <tag>] [--limit <n>]
-just tb-browse --kind protocollo --limit 50
+just list ["tag1,tag2"]                    # all rules, optionally filtered by tags
+just tb-browse <kind> [limit]              # default limit 50
 ```
 
 ---
@@ -72,7 +74,7 @@ just tb-browse --kind protocollo --limit 50
 2. **Draft** the rule applying the anatomy above. Splitting into multiple rules is normal — say so.
 3. **Dedupe** (mandatory, before proposing):
    ```bash
-   just search "<draft context>" --limit 5
+   just search "<draft context>"
    ```
    - Same context, same action → nothing to do; tell the user.
    - Same context, new action → propose `just append-do <id> "<action>"` instead of a new rule.
@@ -87,11 +89,11 @@ just tb-browse --kind protocollo --limit 50
    ```
 5. **Save** after confirmation:
    ```bash
-   just add "<context>" "<action>" --tags <tag1> --tags <tag2>
+   just add "<context>" "<action>" "tag1,tag2"
    ```
-   Note the syntax: `--tags` is **repeatable, one tag per flag** — not comma-separated (that is `tb`'s convention, not `ti`'s).
+   The tags argument is one comma-separated string; the recipe splits it into the repeated flags `ti` expects.
 
-**Tags**: lowercase singular nouns, max 3, reuse the vocabulary already in `just list` before inventing. Tags are a filter (`just search --tags`), not a taxonomy — choose the ones someone would actually filter by.
+**Tags**: lowercase singular nouns, max 3, reuse the vocabulary already in `just list` before inventing. Tags are a filter (`just list "tag1"`), not a taxonomy — choose the ones someone would actually filter by.
 
 ## Workflow B — Distilling rules from existing material
 
@@ -99,7 +101,7 @@ Source can be Third Brain notes, a work session, a post-mortem, a document.
 
 1. **Harvest candidates.** For `tb`: notes of kind `protocollo` are rules almost by definition; `attrito` notes often hide a rule ("questo modello fallisce quando X" → "se X, non usare questo modello"); `dato`/`sintesi` yield a rule only when a clear behavioural consequence exists — most do not, and forcing one produces vague advice. Do not convert knowledge for completeness' sake: a small store of sharp rules beats a large store of noise, because every weak rule pollutes retrieval for the good ones.
    ```bash
-   just tb-browse --kind protocollo --limit 50
+   just tb-browse protocollo 50
    ```
 2. **Convert** each candidate through the anatomy: find the situation in which the protocol applies (that is the `if`), compress the instruction into a dry imperative `do` — drop the note's `why` entirely, it stays in `tb`. Cross-project only — project-specific protocols stay out.
 3. **Dedupe against `ti` and within the batch**, same as Workflow A step 3. When several notes yield the same context, that is one rule with multiple `do` entries, not several rules.
