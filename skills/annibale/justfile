@@ -8,6 +8,10 @@
 # below operate on skills/annibale/.th instead of the caller's project.
 # [no-cd] keeps the recipe running from wherever `just` was invoked.
 
+
+set positional-arguments
+
+guard := justfile_directory() / "scripts/guard.sh"
 default:
     @just --list
 
@@ -16,12 +20,14 @@ default:
 # a temporary one (see member-tmp below).
 [no-cd]
 run member task *FLAGS:
-    th run --member {{member}} --task "{{task}}" {{FLAGS}}
+    @"{{guard}}" 'Usage: just run <member> "<task>" [th flags]' "$1" "$2"
+    @th run --member {{member}} --task "{{task}}" {{FLAGS}}
 
 # Run a member in the background. Returns JSON with pid, out, log, status.
 [no-cd]
 run-detached member task *FLAGS:
-    th run --member {{member}} --task "{{task}}" --detach {{FLAGS}}
+    @"{{guard}}" 'Usage: just run-detached <member> "<task>" [th flags]' "$1" "$2"
+    @th run --member {{member}} --task "{{task}}" --detach {{FLAGS}}
 
 # Wait for detached runs to finish. Pass status-file paths; optional flags
 # like --timeout come after the paths.
@@ -37,17 +43,20 @@ members:
 # Create a temporary member in /tmp/.th/members/.
 [no-cd]
 member-tmp name hat role *FLAGS:
-    th member create {{name}} --hat {{hat}} --role "{{role}}" --tmp {{FLAGS}}
+    @"{{guard}}" 'Usage: just member-tmp <name> <hat-core> "<role>" [th flags]' "$1" "$2" "$3"
+    @th member create {{name}} --hat {{hat}} --role "{{role}}" --tmp {{FLAGS}}
 
 # Promote a local/tmp member to global (~/.th/members/).
 [no-cd]
 promote name *FLAGS:
-    th member promote {{name}} {{FLAGS}}
+    @"{{guard}}" 'Usage: just promote <name> [th flags]' "$1"
+    @th member promote {{name}} {{FLAGS}}
 
 # Check whether a member is available (exit 0 if yes, 1 if no).
 [no-cd]
 member-exists name:
-    th member get {{name}} >/dev/null 2>&1
+    @"{{guard}}" 'Usage: just member-exists <name>' "$@"
+    @th member get {{name}} >/dev/null 2>&1
 
 # ─── Flow recipes ────────────────────────────────────────────────────────────
 
@@ -57,6 +66,7 @@ flow-list:
 
 # Read the documentation for a flow template.
 flow-read name:
+    @"{{guard}}" 'Usage: just flow-read <flow-name>' "$@"
     @cat "{{justfile_directory()}}/flows/{{name}}.md"
 
 # Run the Council of Experts flow harness. council.sh calls back into this
@@ -64,6 +74,7 @@ flow-read name:
 # the whole chain anchored to the caller's project.
 [no-cd]
 council task members *FLAGS:
+    @"{{guard}}" 'Usage: just council "<problem>" "<member1,member2>" [flags]' "$1" "$2"
     "{{justfile_directory()}}/flows/council.sh" \
       --task "{{task}}" \
       --members "{{members}}" \
