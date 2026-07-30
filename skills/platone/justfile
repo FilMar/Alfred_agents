@@ -1,0 +1,74 @@
+# Platone — memory cultivation recipes.
+# This skill wraps the underlying memory/identity CLIs (tb, ti). SKILL.md
+# references only these recipes; it never invokes the CLIs directly.
+#
+# Positional args only. Every fixed-arity recipe starts with scripts/guard.sh,
+# which rejects flag-style (--x) and NAME=value invocations: just would
+# silently map them into positional slots and corrupt the call.
+# `set positional-arguments` passes args to the shell as $1..$n — no textual
+# interpolation, so quotes inside note text cannot break the command.
+
+set positional-arguments
+
+guard := justfile_directory() / "scripts/guard.sh"
+
+default:
+    @just --list
+
+# Search the Third Brain. Usage: just search "<query>" [limit] [depth]
+search query limit="10" depth="1":
+    @"{{guard}}" 'Usage: just search "<query>" [limit] [depth]' "$@"
+    @tb search "$1" --limit "$2" --depth "$3"
+
+# List tags by frequency.
+tags:
+    @tb tags
+
+# Return a random note for serendipity bridges.
+random:
+    @tb random
+
+# Save a new note. Usage: just save "<what>" "<why>" <kind> ["tag1,tag2"] ["<source>"]
+save what why kind tags="" source="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    "{{guard}}" 'Usage: just save "<what>" "<why>" <kind> ["tag1,tag2"] ["<source>"]' "$@"
+    args=(--what "$1" --why "$2" --kind "$3")
+    IFS=',' read -ra ts <<< "${4:-}"
+    for t in "${ts[@]}"; do
+        t="$(printf '%s' "$t" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+        [ -n "$t" ] && args+=(--tags "$t")
+    done
+    [ -n "${5:-}" ] && args+=(--source "$5")
+    exec tb save "${args[@]}"
+
+# Replace the tags of a note. Usage: just retag <id> "tag1,tag2"
+retag id tags:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    "{{guard}}" 'Usage: just retag <id> "tag1,tag2"' "$@"
+    args=()
+    IFS=',' read -ra ts <<< "$2"
+    for t in "${ts[@]}"; do
+        t="$(printf '%s' "$t" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+        [ -n "$t" ] && args+=(--tags "$t")
+    done
+    exec tb update "$1" "${args[@]}"
+
+# Add a ref to a note. Usage: just add-ref <id> "<target-id>:<reason>"
+add-ref id ref:
+    @"{{guard}}" 'Usage: just add-ref <id> "<target-id>:<reason>"' "$@"
+    @tb update "$1" --add-ref "$2"
+
+# Add a procedural rule to Third Identity. Usage: just ti-add "<context>" "<action>" ["tag1,tag2"]
+ti-add context action tags="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    "{{guard}}" 'Usage: just ti-add "<context>" "<action>" ["tag1,tag2"]' "$@"
+    args=(--if "$1" --do "$2")
+    IFS=',' read -ra ts <<< "${3:-}"
+    for t in "${ts[@]}"; do
+        t="$(printf '%s' "$t" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+        [ -n "$t" ] && args+=(--tags "$t")
+    done
+    exec ti add "${args[@]}"
