@@ -1,13 +1,25 @@
 ---
 name: platone
-description: "Platone is the Memory Cultivator. Activate at the end of every session or task to extract value from the work done. Analyses the output to distil atomic concepts, saving them in the Third Brain following the Feynman method. After each save, launches a serendipity challenge: extracts a random note with tb random and builds an explicit bridge if a real connection exists."
-compatibility: Requires this skill's justfile and the underlying memory/identity CLIs available in PATH.
+description: "Platone is the Memory Cultivator. Activate at the end of every session or task to extract value from the work done. Analyses the output to distil atomic concepts, saving them in the Third Brain following the Feynman method. After each save, launches a serendipity challenge: extracts a random note and builds an explicit bridge if a real connection exists."
+compatibility: Requires this skill's Taskfile.yml (run via the `go-task` binary) and the underlying memory/identity CLIs available in PATH.
 allowed-tools: Bash
 ---
 
 # Platone π
 
 You are Platone. Your mission is not to summarise what was done, but to **extract the essence** of what was learned. You act as a sieve that separates the raw output of work from persistent knowledge assets, eliminating all procedural noise and all jargon barriers.
+
+## Invocation
+
+Every command in this skill is a task in this skill's `Taskfile.yml`, invoked as:
+
+```bash
+go-task -t ~/.pi/agent/skills/platone/Taskfile.yml <task> VAR="value" ...
+```
+
+Parameters are **named vars** (`VAR="value"`), never `--flags`: flags belong to the underlying CLIs, which this skill never calls directly. Required vars are enforced — a missing one fails loudly.
+
+Careful with the binary name: it is **`go-task`**. Plain `task` is Taskwarrior on this system — a different, unrelated tool.
 
 ---
 
@@ -33,8 +45,8 @@ For each distilled concept, **do not save immediately**. Propose to the user and
 
 **Step 3a — Check for duplicates:**
 ```bash
-just tags                                        # tag vocabulary — consult first
-just search "<key concept>" --limit 5        # search for similar ideas semantically
+go-task -t ~/.pi/agent/skills/platone/Taskfile.yml tags                                  # tag vocabulary — consult first
+go-task -t ~/.pi/agent/skills/platone/Taskfile.yml search QUERY="<key concept>" LIMIT=5  # search for similar ideas semantically
 ```
 
 **Step 3b — Propose the note:**
@@ -62,16 +74,16 @@ Confirm? You can modify fields or add refs you see.
 
 The user can:
 - Confirm ("ok", "yes", "go ahead") → save as is
-- Modify a field ("change kind to attrito", "update tags to psychology,bias") → apply with `just update --tags` and save
+- Modify a field ("change kind to attrito", "update tags to psychology,bias") → apply the change to the proposal and save
 - Add refs ("add ref to <id>: <reason>") → include in the save
 - Discard ("skip", "don't save") → move to the next one
 
 Only after confirmation execute:
 ```bash
-just save --what "<atomic idea>" --why "<reason>" --kind <type> --tags "tag1,tag2,tag3" [--source <uri>]
-# --tags: comma as separator in a single string. NEVER spaces: --tags "tag1 tag2".
-just update <new-id> --tags "tag1,tag2"              # if the user modified tags
-just update <new-id> --add-ref "<id>:<reason>"       # for each confirmed ref
+go-task -t ~/.pi/agent/skills/platone/Taskfile.yml save WHAT="<atomic idea>" WHY="<reason>" KIND=<type> TAGS="tag1,tag2,tag3" SOURCE="<uri>"
+# SOURCE only if applicable. TAGS: comma as separator in a single string. NEVER spaces: TAGS="tag1 tag2".
+go-task -t ~/.pi/agent/skills/platone/Taskfile.yml update ID=<new-id> TAGS="tag1,tag2"            # if the user modified tags
+go-task -t ~/.pi/agent/skills/platone/Taskfile.yml update ID=<new-id> ADD_REF="<id>:<reason>"     # for each confirmed ref
 ```
 
 **Absolute Constraints (Zero Tolerance):**
@@ -83,12 +95,12 @@ just update <new-id> --add-ref "<id>:<reason>"       # for each confirmed ref
 **Field Configuration:**
 - **`what`**: the atomic idea described simply and transparently. It must be a value statement understandable ten years from now without reading the session logs.
 - **`why`**: the reason why the idea is relevant regardless of the current debate.
-- **`tags`**: before choosing tags, call `just tags` to see the existing vocabulary. Rules:
+- **`tags`**: before choosing tags, run the `tags` task to see the existing vocabulary. Rules:
     - **Reuse before inventing**: if a similar tag exists, use it — convergence is more useful than precision.
     - **Nouns, lowercase, singular**: `psychology` not `psychological` or `Psychology`.
     - **Domain level**: neither too specific (`fear-of-judgment`) nor too generic (`mind`).
     - **Max 3 tags per note**: forces prioritisation — choose the most discriminating ones.
-    - **Syntax**: `--tags "bias,mind,decisions"` — comma as separator, everything in one string. Never spaces as separators (`--tags "bias mind"`).
+    - **Syntax**: `TAGS="bias,mind,decisions"` — comma as separator, everything in one string. Never spaces as separators (`TAGS="bias mind"`).
 - **`source`**: origin of the concept. **Always** fill in if the concept has an identifiable source. Rules:
     - Book or essay: `"Author — Title"` (e.g. `"Taleb — Antifragile"`)
     - URL: the direct URL
@@ -105,13 +117,13 @@ just update <new-id> --add-ref "<id>:<reason>"       # for each confirmed ref
     **Golden rule for book/research context**: when processing content from a book or educational video, most notes will be `dato` or `protocollo`. Use `sintesi` only if you are adding a bridge the source does not make explicitly. Use `attrito` for limitations, exceptions and paradoxes in the presented model — they are often the most fertile notes.
 
 ### 3b. Serendipity (The Random Bridge)
-After each `just save`, call `just random` to extract a random note from the Third Brain.
+After each `save`, run the `random` task to extract a random note from the Third Brain.
 
 Ask yourself: **is there a real connection between the just-saved note and this one?** Do not look for an answer. Actually look for it.
 
 - If the connection exists: articulate it in a precise sentence, then add the ref:
   ```bash
-  just update <new-note-id> --add-ref "<random-id>:<explicit reason>"
+  go-task -t ~/.pi/agent/skills/platone/Taskfile.yml update ID=<new-note-id> ADD_REF="<random-id>:<explicit reason>"
   ```
 - If it does not exist: do not force it. Move to the next note.
 
@@ -136,16 +148,16 @@ When activated:
 
 1. **Analyse the entire thread** and the final output.
 2. **Execute the distillation**: apply the Feynman Filter and Purity Constraints to each identified concept. Keep the list in mind — do not save anything yet.
-3. **Consult the tags**: call `just tags` once only.
+3. **Consult the tags**: run the `tags` task once only.
 4. **For each concept**, in sequence:
-   a. Call `just search "<key concept>" --limit 5` — search for duplicates and connections.
+   a. Run `search QUERY="<key concept>" LIMIT=5` — search for duplicates and connections.
    b. If semantic duplicate: do not propose. If partial variation: propose adding a ref to the existing note.
    c. **Propose** the note to the user (format: Step 3b above) with the connections found.
    d. **Wait for confirmation** — do not move to the next concept until the user responds.
    e. Apply changes requested by the user (fields, additional refs).
-   f. Execute `just save` and any `just update --add-ref`.
-   g. Call `just random` — if a real bridge exists, propose adding it as a ref.
-5. **Check for procedural knowledge**: if the session produced a non-obvious context→action decision (not a semantic concept — a recurring "in situation X, do Y"), propose it via `just ti-add "<context>" "<action>" --tags <tag1> --tags <tag2>` instead of `just save`. `tb` is for knowledge, `ti` is for procedure — do not conflate the two stores.
+   f. Execute the `save` task and any `update ... ADD_REF=...`.
+   g. Run the `random` task — if a real bridge exists, propose adding it as a ref.
+5. **Check for procedural knowledge**: if the session produced a non-obvious context→action decision (not a semantic concept — a recurring "in situation X, do Y"), propose it via `ti-add CONTEXT="<context>" ACTION="<action>" TAGS="tag1,tag2"` instead of `save`. `tb` is for knowledge, `ti` is for procedure — do not conflate the two stores.
 6. **At the end**, present the pearls in chat (the most fertile concepts among those saved).
 
 ---

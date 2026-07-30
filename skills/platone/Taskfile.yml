@@ -1,0 +1,62 @@
+# Platone — memory cultivation recipes.
+# Wraps the underlying memory/identity CLIs (tb, ti). SKILL.md references only
+# these tasks; it never invokes the CLIs directly.
+#
+# Binary: `go-task`. Never `task` — on this system that is Taskwarrior.
+# Parameters are named vars (VAR="value"); required ones are enforced via
+# `requires`, so a wrong invocation fails loudly instead of saving garbage.
+
+version: '3'
+
+tasks:
+  default:
+    desc: List available tasks
+    silent: true
+    cmds:
+      - go-task --taskfile "{{.TASKFILE_DIR}}/Taskfile.yml" --list
+
+  search:
+    desc: 'Search the Third Brain. QUERY required; LIMIT (default 10), DEPTH (default 1) optional.'
+    requires:
+      vars: [QUERY]
+    cmds:
+      - tb search "{{.QUERY}}" --limit {{.LIMIT | default "10"}} --depth {{.DEPTH | default "1"}}
+
+  tags:
+    desc: List tags by frequency.
+    cmds:
+      - tb tags
+
+  save:
+    desc: 'Save a new note. WHAT, WHY, KIND required; TAGS="t1,t2" and SOURCE optional.'
+    requires:
+      vars: [WHAT, WHY, KIND]
+    cmds:
+      - >-
+        tb save --what "{{.WHAT}}" --why "{{.WHY}}" --kind "{{.KIND}}"
+        {{- if .TAGS}}{{- range splitList "," .TAGS}} --tags "{{trim .}}"{{end}}{{end}}
+        {{- if .SOURCE}} --source "{{.SOURCE}}"{{end}}
+
+  update:
+    desc: 'Update a note. ID required; TAGS="t1,t2" (replaces tags) and ADD_REF="id:reason" optional.'
+    requires:
+      vars: [ID]
+    cmds:
+      - >-
+        tb update "{{.ID}}"
+        {{- if .TAGS}}{{- range splitList "," .TAGS}} --tags "{{trim .}}"{{end}}{{end}}
+        {{- if .ADD_REF}} --add-ref "{{.ADD_REF}}"{{end}}
+
+  random:
+    desc: Return a random note for serendipity bridges.
+    cmds:
+      - tb random
+
+  ti-add:
+    desc: 'Add a procedural rule to Third Identity. CONTEXT, ACTION required; TAGS="t1,t2" optional.'
+    requires:
+      vars: [CONTEXT, ACTION]
+    cmds:
+      - >-
+        ti add --if "{{.CONTEXT}}" --do "{{.ACTION}}"
+        {{- if .TAGS}}{{- range splitList "," .TAGS}} --tags "{{trim .}}"{{end}}{{end}}
