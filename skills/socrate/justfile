@@ -1,13 +1,21 @@
 # Socrate — Third Brain friction-search recipes.
 # This skill wraps the underlying memory CLI. SKILL.md references only these
 # recipes; it never invokes the CLI directly.
+# The query is guarded (positional); trailing tb flags are part of the
+# recipe contract for this read-only surface.
+
+
+set positional-arguments
+
+guard := justfile_directory() / "scripts/guard.sh"
 
 default:
     @just --list
 
 # Search the Third Brain.
 search query *FLAGS:
-    tb search "{{query}}" {{FLAGS}}
+    @"{{guard}}" 'Usage: just search "<query>" [tb flags] — the query is the first positional argument' "$1"
+    @tb search "$1" {{FLAGS}}
 
 # Browse notes by kind, date, etc.
 browse *FLAGS:

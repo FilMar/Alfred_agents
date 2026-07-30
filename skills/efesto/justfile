@@ -49,3 +49,17 @@ optimize-description eval_set skill_path model *FLAGS:
 # Package a skill into a distributable .skill file.
 package skill_path output_dir=".":
     cd "{{SMITH_DIR}}" && python3 -m scripts.package_skill "{{invocation_directory()}}/{{skill_path}}" "{{invocation_directory()}}/{{output_dir}}"
+
+# Lint one skill: SKILL.md `just` invocations vs justfile signatures, guard presence.
+lint skill_path:
+    python3 "{{justfile_directory()}}/scripts/lint_skill.py" "{{skill_path}}"
+
+# Lint every skill in a directory (default: the repo's skills/).
+lint-all dir=(justfile_directory() / ".."):
+    #!/usr/bin/env bash
+    set -euo pipefail
+    dirs=()
+    for d in "{{dir}}"/*/; do
+        [ -f "$d/SKILL.md" ] && dirs+=("$d")
+    done
+    python3 "{{justfile_directory()}}/scripts/lint_skill.py" "${dirs[@]}"
