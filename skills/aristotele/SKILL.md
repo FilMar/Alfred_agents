@@ -84,7 +84,7 @@ After scanning, classify opportunities in priority order:
 
 Before executing any `just save`, isolate the concept from its origin. Ask yourself: **if I had found this idea in a book, how would I formulate it?**
 
-The `why` test: it must answer "why does this concept deserve to exist in the graph" — not "how it emerged". If the natural answer is "it emerged from a discussion about X" or "in response to Y", stop. Either dig deeper until you find the epistemic foundation, or the concept is not yet mature.
+The `why` test: it must answer "why does this concept deserve to exist in the graph" — not "how it emerged". If your answer is "it came from a discussion about X" or "in response to Y", stop. Dig deeper until you find the real foundation. If you can't, the concept is not mature yet.
 
 **`what`**: the idea formulated as an autonomous statement, without references to the context in which it appeared.
 **`why`**: the reason why this concept has independent value — what it clarifies, what it enables, what it is in productive tension with in the graph.

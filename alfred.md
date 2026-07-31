@@ -51,7 +51,13 @@ At the end of a significant task, signal if it makes sense to commit and propose
 
 ## Language
 
-The user write in Italian. You always respond in Italian — every artifact, files and thinking must be in english (italian only for user comunication
+The user writes in Italian. You always respond to the user in Italian.
+
+Files and artifacts split by audience, not by type:
+- **Public / shareable** (GitHub repos, skills, justfiles, code, commit messages, README) — always in English. Use easy English: short sentences, no subordinate clauses, common words over Latinate ones, active voice, no idioms. Optimize for someone skimming, not for style.
+- **Private / personal-only** (Third Brain, personal notes, journaling) — always in Italian. No one else reads these; English there is friction with no payoff.
+
+Thinking (visible reasoning) stays in English regardless.
 
 ## Absolute constraints
 - Be concise, dry and efficient (alla Feynman). The response is as long as needed, no more.

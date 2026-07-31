@@ -1,50 +1,50 @@
 # MEGA Backup Skill
-# Backup di Qdrant (e archivi compatibili) su MEGA
+# Backs up Qdrant (and compatible archives) to MEGA
 #
-# Variabili d'ambiente:
-#   MEGA_HOME   Path della skill (default: $HOME/.pi/agent/skills/mega)
-#               Necessario per il recipe mega-enable-timer.
+# Environment variables:
+#   MEGA_HOME   Skill path (default: $HOME/.pi/agent/skills/mega)
+#               Needed for the mega-enable-timer recipe.
 #
-# Uso:
-#   just mega-backup-qdrant <collection> [retain=5]   # Backup di una collection
-#   just mega-backup-all                              # Backup di tutte le collection configurate
-#   just mega-enable-timer                            # Abilita timer systemd
+# Usage:
+#   just mega-backup-qdrant <collection> [retain=5]   # Back up one collection
+#   just mega-backup-all                              # Back up all configured collections
+#   just mega-enable-timer                            # Enable the systemd timer
 
 # =============================================================================
-# STATO E INFO
+# STATUS AND INFO
 # =============================================================================
 
-# Stato login MEGA e spazio disponibile
+# MEGA login status and available space
 mega-status:
     #!/usr/bin/env bash
-    echo "=== Stato Login ==="
-    mega-whoami || (echo "NON LOGGATO: esegui 'mega-login <email>'" && exit 1)
+    echo "=== Login status ==="
+    mega-whoami || (echo "NOT LOGGED IN: run 'mega-login <email>'" && exit 1)
     echo ""
-    echo "=== Spazio Usato ==="
+    echo "=== Space used ==="
     mega-df -h
 
 # =============================================================================
-# BACKUP QDRANT
+# QDRANT BACKUP
 # =============================================================================
 
-# Backup di una collection Qdrant su MEGA, con retention.
+# Back up a Qdrant collection to MEGA, with retention.
 mega-backup-qdrant collection="default" retain="5":
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # Dipendenze
-    command -v jq >/dev/null 2>&1 || { echo "ERRORE: jq non installato"; exit 1; }
-    command -v curl >/dev/null 2>&1 || { echo "ERRORE: curl non installato"; exit 1; }
+    # Dependencies
+    command -v jq >/dev/null 2>&1 || { echo "ERROR: jq not installed"; exit 1; }
+    command -v curl >/dev/null 2>&1 || { echo "ERROR: curl not installed"; exit 1; }
 
     if [ -z "{{collection}}" ]; then
-        echo "ERRORE: specifica collection=<name>"
+        echo "ERROR: specify collection=<name>"
         exit 1
     fi
 
     COLLECTION="{{collection}}"
     RETAIN="{{retain}}"
 
-    echo "=== Backup Qdrant: $COLLECTION ==="
+    echo "=== Qdrant backup: $COLLECTION ==="
     TMPDIR="$HOME/.local/tmp/qdrant-backup"
     LOGFILE="$HOME/.local/log/mega-backup.log"
     mkdir -p "$TMPDIR"
@@ -53,40 +53,40 @@ mega-backup-qdrant collection="default" retain="5":
     TIMESTAMP=$(date +%Y%m%d-%H%M%S)
     echo "[$(date -Iseconds)] Starting Qdrant backup: $COLLECTION" >> "$LOGFILE"
 
-    # 1. Crea snapshot via API
-    echo "Creazione snapshot..."
+    # 1. Create snapshot via API
+    echo "Creating snapshot..."
     SNAP_RESPONSE=$(curl -sf -X POST "http://localhost:6333/collections/$COLLECTION/snapshots")
     SNAP_FILE=$(echo "$SNAP_RESPONSE" | jq -r '.result.name // empty')
 
     if [ -z "$SNAP_FILE" ]; then
         echo "[$(date -Iseconds)] ERROR: snapshot creation failed: $SNAP_RESPONSE" >> "$LOGFILE"
-        echo "ERRORE: impossibile creare snapshot. Risposta: $SNAP_RESPONSE"
+        echo "ERROR: could not create snapshot. Response: $SNAP_RESPONSE"
         exit 1
     fi
-    echo "Snapshot creato: $SNAP_FILE"
+    echo "Snapshot created: $SNAP_FILE"
 
-    # 2. Scarica snapshot (Qdrant lo conserva nei suoi storage, non in un path esposto)
+    # 2. Download snapshot (Qdrant keeps it in its own storage, not an exposed path)
     LOCAL_PATH="$TMPDIR/$SNAP_FILE"
-    echo "Download snapshot in locale..."
+    echo "Downloading snapshot locally..."
     if ! curl -sf -o "$LOCAL_PATH" "http://localhost:6333/collections/$COLLECTION/snapshots/$SNAP_FILE"; then
         echo "[$(date -Iseconds)] ERROR: snapshot download failed" >> "$LOGFILE"
         rm -f "$LOCAL_PATH"
         exit 1
     fi
 
-    # 3. Comprimi
+    # 3. Compress
     ARCHIVE_NAME="qdrant-${COLLECTION}-${TIMESTAMP}.tar.gz"
     ARCHIVE_PATH="$TMPDIR/$ARCHIVE_NAME"
-    echo "Compressione in $ARCHIVE_NAME..."
+    echo "Compressing to $ARCHIVE_NAME..."
     tar -czf "$ARCHIVE_PATH" -C "$TMPDIR" "$SNAP_FILE"
 
-    # 4. Upload su MEGA
-    echo "Upload su MEGA..."
+    # 4. Upload to MEGA
+    echo "Uploading to MEGA..."
     mega-mkdir -p /backup/qdrant 2>/dev/null || true
 
     if mega-put "$ARCHIVE_PATH" /backup/qdrant/; then
         echo "[$(date -Iseconds)] Upload completed: $ARCHIVE_NAME" >> "$LOGFILE"
-        echo "Upload completato: /backup/qdrant/$ARCHIVE_NAME"
+        echo "Upload complete: /backup/qdrant/$ARCHIVE_NAME"
     else
         echo "[$(date -Iseconds)] ERROR: Upload failed" >> "$LOGFILE"
         rm -f "$ARCHIVE_PATH"
@@ -94,13 +94,13 @@ mega-backup-qdrant collection="default" retain="5":
     fi
 
     # 5. Retention
-    echo "Applicazione retention ($RETAIN backup)..."
+    echo "Applying retention ($RETAIN backups)..."
     BACKUP_COUNT=$(mega-ls /backup/qdrant/ 2>/dev/null | grep -c "qdrant-${COLLECTION}-" || echo 0)
 
     if [ "$BACKUP_COUNT" -gt "$RETAIN" ]; then
         TO_DELETE=$((BACKUP_COUNT - RETAIN))
         if [ "$TO_DELETE" -gt 0 ]; then
-            echo "Rimozione di $TO_DELETE backup vecchi..."
+            echo "Removing $TO_DELETE old backups..."
             mega-ls /backup/qdrant/ | grep "qdrant-${COLLECTION}-" | sort | head -n "$TO_DELETE" | while read -r OLD_BACKUP; do
                 [ -n "$OLD_BACKUP" ] || continue
                 mega-rm "/backup/qdrant/$OLD_BACKUP"
@@ -109,28 +109,28 @@ mega-backup-qdrant collection="default" retain="5":
         fi
     fi
 
-    # 6. Cleanup locale
+    # 6. Local cleanup
     rm -f "$LOCAL_PATH" "$ARCHIVE_PATH"
     echo "[$(date -Iseconds)] Backup completed" >> "$LOGFILE"
-    echo "=== Backup completato ==="
+    echo "=== Backup complete ==="
 
 # =============================================================================
-# RESTORE QDRANT
+# QDRANT RESTORE
 # =============================================================================
 
-# Ripristina una collection Qdrant da un backup presente su MEGA.
-# Uso: just mega-restore-qdrant <collection> <backup_file>
-# Esempio: just mega-restore-qdrant supertest qdrant-supertest-20260728-184022.tar.gz
+# Restore a Qdrant collection from a backup stored on MEGA.
+# Usage: just mega-restore-qdrant <collection> <backup_file>
+# Example: just mega-restore-qdrant supertest qdrant-supertest-20260728-184022.tar.gz
 mega-restore-qdrant collection="default" file="":
     #!/usr/bin/env bash
     set -euo pipefail
 
-    command -v curl >/dev/null 2>&1 || { echo "ERRORE: curl non installato"; exit 1; }
-    command -v jq >/dev/null 2>&1 || { echo "ERRORE: jq non installato"; exit 1; }
+    command -v curl >/dev/null 2>&1 || { echo "ERROR: curl not installed"; exit 1; }
+    command -v jq >/dev/null 2>&1 || { echo "ERROR: jq not installed"; exit 1; }
 
     if [ -z "{{collection}}" ] || [ -z "{{file}}" ]; then
-        echo "ERRORE: specifica collection=<name> file=<backup.tar.gz>"
-        echo "Esempio: just mega-restore-qdrant supertest qdrant-supertest-20260728-184022.tar.gz"
+        echo "ERROR: specify collection=<name> file=<backup.tar.gz>"
+        echo "Example: just mega-restore-qdrant supertest qdrant-supertest-20260728-184022.tar.gz"
         exit 1
     fi
 
@@ -138,91 +138,91 @@ mega-restore-qdrant collection="default" file="":
     BACKUP_FILE="{{file}}"
     MEGA_PATH="/backup/qdrant/${BACKUP_FILE}"
 
-    echo "=== Restore Qdrant: $COLLECTION ← $BACKUP_FILE ==="
+    echo "=== Restoring Qdrant: $COLLECTION ← $BACKUP_FILE ==="
 
-    # 1. Verifica che il backup esista su MEGA
+    # 1. Check that the backup exists on MEGA
     if ! mega-ls /backup/qdrant/ | grep -qx "$BACKUP_FILE"; then
-        echo "ERRORE: $BACKUP_FILE non trovato su MEGA in $MEGA_PATH"
-        echo "Backup disponibili per la collection:"
-        mega-ls /backup/qdrant/ | grep "^qdrant-${COLLECTION}-" || echo "(nessuno)"
+        echo "ERROR: $BACKUP_FILE not found on MEGA at $MEGA_PATH"
+        echo "Available backups for this collection:"
+        mega-ls /backup/qdrant/ | grep "^qdrant-${COLLECTION}-" || echo "(none)"
         exit 1
     fi
 
-    # 2. Scarica backup
+    # 2. Download the backup
     TMPDIR="$HOME/.local/tmp/qdrant-restore"
     mkdir -p "$TMPDIR"
     LOCAL_ARCHIVE="$TMPDIR/$BACKUP_FILE"
-    echo "Download backup da MEGA..."
+    echo "Downloading backup from MEGA..."
     if ! mega-get "$MEGA_PATH" "$LOCAL_ARCHIVE"; then
-        echo "ERRORE: download fallito"
+        echo "ERROR: download failed"
         rm -f "$LOCAL_ARCHIVE"
         exit 1
     fi
 
-    # 3. Decomprimi
-    echo "Decompressione..."
+    # 3. Decompress
+    echo "Decompressing..."
     EXTRACT_DIR="$TMPDIR/extracted"
     rm -rf "$EXTRACT_DIR"
     mkdir -p "$EXTRACT_DIR"
     if ! tar -xzf "$LOCAL_ARCHIVE" -C "$EXTRACT_DIR"; then
-        echo "ERRORE: decompressione fallita"
+        echo "ERROR: decompression failed"
         rm -rf "$LOCAL_ARCHIVE" "$EXTRACT_DIR"
         exit 1
     fi
 
-    # Trova il file .snapshot dentro l'archivio (nome dipende da Qdrant)
+    # Find the .snapshot file inside the archive (name depends on Qdrant)
     SNAPSHOT_FILE=$(find "$EXTRACT_DIR" -name "*.snapshot" -type f | head -1)
     if [ -z "$SNAPSHOT_FILE" ]; then
-        echo "ERRORE: file .snapshot non trovato nell'archivio"
+        echo "ERROR: no .snapshot file found in the archive"
         rm -rf "$LOCAL_ARCHIVE" "$EXTRACT_DIR"
         exit 1
     fi
     echo "Snapshot file: $SNAPSHOT_FILE"
 
-    # 4. Check pre-esistente (la collection verrà sovrascritta)
+    # 4. Check if it already exists (the collection will be overwritten)
     EXISTS=$(curl -sf "http://localhost:6333/collections/$COLLECTION" | jq -r '.result.status // empty' 2>/dev/null || true)
     if [ -n "$EXISTS" ]; then
-        echo "ATTENZIONE: la collection '$COLLECTION' esiste già e verrà sovrascritta."
-        echo "Procedo comunque (priority=snapshot)."
+        echo "WARNING: collection '$COLLECTION' already exists and will be overwritten."
+        echo "Proceeding anyway (priority=snapshot)."
     fi
 
-    # 5. Upload snapshot via API Qdrant
-    echo "Upload snapshot al Qdrant..."
+    # 5. Upload snapshot via the Qdrant API
+    echo "Uploading snapshot to Qdrant..."
     RESPONSE=$(curl -sf -X POST "http://localhost:6333/collections/${COLLECTION}/snapshots/upload?priority=snapshot&wait=true" \
         -F "snapshot=@${SNAPSHOT_FILE}")
     if [ -z "$RESPONSE" ] || ! echo "$RESPONSE" | jq -e '.result == true' >/dev/null; then
-        echo "ERRORE: upload fallito. Risposta: $RESPONSE"
+        echo "ERROR: upload failed. Response: $RESPONSE"
         rm -rf "$LOCAL_ARCHIVE" "$EXTRACT_DIR"
         exit 1
     fi
-    echo "Upload completato."
+    echo "Upload complete."
 
-    # 6. Verifica finale
+    # 6. Final check
     FINAL=$(curl -sf "http://localhost:6333/collections/$COLLECTION" | jq -r '.result.points_count // "?"')
-    echo "Collection '$COLLECTION' ripristinata con $FINAL punti."
+    echo "Collection '$COLLECTION' restored with $FINAL points."
 
     # 7. Cleanup
     rm -rf "$LOCAL_ARCHIVE" "$EXTRACT_DIR"
-    echo "=== Restore completato ==="
+    echo "=== Restore complete ==="
 
 # =============================================================================
-# BACKUP COMPLETO
+# FULL BACKUP
 # =============================================================================
 
-# Backup di tutte le collection Qdrant configurate.
-# Modifica la lista QDRANT_COLLECTIONS per aggiungere/togliere collection.
+# Back up all configured Qdrant collections.
+# Edit the QDRANT_COLLECTIONS list to add/remove collections.
 mega-backup-all:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # Personalizza qui le collection da backuppare
+    # Edit the collections to back up here
     QDRANT_COLLECTIONS=(
         "third-brain"
         "pi_identity"
     )
 
     echo "========================================"
-    echo "  BACKUP QDRANT - $(date)"
+    echo "  QDRANT BACKUP - $(date)"
     echo "========================================"
     echo ""
 
@@ -232,7 +232,7 @@ mega-backup-all:
         if just mega-backup-qdrant "$COL"; then
             echo "OK: $COL"
         else
-            echo "WARN: $COL fallito"
+            echo "WARN: $COL failed"
             FAILED+=("$COL")
         fi
         echo ""
@@ -240,9 +240,9 @@ mega-backup-all:
 
     echo "========================================"
     if [ ${#FAILED[@]} -eq 0 ]; then
-        echo "  BACKUP COMPLETO TERMINATO CON SUCCESSO"
+        echo "  FULL BACKUP FINISHED SUCCESSFULLY"
     else
-        echo "  BACKUP COMPLETO CON ERRORI: ${FAILED[*]}"
+        echo "  FULL BACKUP FINISHED WITH ERRORS: ${FAILED[*]}"
         exit 1
     fi
     echo "========================================"
@@ -251,79 +251,79 @@ mega-backup-all:
 # SYSTEMD TIMER
 # =============================================================================
 
-# Abilita timer per backup automatico settimanale
+# Enable the weekly automatic backup timer
 mega-enable-timer:
     #!/usr/bin/env bash
     set -euo pipefail
     MEGA_HOME="${MEGA_HOME:-$HOME/.pi/agent/skills/mega}"
     if [ ! -d "$MEGA_HOME/systemd" ]; then
-        echo "ERRORE: directory $MEGA_HOME/systemd non trovata"
-        echo "Imposta MEGA_HOME o installa la skill nel path di default"
+        echo "ERROR: directory $MEGA_HOME/systemd not found"
+        echo "Set MEGA_HOME or install the skill at its default path"
         exit 1
     fi
 
-    echo "Abilitazione timer per backup settimanale (skill: $MEGA_HOME)..."
+    echo "Enabling weekly backup timer (skill: $MEGA_HOME)..."
     mkdir -p "$HOME/.config/systemd/user"
     cp "$MEGA_HOME/systemd/mega-backup.service" "$HOME/.config/systemd/user/"
     cp "$MEGA_HOME/systemd/mega-backup.timer" "$HOME/.config/systemd/user/"
     systemctl --user daemon-reload
     systemctl --user enable mega-backup.timer
     systemctl --user start mega-backup.timer
-    echo "Timer abilitato e avviato."
+    echo "Timer enabled and started."
     systemctl --user list-timers mega-backup.timer
 
-# Disabilita timer
+# Disable the timer
 mega-disable-timer:
     #!/usr/bin/env bash
     systemctl --user stop mega-backup.timer || true
     systemctl --user disable mega-backup.timer || true
     rm -f "$HOME/.config/systemd/user/mega-backup.service" "$HOME/.config/systemd/user/mega-backup.timer"
     systemctl --user daemon-reload
-    echo "Timer disabilitato."
+    echo "Timer disabled."
 
-# Stato timer
+# Timer status
 mega-timer-status:
     #!/usr/bin/env bash
-    echo "=== Stato Timer ==="
-    systemctl --user list-timers mega-backup.timer || echo "Timer non installato"
+    echo "=== Timer status ==="
+    systemctl --user list-timers mega-backup.timer || echo "Timer not installed"
     echo ""
-    echo "=== Ultimo log ==="
-    journalctl --user -u mega-backup -n 10 --no-pager 2>/dev/null || echo "Nessun log"
+    echo "=== Latest log ==="
+    journalctl --user -u mega-backup -n 10 --no-pager 2>/dev/null || echo "No log found"
 
 # =============================================================================
 # LOG
 # =============================================================================
 
-# Mostra log backup
+# Show the backup log
 mega-logs lines="50":
     #!/usr/bin/env bash
     if [ -f "$HOME/.local/log/mega-backup.log" ]; then
         tail -n {{lines}} "$HOME/.local/log/mega-backup.log"
     else
-        echo "Nessun log trovato."
+        echo "No log found."
     fi
 
 # =============================================================================
 # HELP
 # =============================================================================
 
-# Mostra aiuto
+# Show help
 help:
     #!/usr/bin/env bash
-    echo "MEGA Backup Skill - Backup Qdrant su MEGA"
+    echo "MEGA Backup Skill - Qdrant backups to MEGA"
     echo ""
     echo "Backup:"
-    echo "  just mega-backup-qdrant <collection> [retain]  # Backup collection Qdrant"
-    echo "  just mega-backup-all                          # Tutte le collection configurate"
+    echo "  just mega-backup-qdrant <collection> [retain]  # Back up a Qdrant collection"
+    echo "  just mega-backup-all                          # All configured collections"
     echo ""
     echo "Restore:"
-    echo "  just mega-restore-qdrant <collection> <file>  # Ripristina collection da backup"
+    echo "  just mega-restore-qdrant <collection> <file>  # Restore a collection from backup"
     echo ""
-    echo "Timer (backup automatico):"
-    echo "  just mega-enable-timer      # Abilita timer settimanale"
-    echo "  just mega-disable-timer     # Disabilita timer"
-    echo "  just mega-timer-status      # Stato timer"
+    echo "Timer (automatic backup):"
+    echo "  just mega-enable-timer      # Enable weekly timer"
+    echo "  just mega-disable-timer     # Disable timer"
+    echo "  just mega-timer-status      # Timer status"
     echo ""
-    echo "Info e utility:"
-    echo "  just mega-status            # Login e spazio"
-    echo "  just mega-logs [lines=50]   # Visualizza log"
+    echo "Info and utilities:"
+    echo "  just mega-status            # Login and space"
+    echo "  just mega-logs [lines=50]   # View log"

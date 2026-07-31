@@ -163,7 +163,7 @@ If a step fails (`just run` exits with an error), stop and show the error to the
 
 ### Pattern B — Parallel
 
-When perspectives must be independent. `run-detached` runs each member in the background (clean: no output on the terminal) and returns JSON with the `out`/`log`/`status` paths. `wait` then blocks on the status files until every job is terminal — it never hangs on a failed job and exits non-zero if any did not finish `done`.
+When perspectives must be independent. `run-detached` runs each member in the background — no output on the terminal — and returns JSON with the `out`/`log`/`status` paths. `wait` then blocks until every job finishes. It never hangs on a failed job. It exits non-zero if any job did not reach `done`.
 
 ```bash
 P1=$(just run-detached <name-hat1> "<task>")

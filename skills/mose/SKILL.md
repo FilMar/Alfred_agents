@@ -99,13 +99,13 @@ just tb-browse <kind> [limit]              # default limit 50
 
 Source can be Third Brain notes, a work session, a post-mortem, a document.
 
-1. **Harvest candidates.** For `tb`: notes of kind `protocollo` are rules almost by definition; `attrito` notes often hide a rule ("questo modello fallisce quando X" → "se X, non usare questo modello"); `dato`/`sintesi` yield a rule only when a clear behavioural consequence exists — most do not, and forcing one produces vague advice. Do not convert knowledge for completeness' sake: a small store of sharp rules beats a large store of noise, because every weak rule pollutes retrieval for the good ones.
+1. **Harvest candidates.** For `tb`: notes of kind `protocollo` are rules almost by definition. `attrito` notes often hide a rule ("questo modello fallisce quando X" → "se X, non usare questo modello"). `dato`/`sintesi` notes yield a rule only when they imply a clear behavioural consequence — most don't, and forcing one produces vague advice. Don't convert knowledge just to fill the store: a small set of sharp rules beats a large set of noise. Every weak rule makes retrieval worse for the good ones.
    ```bash
    just tb-browse protocollo 50
    ```
 2. **Convert** each candidate through the anatomy: find the situation in which the protocol applies (that is the `if`), compress the instruction into a dry imperative `do` — drop the note's `why` entirely, it stays in `tb`. Cross-project only — project-specific protocols stay out.
 3. **Dedupe against `ti` and within the batch**, same as Workflow A step 3. When several notes yield the same context, that is one rule with multiple `do` entries, not several rules.
-4. **Propose in batch.** Present the full list of proposed rules (same format as above, numbered) and let the user confirm, edit, or discard per item. For large batches, confirm in groups of ~10 rather than one by one. **Never save without this review** — not even in autonomous sessions: write the proposed batch to a file, show it, and stop until the user responds. A wrong rule in `ti` silently steers every future retrieval; the review is the only checkpoint.
+4. **Propose in batch.** Present the full list of proposed rules (same format as above, numbered) and let the user confirm, edit, or discard per item. For large batches, confirm in groups of ~10 rather than one by one. **Never save without this review**, not even in autonomous sessions: write the proposed batch to a file, show it, and stop until the user responds. A wrong rule in `ti` silently steers every future retrieval — the review is the only checkpoint against that.
 5. **Save** the confirmed ones. Report the tally: proposed / saved / appended / discarded, and which tb notes were judged knowledge-only.
 
 ---

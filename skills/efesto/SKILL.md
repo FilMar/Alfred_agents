@@ -5,7 +5,7 @@ description: "Use this skill when the user wants to create, build, modify, test,
 
 # Efesto π
 
-Efesto crea e migliora le skill.
+Efesto creates and improves skills.
 
 At a high level, the process of creating a skill goes like this:
 
@@ -31,7 +31,7 @@ Cool? Cool.
 
 ## Communicating with the user
 
-The skill creator is liable to be used by people across a wide range of familiarity with coding jargon. If you haven't heard (and how could you, it's only very recently that it started), there's a trend now where the power of Claude is inspiring plumbers to open up their terminals, parents and grandparents to google "how to install npm". On the other hand, the bulk of users are probably fairly computer-literate.
+People with very different coding backgrounds use this skill creator. Some are new to terminals. Some are experienced developers. Match your language to the person in front of you.
 
 So please pay attention to context cues to understand how to phrase your communication! In the default case, just to give you some idea:
 
@@ -292,11 +292,11 @@ This is the heart of the loop. You've run the test cases, the user has reviewed 
 
 ### How to think about improvements
 
-1. **Generalize from the feedback.** The big picture thing that's happening here is that we're trying to create skills that can be used a million times (maybe literally, maybe even more who knows) across many different prompts. Here you and the user are iterating on only a few examples over and over again because it helps move faster. The user knows these examples in and out and it's quick for them to assess new outputs. But if the skill you and the user are codeveloping works only for those examples, it's useless. Rather than put in fiddly overfitty changes, or oppressively constrictive MUSTs, if there's some stubborn issue, you might try branching out and using different metaphors, or recommending different patterns of working. It's relatively cheap to try and maybe you'll land on something great.
+1. **Generalize from the feedback.** The goal is a skill that works across many prompts, not just the few test cases you're iterating on. Testing on a few examples is faster, and the user knows them well enough to judge new outputs fast. But if the skill only works on those examples, it's useless. Avoid narrow fixes and rigid MUSTs. For a stubborn issue, try a different metaphor or a different way of framing the instructions — it's cheap to try, and it can lead to a much better result.
 
 2. **Keep the prompt lean.** Remove things that aren't pulling their weight. Make sure to read the transcripts, not just the final outputs — if it looks like the skill is making the model waste a bunch of time doing things that are unproductive, you can try getting rid of the parts of the skill that are making it do that and seeing what happens.
 
-3. **Explain the why.** Try hard to explain the **why** behind everything you're asking the model to do. Today's LLMs are *smart*. They have good theory of mind and when given a good harness can go beyond rote instructions and really make things happen. Even if the feedback from the user is terse or frustrated, try to actually understand the task and why the user is writing what they wrote, and what they actually wrote, and then transmit this understanding into the instructions. If you find yourself writing ALWAYS or NEVER in all caps, or using super rigid structures, that's a yellow flag — if possible, reframe and explain the reasoning so that the model understands why the thing you're asking for is important. That's a more humane, powerful, and effective approach.
+3. **Explain the why.** Explain the reason behind each instruction, not just the instruction itself. Today's models are smart: given the reasoning, they generalize better than they follow rote steps. Even when user feedback is terse or frustrated, dig into what they actually mean and turn that understanding into clear reasoning in the skill. If you catch yourself writing ALWAYS or NEVER in all caps, that's a warning sign — rewrite it as an explanation instead.
 
 4. **Look for repeated work across test cases.** Read the transcripts from the test runs and notice if the subagents all independently wrote similar helper scripts or took the same multi-step approach to something. If all 3 test cases resulted in the subagent writing a `create_docx.py` or a `build_chart.py`, that's a strong signal the skill should bundle that script. Write it once, put it in `scripts/`, and tell the skill to use it. This saves every future invocation from reinventing the wheel.
 
@@ -442,7 +442,7 @@ If you're in Cowork, the main things to know are:
 
 - You have subagents, so the main workflow (spawn test cases in parallel, run baselines, grade, etc.) all works. (However, if you run into severe problems with timeouts, it's OK to run the test prompts in series rather than parallel.)
 - You don't have a browser or display, so when generating the eval viewer, use `--static <output_path>` to write a standalone HTML file instead of starting a server. Then proffer a link that the user can click to open the HTML in their browser.
-- For whatever reason, the Cowork setup seems to disincline Claude from generating the eval viewer after running the tests, so just to reiterate: whether you're in Cowork or in Claude Code, after running tests, you should always generate the eval viewer for the human to look at examples before revising the skill yourself and trying to make corrections, using `generate_review.py` (not writing your own boutique html code). Sorry in advance but I'm gonna go all caps here: GENERATE THE EVAL VIEWER *BEFORE* evaluating inputs yourself. You want to get them in front of the human ASAP!
+- The Cowork setup tends to skip the eval viewer step. Don't skip it: in Cowork or in Claude Code, always generate the eval viewer right after running tests, using `generate_review.py` (never a custom HTML page). Do this before you judge the outputs yourself — get them in front of the human first.
 - Feedback works differently: since there's no running server, the viewer's "Submit All Reviews" button will download `feedback.json` as a file. You can then read it from there (you may have to request access first).
 - Packaging works — `package_skill.py` just needs Python and a filesystem.
 - Description optimization (`run_loop.py` / `run_eval.py`) should work in Cowork just fine since it uses `pi` via subprocess, not a browser, but please save it until you've fully finished making the skill and the user agrees it's in good shape.

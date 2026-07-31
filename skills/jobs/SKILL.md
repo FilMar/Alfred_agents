@@ -7,51 +7,51 @@ description: "Manages tasks via Taskwarrior through a justfile abstraction layer
 
 Jobs manages tasks through a `justfile` that wraps Taskwarrior. Always use the recipes in this skill's `justfile` instead of calling `task` directly — the justfile provides GTD-semantic names and handles quoting. Run `just --list` from this directory to see all recipes.
 
-## Sistema GTD Personalizzato
+## Custom GTD System
 
-Il sistema usa tre dimensioni per organizzare i task:
+The system organizes tasks along three dimensions:
 
-### 1. Aree di Focus (dove appartiene il task nella tua vita)
-- `+emotion` — lavoro principale, relazioni profonde, scopo
-- `+cura` — salute, benessere, esercizio, manutenzione casa
-- `+amministrazione` — bollette, scadenze fiscali, burocrazia
-- `+personale` — progetti creativi, studio, hobby intellettuali
-- `+lavoro` — lavoretti secondari, freelance, clienti
+### 1. Areas of Focus (where the task belongs in your life)
+- `+emotion` — main work, deep relationships, purpose
+- `+cura` — health, wellbeing, exercise, home maintenance
+- `+amministrazione` — bills, tax deadlines, admin/bureaucracy
+- `+personale` — creative projects, study, intellectual hobbies
+- `+lavoro` — side jobs, freelance, clients
 
-### 2. Workflow (stato dell'azione)
-- `+next` — azioni pronte da fare ora
-- `+waiting` — in attesa di altri o eventi esterni
-- `+someday` — forse un giorno (non attivo ora)
-- `+routine` — abitudini ricorrenti giornaliere/settimanali
+### 2. Workflow (state of the action)
+- `+next` — actions ready to do now
+- `+waiting` — waiting on someone or something external
+- `+someday` — maybe someday (not active now)
+- `+routine` — recurring daily/weekly habits
 
-### 3. Energia Richiesta (quanto richiede il task)
-- `+focus` — deep work, alta concentrazione
-- `+execute` — meccanico, esecuzione senza pensiero
-- `+reflect` — riflessione, pianificazione, brainstorming
-- `+rest` — bassa energia, recupero, abitudini leggere
+### 3. Energy Required (how much the task demands)
+- `+focus` — deep work, high concentration
+- `+execute` — mechanical, no thinking needed
+- `+reflect` — reflection, planning, brainstorming
+- `+rest` — low energy, recovery, light habits
 
-### 4. Progetti (outcome specifici con fine definita)
-- `project:NomeProgetto` — es. `project:ScrivereLibro`, `project:ViaggioGiappone`
-- I progetti non si creano esplicitamente — esistono quando assegni il primo task
+### 4. Projects (specific outcomes with a defined end)
+- `project:ProjectName` — e.g. `project:WriteBook`, `project:JapanTrip`
+- Projects are not created explicitly — they exist as soon as you assign the first task
 
 ## Capture
 
-Aggiungi un task all'inbox (senza categorizzazione, solo descrizione):
+Add a task to the inbox (no categorization, just a description):
 
 ```bash
-just add "Comprare pane"
-just add "Inviare report" due:tomorrow
+just add "Buy bread"
+just add "Send report" due:tomorrow
 ```
 
-Per catturare già categorizzato (se chiaro al momento):
+To capture an already-categorized task (if it's clear at the moment):
 
 ```bash
-just add "Scrivi capitolo 3" project:ScrivereLibro +personale +next +focus
-just add "Paga bolletta luce" +amministrazione +next +execute due:eom
-just add "Meditazione" +cura +routine +rest due:today recur:daily
+just add "Write chapter 3" project:WriteBook +personale +next +focus
+just add "Pay electricity bill" +amministrazione +next +execute due:eom
+just add "Meditation" +cura +routine +rest due:today recur:daily
 ```
 
-L'inbox — task senza tag `+next`, `+waiting`, `+someday`, o `+routine`, da chiarire:
+The inbox — tasks without a `+next`, `+waiting`, `+someday`, or `+routine` tag, waiting to be clarified:
 
 ```bash
 just list -next -waiting -someday -routine
@@ -59,147 +59,147 @@ just list -next -waiting -someday -routine
 
 ## Clarify & Organize
 
-Assegna area di focus, stato workflow, energia, progetto:
+Assign area of focus, workflow state, energy, project:
 
 ```bash
-# Assegna area di focus
+# Assign area of focus
 just tag 12 emotion
 just tag 12 cura
 just tag 12 amministrazione
 just tag 12 personale
 just tag 12 lavoro
 
-# Assegna stato workflow
+# Assign workflow state
 just tag 12 next
 just tag 12 waiting
 just tag 12 someday
 just tag 12 routine
 
-# Assegna energia
+# Assign energy
 just tag 12 focus
 just tag 12 execute
 just tag 12 reflect
 just tag 12 rest
 
-# Assegna progetto
-just proj 12 ScrivereLibro
-just proj 12 ViaggioGiappone
+# Assign project
+just proj 12 WriteBook
+just proj 12 JapanTrip
 
-# Rimuovi tag
-just untag 12 next      # es. sposta da next a waiting
+# Remove a tag
+just untag 12 next      # e.g. move from next to waiting
 just untag 12 focus
 
-# Imposta scadenza
+# Set a due date
 just due 12 tomorrow
 just due 12 2025-08-15
 just due 12 eom         # end of month
 
-# Rimuovi scadenza
+# Remove the due date
 just nodue 12
 
-# Modifica generica (qualsiasi modificatore Taskwarrior)
-just modify 12 due:eom +urgent project:Lavoro
+# Generic edit (any Taskwarrior modifier)
+just modify 12 due:eom +urgent project:Work
 ```
 
 ## Reflect
 
-### Per Stato Workflow
+### By Workflow State
 
 ```bash
-just next-actions     # tutte le azioni pronte (+next)
-just waiting-list     # in attesa di altri (+waiting)
-just someday          # lista someday/maybe (+someday)
-just routine          # abitudini ricorrenti (+routine)
+just next-actions     # all ready actions (+next)
+just waiting-list      # waiting on someone (+waiting)
+just someday           # someday/maybe list (+someday)
+just routine           # recurring habits (+routine)
 ```
 
-### Per Area di Focus
+### By Area of Focus
 
 ```bash
-just emotion          # task dell'area Emotion
-just cura             # task dell'area Cura
-just amministrazione  # task dell'area Amministrazione
-just personale        # task dell'area Personale
-just lavoro           # task dell'area Lavoro
+just emotion          # tasks in the Emotion area
+just cura             # tasks in the Cura area
+just amministrazione   # tasks in the Amministrazione area
+just personale         # tasks in the Personale area
+just lavoro            # tasks in the Lavoro area
 ```
 
-### Per Energia Richiesta
+### By Energy Required
 
 ```bash
-just focus            # task che richiedono deep work
-just exec             # task meccanici da eseguire
-just reflect          # task di riflessione/pianificazione
-just rest             # task a bassa energia
+just focus            # tasks that need deep work
+just exec             # mechanical tasks to execute
+just reflect          # reflection/planning tasks
+just rest             # low-energy tasks
 ```
 
-### Altri Report Utili
+### Other Useful Reports
 
 ```bash
-just next             # task più urgenti (sorted by urgency)
-just overdue          # task scaduti
-just active           # task avviati (started ma non completati)
-just completed        # task completati
-just projects         # overview progetti con conteggio task
-just tags             # tutti i tag in uso
-just calendar         # calendario con scadenze
+just next             # most urgent tasks (sorted by urgency)
+just overdue          # overdue tasks
+just active           # started but not completed tasks
+just completed        # completed tasks
+just projects         # project overview with task counts
+just tags             # all tags in use
+just calendar         # calendar with due dates
 ```
 
-### Liste con Filtri Personalizzati
+### Lists with Custom Filters
 
 ```bash
-just list                            # tutti i pending
-just list project:ScrivereLibro      # per progetto
-just list +emotion +next             # area + stato
-just list +focus due.before:tomorrow # energia + scadenza
+just list                          # all pending
+just list project:WriteBook        # by project
+just list +emotion +next           # area + state
+just list +focus due.before:tomorrow  # energy + due date
 ```
 
-### Dettagli Completi di un Task
+### Full Details of a Task
 
 ```bash
-just info 12          # dettagli completi + storico modifiche
+just info 12          # full details + change history
 ```
 
 ## Engage
 
 ```bash
-just start 12         # inizia a lavorare (task diventa "active")
-just stop 12          # ferma il lavoro
-just done 12          # completa il task
-just delete 12        # elimina il task
+just start 12         # start working (task becomes "active")
+just stop 12          # stop working
+just done 12          # complete the task
+just delete 12        # delete the task
 ```
 
-Aggiungi un'annotazione (nota) a un task:
+Add an annotation (note) to a task:
 
 ```bash
-just annotate 12 "Inviata mail a Marco per chiarimenti"
+just annotate 12 "Sent email to Marco for clarification"
 ```
 
 ## Routine
 
-Le routine si creano con ricorrenza:
+Routines are created with recurrence:
 
 ```bash
-# Routine giornaliera
-just add "Meditazione" +cura +routine +rest due:today recur:daily
+# Daily routine
+just add "Meditation" +cura +routine +rest due:today recur:daily
 
-# Routine settimanale
-just add "Review settimanale" +personale +routine +reflect due:today recur:weekly
+# Weekly routine
+just add "Weekly review" +personale +routine +reflect due:today recur:weekly
 ```
 
-Taskwarrior genera automaticamente le istanze future alla scadenza.
+Taskwarrior generates future instances automatically as each due date passes.
 
 ## Export
 
-Esporta task in JSON per elaborazione programmatica:
+Export tasks to JSON for programmatic processing:
 
 ```bash
-just export                          # tutti i pending
+just export                          # all pending
 just export project:Home status:pending
 just export +next +emotion
 ```
 
 ## Raw
 
-Quando l'astrazione non copre ciò che ti serve, passa direttamente a Taskwarrior:
+When the abstraction doesn't cover what you need, go straight to Taskwarrior:
 
 ```bash
 just raw burndown.weekly
@@ -208,64 +208,64 @@ just raw stats
 just raw +emotion calendar
 ```
 
-## Flusso di Lavoro Consigliato
+## Recommended Workflow
 
-### 1. Cattura (Capture)
-Butta giù tutto quello che hai in mente, senza categorizzare:
+### 1. Capture
+Write down everything on your mind, without categorizing:
 ```bash
-just add "Task generico"
+just add "Generic task"
 ```
 
-### 2. Chiarimento (Clarify)
-Processa l'inbox periodicamente (ogni giorno o ogni settimana):
+### 2. Clarify
+Process the inbox regularly (daily or weekly):
 ```bash
-just list -next -waiting -someday -routine   # task da chiarire
+just list -next -waiting -someday -routine   # tasks to clarify
 ```
 
-Per ogni task, chiediti:
-- È azionabile? Se no, elimina o sposta in `+someday`
-- Qual è la prossima azione fisica?
-- A quale area di focus appartiene? (`+emotion`, `+cura`, etc.)
-- Che energia richiede? (`+focus`, `+execute`, `+reflect`, `+rest`)
-- È parte di un progetto? (`project:Nome`)
-- Qual è lo stato? (`+next`, `+waiting`, `+someday`, `+routine`)
+For each task, ask yourself:
+- Is it actionable? If not, delete it or move it to `+someday`
+- What's the next physical action?
+- Which area of focus does it belong to? (`+emotion`, `+cura`, etc.)
+- How much energy does it need? (`+focus`, `+execute`, `+reflect`, `+rest`)
+- Is it part of a project? (`project:Name`)
+- What's its state? (`+next`, `+waiting`, `+someday`, `+routine`)
 
-### 3. Organizzazione (Organize)
-Applica le categorizzazioni:
+### 3. Organize
+Apply the categorization:
 ```bash
 just tag 12 emotion
 just tag 12 next
 just tag 12 focus
-just proj 12 ScrivereLibro
+just proj 12 WriteBook
 ```
 
-### 4. Reflection (Review)
-- **Daily:** `just next` e `just routine` per vedere cosa fare oggi
-- **Weekly:** `just someday` per review progetti futuri, `just projects` per overview
-- **Monthly:** `just calendar` per pianificazione a lungo termine
+### 4. Reflect (Review)
+- **Daily:** `just next` and `just routine` to see what to do today
+- **Weekly:** `just someday` to review future projects, `just projects` for an overview
+- **Monthly:** `just calendar` for long-term planning
 
-### 5. Engagement (Execute)
-Scegli in base a:
-- Contesto fisico (dove sei, che strumenti hai)
-- Tempo disponibile (5 min vs 2 ore)
-- Energia mentale (alto vs basso)
-- Priorità (urgenza + importanza)
+### 5. Engage (Execute)
+Choose based on:
+- Physical context (where you are, what tools you have)
+- Available time (5 min vs 2 hours)
+- Mental energy (high vs low)
+- Priority (urgency + importance)
 
 ```bash
-just focus      # se hai energia e tempo per deep work
-just exec       # se hai poco tempo/energia, task meccanici
-just rest       # se sei stanco, abitudini leggere
+just focus      # if you have energy and time for deep work
+just exec       # if you have little time/energy, mechanical tasks
+just rest       # if you're tired, light habits
 ```
 
-## Contesti (Context)
+## Contexts
 
-Taskwarrior supporta contesti predefiniti per filtrare automaticamente le liste:
+Taskwarrior supports predefined contexts that filter lists automatically:
 
 ```bash
-just context-list         # vedi contesti disponibili
-just context-set next     # attiva contesto: mostra solo +next
-just context-set focus    # attiva contesto: mostra solo +focus
-just context-none         # disattiva contesto
+just context-list         # see available contexts
+just context-set next     # activate context: show only +next
+just context-set focus    # activate context: show only +focus
+just context-none         # deactivate context
 ```
 
-Contesti disponibili: `next`, `waiting`, `someday`, `routine`, `focus`, `exec`, `reflect`, `rest`, `emotion`, `cura`, `amministrazione`, `personale`, `lavoro`.
+Available contexts: `next`, `waiting`, `someday`, `routine`, `focus`, `exec`, `reflect`, `rest`, `emotion`, `cura`, `amministrazione`, `personale`, `lavoro`.

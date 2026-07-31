@@ -103,7 +103,7 @@ Architectural traps are not bugs — they are patterns that seemed reasonable at
 
 This is the heart of the work. Every specific observation must be **generalised** into a transferable artefact.
 
-**Golden rule**: Do not write "this project has a God Object in `api.py`". Write the general pattern: *"When HTTP route handling has no separate layer for domain logic, the natural growth of the product tends to accumulate responsibilities in the controller until it becomes untestable."*
+**Golden rule**: Do not write "this project has a God Object in `api.py`". Write the general pattern instead: *"When HTTP route handling has no separate layer for domain logic, the controller keeps absorbing responsibilities as the product grows — until it becomes untestable."*
 
 ### 5. Delivery
 
