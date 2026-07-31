@@ -13,83 +13,88 @@ guard := justfile_directory() / "scripts/guard.sh"
 default:
     @just --list
 
-# Elenca gli account configurati
+# List configured accounts
 accounts:
-    himalaya account list -o json
+    himalaya account list --json
 
-# Elenca le cartelle disponibili
+# List available folders
 folders account="filippo":
     @"{{guard}}" 'Usage: just folders [account]' "$@"
-    himalaya folder list -o json -a {{account}}
+    himalaya mailbox list --json -a {{account}}
 
-# Lista envelope dell'INBOX (o cartella indicata)
+# List envelopes in INBOX (or given folder)
 inbox account="filippo" folder="INBOX" page="200":
     @"{{guard}}" 'Usage: just inbox [account] [folder] [page-size]' "$@"
-    himalaya envelope list --page-size {{page}} -o json -f {{folder}} -a {{account}}
+    himalaya envelope list --page-size {{page}} --json -m {{folder}} -a {{account}}
 
-# Ricerca con la query syntax di Himalaya (es: 'from paypal and after 2026-01-01')
+# Search using Himalaya's query syntax (e.g. 'from paypal and after 2026-01-01')
 search account="filippo" folder="INBOX" *query:
-    himalaya envelope list -o json -f {{folder}} -a {{account}} {{query}}
+    himalaya envelope search --json -m {{folder}} -a {{account}} {{query}}
 
-# Legge il corpo di un messaggio (marca automaticamente come "seen")
+# Read a message body (marks it "seen" automatically)
 read account id folder="INBOX":
     @"{{guard}}" 'Usage: just read <account> <id> [folder]' "$@"
-    himalaya message read {{id}} -f {{folder}} -a {{account}}
+    himalaya message read {{id}} -m {{folder}} -a {{account}}
 
-# Legge un messaggio senza marcarlo come letto
+# Read a message without marking it as read (himalaya v2 dropped --preview:
+# read it, then restore "unseen" — if it was already "seen" before, it stays "seen")
 preview account id folder="INBOX":
-    @"{{guard}}" 'Usage: just preview <account> <id> [folder]' "$@"
-    himalaya message read {{id}} -f {{folder}} -a {{account}} --preview
+    #!/usr/bin/env bash
+    set -euo pipefail
+    "{{guard}}" 'Usage: just preview <account> <id> [folder]' "$@"
+    himalaya message read {{id}} -m {{folder}} -a {{account}}
+    himalaya flag remove -f seen {{id}} -m {{folder}} -a {{account}}
 
-# Esporta il messaggio raw e stampa la parte text/html (utile per estrarre link persi nella resa in testo)
+# Print the raw RFC 5322 message (useful for links lost in the text rendering;
+# himalaya v2 dropped the export command for just text/html)
 html account id folder="INBOX":
     @"{{guard}}" 'Usage: just html <account> <id> [folder]' "$@"
-    himalaya message export {{id}} -f {{folder}} -a {{account}} -F
+    himalaya message read {{id}} -m {{folder}} -a {{account}} --raw
 
-# Aggiunge flag (es. seen, flagged, answered) a uno o più id — mescola id e nomi flag come vuole himalaya
-flag-add account folder *ids_and_flags:
-    himalaya flag add {{ids_and_flags}} -f {{folder}} -a {{account}}
+# Add a flag (e.g. seen, flagged, answered) to one or more ids
+flag-add account folder flag *ids:
+    himalaya flag add -f {{flag}} {{ids}} -m {{folder}} -a {{account}}
 
-# Rimuove flag da uno o più id
-flag-remove account folder *ids_and_flags:
-    himalaya flag remove {{ids_and_flags}} -f {{folder}} -a {{account}}
+# Remove a flag from one or more ids
+flag-remove account folder flag *ids:
+    himalaya flag remove -f {{flag}} {{ids}} -m {{folder}} -a {{account}}
 
-# Scarica gli allegati di uno o più messaggi
-download account folder *ids:
-    himalaya attachment download {{ids}} -f {{folder}} -a {{account}}
+# Download one or more attachments of a single message (omit ids to download all)
+download account folder id *attachment_ids:
+    himalaya attachment download {{id}} {{attachment_ids}} -m {{folder}} -a {{account}}
 
-# Crea (se manca) e sposta uno o più id da una cartella sorgente a una di destinazione
+# Move one or more ids from a source folder to a destination folder
+# (the destination folder must already exist: himalaya v2 dropped the command to create one)
 move account src dst *ids:
-    himalaya folder create '{{dst}}' -a {{account}} || true
-    himalaya message move -f {{src}} -a {{account}} '{{dst}}' {{ids}}
+    himalaya message move --from '{{src}}' --to '{{dst}}' {{ids}} -a {{account}}
 
-# Genera il template di risposta per un id e lo salva in ~/mail/outbox/
+# Generate a reply template for an id and save it to ~/mail/outbox/
 reply account id folder="INBOX":
     #!/usr/bin/env bash
     set -euo pipefail
     "{{guard}}" 'Usage: just reply <account> <id> [folder]' "$@"
     mkdir -p ~/mail/outbox
-    file=~/mail/outbox/reply-{{id}}.mml
-    himalaya template reply {{id}} -f {{folder}} -a {{account}} > "$file"
+    file=~/mail/outbox/reply-{{id}}.eml
+    himalaya message reply {{id}} -m {{folder}} -a {{account}} > "$file"
     echo "Template saved: $file"
 
-# Genera un template per un messaggio nuovo (From/firma prefillati da himalaya) e lo salva in ~/mail/outbox/
+# Generate a template for a new message (From/signature prefilled by himalaya) and save it to ~/mail/outbox/
 template account to subject body:
     #!/usr/bin/env bash
     set -euo pipefail
     "{{guard}}" 'Usage: just template <account> <to> "<subject>" "<body>"' "$@"
     mkdir -p ~/mail/outbox
     slug=$(echo "{{subject}}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-//;s/-$//')
-    file=~/mail/outbox/"$slug".mml
-    himalaya template write -a {{account}} -H "To:{{to}}" -H "Subject:{{subject}}" "{{body}}" > "$file"
+    file=~/mail/outbox/"$slug".eml
+    himalaya message compose -a {{account}} -t '{{to}}' -s '{{subject}}' --body '{{body}}' > "$file"
     echo "Template saved: $file"
 
-# Stampa (NON esegue) il comando che l'utente può lanciare per inviare un template
+# Print (does NOT run) the command the user can use to send a template
 send-cmd file account="filippo":
     @"{{guard}}" 'Usage: just send-cmd <file> [account]' "$@"
-    @echo "himalaya template send -a {{account}} < {{file}}"
+    @echo "himalaya message send -a {{account}} -- {{file}}"
 
-# Stampa a schermo il contenuto di un template già scritto in outbox
+# Print the content of a template already saved in outbox
 show-template file:
     @"{{guard}}" 'Usage: just show-template <file>' "$@"
     @cat {{file}}

@@ -1,129 +1,134 @@
 ---
 name: vinci
 description: >-
-  Genera un Curriculum Vitae in Typst a partire da una conversazione libera o da
-  un CV/testo esistente fornito dall'utente. Produce un file .typ pronto da
-  compilare, scegliendo tra tre varianti di stile (classico, moderno,
-  accademico). Usa SEMPRE questa skill quando l'utente vuole creare, scrivere,
-  rifare o convertire un curriculum, un CV o un résumé in Typst — anche se non
-  nomina esplicitamente "Typst", basta che chieda un CV e menzioni Typst nel
-  contesto, o che chieda di trasformare le proprie esperienze in un curriculum
-  tipografico. Attivala anche per "fammi il CV", "curriculum in typst",
-  "rifammi il résumé", "converti questo profilo LinkedIn in CV".
+  Generates a Curriculum Vitae in Typst from a free-form conversation or from
+  an existing CV/text the user provides. Produces a .typ file ready to
+  compile, with a choice of three style variants (classic, modern, academic).
+  ALWAYS use this skill when the user wants to create, write, redo, or
+  convert a curriculum, a CV, or a résumé in Typst — even if they don't
+  explicitly say "Typst", as long as they ask for a CV in that context, or
+  ask to turn their experience into a typeset resume. Also trigger it for
+  "fammi il CV", "curriculum in typst", "rifammi il résumé", "converti
+  questo profilo LinkedIn in CV" (Italian phrasings the user may use).
 compatibility: Requires this skill's justfile and `typst` available in PATH.
 allowed-tools: Bash, Read, Write, Edit
 ---
 
 # Vinci — Curriculum Vitae in Typst
 
-Come Vasari, che scrisse le *Vite* fissando per sempre la reputazione degli artisti,
-questo compito ritrae una persona in una pagina, in modo che resti.
+This task writes a one-page portrait of a person. It is meant to last, like
+Vasari's *Lives*.
 
-Il compito qui è raccogliere i contenuti della persona e versarli in uno dei tre
-template Typst autocontenuti in `assets/`, consegnando un file `.typ` che compila
-subito, ovunque, senza dipendenze esterne.
+The job here is to collect the person's content and pour it into one of the
+three self-contained Typst templates in `assets/`, delivering a `.typ` file
+that compiles right away, anywhere, with no external dependencies.
 
-## Flusso di lavoro
+## Workflow
 
-### 1. Raccogli i contenuti
-Parti da ciò che l'utente ti dà: un CV esistente, un profilo LinkedIn incollato,
-un testo libero, oppure niente. Estrai da lì il più possibile — non far ripetere
-all'utente cose che ha già scritto.
+### 1. Collect the content
+Start from whatever the user gives you: an existing CV, a pasted LinkedIn
+profile, free text, or nothing at all. Extract as much as you can from it —
+don't make the user repeat what they already wrote.
 
-Poi chiedi **solo le lacune essenziali**, in modo mirato e in un colpo solo. Il
-nucleo minimo di un CV:
-- nome e ruolo/titolo professionale
-- contatti (email, telefono, città; opzionali: sito, GitHub, LinkedIn, ORCID)
-- una riga di profilo/sintesi
-- esperienze (ruolo, ente, periodo, 1-3 risultati concreti per voce)
-- formazione (titolo, ente, periodo)
-- competenze e lingue
+Then ask **only for the essential gaps**, in one targeted round. The minimum
+core of a CV:
+- name and professional title/role
+- contacts (email, phone, city; optional: website, GitHub, LinkedIn, ORCID)
+- one profile/summary line
+- experience (role, organization, period, 1-3 concrete results per entry)
+- education (degree, institution, period)
+- skills and languages
 
-Non trasformare la raccolta in un interrogatorio. Se mancano dettagli minori,
-proponi una formulazione ragionevole e segnala all'utente cosa hai ipotizzato,
-così può correggere. I risultati contano più delle mansioni: preferisci "ridotto
-la latenza del 40%" a "responsabile della manutenzione".
+Don't turn this into an interrogation. If minor details are missing, propose
+a reasonable version. Tell the user what you assumed, so they can correct
+it. Results matter more than duties: prefer "cut latency by 40%" over
+"responsible for maintenance".
 
-### 2. Scegli la variante
-Tre stili in `assets/`, tutti già compilabili con dati d'esempio:
+### 2. Choose the variant
+Three styles in `assets/`, all already compiling with sample data:
 
-| variante | quando | carattere |
+| variant | when | look |
 |---|---|---|
-| `moderno.typ` | tech, startup, prodotto, design | sans, accento blu, compatto, un colpo d'occhio |
-| `classico.typ` | ruoli tradizionali, consulenza, settori conservativi | serif sobrio, intestazione centrata, niente colore |
-| `accademico.typ` | ricerca, dottorato, posizioni universitarie | serif denso, sezioni Pubblicazioni/Didattica, numero di pagina |
+| `moderno.typ` | tech, startup, product, design | sans, blue accent, compact, easy to scan |
+| `classico.typ` | traditional roles, consulting, conservative sectors | plain serif, centered header, no color |
+| `accademico.typ` | research, PhD, academic positions | dense serif, Publications/Teaching sections, page numbers |
 
-Consiglia la variante adatta al contesto della persona, ma lascia scegliere
-all'utente. Se non ha preferenze, usa il default sensato per il suo settore.
+Suggest the variant that fits the person's context, but let the user choose.
+If they have no preference, use the sensible default for their field.
 
-### 3. Compila il template
-Apri il file della variante scelta. È diviso in due blocchi separati da commenti:
+### 3. Fill in the template
+Open the chosen variant's file. It's split into two blocks marked by comments:
 
-- `// ---------- DATI ----------` — **modifica solo questo.** Sostituisci i dati
-  d'esempio con quelli reali della persona, mantenendo la stessa struttura
-  (dizionari, array, nomi dei campi).
-- `// ---------- LAYOUT ----------` — **non toccarlo** salvo richiesta esplicita
-  (es. cambio font o colore d'accento). È ciò che garantisce che il file compili
-  e resti coerente.
+- `// ---------- DATI ----------` — **edit only this.** Replace the sample
+  data with the person's real data, keeping the same structure (dictionaries,
+  arrays, field names).
+- `// ---------- LAYOUT ----------` — **don't touch it** unless explicitly
+  asked (e.g. a font or accent color change). This is what keeps the file
+  compiling and consistent.
 
-Copia il template nella working directory dell'utente con un nome sensato (es.
-`cv_mario_rossi.typ`) e riscrivi il blocco DATI. Non lasciare mai dati d'esempio
-residui.
+Copy the template into the user's working directory under a sensible name
+(e.g. `cv_mario_rossi.typ`) and rewrite the DATI block. Never leave leftover
+sample data.
 
-### 4. Verifica che compili
+### 4. Check that it compiles
 
-Se `typst` è disponibile, **compila sempre** prima di consegnare:
-
-```bash
-just compile cv_mario_rossi.typ
-```
-
-Se dà errore, leggilo e correggi il `.typ` — un CV che non compila è inutile.
-Se `typst` non è installato, rivedi la sintassi con cura seguendo le regole sotto
-e dillo all'utente, suggerendogli come installarlo (`https://typst.app` o il
-binario da GitHub `typst/typst`).
-
-### 5. Consegna
-
-Dai all'utente il percorso del `.typ` e il comando per compilarlo:
+If `typst` is available, **always compile** before handing it over:
 
 ```bash
 just compile cv_mario_rossi.typ
 ```
 
-(`typst compile` produce il PDF; `just watch cv_mario_rossi.typ` per l'anteprima
-live). Ricordagli che i dati stanno tutti nel blocco DATI, così può ritoccarli da
-solo.
+If it errors, read the error and fix the `.typ` — a CV that doesn't compile
+is useless. If `typst` isn't installed, review the syntax carefully using the
+rules below and tell the user, suggesting how to install it
+(`https://typst.app` or the binary from GitHub `typst/typst`).
 
-## Regole di sintassi Typst (per non rompere il file quando editi i DATI)
+### 5. Hand it over
 
-Queste sono le insidie che fanno fallire la compilazione. Rispettarle è ciò che
-distingue un `.typ` che funziona da uno che esplode.
+Give the user the `.typ` path and the command to compile it:
 
-- **I dati vanno nelle stringhe** (`"..."`), non nel markup. Dentro una stringa i
-  caratteri `#`, `@`, `*`, `_`, `<`, `$` sono letterali e innocui. Tieni i
-  contenuti della persona nelle stringhe del blocco DATI e non avrai sorprese.
-- **Virgolette dentro le stringhe** vanno con backslash: `"la tesi «X»"` va bene
-  (le caporali no problema), ma `"disse "ciao""` no — usa `"disse \"ciao\""`.
-- **Array a un solo elemento** richiede la virgola finale: `("Go",)` non `("Go")`.
-  Vale per `punti:` con una sola voce.
-- **Ogni voce di un array/dizionario** termina con virgola. Meglio metterla anche
-  sull'ultima: è consentita e previene errori quando aggiungi righe.
-- **Per togliere una sezione** (es. la persona non ha pubblicazioni), elimina sia
-  il suo blocco dati sia la sua chiamata `#sezione(...)` con il relativo `#for`.
-  Non lasciare un `#for` che itera su un array inesistente.
-- **Per aggiungere una voce**, copia un elemento esistente dell'array e cambiane i
-  campi, mantenendo identici i nomi dei campi (`ruolo`, `ente`, `periodo`, ...).
-- **Accenti e simboli** (à, è, €, «») sono UTF-8 e funzionano nativamente.
-- **Font**: i template usano `DejaVu Sans` (moderno) e `Libertinus Serif`
-  (classico/accademico) perché disponibili ovunque. Per cambiarli, modifica solo
-  `font:` in `#set text(...)` nel blocco LAYOUT. Se un font non c'è, Typst usa un
-  fallback e compila comunque (con un warning innocuo).
+```bash
+just compile cv_mario_rossi.typ
+```
 
-## Estendere oltre i template
+(`typst compile` produces the PDF; `just watch cv_mario_rossi.typ` for a live
+preview). Remind them that all the data lives in the DATI block, so they can
+tweak it themselves.
 
-Se l'utente vuole qualcosa che i tre stili non coprono (foto, colonna laterale
-con timeline, QR code, sezione progetti/certificazioni), aggiungi la sezione
-lavorando **dentro le convenzioni del template**: definisci i dati come array di
-dizionari nel blocco DATI e una `#sezione("...")` con un `#for` nel LAYOUT, sullo
-stesso schema delle sezioni esistenti. Compila per verificare a ogni aggiunta.
+## Typst syntax rules (so you don't break the file when editing DATI)
+
+These are the traps that break compilation. Follow them, or the `.typ` file
+will fail to compile.
+
+- **Data goes in strings** (`"..."`), not in markup. Inside a string, the
+  characters `#`, `@`, `*`, `_`, `<`, `$` are literal and harmless. Keep the
+  person's content inside the DATI block's strings and you won't get
+  surprises.
+- **Quotes inside strings** need a backslash: `"the thesis «X»"` is fine
+  (curly quotes are no problem), but `"he said "hi""` is not — use
+  `"he said \"hi\""`.
+- **Single-element arrays** need a trailing comma: `("Go",)` not `("Go")`.
+  This applies to `punti:` with only one entry.
+- **Every array/dictionary entry** ends with a comma. It's best to add one
+  to the last entry too: it's allowed, and it prevents errors when you add
+  more lines later.
+- **To remove a section** (e.g. the person has no publications), delete both
+  its data block and its `#sezione(...)` call along with the matching
+  `#for`. Never leave a `#for` looping over an array that no longer exists.
+- **To add an entry**, copy an existing array element and change its
+  fields, keeping the field names identical (`ruolo`, `ente`, `periodo`, ...).
+- **Accents and symbols** (à, è, €, «») are UTF-8 and work natively.
+- **Fonts**: the templates use `DejaVu Sans` (modern) and `Libertinus Serif`
+  (classic/academic) because they're available everywhere. To change them,
+  edit only `font:` in `#set text(...)` in the LAYOUT block. If a font isn't
+  found, Typst falls back to another one and still compiles (with a harmless
+  warning).
+
+## Going beyond the templates
+
+The three styles may not cover everything (a photo, a sidebar with a
+timeline, a QR code, a projects/certifications section). In that case, add
+the new section, but stay **within the template's conventions**: define the
+data as an array of dictionaries in the DATI block, and add a
+`#sezione("...")` with a `#for` in the LAYOUT block. Follow the same pattern
+as the existing sections. Compile to check after every addition.
