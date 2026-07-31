@@ -18,33 +18,23 @@ roster:
 validate skill_path:
     cd "{{SMITH_DIR}}" && python3 -m scripts.quick_validate $(realpath -m "{{invocation_directory()}}/{{skill_path}}")
 
-# Run a skill file as a sandboxed test session.
-test-skill skill_path *FLAGS:
-    cd "{{invocation_directory()}}" && th run --skill {{skill_path}} {{FLAGS}}
-
-# Aggregate benchmark results from an iteration workspace into benchmark.json/.md.
-aggregate workspace iteration skill_name:
-    cd "{{SMITH_DIR}}" && python3 -m scripts.aggregate_benchmark "{{invocation_directory()}}/{{workspace}}/iteration-{{iteration}}" --skill-name {{skill_name}}
-
-# Generate a static eval-review HTML file for an iteration workspace.
-review workspace iteration skill_name previous_iteration="":
+# Run a skill for real in a throwaway th member, inside the bwrap sandbox (see SKILL.md).
+test-skill skill_path task:
     #!/usr/bin/env bash
     set -euo pipefail
-    ws="{{invocation_directory()}}/{{workspace}}/iteration-{{iteration}}"
-    out="$ws/review.html"
-    args=("$ws" --skill-name "{{skill_name}}")
-    if [ -f "$ws/benchmark.json" ]; then
-      args+=(--benchmark "$ws/benchmark.json")
-    fi
-    if [ -n "{{previous_iteration}}" ]; then
-      args+=(--previous-workspace "{{invocation_directory()}}/{{workspace}}/iteration-{{previous_iteration}}")
-    fi
-    cd "{{SMITH_DIR}}" && python3 eval-viewer/generate_review.py "${args[@]}" --static "$out"
-    echo "$out"
+    cd "{{invocation_directory()}}"
+    name="efesto-test-$(basename "{{skill_path}}")"
+    th member create "$name" --hat white-core --role "tests skill under evaluation" --tools read,bash --tmp
+    th run --member "$name" --task "Use the skill at {{skill_path}} to do this: {{task}}. Note: you run inside a bwrap sandbox — only $(pwd), ~/.pi, ~/.bun and /tmp are writable; everything else is read-only by design, not a bug in the skill."
+    th member delete "$name"
 
-# Optimize the skill description for triggering accuracy.
-optimize-description eval_set skill_path model *FLAGS:
-    cd "{{SMITH_DIR}}" && python3 -m scripts.run_loop --eval-set {{eval_set}} --skill-path {{skill_path}} --model {{model}} {{FLAGS}}
+# Search the public skills-cli registry for existing skills matching a query (research, not install).
+search query:
+    skills-cli search "{{query}}"
+
+# Show full metadata + SKILL.md content for one registry skill, for research — does not install it.
+search-info skill_name:
+    skills-cli info {{skill_name}}
 
 # Package a skill into a distributable .skill file.
 package skill_path output_dir=".":
