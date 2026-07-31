@@ -13,10 +13,10 @@ Arguments are positional only. `just --list` shows all recipes with argument ord
 - Score > 0.85 → apply directly: `just move filippo INBOX '<folder>' <id1> <id2> ...`
 - No match / low confidence → ask the user which folder (or "leave in INBOX" / "delete manually"). Never guess silently.
 - After the user decides: move the emails, then persist the rule: `just ti-add "<sender address or domain>" "<folder>"`
-- Correcting an existing rule → do not edit in place: `just ti-add` a fresh entry with the corrected mapping; prune the stale one later with `just ti-delete <id>` if it interferes.
+- Correcting an existing rule → do not edit in place. Add a fresh entry with `just ti-add` and the corrected mapping. Prune the stale one later with `just ti-delete <id>`, if it interferes.
 - Review rulebook: `just ti-list`
 
-## Cerca
+## Search
 
 `just search filippo INBOX [QUERY]`
 
@@ -33,12 +33,12 @@ Examples:
 
 Show results as a table: ID, from, subject, date.
 
-## Sfoglia
+## Browse
 
 - `just inbox filippo "<folder>"`
 - List folders: `just folders filippo`
 
-## Componi
+## Compose
 
 Write a draft to file. Never send it — the user sends manually.
 

@@ -1,11 +1,11 @@
 ---
 name: jobs
-description: "Manages tasks via Taskwarrior through a justfile abstraction layer. Capture, organize, track and complete tasks with GTD semantics using Areas of Focus, Workflow states, and Energy levels. Use it whenever the user wants to add, list, modify, complete, or review tasks, manage projects and contexts, check overdue or active work, or do any task management activity — even if they don't mention Taskwarrior explicitly."
+description: "Manages tasks via Taskwarrior through a justfile abstraction layer. Capture, organize, track and complete tasks with GTD semantics using Areas of Focus, Workflow states, and Energy levels. Use it for any task management activity: add, list, modify, complete, or review tasks, manage projects and contexts, check overdue or active work. Use it even if the user does not mention Taskwarrior by name."
 ---
 
 # Jobs
 
-Jobs manages tasks through a `justfile` that wraps Taskwarrior. Always use the recipes in this skill's `justfile` instead of calling `task` directly — the justfile provides GTD-semantic names and handles quoting. Run `just --list` from this directory to see all recipes.
+Jobs manages tasks through a `justfile` that wraps Taskwarrior. Always use the recipes in this skill's `justfile` instead of calling `task` directly. The justfile provides GTD-semantic names and handles quoting. Run `just --list` from this directory to see all recipes.
 
 ## Custom GTD System
 
@@ -32,7 +32,7 @@ The system organizes tasks along three dimensions:
 
 ### 4. Projects (specific outcomes with a defined end)
 - `project:ProjectName` — e.g. `project:WriteBook`, `project:JapanTrip`
-- Projects are not created explicitly — they exist as soon as you assign the first task
+- You do not create projects explicitly. Assign the first task and the project exists
 
 ## Capture
 
@@ -51,7 +51,7 @@ just add "Pay electricity bill" +amministrazione +next +execute due:eom
 just add "Meditation" +cura +routine +rest due:today recur:daily
 ```
 
-The inbox — tasks without a `+next`, `+waiting`, `+someday`, or `+routine` tag, waiting to be clarified:
+The inbox holds tasks with no `+next`, `+waiting`, `+someday`, or `+routine` tag. These tasks wait to be clarified:
 
 ```bash
 just list -next -waiting -someday -routine
@@ -175,7 +175,7 @@ just annotate 12 "Sent email to Marco for clarification"
 
 ## Routine
 
-Routines are created with recurrence:
+Create routines with recurrence:
 
 ```bash
 # Daily routine
@@ -199,7 +199,7 @@ just export +next +emotion
 
 ## Raw
 
-When the abstraction doesn't cover what you need, go straight to Taskwarrior:
+When the abstraction doesn't cover what you need, call Taskwarrior directly:
 
 ```bash
 just raw burndown.weekly

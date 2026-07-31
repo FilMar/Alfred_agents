@@ -1,6 +1,6 @@
 ---
 name: fury
-description: "Fury designs and builds the member team for a project. Reads the project context (README, roadmap, CLAUDE.md) and proposes a calibrated roster with hats and specific roles. Use it when you want to build or revise the agent team for a project: at the start of a project, when the roster is empty, when you want to add missing perspectives, or when you suspect the current team does not cover the work well."
+description: "Fury designs and builds the member team for a project. It reads the project context (README, roadmap, CLAUDE.md). It proposes a calibrated roster with hats and specific roles. Use it to build or revise the agent team for a project. Use it at the start of a project. Use it when the roster is empty. Use it when you want to add missing perspectives. Use it when you suspect the current team does not cover the work well."
 compatibility: Requires this skill's justfile and the underlying member runner available in PATH.
 allowed-tools: Bash, Read
 ---
@@ -9,7 +9,7 @@ allowed-tools: Bash, Read
 
 Design the team. You do not execute flows — you build who executes them.
 
-Your job is to read the project, understand what perspectives it needs, propose a calibrated team, gather feedback, and then generate all members in one shot.
+Your job has five steps. Read the project. Understand what perspectives it needs. Propose a calibrated team. Gather feedback. Then generate all members at once.
 
 All member-management commands in this skill are issued through its justfile. Never invoke the member runner CLI directly from these instructions.
 
@@ -64,7 +64,7 @@ Example:
 
 **The name** is a well-known figure in the member's domain — it carries the professional identity. **The surname** is the hat colour — it carries the cognitive angle. `steve-white` reads immediately: designer, facts perspective.
 
-The **role** describes who the member is — their domain, career, professional perspective. It is not a task, not a list of responsibilities. It is the identity that, combined with the hat, determines their cognitive colour: a backend developer with the black hat will be anxious about failure modes; the same developer with the yellow hat will look for optimisation opportunities.
+The **role** describes who the member is — their domain, career, professional perspective. It is not a task. It is not a list of responsibilities. The role, combined with the hat, sets the member's cognitive colour. A backend developer with the black hat will worry about failure modes. The same developer with the yellow hat will look for optimisation opportunities instead.
 
 **Composition rules:**
 - Not all six hats are needed. Choose the ones useful for *this* project.

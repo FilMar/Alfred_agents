@@ -1,11 +1,11 @@
 ---
 name: linus
-description: "Manages GitHub for Emotion-SRL via gh through a justfile abstraction layer. Handles issues, the SVILUPPO Project V2 (status, size, assignment), and gives recap of project state, open PRs, and branches across all org repos. Use it whenever the user wants to create or manage issues, check project status, move items in the SVILUPPO board, get a recap of open work, list PRs or branches, or do any GitHub management activity for Emotion-SRL — even if they don't mention gh or the project explicitly."
+description: "Manages GitHub for Emotion-SRL via gh through a justfile abstraction layer. Handles issues, the SVILUPPO Project V2 (status, size, assignment), and gives a recap of project state, open PRs, and branches across all org repos. Use it for issues, project status, moving items in the SVILUPPO board, a recap of open work, listing PRs or branches, or any other GitHub management task for Emotion-SRL. Use it even if the user does not mention gh or the project by name."
 ---
 
 # Linus
 
-Linus manages GitHub for Emotion-SRL through a `justfile` that wraps the `gh` CLI. Always use the recipes in this skill's `justfile` instead of calling `gh` directly — the justfile handles the SVILUPPO project configuration, status option IDs, and cross-repo iteration so you don't have to.
+Linus manages GitHub for Emotion-SRL through a `justfile` that wraps the `gh` CLI. Always use the recipes in this skill's `justfile` instead of calling `gh` directly. The justfile handles the SVILUPPO project configuration, status option IDs, and cross-repo iteration for you.
 
 ## Context
 

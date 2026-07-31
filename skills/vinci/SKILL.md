@@ -16,8 +16,8 @@ allowed-tools: Bash, Read, Write, Edit
 
 # Vinci — Curriculum Vitae in Typst
 
-Like Vasari, who wrote the *Lives* and fixed artists' reputations for good,
-this task portrays a person on one page, built to last.
+This task writes a one-page portrait of a person. It is meant to last, like
+Vasari's *Lives*.
 
 The job here is to collect the person's content and pour it into one of the
 three self-contained Typst templates in `assets/`, delivering a `.typ` file
@@ -40,7 +40,7 @@ core of a CV:
 - skills and languages
 
 Don't turn this into an interrogation. If minor details are missing, propose
-a reasonable version and tell the user what you assumed, so they can correct
+a reasonable version. Tell the user what you assumed, so they can correct
 it. Results matter more than duties: prefer "cut latency by 40%" over
 "responsible for maintenance".
 
@@ -97,8 +97,8 @@ tweak it themselves.
 
 ## Typst syntax rules (so you don't break the file when editing DATI)
 
-These are the traps that break compilation. Following them is what separates
-a `.typ` file that works from one that blows up.
+These are the traps that break compilation. Follow them, or the `.typ` file
+will fail to compile.
 
 - **Data goes in strings** (`"..."`), not in markup. Inside a string, the
   characters `#`, `@`, `*`, `_`, `<`, `$` are literal and harmless. Keep the
@@ -126,9 +126,9 @@ a `.typ` file that works from one that blows up.
 
 ## Going beyond the templates
 
-If the user wants something the three styles don't cover (a photo, a
-sidebar with a timeline, a QR code, a projects/certifications section), add
-the section while working **within the template's conventions**: define the
-data as an array of dictionaries in the DATI block, and a `#sezione("...")`
-with a `#for` in the LAYOUT block, following the same pattern as the
-existing sections. Compile to check after every addition.
+The three styles may not cover everything (a photo, a sidebar with a
+timeline, a QR code, a projects/certifications section). In that case, add
+the new section, but stay **within the template's conventions**: define the
+data as an array of dictionaries in the DATI block, and add a
+`#sezione("...")` with a `#for` in the LAYOUT block. Follow the same pattern
+as the existing sections. Compile to check after every addition.

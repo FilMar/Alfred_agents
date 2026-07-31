@@ -20,15 +20,15 @@ the whole audit; nothing else in this skill matters more.
 1. **Understand the intent.** What should the skill let the agent do? When
    should it trigger? What does a good result look like? If the user is
    turning an existing conversation into a skill, pull the steps, the
-   corrections, and the input/output shapes from that conversation first —
-   don't make the user repeat what already happened.
+   corrections, and the input/output shapes from that conversation first.
+   Don't make the user repeat what already happened.
 2. **Check for an existing skill first.**
    ```
    just -f skills/efesto/justfile roster
    ```
-   A skill that duplicates one already in the roster is the same failure
-   mode as duplicating a rule inside one skill — say it once, and extend
-   or point to it instead of writing it twice.
+   A duplicate skill is the same failure mode as a duplicate rule inside
+   one skill. Say it once. Extend the existing skill, or point to it,
+   instead of writing it twice.
 3. **Look outside for a precedent, when the task is common enough that
    someone else has likely built it** (a language's test runner, a common
    CLI wrapper, a well-known workflow):
@@ -70,11 +70,11 @@ the whole audit; nothing else in this skill matters more.
 
 ### Writing the description
 
-The `description` field is what makes the agent trigger the skill on its
-own — write it a little "pushy": name the skill's job, then list the
-phrasings and situations that should trigger it, even when the user
-doesn't name the skill. A description that only states what the skill does,
-without naming when to reach for it, under-triggers.
+The `description` field makes the agent trigger the skill on its own.
+Write it a little "pushy": name the skill's job, then list the phrasings
+and situations that should trigger it. Include cases where the user
+doesn't name the skill directly. A description that only states what the
+skill does, and never says when to reach for it, under-triggers.
 
 ## Reference: the three rules
 
@@ -102,8 +102,8 @@ check it against these failure modes:
   be). Fix: cut it, or replace it with a sharper word (e.g. "exhaustive").
 - **Negation** — "never do X" pulls X into the model's attention and makes
   it *more* likely, not less. Fix: state the wanted behaviour instead of
-  the unwanted one; keep a "never" only as a hard guardrail, and pair it
-  with what to do instead.
+  the unwanted one. Keep a "never" only as a hard guardrail, and always
+  pair it with what to do instead.
 - **Premature completion** — a step gets cut short because the steps after
   it are visible and pull attention toward being done. Fix: first sharpen
   that step's completion criterion (cheap); only if that's not enough,
@@ -136,8 +136,9 @@ type, and skills are always on the public side of it.
 `SKILL.md` never calls an external CLI or a script directly — not `tb`,
 `ti`, `th`, `gh`, `himalaya`, `task`, `typst`, a bare `python3 script.py`,
 nothing. Every such call goes through a `just` recipe in the skill's own
-`justfile`. This keeps the CLI surface in one place, testable and
-guardable, instead of scattered as ad-hoc commands across prose.
+`justfile`. This keeps every CLI call in one place. That one place is
+easy to test and easy to guard, instead of loose commands scattered
+through the prose.
 
 **If no recipe fits what the skill needs to do, propose a new justfile
 recipe** — don't inline a workaround in `SKILL.md` to route around the
@@ -190,6 +191,6 @@ flags:
 ## Communicating with the user
 
 People with very different backgrounds use this skill. Some are new to
-terminals, some are experienced developers. Match your language to the
-person in front of you — explain a term like "frontmatter" or "recipe"
-briefly if you're not sure they know it, rather than assuming either way.
+terminals, some are experienced developers. Write for the person in front
+of you. If you are not sure they know a term like "frontmatter" or
+"recipe", explain it in a short phrase.
