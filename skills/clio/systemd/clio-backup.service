@@ -1,18 +1,18 @@
 [Unit]
-Description=MEGA Backup Completo
+Description=Clio Backup - Qdrant to MEGA
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/just -f /home/filrasp/.pi/agent/skills/mega/justfile mega-backup-all
-WorkingDirectory=/home/filrasp
+ExecStart=/usr/bin/just -f /home/filippo/.pi/agent/skills/clio/justfile clio-backup-all
+WorkingDirectory=/home/filippo
 Environment=PATH=/usr/bin:/bin:/usr/sbin:/sbin
 
 # Logging
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=mega-backup
+SyslogIdentifier=clio-backup
 
 [Install]
 WantedBy=default.target

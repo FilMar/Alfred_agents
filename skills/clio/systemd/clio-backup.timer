@@ -1,6 +1,5 @@
 [Unit]
-Description=Weekly MEGA Backup Qdrant Timer
-Documentation=https://github.com/meganz/MEGAcmd
+Description=Clio Backup Timer - Qdrant to MEGA weekly
 
 [Timer]
 # Every Monday at 04:00
