@@ -59,6 +59,36 @@ flag-add account folder flag *ids:
 flag-remove account folder flag *ids:
     himalaya flag remove -f {{flag}} {{ids}} -m {{folder}} -a {{account}}
 
+# Tag recipes. A tag is a custom IMAP keyword stored on the server.
+# The shared `flag` API above only accepts the four system flags, so tags
+# use the raw IMAP API instead. Two quirks of that API:
+#   - `--` before the ids is required: -f is variadic and eats them otherwise.
+#   - the ids are one IMAP sequence set, so they join with commas, not spaces.
+
+# Add a tag to one or more ids
+tag-add account folder tag *ids:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    seq=$(echo "{{ids}}" | tr -s ' ' ',')
+    himalaya imap store -a {{account}} -m {{folder}} -f '{{tag}}' -- "$seq"
+
+# Remove a tag from one or more ids
+tag-rm account folder tag *ids:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    seq=$(echo "{{ids}}" | tr -s ' ' ',')
+    himalaya imap store -a {{account}} -m {{folder}} --action remove -f '{{tag}}' -- "$seq"
+
+# List envelopes carrying a tag
+tag-find account tag folder="INBOX":
+    @"{{guard}}" 'Usage: just tag-find <account> <tag> [folder]' "$@"
+    himalaya envelope search --json -m {{folder}} -a {{account}} flag '{{tag}}'
+
+# List every tag the folder already holds (the tag vocabulary)
+tags account folder="INBOX":
+    @"{{guard}}" 'Usage: just tags <account> [folder]' "$@"
+    himalaya imap flags -a {{account}} {{folder}}
+
 # Download one or more attachments of a single message (omit ids to download all)
 download account folder id *attachment_ids:
     himalaya attachment download {{id}} {{attachment_ids}} -m {{folder}} -a {{account}}
@@ -106,10 +136,10 @@ ti-search sender:
     @"{{guard}}" 'Usage: just ti-search "<sender address or domain>"' "$@"
     ti search "{{sender}}" --tags mail --tags triage --limit 1
 
-# Add a triage rule that moves mail from a sender to a folder.
-ti-add sender folder:
-    @"{{guard}}" 'Usage: just ti-add "<sender address or domain>" "<folder>"' "$@"
-    ti add --if "{{sender}}" --do "move to {{folder}}" --tags mail --tags triage
+# Add a triage rule that tags mail from a sender.
+ti-add sender tag:
+    @"{{guard}}" 'Usage: just ti-add "<sender address or domain>" "<tag>"' "$@"
+    ti add --if "{{sender}}" --do "tag with {{tag}}" --tags mail --tags triage
 
 # List all mail triage rules.
 ti-list:
