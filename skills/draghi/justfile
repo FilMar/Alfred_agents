@@ -1,0 +1,38 @@
+# draghi: import bank exports, track spending, feed atlante charts
+# Usage: just -f ~/.claude/skills/draghi/justfile <recipe> [args...]
+#
+# Every script runs through `uv run`. uv reads the dependency list from
+# each script's own header and builds a throwaway environment for it.
+# No venv to manage by hand.
+
+gen := justfile_directory()
+
+# Import one official bank export CSV into essays/.bank.csv
+[no-cd]
+import FILE:
+    uv run {{gen}}/scripts/import_csv.py {{quote(FILE)}}
+
+# One-time migration of the legacy spese2021.csv / spese2022.csv files
+[no-cd]
+migrate-legacy:
+    uv run {{gen}}/scripts/migrate_legacy.py
+
+# Monthly time series for one category or "totale", with a 3-month moving average
+[no-cd]
+trend TARGET YEARS="":
+    uv run {{gen}}/scripts/trend.py {{quote(TARGET)}} {{quote(YEARS)}}
+
+# Per-category totals for one year, compared with the previous year
+[no-cd]
+summary YEAR:
+    uv run {{gen}}/scripts/summary.py {{quote(YEAR)}}
+
+# Write a trend JSON file for atlante's line/bar recipes
+[no-cd]
+export-chart-trend TARGET YEARS="" OUTPUT="trend.json":
+    uv run {{gen}}/scripts/export_chart.py trend {{quote(TARGET)}} {{quote(YEARS)}} {{quote(OUTPUT)}}
+
+# Write a summary JSON file for atlante's bar recipe
+[no-cd]
+export-chart-summary YEAR OUTPUT="summary.json":
+    uv run {{gen}}/scripts/export_chart.py summary {{quote(YEAR)}} {{quote(OUTPUT)}}
