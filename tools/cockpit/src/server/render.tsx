@@ -20,6 +20,41 @@ declare module "hono/jsx" {
 const FEED = { "hx-target": "#feed", "hx-swap": "beforeend" } as const;
 const vals = (obj: Record<string, string>) => JSON.stringify(obj);
 
+/** Client-side niceties: terminal-style input history (ArrowUp/ArrowDown,
+ *  persisted in localStorage) and autoscroll of the feed on new fragments.
+ *  Static constant — nothing user-provided lands here. */
+const PAGE_SCRIPT = `
+const form = document.querySelector("form[hx-post='/turn']");
+const input = form.querySelector("input[name=input]");
+const feed = document.getElementById("feed");
+const KEY = "cockpit-history";
+let hist = JSON.parse(localStorage.getItem(KEY) || "[]");
+let idx = hist.length, draft = "";
+form.addEventListener("htmx:beforeRequest", () => {
+  const v = input.value.trim();
+  if (v && hist[hist.length - 1] !== v) {
+    hist.push(v);
+    if (hist.length > 100) hist.shift();
+    localStorage.setItem(KEY, JSON.stringify(hist));
+  }
+  idx = hist.length; draft = "";
+});
+input.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowUp" && idx > 0) {
+    if (idx === hist.length) draft = input.value;
+    input.value = hist[--idx];
+    e.preventDefault();
+  } else if (e.key === "ArrowDown" && idx < hist.length) {
+    idx++;
+    input.value = idx === hist.length ? draft : hist[idx];
+    e.preventDefault();
+  }
+});
+document.body.addEventListener("htmx:afterSwap", () => {
+  feed.scrollTop = feed.scrollHeight;
+});
+`;
+
 /** Full page shell: HTMX + Tailwind from CDN, feed, input form. */
 export function renderPage(session: Session, hats: string[]): string {
   return (
@@ -33,8 +68,8 @@ export function renderPage(session: Session, hats: string[]): string {
           <script src="https://unpkg.com/htmx.org@1.9.12"></script>
           <script src="https://cdn.tailwindcss.com"></script>
         </head>
-        <body class="bg-zinc-900 text-zinc-100 min-h-screen flex flex-col">
-          <header class="px-4 py-2 border-b border-zinc-700 text-sm flex gap-4">
+        <body class="bg-zinc-900 text-zinc-100 h-dvh flex flex-col">
+          <header class="px-4 py-2 border-b border-zinc-700 text-sm flex flex-wrap gap-x-4 gap-y-1">
             <span class="font-bold">cockpit</span>
             <span>
               bank: <b>{session.bank}</b>
@@ -54,9 +89,10 @@ export function renderPage(session: Session, hats: string[]): string {
               autofocus
               autocomplete="off"
               placeholder="message, or :command"
-              class="w-full bg-zinc-800 rounded px-3 py-2 outline-none"
+              class="w-full bg-zinc-800 rounded px-3 py-2 outline-none text-base"
             />
           </form>
+          <script dangerouslySetInnerHTML={{ __html: PAGE_SCRIPT }}></script>
         </body>
       </html>,
     )

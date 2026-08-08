@@ -62,6 +62,17 @@ describe("renderPage", () => {
     expect(html).toContain("htmx");
     expect(html).toContain("main");
   });
+
+  test("ships the arrow-key input history script", () => {
+    const html = renderPage({ bank: "main", hat: null }, []);
+    expect(html).toContain("cockpit-history");
+    expect(html).toContain("ArrowUp");
+  });
+
+  test("uses dynamic viewport height for mobile browsers", () => {
+    const html = renderPage({ bank: "main", hat: null }, []);
+    expect(html).toContain("h-dvh");
+  });
 });
 
 describe("renderBankList", () => {
