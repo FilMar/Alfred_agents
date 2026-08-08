@@ -1,0 +1,17 @@
+# cockpit — dev recipes. Install deps from the repo root with `bun install`.
+
+# Run the server with reload on change
+dev:
+    bun --watch src/server.ts
+
+# Run the server
+run:
+    bun src/server.ts
+
+# Run the test suite
+test:
+    bun test tests/
+
+# Type-check without emitting
+typecheck:
+    bunx tsc --project tsconfig.json --noEmit
