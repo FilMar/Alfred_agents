@@ -54,6 +54,7 @@ Three parallel worksites are now open beyond the numbered phases. Their dependen
 1. **Orchestrator Phase 1 skeleton** ([roadmap_orchestrator](roadmap_orchestrator)) — **done**: catalog, FS-queue, scheduler, REST API implemented in `tools/orchestrator/` and accepted after a full `th` review cycle. Next on this worksite: Phase 2 (WoL, `i_wake`, provisioning pipeline).
 2. **TB-on-Rasp migration** ([tb_on_rasp](tb_on_rasp)) — needs the Rasp provisioned (Qdrant + Ollama containers, see [rasp_node](rasp_node)); the mass re-embedding path additionally needs the orchestrator's WoL/`requiresDesktop` loop working.
 3. **Events table / procedural memory** ([procedural_memory_gaps](procedural_memory_gaps)) — independent of the Rasp, can start anytime; ordered last only because its value accrues slowly (it needs months of accumulated events before the downstream pieces make sense).
+4. **Stateless Cockpit** ([stateless_cockpit](stateless_cockpit)) — proposed 2026-08-08 as the next project: tailnet web UI with episodic stateless execution. Not started; foundation via the `piano` skill. Must first settle its conflict with Pillar 5 of [orchestrator_overview](orchestrator_overview) (agent chat was Matrix-only by design).
 
 Shared component: the **Matrix layer** serves both the orchestrator (notifications, `run_task`, wake) and the TB (`!tb search`). The homeserver and bot plumbing are built once; whether the two command families live in one bot or a dedicated TB bot ([tb_on_rasp](tb_on_rasp) leans dedicated) is an implementation detail to settle then.
 

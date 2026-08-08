@@ -115,3 +115,4 @@ Beyond deterministic commands, the Matrix bot supports an interactive session wi
 - [architettura](architettura)
 - [tb_on_rasp](tb_on_rasp) — Third Brain hosted on the Rasp inside the same perimeter; mass re-embedding as a `requiresDesktop` task
 - [rasp_node](rasp_node) — full view of services on the Rasp and provisioning order
+- [stateless_cockpit](stateless_cockpit) — proposed web UI that overlaps with Interactive pi Chat and challenges the Matrix-only rule of Pillar 5

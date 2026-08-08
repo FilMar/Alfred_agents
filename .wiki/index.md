@@ -15,6 +15,7 @@
 | [tb_on_rasp](tb_on_rasp) | Third Brain hosted on the Rasp, Matrix bot for agent-free queries |
 | [rasp_node](rasp_node) | The Rasp as a node: all services it hosts and provisioning order |
 | [skill_pattern](skill_pattern) | Conventions for `SKILL.md` + `justfile` — every operational skill must follow this |
+| [stateless_cockpit](stateless_cockpit) | Proposed next project: tailnet web UI with episodic stateless execution and rolling hot memory |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI+HTTP API pattern (Hono) shared by `tb serve`/`ti serve` |
 | [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards shared by `tb`/`ti` |
 | [log](log) | Wiki update history |

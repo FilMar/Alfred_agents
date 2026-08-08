@@ -8,6 +8,10 @@ updated: 2026-07-02
 
 ## Log
 
+## [2026-08-08] ingest | Stateless Cockpit — proposed next project
+
+New page [stateless_cockpit](stateless_cockpit) from a session discussion. Tailnet-only web UI with episodic stateless execution: each turn rebuilds context (rolling hot memory + tb/ti retrieval), fresh agent call, async re-condensation. Includes the review amendments (raw tail + summary, append-only facts ledger, merge-not-rewrite, no LLM-generated HTML — JSON widget schemas instead, reuse of existing harness/atlante) and open questions, chief among them the conflict with Pillar 5 of [orchestrator_overview](orchestrator_overview) (agent chat is Matrix-only by design; a tailnet web UI reopens the single-auth-channel hole). Roadmap worksite 4 added; not started, foundation via `piano`.
+
 ## [2026-07-28] ingest | Proposal: search score-cutoff (ti/tb) + UserPromptSubmit hook for structural rule retrieval
 
 Design discussion, not yet implemented, documented in [ti_module](ti_module). Two items: (1) add a `--min-score` option natively to `search` in `tools/ti/src/` and `tools/tb/src/` (currently only `--limit`/`--tags` exist, no relevance threshold) — filtering belongs in the tool source, not as a `jq` post-filter in the wrapping `mose`/`christopher` justfiles; (2) a Claude Code `UserPromptSubmit` hook that runs `ti search`/`tb search` (with the cutoff above) on every incoming prompt and injects the results as context, replacing pull-based retrieval (agent must remember to query `ti`) with structural injection. Motivated by two new `ti` rules added this session on justfile discipline (never bypass a skill's justfile for its underlying CLI; propose a new recipe rather than an ad-hoc command when one is missing) — the concrete case that exposed the "rule is lost if nobody queries `ti`" gap already flagged in `ti_module`'s governance section. Open questions: relevance-threshold tuning, added per-prompt latency.
