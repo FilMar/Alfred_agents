@@ -36,3 +36,13 @@ export-chart-trend TARGET YEARS="" OUTPUT="trend.json":
 [no-cd]
 export-chart-summary YEAR OUTPUT="summary.json":
     uv run {{gen}}/scripts/export_chart.py summary {{quote(YEAR)}} {{quote(OUTPUT)}}
+
+# Reduce recurring rent rows by a fixed amount, from a given date onward. Idempotent.
+[no-cd]
+adjust-rent FULL_AMOUNT REDUCTION SINCE:
+    uv run {{gen}}/scripts/adjust_rent.py {{quote(FULL_AMOUNT)}} {{quote(REDUCTION)}} {{quote(SINCE)}}
+
+# Split a recurring self-transfer row into an investment portion and a remainder. Idempotent.
+[no-cd]
+split-selftransfer AMOUNT INVEST MATCH_TEXT="Filippo Mariani" INVEST_CATEGORY="investimenti" EXTRA_MATCH="":
+    uv run {{gen}}/scripts/split_selftransfer.py {{quote(AMOUNT)}} {{quote(INVEST)}} {{quote(MATCH_TEXT)}} {{quote(INVEST_CATEGORY)}} {{quote(EXTRA_MATCH)}}
