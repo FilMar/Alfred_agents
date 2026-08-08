@@ -4,7 +4,7 @@
 
 tags: [roadmap, phases, status]
 sources: [conversation]
-updated: 2026-07-16
+updated: 2026-08-08
 
 ## Phase status
 
@@ -54,9 +54,9 @@ Three parallel worksites are now open beyond the numbered phases. Their dependen
 1. **Orchestrator Phase 1 skeleton** ([roadmap_orchestrator](roadmap_orchestrator)) — **done**: catalog, FS-queue, scheduler, REST API implemented in `tools/orchestrator/` and accepted after a full `th` review cycle. Next on this worksite: Phase 2 (WoL, `i_wake`, provisioning pipeline).
 2. **TB-on-Rasp migration** ([tb_on_rasp](tb_on_rasp)) — needs the Rasp provisioned (Qdrant + Ollama containers, see [rasp_node](rasp_node)); the mass re-embedding path additionally needs the orchestrator's WoL/`requiresDesktop` loop working.
 3. **Events table / procedural memory** ([procedural_memory_gaps](procedural_memory_gaps)) — independent of the Rasp, can start anytime; ordered last only because its value accrues slowly (it needs months of accumulated events before the downstream pieces make sense).
-4. **Stateless Cockpit** ([stateless_cockpit](stateless_cockpit)) — proposed 2026-08-08 as the next project: tailnet web UI with episodic stateless execution. Not started; foundation via the `piano` skill. Must first settle its conflict with Pillar 5 of [orchestrator_overview](orchestrator_overview) (agent chat was Matrix-only by design).
+4. **Stateless Cockpit** ([stateless_cockpit](stateless_cockpit)) — **founded 2026-08-08** via `piano`: `tools/cockpit/` (README, justfile, CLAUDE.md). Tailnet web UI, episodic stateless execution, `/mem` memory banks, agent via pi SDK in the `th` sandbox, v1 entirely on the Rasp. The Pillar 5 conflict was settled by revision: security deferred, risk accepted (see the page's Foundation decisions). Next: first line of code.
 
-Shared component: the **Matrix layer** serves both the orchestrator (notifications, `run_task`, wake) and the TB (`!tb search`). The homeserver and bot plumbing are built once; whether the two command families live in one bot or a dedicated TB bot ([tb_on_rasp](tb_on_rasp) leans dedicated) is an implementation detail to settle then.
+Shared component — **superseded 2026-08-08**: the Matrix layer was to serve both the orchestrator (notifications, `run_task`, wake) and the TB (`!tb search`). With the cockpit founded as a full replacement, **Matrix shuts down entirely**: notifications become the cockpit feed, `!tb search` becomes a cockpit turn, interactive chat is the cockpit itself. The homeserver/bot plumbing in [orchestrator_overview](orchestrator_overview) and [tb_on_rasp](tb_on_rasp) is no longer planned; `run_task`'s second-auth-channel rationale is absorbed by the accepted-risk decision.
 
 ## Immediate todo
 

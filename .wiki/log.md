@@ -8,6 +8,10 @@ updated: 2026-07-02
 
 ## Log
 
+## [2026-08-08] revision | Stateless Cockpit founded — Matrix layer superseded
+
+Foundation session via `piano`; `tools/cockpit/` created (README.md, justfile, CLAUDE.md). All open questions of [stateless_cockpit](stateless_cockpit) closed, recorded in its new Foundation decisions section: Pillar 5 risk accepted (security deferred, tailnet-only, account step later; `th` sandbox covers filesystem not network); **Matrix shuts down entirely** — the cockpit replaces the Matrix chat and pi-web, notifications become a feed at next opening, `!tb search` becomes a turn; agent via pi SDK (fresh session per turn, full toolset — direct Ollama calls discarded as toolless; injection→shell risk reopened and accepted); `/mem` markdown banks (delta summary, append-only ledger with user-confirmed entries, 3-exchange verbatim tail, per-bank `/safe` profile, default write `essays/dot_file/alfred`; no SQLite); v1 entirely on the Rasp, `/wake` + Ollama URL move as future config-only step; hats from `tools/th/hats/`, annibale out of v1; `/bash` is a user terminal, audit question dropped; sshfs rejected. Updated: [roadmap](roadmap) (worksite 4 founded, Matrix shared-component superseded), [orchestrator_overview](orchestrator_overview) (Interactive pi Chat marked superseded), [index](index).
+
 ## [2026-08-08] ingest | Stateless Cockpit — proposed next project
 
 New page [stateless_cockpit](stateless_cockpit) from a session discussion. Tailnet-only web UI with episodic stateless execution: each turn rebuilds context (rolling hot memory + tb/ti retrieval), fresh agent call, async re-condensation. Includes the review amendments (raw tail + summary, append-only facts ledger, merge-not-rewrite, no LLM-generated HTML — JSON widget schemas instead, reuse of existing harness/atlante) and open questions, chief among them the conflict with Pillar 5 of [orchestrator_overview](orchestrator_overview) (agent chat is Matrix-only by design; a tailnet web UI reopens the single-auth-channel hole). Roadmap worksite 4 added; not started, foundation via `piano`.

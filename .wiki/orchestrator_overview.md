@@ -96,6 +96,8 @@ No custom user/role system in the app — access is governed by who can reach th
 
 ## Interactive pi Chat (Matrix Relay)
 
+> **Superseded 2026-08-08.** The [stateless_cockpit](stateless_cockpit) foundation decided Matrix shuts down entirely: interactive chat, orchestrator notifications and `!tb search` all move to the cockpit. The Matrix-only rationale below (second auth channel, Pillar 5) was revised, not refuted — the risk of a tailnet-only surface is now explicitly accepted for a single-user tailnet, with an account step deferred to the future. This section stays as the record of the original design.
+
 Beyond deterministic commands, the Matrix bot supports an interactive session with the `pi` agent on the Desktop — the last function an openclaw-style agent would have provided, now covered by pieces already in the design:
 
 - **Flow**: `/wake` on Matrix → Rasp sends WoL → Desktop boots → `i_wake` callback → the user chats with `pi` through the Matrix room. The only *new* component is the **relay**: the bot on the Rasp forwards room messages to a `pi` session on the Desktop over SSH and relays replies back. Everything else (`/wake` manual trigger, `i_wake`, the bot) is already planned.
@@ -115,4 +117,4 @@ Beyond deterministic commands, the Matrix bot supports an interactive session wi
 - [architettura](architettura)
 - [tb_on_rasp](tb_on_rasp) — Third Brain hosted on the Rasp inside the same perimeter; mass re-embedding as a `requiresDesktop` task
 - [rasp_node](rasp_node) — full view of services on the Rasp and provisioning order
-- [stateless_cockpit](stateless_cockpit) — proposed web UI that overlaps with Interactive pi Chat and challenges the Matrix-only rule of Pillar 5
+- [stateless_cockpit](stateless_cockpit) — founded 2026-08-08; replaces Interactive pi Chat and the whole Matrix layer (see its Foundation decisions)
