@@ -82,11 +82,11 @@ clio-backup-qdrant collection="default" retain="5":
 
     # 4. Upload to CLIO
     echo "Uploading to CLIO..."
-    mega-mkdir -p /clio/qdrant 2>/dev/null || true
+    mega-mkdir -p /backup/qdrant 2>/dev/null || true
 
-    if mega-put "$ARCHIVE_PATH" /clio/qdrant/; then
+    if mega-put "$ARCHIVE_PATH" /backup/qdrant/; then
         echo "[$(date -Iseconds)] Upload completed: $ARCHIVE_NAME" >> "$LOGFILE"
-        echo "Upload complete: /clio/qdrant/$ARCHIVE_NAME"
+        echo "Upload complete: /backup/qdrant/$ARCHIVE_NAME"
     else
         echo "[$(date -Iseconds)] ERROR: Upload failed" >> "$LOGFILE"
         rm -f "$ARCHIVE_PATH"
@@ -95,15 +95,15 @@ clio-backup-qdrant collection="default" retain="5":
 
     # 5. Retention
     echo "Applying retention ($RETAIN backups)..."
-    BACKUP_COUNT=$(mega-ls /clio/qdrant/ 2>/dev/null | grep -c "qdrant-${COLLECTION}-" || echo 0)
+    BACKUP_COUNT=$(mega-ls /backup/qdrant/ 2>/dev/null | grep -c "qdrant-${COLLECTION}-" || echo 0)
 
     if [ "$BACKUP_COUNT" -gt "$RETAIN" ]; then
         TO_DELETE=$((BACKUP_COUNT - RETAIN))
         if [ "$TO_DELETE" -gt 0 ]; then
             echo "Removing $TO_DELETE old backups..."
-            mega-ls /clio/qdrant/ | grep "qdrant-${COLLECTION}-" | sort | head -n "$TO_DELETE" | while read -r OLD_BACKUP; do
+            mega-ls /backup/qdrant/ | grep "qdrant-${COLLECTION}-" | sort | head -n "$TO_DELETE" | while read -r OLD_BACKUP; do
                 [ -n "$OLD_BACKUP" ] || continue
-                mega-rm "/clio/qdrant/$OLD_BACKUP"
+                mega-rm "/backup/qdrant/$OLD_BACKUP"
                 echo "[$(date -Iseconds)] Deleted: $OLD_BACKUP" >> "$LOGFILE"
             done
         fi
@@ -136,15 +136,15 @@ clio-restore-qdrant collection="default" file="":
 
     COLLECTION="{{collection}}"
     BACKUP_FILE="{{file}}"
-    CLIO_PATH="/clio/qdrant/${BACKUP_FILE}"
+    CLIO_PATH="/backup/qdrant/${BACKUP_FILE}"
 
     echo "=== Restoring Qdrant: $COLLECTION ← $BACKUP_FILE ==="
 
     # 1. Check that the backup exists on CLIO
-    if ! mega-ls /clio/qdrant/ | grep -qx "$BACKUP_FILE"; then
+    if ! mega-ls /backup/qdrant/ | grep -qx "$BACKUP_FILE"; then
         echo "ERROR: $BACKUP_FILE not found on CLIO at $CLIO_PATH"
         echo "Available backups for this collection:"
-        mega-ls /clio/qdrant/ | grep "^qdrant-${COLLECTION}-" || echo "(none)"
+        mega-ls /backup/qdrant/ | grep "^qdrant-${COLLECTION}-" || echo "(none)"
         exit 1
     fi
 

@@ -50,7 +50,7 @@ All backups write to `~/.local/log/clio-backup.log`.
 ## Layout on MEGA
 
 ```
-/clio/qdrant/
+/backup/qdrant/
   qdrant-third-brain-20260728-175500.tar.gz
   qdrant-pi_identity-20260728-175500.tar.gz
 ```
