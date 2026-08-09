@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { stream } from "hono/streaming";
 import { appendLedger, parseBank, renderBank as bankToMarkdown } from "../bank/core.ts";
 import { deleteBank, loadBank, saveBank } from "../bank/store.ts";
 import { listHats } from "../router/hats.ts";
@@ -26,10 +27,13 @@ export function buildApp(cfg: CockpitConfig, deps: TurnDeps): Hono {
   app.post("/turn", async (c) => {
     const input = await field(c, "input");
     if (input === null) return c.text("input is required", 400);
-    const r = await handleInput(input, session, cfg, deps, await hats);
-    session = r.session;
-    r.bookkeeping?.catch((err) => console.error("bookkeeping failed:", err));
-    return c.html(r.html);
+    return stream(c, async (s) => {
+      const onProgress = (text: string) => s.write(`${JSON.stringify({ type: "progress", text })}\n`);
+      const r = await handleInput(input, session, cfg, deps, await hats, onProgress);
+      session = r.session;
+      r.bookkeeping?.catch((err) => console.error("bookkeeping failed:", err));
+      await s.write(`${JSON.stringify({ type: "done", html: r.html })}\n`);
+    });
   });
 
   app.post("/ledger/confirm", async (c) => {

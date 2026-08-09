@@ -22,8 +22,15 @@ const deps: TurnDeps = {
 const form = (fields: Record<string, string>) =>
   new Request("http://x", { method: "POST", body: new URLSearchParams(fields) });
 
-const post = (path: string, fields: Record<string, string>) =>
-  app.request(path, { method: "POST", body: new URLSearchParams(fields) });
+// /turn streams: app.request() resolves once headers are ready, not once the body
+// (and the session mutation it carries) is fully written. Drain a clone so callers
+// that chain requests see up-to-date session state, while the original body stays
+// readable for the caller's own assertions.
+const post = async (path: string, fields: Record<string, string>) => {
+  const res = await app.request(path, { method: "POST", body: new URLSearchParams(fields) });
+  await res.clone().text();
+  return res;
+};
 
 beforeEach(async () => {
   root = await mkdtemp(join(tmpdir(), "cockpit-app-"));
@@ -43,7 +50,7 @@ describe("GET /", () => {
     expect(res.status).toBe(200);
     const html = await res.text();
     expect(html).toContain("htmx");
-    expect(html).toContain('hx-post="/turn"');
+    expect(html).toContain('id="turn-form"');
   });
 });
 

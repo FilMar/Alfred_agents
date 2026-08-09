@@ -18,17 +18,19 @@ export type TurnDeps = {
 
 const EMPTY_RETRIEVAL: Retrieval = { tb: [], ti: [] };
 
-/** One episodic turn: retrieve -> load @files -> assemble -> run. Reply comes back now. */
+/** One episodic turn: retrieve -> load @files -> assemble -> run. Reply comes back now.
+ *  onProgress relays what the agent is doing (tool calls, thinking) as it happens. */
 export async function runTurn(
   bank: Bank,
   input: Command & { kind: "turn" },
   hatOverlay: string | null,
   deps: TurnDeps,
+  onProgress?: (text: string) => void,
 ): Promise<AgentReply> {
   const retrieval = await deps.retrieve(input.text).catch(() => EMPTY_RETRIEVAL);
   const files = await loadFiles(input.files, bank.cwd);
   const prompt = assembleContext(bank, input.text, hatOverlay, retrieval, files);
-  return deps.runAgent(prompt, bank.safe, bank.cwd);
+  return deps.runAgent(prompt, bank.safe, bank.cwd, onProgress);
 }
 
 /** Post-reply bookkeeping, run async by the server: push the exchange into the tail,

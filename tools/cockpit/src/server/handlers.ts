@@ -32,13 +32,14 @@ export async function handleInput(
   cfg: CockpitConfig,
   deps: TurnDeps,
   knownHats: string[],
+  onProgress?: (text: string) => void,
 ): Promise<HandlerResult> {
   const cmd = parseCommand(input, knownHats);
   const keep = (html: string): HandlerResult => ({ html, session });
 
   switch (cmd.kind) {
     case "turn":
-      return handleTurn(cmd, session, cfg, deps);
+      return handleTurn(cmd, session, cfg, deps, onProgress);
     case "hat":
       return { html: renderInfo(`hat armed for next turn: ${cmd.name}`), session: { ...session, hat: cmd.name } };
     case "mem": {
@@ -92,10 +93,11 @@ async function handleTurn(
   session: Session,
   cfg: CockpitConfig,
   deps: TurnDeps,
+  onProgress?: (text: string) => void,
 ): Promise<HandlerResult> {
   const bank = await loadBank(cfg.banksDir, session.bank);
   const overlay = session.hat ? await loadHat(cfg.hatsDir, session.hat) : null;
-  const reply = await runTurn(bank, cmd, overlay, deps);
+  const reply = await runTurn(bank, cmd, overlay, deps, onProgress);
   const ex = { at: new Date().toISOString(), user: cmd.text, agent: reply.text };
   const bookkeeping = afterTurn(bank, ex, deps).then((b) => saveBank(cfg.banksDir, b));
   return { html: renderTurn(cmd.text, reply), session: { ...session, hat: null }, bookkeeping };

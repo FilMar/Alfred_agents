@@ -14,12 +14,48 @@ export type RunnerInput = {
   timeoutSec?: number;
 };
 
-/** stdout contract back to the parent. */
+/** stdout contract back to the parent: NDJSON lines, zero or more progress events
+ *  followed by exactly one done event. */
 export type RunnerOutput = {
   text: string;
   widgets: Widget[];
   ledgerProposals: string[];
 };
+type ProgressLine = { type: "progress"; text: string };
+type DoneLine = { type: "done" } & RunnerOutput;
+
+function emitLine(line: ProgressLine | DoneLine): void {
+  process.stdout.write(JSON.stringify(line) + "\n");
+}
+
+/** Session events -> short human-readable progress lines. Dedupes consecutive
+ *  deltas of the same kind so a token stream doesn't flood the channel. */
+export function subscribeProgress(
+  session: { subscribe: (listener: (event: unknown) => void) => void },
+  emit: (line: ProgressLine) => void,
+): void {
+  let lastKind: string | null = null;
+  session.subscribe((raw) => {
+    const event = raw as {
+      type: string;
+      toolName?: string;
+      assistantMessageEvent?: { type: string };
+    };
+    if (event.type === "tool_execution_start") {
+      emit({ type: "progress", text: `tool: ${event.toolName}` });
+      lastKind = null;
+    } else if (event.type === "message_update") {
+      const kind = event.assistantMessageEvent?.type;
+      if (kind === "thinking_delta" && lastKind !== "thinking") {
+        emit({ type: "progress", text: "thinking…" });
+        lastKind = "thinking";
+      } else if (kind === "text_delta" && lastKind !== "answering") {
+        emit({ type: "progress", text: "answering…" });
+        lastKind = "answering";
+      }
+    }
+  });
+}
 
 type AssistantLike = { role: string; content: { type: string; text?: string }[] };
 
@@ -87,6 +123,7 @@ async function main(): Promise<void> {
     model: input.modelStr ? resolveModel(input.modelStr) : undefined,
     thinkingLevel: input.thinkingLevel as never,
   });
+  subscribeProgress(session, emitLine);
 
   const timeoutSec = input.timeoutSec ?? 120;
   const timeout = new Promise<never>((_, reject) =>
@@ -94,8 +131,12 @@ async function main(): Promise<void> {
   );
   await Promise.race([session.prompt(input.userPrompt), timeout]);
 
-  const output: RunnerOutput = { text: extractReplyText(session.messages as AssistantLike[]), widgets, ledgerProposals };
-  process.stdout.write(JSON.stringify(output));
+  emitLine({
+    type: "done",
+    text: extractReplyText(session.messages as AssistantLike[]),
+    widgets,
+    ledgerProposals,
+  });
 }
 
 if (import.meta.main) {

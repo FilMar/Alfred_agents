@@ -38,14 +38,13 @@ describe("renderTurn", () => {
     expect(html).toContain("<table");
   });
 
-  test("action widget is a button posting the whitelisted command to /turn", () => {
+  test("action widget is a button with the whitelisted command as data-command", () => {
     const html = renderTurn(
       "q",
       reply({ widgets: [{ type: "action", label: "clear bank", command: ":clear" }] }),
     );
     expect(html).toContain("clear bank");
-    expect(html).toContain('hx-post="/turn"');
-    expect(html).toContain(":clear");
+    expect(html).toContain('data-command=":clear"');
   });
 
   test("ledger proposal carries a confirm button with the exact sentence", () => {
@@ -56,9 +55,9 @@ describe("renderTurn", () => {
 });
 
 describe("renderPage", () => {
-  test("has the input form wired to /turn and the CDN scripts", () => {
+  test("has the input form and the CDN scripts", () => {
     const html = renderPage({ bank: "main", hat: null }, ["black"]);
-    expect(html).toContain('hx-post="/turn"');
+    expect(html).toContain('id="turn-form"');
     expect(html).toContain("htmx");
     expect(html).toContain("main");
   });

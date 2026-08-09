@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { buildExtraBinds, parseReply } from "../src/turn/agent.ts";
+import { buildExtraBinds, parseReply, splitLines } from "../src/turn/agent.ts";
 
 describe("buildExtraBinds", () => {
   test("empty safe profile yields no extra binds", () => {
@@ -28,5 +28,29 @@ describe("parseReply", () => {
 
   test("rejects JSON missing the expected shape", () => {
     expect(() => parseReply(JSON.stringify({ text: "hi" }))).toThrow("malformed agent reply");
+  });
+});
+
+describe("splitLines", () => {
+  test("no newline yet -> everything stays in rest", () => {
+    expect(splitLines("", "partial")).toEqual({ lines: [], rest: "partial" });
+  });
+
+  test("one full line plus a trailing partial one", () => {
+    expect(splitLines("", 'line1\n{"a":1}\npart')).toEqual({
+      lines: ["line1", '{"a":1}'],
+      rest: "part",
+    });
+  });
+
+  test("carries the buffered rest into the next chunk", () => {
+    const first = splitLines("", "ab");
+    expect(first).toEqual({ lines: [], rest: "ab" });
+    const second = splitLines(first.rest, "cd\n");
+    expect(second).toEqual({ lines: ["abcd"], rest: "" });
+  });
+
+  test("empty lines are dropped", () => {
+    expect(splitLines("", "a\n\nb\n")).toEqual({ lines: ["a", "b"], rest: "" });
   });
 });

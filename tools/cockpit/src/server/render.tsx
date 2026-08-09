@@ -21,24 +21,75 @@ const FEED = { "hx-target": "#feed", "hx-swap": "beforeend" } as const;
 const vals = (obj: Record<string, string>) => JSON.stringify(obj);
 
 /** Client-side niceties: terminal-style input history (ArrowUp/ArrowDown,
- *  persisted in localStorage) and autoscroll of the feed on new fragments.
+ *  persisted in localStorage), a live "what the agent is doing" indicator fed by
+ *  /turn's NDJSON stream, and autoscroll of the feed on new fragments.
  *  Static constant — nothing user-provided lands here. */
 const PAGE_SCRIPT = `
-const form = document.querySelector("form[hx-post='/turn']");
+const form = document.getElementById("turn-form");
 const input = form.querySelector("input[name=input]");
 const feed = document.getElementById("feed");
+const indicator = document.getElementById("turn-indicator");
 const KEY = "cockpit-history";
 let hist = JSON.parse(localStorage.getItem(KEY) || "[]");
 let idx = hist.length, draft = "";
-form.addEventListener("htmx:beforeRequest", () => {
-  const v = input.value.trim();
+
+function pushHistory(v) {
   if (v && hist[hist.length - 1] !== v) {
     hist.push(v);
     if (hist.length > 100) hist.shift();
     localStorage.setItem(KEY, JSON.stringify(hist));
   }
   idx = hist.length; draft = "";
+}
+
+async function submitTurn(text) {
+  pushHistory(text);
+  indicator.textContent = "…";
+  indicator.classList.remove("hidden");
+  try {
+    const res = await fetch("/turn", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "input=" + encodeURIComponent(text),
+    });
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf("\\n")) !== -1) {
+        const line = buf.slice(0, nl);
+        buf = buf.slice(nl + 1);
+        if (!line) continue;
+        const evt = JSON.parse(line);
+        if (evt.type === "progress") indicator.textContent = evt.text;
+        else if (evt.type === "done") {
+          feed.insertAdjacentHTML("beforeend", evt.html);
+          feed.scrollTop = feed.scrollHeight;
+        }
+      }
+    }
+  } finally {
+    indicator.classList.add("hidden");
+  }
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const v = input.value.trim();
+  if (!v) return;
+  input.value = "";
+  submitTurn(v);
 });
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-command]");
+  if (btn) submitTurn(btn.dataset.command);
+});
+
 input.addEventListener("keydown", (e) => {
   if (e.key === "ArrowUp" && idx > 0) {
     if (idx === hist.length) draft = input.value;
@@ -78,12 +129,7 @@ export function renderPage(session: Session, hats: string[]): string {
             <span class="text-zinc-500">hats: {hats.map((h) => `:${h}`).join(" ")}</span>
           </header>
           <main id="feed" class="flex-1 overflow-y-auto p-4 space-y-3"></main>
-          <form
-            hx-post="/turn"
-            {...FEED}
-            hx-on--after-request="this.reset()"
-            class="p-4 border-t border-zinc-700"
-          >
+          <form id="turn-form" class="p-4 border-t border-zinc-700 space-y-1">
             <input
               name="input"
               autofocus
@@ -91,6 +137,9 @@ export function renderPage(session: Session, hats: string[]): string {
               placeholder="message, or :command"
               class="w-full bg-zinc-800 rounded px-3 py-2 outline-none text-base"
             />
+            <div id="turn-indicator" class="hidden text-zinc-500 text-sm">
+              thinking…
+            </div>
           </form>
           <script dangerouslySetInnerHTML={{ __html: PAGE_SCRIPT }}></script>
         </body>
@@ -125,9 +174,8 @@ function WidgetView({ w }: { w: Widget }) {
     case "action":
       return (
         <button
-          hx-post="/turn"
-          {...FEED}
-          hx-vals={vals({ input: w.command })}
+          type="button"
+          data-command={w.command}
           class="bg-zinc-700 hover:bg-zinc-600 rounded px-3 py-1 text-sm my-1"
         >
           {w.label}
