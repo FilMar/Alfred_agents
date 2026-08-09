@@ -3,12 +3,27 @@
 ```yaml
 tags: [project, cockpit, web-ui, memory]
 sources: [conversation, tools/cockpit/README.md]
-updated: 2026-08-08
+updated: 2026-08-09
 ```
 
 ## Overview
 
-A personal web UI, reachable only inside the tailnet, for talking to the agent from any device. It drops the classic chat model (one long message history) for a **single continuous session with episodic stateless execution**: every request rebuilds a compact context from scratch, the agent answers with no memory of its own, and the session state is re-condensed after each turn. Status: **founded 2026-08-08** via the `piano` skill — `tools/cockpit/` holds README.md, justfile and CLAUDE.md. It **replaces both the Matrix interactive chat and pi-web**; Matrix shuts down entirely (see Foundation decisions below).
+A personal web UI, reachable only inside the tailnet, for talking to the agent from any device. It drops the classic chat model (one long message history) for a **single continuous session with episodic stateless execution**: every request rebuilds a compact context from scratch, the agent answers with no memory of its own, and the session state is re-condensed after each turn. Status: **paused 2026-08-09** — see Pause below. Founded 2026-08-08 via the `piano` skill — `tools/cockpit/` holds README.md, justfile and CLAUDE.md. It is meant to **replace both the Matrix interactive chat and pi-web**; Matrix shuts down entirely (see Foundation decisions below). `pi-web` stays up in the meantime — the pause changes nothing about its status, it simply keeps being the default since nothing has replaced it yet.
+
+## Pause (2026-08-09)
+
+**Not abandoned — paused pending a decision.** The build is further along than earlier wiki text suggested: real implementation exists on branch `feature/cockpit-skeleton` (never merged to `main`), through commit `08c6f73` ("ezperimental cockpit", 2026-08-09). Milestones reached on the branch: Hono server + HTMX UI + command handlers, `bank`/`router`/`turn` modules with tests, and three working edges — `retrieve` (direct `tb`/`ti` calls), `condense` (direct Ollama call), `runAgent` (a generalized `th` session). The branch is left as-is, no merge or cleanup obligation.
+
+**Why paused**: the first end-to-end test (against a cloud model, not the local target) came back slow and clunky. Diagnosed in conversation:
+- **Slow — mechanical, not a model problem.** `runAgent` does `spawnSandboxed` of a fresh `bun` process every turn (fork + bwrap + SDK boot + session init), paying that cost even on trivial exchanges, before the model answers at all.
+- **Clunky — not explained by model size** in this test (the test model was a 300B-class cloud model, not the 16GB-VRAM local target) — so the cause is still open, to be re-tested against the real target model.
+
+**What is not in question**: the target deployment is a **local model within 16GB VRAM** (candidate to try: `dwarfstar`), not the cloud model used in the test. At that model size, the long-history degradation problem the whole bank/ledger/condense design exists to solve is still real — that part of the architecture is not being reconsidered.
+
+**Agreed next steps, in order, before resuming build:**
+1. **Model-independent fix**: replace spawn-per-turn with a persistent process — keep the `bun`/`bwrap`/SDK process warm, rebuild only the *context* each turn from the bank (not a fresh OS process, and not a growing SDK session history either — the per-turn context assembly stays as designed). Worth doing regardless of which model ends up in use.
+2. **Re-run the quality test (~20-30 turns) against the actual local candidate model** (16GB VRAM), not the cloud model — this is what actually answers whether the bank/ledger/condense memory system is needed at that scale or is overkill even there.
+3. Only after that test: decide whether to resume the implementation as designed or simplify it.
 
 ## Core loop
 
@@ -56,7 +71,7 @@ Settled via `piano`; these close every open question of the original proposal.
 ## Cross-references
 
 - [orchestrator_overview](orchestrator_overview) — Pillar 5 rationale (risk now accepted, see decisions) and the Interactive pi Chat this replaces
-- [roadmap](roadmap) — worksite 4; Phase 8 (Personal Server) is the closest numbered phase
+- [roadmap](roadmap) — worksite 4, now paused; Phase 8 (Personal Server) is the closest numbered phase
 - [rasp_node](rasp_node) — the host of the whole v1
 - [style_dual_entrypoint](style_dual_entrypoint) — the Hono pattern the backend follows
 - [architettura](architettura) — tb/ti layers used for retrieval
