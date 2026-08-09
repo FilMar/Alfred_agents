@@ -26,8 +26,12 @@ let _hasBwrap: boolean | null = null;
 const hasBwrap = () =>
   _hasBwrap ?? (_hasBwrap = spawnSync("which", ["bwrap"], { stdio: "ignore" }).status === 0);
 
-function bwrapArgs(): string[] {
+/** Extra path bound into the sandbox on top of the fixed base policy (cwd/.pi/.bun/tmp rw, "/" ro). */
+export type ExtraBind = { path: string; mode: "ro" | "rw" };
+
+function bwrapArgs(extraBinds: ExtraBind[] = []): string[] {
   const home = homedir();
+  const extras = extraBinds.flatMap((b) => [b.mode === "rw" ? "--bind" : "--ro-bind", b.path, b.path]);
   return [
     "--ro-bind", "/", "/",
     "--proc", "/proc",
@@ -36,6 +40,7 @@ function bwrapArgs(): string[] {
     "--bind", `${home}/.pi`, `${home}/.pi`,
     "--bind", `${home}/.bun`, `${home}/.bun`,
     "--bind", "/tmp", "/tmp",
+    ...extras,
     "--setenv", "HOME", home,
     "--",
   ];
@@ -62,12 +67,13 @@ export function spawnSandboxed(
   bin: string,
   args: string[],
   opts: Parameters<typeof spawn>[2],
+  extraBinds: ExtraBind[] = [],
 ): ReturnType<typeof spawn> {
   if (!hasBwrap()) {
     warnNoBwrap();
     return spawn(bin, args, opts);
   }
-  return spawn("bwrap", [...bwrapArgs(), bin, ...args], {
+  return spawn("bwrap", [...bwrapArgs(extraBinds), bin, ...args], {
     ...opts,
     env: { ...process.env, [SANDBOXED]: "1" },
   });
@@ -177,7 +183,7 @@ export function spawnDetached(
 
 // ─── Session building ─────────────────────────────────────────────────────────
 
-function resolveModel(modelStr: string) {
+export function resolveModel(modelStr: string) {
   const [provider, ...rest] = modelStr.split("/");
   const modelId = rest.join("/");
   if (!provider || !modelId) throw new Error(`Formato model non valido: usa "provider/model-id" (es. anthropic/claude-opus-4-5)`);
@@ -190,10 +196,46 @@ function resolveModel(modelStr: string) {
   return model;
 }
 
-async function buildSession(
-  memberName: string,
-  opts: RunMemberOpts,
-): Promise<{ session: AgentSession }> {
+type CreateAgentSessionParams = Parameters<typeof createAgentSession>[0];
+
+/** Everything a session needs, independent of where it comes from (a member file, or a caller-built prompt). */
+export type SessionSpec = {
+  /** Omit to keep pi's default built-in tools (read, bash, edit, write) enabled. */
+  tools?: NonNullable<CreateAgentSessionParams>["tools"];
+  customTools?: NonNullable<CreateAgentSessionParams>["customTools"];
+  systemPrompt: string;
+  cwd?: string;
+  model?: ReturnType<typeof resolveModel>;
+  thinkingLevel?: ThinkingLevel;
+};
+
+/** Build a fresh in-memory session from an explicit spec. No member lookup, no file I/O. */
+export async function createSession(spec: SessionSpec): Promise<{ session: AgentSession }> {
+  const loader = new DefaultResourceLoader({
+    cwd: spec.cwd ?? process.cwd(),
+    agentDir: getAgentDir(),
+    noExtensions: true,
+    systemPromptOverride: () => spec.systemPrompt,
+  });
+  await loader.reload();
+
+  const { authStorage, modelRegistry } = createRegistry();
+  const { session } = await createAgentSession({
+    tools: spec.tools,
+    customTools: spec.customTools,
+    resourceLoader: loader,
+    sessionManager: SessionManager.inMemory(),
+    authStorage,
+    modelRegistry,
+    ...(spec.model ? { model: spec.model } : {}),
+    ...(spec.thinkingLevel ? { thinkingLevel: spec.thinkingLevel } : {}),
+  });
+
+  return { session };
+}
+
+/** Resolve a named member (from .th/members/) into a SessionSpec, validating opts along the way. */
+function resolveMember(memberName: string, opts: RunMemberOpts): Omit<SessionSpec, "customTools"> {
   if (opts.thinkingLevel && !THINKING_LEVELS.includes(opts.thinkingLevel as ThinkingLevel)) {
     throw new Error(`Thinking level non valido: "${opts.thinkingLevel}". Valori accettati: ${THINKING_LEVELS.join(", ")}`);
   }
@@ -204,26 +246,19 @@ async function buildSession(
   if (autoInstantiated) process.stderr.write(`info: istanziato "${memberName}" da globale in .th/members/\n`);
   const { member, systemPrompt } = loadMember(memberName);
 
-  const loader = new DefaultResourceLoader({
-    cwd: process.cwd(),
-    agentDir: getAgentDir(),
-    noExtensions: true,
-    systemPromptOverride: () => systemPrompt,
-  });
-  await loader.reload();
-
-  const { authStorage, modelRegistry } = createRegistry();
-  const { session } = await createAgentSession({
+  return {
     tools: member.tools,
-    resourceLoader: loader,
-    sessionManager: SessionManager.inMemory(),
-    authStorage,
-    modelRegistry,
-    ...(model ? { model } : {}),
+    systemPrompt,
+    model,
     ...(opts.thinkingLevel ? { thinkingLevel: opts.thinkingLevel as ThinkingLevel } : {}),
-  });
+  };
+}
 
-  return { session };
+async function buildSession(
+  memberName: string,
+  opts: RunMemberOpts,
+): Promise<{ session: AgentSession }> {
+  return createSession(resolveMember(memberName, opts));
 }
 
 // ─── I/O ──────────────────────────────────────────────────────────────────────

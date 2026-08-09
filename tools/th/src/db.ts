@@ -82,7 +82,7 @@ export function getRun(id: string): Run | null {
 
 export function listRuns(opts: { member?: string; limit?: number } = {}): Run[] {
   const conditions: string[] = [];
-  const params: unknown[] = [];
+  const params: (string | number)[] = [];
   if (opts.member) { conditions.push("member = ?"); params.push(opts.member); }
   const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
   params.push(opts.limit ?? 20);
