@@ -2,7 +2,7 @@
 
 ```yaml
 tags: [project, cockpit, web-ui, memory]
-sources: [conversation, tools/cockpit/README.md]
+sources: [conversation, tools/cockpit/README.md, tools/cockpit/src/]
 updated: 2026-08-08
 ```
 
@@ -25,9 +25,9 @@ Hot memory is short-term session state only. Long-term memory stays where it alr
 
 - **Backend** — TypeScript on Bun, **Hono** (settled at foundation: same dual-entrypoint pattern as `tb`/`ti`, see [style_dual_entrypoint](style_dual_entrypoint) — Fastify discarded).
 - **Agent** — the **pi SDK** (`@earendil-works/pi-coding-agent`), fresh session per turn, full toolset (skills, web, bash), wrapped in `th`'s sandbox. Model backend is Ollama.
-- **Slash command router** — deterministic, runs *before* the LLM: `/bash <cmd>` (user terminal in the browser — a user feature, not an agent tool), `/mem <name>` (switch memory bank), `/clean` (reset current bank), `/safe` (menu toggling the sandbox read/write directory allowlist of the current bank), `/black`, `/white`, ... (apply a thinking hat from `tools/th/hats/` to the next turn), `/detach <task>` (offload to background job), `/edit-memory` (inspect and fix the bank file), `/wake` (future: wake the Desktop and repoint the model URL).
-- **Memory banks** — plain markdown files, one per bank (SQLite discarded). Each bank holds: summary (delta-merged), append-only ledger, raw tail of last 3 exchanges, and its `/safe` profile. Banks swap atomically on `/mem`.
-- **Frontend** — HTMX + Tailwind, server-driven UI. Widgets rendered by the backend from JSON the agent emits via an `emit_widget` tool.
+- **Command router** — deterministic, runs *before* the LLM. Vim-style `:` prefix (settled in implementation — rarer than `/` at line start, `::` escapes a literal colon; a typo like `:men` is an error, it never becomes an LLM turn): `:bash <cmd>` (user terminal in the browser — a user feature, not an agent tool), `:mem [name]` (switch bank; bare = list), `:new <name>` (create + switch, old bank stays), `:delete [name]` (two-step: confirmation button, then everything goes, ledger included), `:clear` (wipe summary+tail, keep ledger and safe profile), `:safe` (menu toggling the sandbox read/write allowlist of the current bank — starts empty, no default paths), `:cd [path]` (set the bank's agent working dir, persisted per bank), `:black`, `:white`, ... (arm a hat from `tools/th/hats/` for the next turn, consumed on use), `:detach <task>` (stub in v1), `:edit-memory` (raw bank file in a textarea), `:wake` (future). `@path` mentions in a plain turn are read by the backend (user privilege, like `:bash`) and inlined into the context.
+- **Memory banks** — plain markdown files, one per bank (SQLite discarded), sections `## Summary/Ledger/Tail/Safe/Cwd`. Each bank holds: summary (delta-merged), append-only ledger, raw tail of last 3 exchanges, its safe profile and its agent cwd. Lenient parser (hand-edits degrade to defaults, never crash a turn), strict renderer (round-trip stable), atomic writes (tmp + rename).
+- **Frontend** — HTMX + Tailwind from CDN, server-driven UI. Fragments are `hono/jsx` templates (typed, auto-escaping — agent text cannot inject markup; no extra dependency). Terminal-style input history on ArrowUp/Down in `localStorage`; `h-dvh` layout for mobile. Widgets rendered by the backend from JSON the agent emits via an `emit_widget` tool; action buttons only post whitelisted commands back to `/turn`.
 - **Network** — Tailscale only, no public exposure. Single user; multi-user fully out of scope.
 
 ## Amendments (settled in review, 2026-08-08)
@@ -52,6 +52,15 @@ Settled via `piano`; these close every open question of the original proposal.
 6. **Hats from `tools/th/hats/`** via `/black`-style commands, one hat per turn, applied as a system-prompt overlay on the fresh call. Multi-member orchestration (annibale) is out of the v1.
 7. **`/bash` audit question dropped.** `/bash` is the *user's* terminal in the browser, not an agent tool — the adversarial-audit pipeline protects against agent-proposed scripts, which this is not.
 8. **sshfs for remote repos rejected.** Mounts hang on disconnect and per-file latency kills agent I/O. The path for repos owned by other hosts: `/wake` + run the agent on the host that owns the repo, or plain git clone on the Rasp.
+
+## Implementation status (milestone 1, 2026-08-08)
+
+Built on branch `feature/cockpit-skeleton`, workflow: frozen signatures -> TODO bodies -> tests -> implementation. 90 tests green, typecheck clean.
+
+- **Done**: bank module (`src/bank/` — types, pure core, fs store), router (`src/router/` — `parseCommand`, hats loaded dynamically from `tools/th/hats/`), turn pipeline (`src/turn/` — `assembleContext`, `runTurn`, `afterTurn`; edges injected via `TurnDeps` so tests never touch the network), server (`src/server/` — Hono routes as shells, logic in `handlers.ts`, fragments in `render.tsx`).
+- **Fake agent**: `server.ts` ships echo deps — the episodic loop, banks, router and UI are real end to end; the reply echoes the assembled context (doubles as a context debugger).
+- **Still TODO** (the SDK phase, in order): `retrieve` (HTTP to tb/ti), `condense` (direct Ollama call), `runAgent` (pi SDK, fresh session, th sandbox from the bank's safe profile, `emit_widget` + `propose_ledger` harness tools).
+- Notable semantics fixed by tests: retrieval failure degrades to an empty context (a sleeping Qdrant never blocks a turn); a condense failure keeps the exchange in the tail (the summary just stays stale); the safe allowlist starts empty = sandbox denies all; `:bash` runs unsandboxed with a 30s timeout (decision 7); session state (active bank, armed hat) is in-memory and boots on bank `main`.
 
 ## Cross-references
 
