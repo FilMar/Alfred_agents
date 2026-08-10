@@ -19,25 +19,25 @@ Linus manages GitHub for Emotion-SRL through a `justfile` that wraps the `gh` CL
 Create an issue and automatically add it to SVILUPPO with status=Backlog:
 
 ```bash
-just issue-create server_api "Fix invoice calculation"
-just issue-create-body server_api "Fix invoice" "Detailed description here"
+pi-just linus issue-create server_api "Fix invoice calculation"
+pi-just linus issue-create-body server_api "Fix invoice" "Detailed description here"
 ```
 
 List and view issues:
 
 ```bash
-just issue-list server_api           # open issues in one repo
-just issue-list-all                  # all open issues across the org
-just issue-view server_api 42        # full details
+pi-just linus issue-list server_api           # open issues in one repo
+pi-just linus issue-list-all                  # all open issues across the org
+pi-just linus issue-view server_api 42        # full details
 ```
 
 Manage issues:
 
 ```bash
-just issue-close server_api 42
-just issue-assign server_api 42 FilMar
-just issue-label server_api 42 bug
-just issue-comment server_api 42 "Working on this"
+pi-just linus issue-close server_api 42
+pi-just linus issue-assign server_api 42 FilMar
+pi-just linus issue-label server_api 42 bug
+pi-just linus issue-comment server_api 42 "Working on this"
 ```
 
 ## Project SVILUPPO
@@ -45,35 +45,35 @@ just issue-comment server_api 42 "Working on this"
 List all items with their status, repo, and assignee:
 
 ```bash
-just proj-list
+pi-just linus proj-list
 ```
 
 Filter by status:
 
 ```bash
-just proj-by-status "In progress"
-just proj-by-status Backlog
-just proj-in-progress              # shortcut
+pi-just linus proj-by-status "In progress"
+pi-just linus proj-by-status Backlog
+pi-just linus proj-in-progress              # shortcut
 ```
 
 Move an item to a new status (accepts case-insensitive names):
 
 ```bash
-just proj-move PVTI_lADOBGn_Wc4BZ0EczgvCCyk "In progress"
-just proj-move PVTI_lADOBGn_Wc4BZ0EczgvCCyk Done
+pi-just linus proj-move PVTI_lADOBGn_Wc4BZ0EczgvCCyk "In progress"
+pi-just linus proj-move PVTI_lADOBGn_Wc4BZ0EczgvCCyk Done
 ```
 
 Set size on an item:
 
 ```bash
-just proj-size PVTI_lADOBGn_Wc4BZ0EczgvCCyk M
-just proj-size PVTI_lADOBGn_Wc4BZ0EczgvCCyk XL
+pi-just linus proj-size PVTI_lADOBGn_Wc4BZ0EczgvCCyk M
+pi-just linus proj-size PVTI_lADOBGn_Wc4BZ0EczgvCCyk XL
 ```
 
 Add an existing issue to SVILUPPO (defaults to Backlog):
 
 ```bash
-just proj-add server_api 42
+pi-just linus proj-add server_api 42
 ```
 
 ## Recap
@@ -81,7 +81,7 @@ just proj-add server_api 42
 The headline feature. Shows a complete picture of the work state:
 
 ```bash
-just recap
+pi-just linus recap
 ```
 
 This outputs three sections:
@@ -92,9 +92,9 @@ This outputs three sections:
 For partial views:
 
 ```bash
-just prs              # open PRs only
-just branches         # open branches only
-just repos            # all repos in the org
+pi-just linus prs              # open PRs only
+pi-just linus branches         # open branches only
+pi-just linus repos            # all repos in the org
 ```
 
 ## Escape hatch
@@ -102,6 +102,6 @@ just repos            # all repos in the org
 When the abstraction doesn't cover what you need:
 
 ```bash
-just raw repo view Emotion-SRL/server_api
-just raw api repos/Emotion-SRL/server_api/branches
+pi-just linus raw repo view Emotion-SRL/server_api
+pi-just linus raw api repos/Emotion-SRL/server_api/branches
 ```

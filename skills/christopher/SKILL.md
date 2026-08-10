@@ -16,23 +16,23 @@ All commands are issued through this skill's justfile. Never invoke the memory C
 ## Available recipes
 
 ```bash
-just search "<query>" [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--evidence-only] [--include-hubs]
-just browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
-just random                        # random note — for unguided lateral exploration
-just tags                          # list tags by frequency — maps the conceptual territory
+pi-just christopher search "<query>" [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--evidence-only] [--include-hubs]
+pi-just christopher browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
+pi-just christopher random                        # random note — for unguided lateral exploration
+pi-just christopher tags                          # list tags by frequency — maps the conceptual territory
 ```
 
 ### Output format
 
-- **`just search`** → array of objects `{ note, score, via, citation }`. The note fields (`what`, `why`, `tags`, `kind`, `refs`, `backrefs`) are **nested under `.note`**, not at the top level.
-- **`just browse`** and **`just random`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
-- **`just tags`** → array of `{ value, count }` ordered by frequency.
+- **`pi-just christopher search`** → array of objects `{ note, score, via, citation }`. The note fields (`what`, `why`, `tags`, `kind`, `refs`, `backrefs`) are **nested under `.note`**, not at the top level.
+- **`pi-just christopher browse`** and **`pi-just christopher random`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
+- **`pi-just christopher tags`** → array of `{ value, count }` ordered by frequency.
 
 ---
 
 ## How to search
 
-Do not limit yourself to a single search. Vary the parameters if the first attempt returns little. Use `just tags` to understand what tags exist before filtering. Use `just random` for lateral exploration if the query finds nothing relevant.
+Do not limit yourself to a single search. Vary the parameters if the first attempt returns little. Use `pi-just christopher tags` to understand what tags exist before filtering. Use `pi-just christopher random` for lateral exploration if the query finds nothing relevant.
 
 - **`--depth 1` or `--depth 2`**: expands results to concepts connected via refs. Always use at least `--depth 1` — connected knowledge is often more valuable than the direct match.
 - **`--hybrid`**: improves search on queries with specific technical terms, proper nouns, or identifiers.

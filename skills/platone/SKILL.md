@@ -14,10 +14,10 @@ You are Platone. Your job is not to summarize the work. Your job is to **pull ou
 Every command in this skill is a recipe in this skill's justfile, invoked as:
 
 ```bash
-just -f ~/.pi/agent/skills/platone/justfile <recipe> "<arg1>" "<arg2>" ...
+pi-just platone <recipe> "<arg1>" "<arg2>" ...
 ```
 
-Arguments are **positional**. Use the order given by each recipe's usage line. Never use `--flags`. Flags belong to the underlying CLIs. This skill never calls those CLIs directly. A flag-style argument aborts and shows the correct usage. Run the `default` recipe (`just -f ...`) to list all recipes.
+Arguments are **positional**. Use the order given by each recipe's usage line. Never use `--flags`. Flags belong to the underlying CLIs. This skill never calls those CLIs directly. A flag-style argument aborts and shows the correct usage. Run the `default` recipe (`pi-just platone default`) to list all recipes.
 
 ---
 
@@ -43,8 +43,8 @@ For each simplified concept, **do not save immediately**. Propose it to the user
 
 **Step 3a — Check for duplicates:**
 ```bash
-just -f ~/.pi/agent/skills/platone/justfile tags                       # tag vocabulary — consult first
-just -f ~/.pi/agent/skills/platone/justfile search "<key concept>" 5   # search for similar ideas semantically
+pi-just platone tags                       # tag vocabulary — consult first
+pi-just platone search "<key concept>" 5   # search for similar ideas semantically
 ```
 
 **Step 3b — Propose the note:**
@@ -78,10 +78,10 @@ The user can:
 
 Only after confirmation execute:
 ```bash
-just -f ~/.pi/agent/skills/platone/justfile save "<atomic idea>" "<reason>" <type> "tag1,tag2,tag3" "<uri>"
+pi-just platone save "<atomic idea>" "<reason>" <type> "tag1,tag2,tag3" "<uri>"
 # The 5th arg (source) only if applicable. Tags: comma as separator in a single string. NEVER spaces: "tag1 tag2".
-just -f ~/.pi/agent/skills/platone/justfile retag <new-id> "tag1,tag2"             # if the user modified tags
-just -f ~/.pi/agent/skills/platone/justfile add-ref <new-id> "<id>:<reason>"       # for each confirmed ref
+pi-just platone retag <new-id> "tag1,tag2"             # if the user modified tags
+pi-just platone add-ref <new-id> "<id>:<reason>"       # for each confirmed ref
 ```
 
 **Absolute Constraints (Zero Tolerance):**
@@ -122,7 +122,7 @@ Ask yourself: **is there a real connection between the note you just saved and t
 
 - If the connection exists: write it in one precise sentence. Then add the ref:
   ```bash
-  just -f ~/.pi/agent/skills/platone/justfile add-ref <new-note-id> "<random-id>:<explicit reason>"
+  pi-just platone add-ref <new-note-id> "<random-id>:<explicit reason>"
   ```
 - If it does not exist: do not force it. Move to the next note.
 

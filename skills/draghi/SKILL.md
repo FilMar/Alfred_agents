@@ -21,7 +21,7 @@ income), `category`, `description`, `description_full`, `source_year`.
    Entrate,Uscite,Descrizione,Descrizione_Completa,Stato,Moneymap`, with
    metadata rows before the header). Run:
    ```
-   just -f ~/.claude/skills/draghi/justfile import <file.csv>
+   pi-just draghi import <file.csv>
    ```
    This appends the parsed rows to `.bank.csv`. It warns, but does not
    block, on a row that looks like a duplicate of one already in the
@@ -37,7 +37,7 @@ income), `category`, `description`, `description_full`, `source_year`.
 2. **One-time legacy migration.** Only if `essays/bank/spese2021.csv` or
    `spese2022.csv` still exist and have not been migrated yet:
    ```
-   just -f ~/.claude/skills/draghi/justfile migrate-legacy
+   pi-just draghi migrate-legacy
    ```
    After it succeeds, tell the user they can delete `essays/bank/`
    entirely — the raw exports are not needed once their data is in
@@ -45,14 +45,14 @@ income), `category`, `description`, `description_full`, `source_year`.
 
 3. **Show a trend.**
    ```
-   just -f ~/.claude/skills/draghi/justfile trend <category|totale> [years]
+   pi-just draghi trend <category|totale> [years]
    ```
    `years` is a comma-separated list (e.g. `2023,2024`); omit it for all
    years. Prints one line per month: total and 3-month moving average.
 
 4. **Show a yearly summary.**
    ```
-   just -f ~/.claude/skills/draghi/justfile summary <year>
+   pi-just draghi summary <year>
    ```
    Prints totals per category for `<year>`, next to the same totals for
    `<year> - 1`, with the delta.
@@ -60,8 +60,8 @@ income), `category`, `description`, `description_full`, `source_year`.
 5. **Feed a chart to atlante.** When the user wants a picture instead of
    numbers:
    ```
-   just -f ~/.claude/skills/draghi/justfile export-chart-trend <category|totale> [years] [output.json]
-   just -f ~/.claude/skills/draghi/justfile export-chart-summary <year> [output.json]
+   pi-just draghi export-chart-trend <category|totale> [years] [output.json]
+   pi-just draghi export-chart-summary <year> [output.json]
    ```
    Each writes a JSON file with `labels` and `values` arrays, ready for
    atlante's `bar` or `line` recipe. Read the file, then call atlante.
@@ -70,7 +70,7 @@ income), `category`, `description`, `description_full`, `source_year`.
    rent row is covered off-ledger (e.g. a roommate pays their share in
    cash), reduce the recorded amount:
    ```
-   just -f ~/.claude/skills/draghi/justfile adjust-rent <full_amount> <reduction> <since_date>
+   pi-just draghi adjust-rent <full_amount> <reduction> <since_date>
    ```
    Matches `Casa` rows paid to Giulio Nozzoli at exactly `<full_amount>`
    (e.g. `-630.0`) from `<since_date>` (ISO, inclusive) onward, and adds
@@ -84,7 +84,7 @@ income), `category`, `description`, `description_full`, `source_year`.
    Republic (`Ben: Filippo Mariani`) mix an investment (PAC) portion with
    monthly living expenses in one row. Split them apart:
    ```
-   just -f ~/.claude/skills/draghi/justfile split-selftransfer <amount> <invest_amount> [match_text] [invest_category] [extra_match]
+   pi-just draghi split-selftransfer <amount> <invest_amount> [match_text] [invest_category] [extra_match]
    ```
    Finds rows at exactly `<amount>` whose `description_full` contains
    `match_text` (default `Filippo Mariani`) and, if given, `extra_match`

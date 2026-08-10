@@ -36,7 +36,7 @@ Do not invent context. If the files are missing or empty, say so and ask the use
 ## 2. Read the current roster state
 
 ```bash
-just members
+pi-just fury members
 ```
 
 Classify:
@@ -100,20 +100,20 @@ Do not create anything until the user approves. Incorporate requested changes, r
 For each approved member, first check whether a global with a compatible hat and role exists:
 
 ```bash
-just members --global
-just member-get <global-name>   # if it looks suitable
+pi-just fury members --global
+pi-just fury member-get <global-name>   # if it looks suitable
 ```
 
 If the global's hat **and role** are compatible:
 
 ```bash
-just clone <name> <global-name>
+pi-just fury clone <name> <global-name>
 ```
 
 Otherwise create from scratch:
 
 ```bash
-just create <name> <hat-core> "<project-specific role>" --tools read,bash
+pi-just fury create <name> <hat-core> "<project-specific role>" --tools read,bash
 ```
 
 Create all members in sequence. After each creation, confirm with the output.
@@ -125,9 +125,9 @@ Create all members in sequence. After each creation, confirm with the output.
 There is no direct update. To modify:
 
 ```bash
-just member-get <name>      # read current state
-just delete <name>          # delete
-just create <name> <hat> "<new role>" --tools read,bash
+pi-just fury member-get <name>      # read current state
+pi-just fury delete <name>          # delete
+pi-just fury create <name> <hat> "<new role>" --tools read,bash
 ```
 
 ---
@@ -135,9 +135,9 @@ just create <name> <hat> "<new role>" --tools read,bash
 ## Reading stats to improve the team
 
 ```bash
-just history
-just history --member <name>   # filter by member
-just history --limit <n>       # change number of runs
+pi-just fury history
+pi-just fury history --member <name>   # filter by member
+pi-just fury history --limit <n>       # change number of runs
 ```
 
 For each run: `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`.
@@ -149,8 +149,8 @@ If a member has repeated errors or timeouts → the role is probably too vague o
 ## Promoting a member to global
 
 ```bash
-just promote <name>          # copies to ~/.th/members/
-just promote <name> --force  # overwrites if already exists
+pi-just fury promote <name>          # copies to ~/.th/members/
+pi-just fury promote <name> --force  # overwrites if already exists
 ```
 
 ---
@@ -161,46 +161,46 @@ just promote <name> --force  # overwrites if already exists
 
 ```bash
 # List members
-just members                    # local + global + tmp
-just members --local            # only .th/members/
-just members --global           # only ~/.th/members/
-just members --tmp              # only /tmp/.th/members/
+pi-just fury members                    # local + global + tmp
+pi-just fury members --local            # only .th/members/
+pi-just fury members --global           # only ~/.th/members/
+pi-just fury members --tmp              # only /tmp/.th/members/
 
 # Detail
-just member-get <name>         # full JSON: hat, role, tools, skills, scope
+pi-just fury member-get <name>         # full JSON: hat, role, tools, skills, scope
 
 # Creation
-just create <name> <hat-core> "<role>" [FLAGS]
+pi-just fury create <name> <hat-core> "<role>" [FLAGS]
 # available flags:
 #   --tools read,bash    # default tools for the member
 #   --tmp                # creates in /tmp instead of .th/members/
 
-just clone <name> <global-name>   # inherits hat+role+tools from global
+pi-just fury clone <name> <global-name>   # inherits hat+role+tools from global
 
 # Deletion
-just delete <name>             # removes the member file
+pi-just fury delete <name>             # removes the member file
 
 # Promotion to global
-just promote <name>             # copies to ~/.th/members/
-just promote <name> --force   # overwrites if already exists
+pi-just fury promote <name>             # copies to ~/.th/members/
+pi-just fury promote <name> --force   # overwrites if already exists
 ```
 
 ### Hats
 
 ```bash
-just hats                        # list all available hats
-just hat <hat-core>             # show the full hat markdown
+pi-just fury hats                        # list all available hats
+pi-just fury hat <hat-core>             # show the full hat markdown
 ```
 
-Use `just hat <hat>` if you have doubts about the exact cognitive role before assigning it to a member.
+Use `pi-just fury hat <hat>` if you have doubts about the exact cognitive role before assigning it to a member.
 
 ### History
 
 ```bash
-just history                     # last 20 runs (JSON)
-just history --member <name>   # filter by specific member
-just history --limit <n>       # change number of runs returned
-just get <run_id>              # metadata + output if still on disk
+pi-just fury history                     # last 20 runs (JSON)
+pi-just fury history --member <name>   # filter by specific member
+pi-just fury history --limit <n>       # change number of runs returned
+pi-just fury get <run_id>              # metadata + output if still on disk
 ```
 
 Each record: `id`, `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`, `out_path`, `log_path`.

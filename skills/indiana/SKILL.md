@@ -30,8 +30,8 @@ Every analysis answers three questions:
 Before reading a line of code, understand the context using this skill's justfile:
 
 ```bash
-just files <path>            # high-level structure (maxdepth 2)
-just dirs <path>             # directory tree (maxdepth 3)
+pi-just indiana files <path>            # high-level structure (maxdepth 2)
+pi-just indiana dirs <path>             # directory tree (maxdepth 3)
 
 # Languages and frameworks
 read <path>/package.json || read <path>/requirements.txt || read <path>/Cargo.toml || read <path>/go.mod || read <path>/pom.xml
@@ -42,13 +42,13 @@ bash "git -C {{path}} log --stat --oneline -5"
 bash "git -C {{path}} shortlog -sn --no-merges | head -10"
 
 # Immediate health signals
-just files <path> 1 '*.md'              # markdown docs
-just pain <path>                      # TODO/FIXME/HACK comments
+pi-just indiana files <path> 1 '*.md'              # markdown docs
+pi-just indiana pain <path>                      # TODO/FIXME/HACK comments
 ```
 
 Then search the Third Brain for what you already know about these stacks:
 ```bash
-just tb-search "<main language or framework>"
+pi-just indiana tb-search "<main language or framework>"
 ```
 
 ### 2. Layer Dig (Layer Analysis)
@@ -66,7 +66,7 @@ Read the project in layers, from general to particular:
 bash "find <path> \( -name 'main.*' -o -name 'index.*' -o -name 'app.*' \) | grep -v node_modules | grep -v '.git'"
 
 # Where is the business logic? Compare with where it should be.
-just counts <path>/src
+pi-just indiana counts <path>/src
 
 # External dependencies
 bash "grep -r 'import\|require\|from' <path>/src --include='*.ts' --include='*.py' --include='*.go' | grep -v 'node_modules\|\.git' | sed 's/.*from //' | sort | uniq -c | sort -rn | head -20"
@@ -75,13 +75,13 @@ bash "grep -r 'import\|require\|from' <path>/src --include='*.ts' --include='*.p
 **Layer 3 — Debt signals**
 ```bash
 # Largest files (God objects?)
-just giants <path>
+pi-just indiana giants <path>
 
 # Most-modified files (hotspots)
-just hotspots <path>
+pi-just indiana hotspots <path>
 
 # Pain comments
-just pain <path>
+pi-just indiana pain <path>
 ```
 
 ### 3. Trap Identification

@@ -75,7 +75,7 @@ sample data.
 If `typst` is available, **always compile** before handing it over:
 
 ```bash
-just compile cv_mario_rossi.typ
+pi-just vinci compile cv_mario_rossi.typ
 ```
 
 If it errors, read the error and fix the `.typ` — a CV that doesn't compile
@@ -88,10 +88,10 @@ rules below and tell the user, suggesting how to install it
 Give the user the `.typ` path and the command to compile it:
 
 ```bash
-just compile cv_mario_rossi.typ
+pi-just vinci compile cv_mario_rossi.typ
 ```
 
-(`typst compile` produces the PDF; `just watch cv_mario_rossi.typ` for a live
+(`typst compile` produces the PDF; `pi-just vinci watch cv_mario_rossi.typ` for a live
 preview). Remind them that all the data lives in the DATI block, so they can
 tweak it themselves.
 

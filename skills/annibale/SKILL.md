@@ -32,10 +32,10 @@ Issue every orchestration command through this skill's justfile. Never invoke th
 
 **Skills are not members.** `christopher`, `socrate`, `aristotele`, `omero`, `feynman`, etc. are system skills — never pass them as `--member` to the runner.
 
-To use a skill, instruct a real member in the task passed to `just -f "path to justfile" run`:
+To use a skill, instruct a real member in the task passed to `pi-just annibale run`:
 
 ```bash
-just -f ".../annibale/justfile" run <member> "Use the christopher skill to retrieve what the Third Brain knows about: <topic>"
+pi-just annibale run <member> "Use the christopher skill to retrieve what the Third Brain knows about: <topic>"
 ```
 
 If you have no suitable member, use a neutral tmp as a relay. Name the skill in the task, not in the member flag. That is what matters.
@@ -47,7 +47,7 @@ If you have no suitable member, use a neutral tmp as a relay. Name the skill in 
 First:
 
 ```bash
-just -f ".../annibale/justfile" members
+pi-just annibale members
 ```
 
 Classify results into three buckets:
@@ -74,13 +74,13 @@ I can proceed with neutral temporary members anyway — do you want me to?
 If the user wants to proceed immediately, create neutral tmps with this skill's justfile:
 
 ```bash
-just -f ".../annibale/justfile" member-tmp <name> <hat-core> "<role>"
+pi-just annibale member-tmp <name> <hat-core> "<role>"
 ```
 
 One member per needed hat, nothing more.
 
 ### Global members available
-The runner creates globals automatically on `just run`. You do not need to create them yourself. Use them directly if they cover the hat you need.
+The runner creates globals automatically on `pi-just annibale run`. You do not need to create them yourself. Use them directly if they cover the hat you need.
 
 ---
 
@@ -97,7 +97,7 @@ Flows available in the annibale skill:
 For `council`: your cognitive job is Phase 0 only — who sits at the table and with what problem. Then launch it with the skill's justfile:
 
 ```bash
-just -f skills/annibale/justfile council "<problem>" "<member1,member2,member3>"
+pi-just annibale council "<problem>" "<member1,member2,member3>"
 ```
 
 The harness drives everything else: parallel fan-out, polling, validation, synthesis. Do not re-implement the fan-out manually.
@@ -105,8 +105,8 @@ The harness drives everything else: parallel fan-out, polling, validation, synth
 To see available flows or read one:
 
 ```bash
-just -f skills/annibale/justfile flow-list
-just -f skills/annibale/justfile flow-read council
+pi-just annibale flow-list
+pi-just annibale flow-read council
 ```
 
 For `debate` and `tdd-coding`: read the template with `flow-read` and follow it step by step.
@@ -116,7 +116,7 @@ For `debate` and `tdd-coding`: read the template with `flow-read` and follow it 
 ## 4. Understand the context
 
 ```bash
-just -f ~/.pi/agent/skills/christopher/justfile search "<work topic>" --limit 5 --depth 1
+pi-just christopher search "<work topic>" --limit 5 --depth 1
 ```
 
 If the TB has nothing on the topic, proceed without it. Do not invent context.
@@ -152,25 +152,25 @@ Wait for confirmation. If the user modifies the flow, adapt before executing.
 Perspectives accumulate: each member reads the previous member's output. Capture stdout.
 
 ```bash
-STEP1=$(just run <name-hat1> "<task>")
-STEP2=$(just run <name-hat2> "<task>
+STEP1=$(pi-just annibale run <name-hat1> "<task>")
+STEP2=$(pi-just annibale run <name-hat2> "<task>
 
 Context:
 $STEP1")
 ```
 
-If a step fails (`just run` exits with an error), stop and show the error to the user before continuing.
+If a step fails (`pi-just annibale run` exits with an error), stop and show the error to the user before continuing.
 
 ### Pattern B — Parallel
 
 When perspectives must be independent. `run-detached` runs each member in the background — no output on the terminal — and returns JSON with the `out`/`log`/`status` paths. `wait` then blocks until every job finishes. It never hangs on a failed job. It exits non-zero if any job did not reach `done`.
 
 ```bash
-P1=$(just run-detached <name-hat1> "<task>")
-P2=$(just run-detached <name-hat2> "<task>")
-P3=$(just run-detached <name-hat3> "<task>")
+P1=$(pi-just annibale run-detached <name-hat1> "<task>")
+P2=$(pi-just annibale run-detached <name-hat2> "<task>")
+P3=$(pi-just annibale run-detached <name-hat3> "<task>")
 
-if ! just wait \
+if ! pi-just annibale wait \
      "$(echo "$P1" | jq -r '.status')" \
      "$(echo "$P2" | jq -r '.status')" \
      "$(echo "$P3" | jq -r '.status')"; then
@@ -182,7 +182,7 @@ OUT1=$(cat "$(echo "$P1" | jq -r '.out')")
 OUT2=$(cat "$(echo "$P2" | jq -r '.out')")
 OUT3=$(cat "$(echo "$P3" | jq -r '.out')")
 
-FINAL=$(just run <name-blue> "<task>
+FINAL=$(pi-just annibale run <name-blue> "<task>
 
 Perspective 1:
 $OUT1
@@ -194,7 +194,7 @@ Perspective 3:
 $OUT3")
 ```
 
-For deep reasoning add `--thinking medium` or `--thinking high` to `just run` / `just run-detached`.
+For deep reasoning add `--thinking medium` or `--thinking high` to `pi-just annibale run` / `pi-just annibale run-detached`.
 
 ---
 

@@ -16,32 +16,32 @@ Backs up **Qdrant** to MEGA cloud storage, with an optional systemd timer.
 
 ## Main commands
 
-Arguments are **positional**: `just <recipe> <arg1> <arg2>`, not `key=value`.
+Arguments are **positional**: `pi-just clio <recipe> <arg1> <arg2>`, not `key=value`.
 
 ```bash
 # Backup
-just clio-backup-qdrant <collection>         # One collection, retain=5
-just clio-backup-qdrant <collection> 10     # Custom retention
-just clio-backup-all                         # All collections in QDRANT_COLLECTIONS
+pi-just clio clio-backup-qdrant <collection>         # One collection, retain=5
+pi-just clio clio-backup-qdrant <collection> 10     # Custom retention
+pi-just clio clio-backup-all                         # All collections in QDRANT_COLLECTIONS
 
 # Restore
-just clio-restore-qdrant <collection> <backup.tar.gz>
-# Example: just clio-restore-qdrant supertest qdrant-supertest-20260728-184022.tar.gz
+pi-just clio clio-restore-qdrant <collection> <backup.tar.gz>
+# Example: pi-just clio clio-restore-qdrant supertest qdrant-supertest-20260728-184022.tar.gz
 
 # Timer (automatic backup)
-just clio-enable-timer                      # Enable weekly timer (Monday 04:00)
-just clio-disable-timer                     # Disable timer
-just clio-timer-status                      # Timer status
+pi-just clio clio-enable-timer                      # Enable weekly timer (Monday 04:00)
+pi-just clio clio-disable-timer                     # Disable timer
+pi-just clio clio-timer-status                      # Timer status
 
 # Status and logs
-just clio-status                            # MEGA login and available space
-just clio-logs [lines=N]                    # Last N backup log lines
+pi-just clio clio-status                            # MEGA login and available space
+pi-just clio clio-logs [lines=N]                    # Last N backup log lines
 ```
 
 ## Architecture
 
 Three-level pattern:
-1. **Recipe `clio-backup-qdrant`**: backs up one collection with configurable retention (default 5). Syntax: `just clio-backup-qdrant <collection> [retain]`.
+1. **Recipe `clio-backup-qdrant`**: backs up one collection with configurable retention (default 5). Syntax: `pi-just clio clio-backup-qdrant <collection> [retain]`.
 2. **Recipe `clio-backup-all`**: loops over a list of collections defined in the justfile. Edit the `QDRANT_COLLECTIONS` array to customize it.
 3. **Recipe `clio-enable-timer`**: installs a systemd user unit that runs `clio-backup-all` every Monday at 04:00.
 

@@ -30,8 +30,8 @@ The Feynman technique has three moves:
 Query the TB with multiple queries to cover the topic from different angles:
 
 ```bash
-just search "<topic>" --limit 10 --depth 1
-just search "<synonym or related aspect>" --limit 5 --depth 1
+pi-just feynman search "<topic>" --limit 10 --depth 1
+pi-just feynman search "<synonym or related aspect>" --limit 5 --depth 1
 ```
 
 Use 2-4 queries to avoid missing material that uses different terminology. If the user specified a sub-topic, add it as a separate query.

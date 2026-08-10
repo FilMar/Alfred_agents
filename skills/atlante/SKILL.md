@@ -40,40 +40,40 @@ defaults, but they come before the axis labels, so pass them to reach
 Bar - values and labels, same length:
 
 ```bash
-just -f ~/.pi/agent/skills/atlante/justfile bar '[100,200,150]' '["Q1","Q2","Q3"]' revenue.html "Revenue by quarter"
+pi-just atlante bar '[100,200,150]' '["Q1","Q2","Q3"]' revenue.html "Revenue by quarter"
 ```
 
 Pie and donut - same arguments, different look:
 
 ```bash
-just -f ~/.pi/agent/skills/atlante/justfile pie '[40,30,20]' '["A","B","C"]'
-just -f ~/.pi/agent/skills/atlante/justfile donut '[40,30,20]' '["A","B","C"]' split.html "Split by area"
+pi-just atlante pie '[40,30,20]' '["A","B","C"]'
+pi-just atlante donut '[40,30,20]' '["A","B","C"]' split.html "Split by area"
 ```
 
 Scatter and line - an array of `[x, y]` pairs. `line` joins them in order:
 
 ```bash
-just -f ~/.pi/agent/skills/atlante/justfile scatter '[[0,0],[1,2],[2,4]]'
-just -f ~/.pi/agent/skills/atlante/justfile line '[[0,10],[1,14],[2,9]]' trend.html "Monthly trend" "Month" "Euro"
+pi-just atlante scatter '[[0,0],[1,2],[2,4]]'
+pi-just atlante line '[[0,10],[1,14],[2,9]]' trend.html "Monthly trend" "Month" "Euro"
 ```
 
 Tree - one nested object, each node has `label` and optional `children`:
 
 ```bash
-just -f ~/.pi/agent/skills/atlante/justfile tree '{"label":"Root","children":[{"label":"A"},{"label":"B"}]}'
+pi-just atlante tree '{"label":"Root","children":[{"label":"A"},{"label":"B"}]}'
 ```
 
 Force graph - nodes and links. A node `type` of `start`, `end` or
 `decision` changes its shape. A link `label` shows text on the arrow:
 
 ```bash
-just -f ~/.pi/agent/skills/atlante/justfile force '[{"id":"A","label":"Start","type":"start"},{"id":"B"}]' '[{"source":"A","target":"B"}]'
+pi-just atlante force '[{"id":"A","label":"Start","type":"start"},{"id":"B"}]' '[{"source":"A","target":"B"}]'
 ```
 
 Open the result:
 
 ```bash
-just -f ~/.pi/agent/skills/atlante/justfile open revenue.html
+pi-just atlante open revenue.html
 ```
 
 ## Look

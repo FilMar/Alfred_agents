@@ -59,11 +59,11 @@ The test: **can you phrase it so that doing it and not doing it look different?*
 All recipes take **positional args** in the order shown — never `--flags`. A flag-style or `NAME=value` argument aborts with the correct usage.
 
 ```bash
-just search "<draft context>" [limit]      # default limit 5
-just add "<context>" "<action>" ["tag1,tag2"]
-just append-do <id> "<new action>"
-just list ["tag1,tag2"]                    # all rules, optionally filtered by tags
-just tb-browse <kind> [limit]              # default limit 50
+pi-just mose search "<draft context>" [limit]      # default limit 5
+pi-just mose add "<context>" "<action>" ["tag1,tag2"]
+pi-just mose append-do <id> "<new action>"
+pi-just mose list ["tag1,tag2"]                    # all rules, optionally filtered by tags
+pi-just mose tb-browse <kind> [limit]              # default limit 50
 ```
 
 ---
@@ -74,10 +74,10 @@ just tb-browse <kind> [limit]              # default limit 50
 2. **Draft** the rule applying the anatomy above. Splitting into multiple rules is normal — say so.
 3. **Dedupe** (mandatory, before proposing):
    ```bash
-   just search "<draft context>"
+   pi-just mose search "<draft context>"
    ```
    - Same context, same action → nothing to do; tell the user.
-   - Same context, new action → propose `just append-do <id> "<action>"` instead of a new rule.
+   - Same context, new action → propose `pi-just mose append-do <id> "<action>"` instead of a new rule.
    - Overlapping context → sharpen the draft `if` until the two situations are distinguishable, or merge.
 4. **Propose and wait.** Show the rule in this format and do not save until confirmed:
    ```
@@ -89,11 +89,11 @@ just tb-browse <kind> [limit]              # default limit 50
    ```
 5. **Save** after confirmation:
    ```bash
-   just add "<context>" "<action>" "tag1,tag2"
+   pi-just mose add "<context>" "<action>" "tag1,tag2"
    ```
    The tags argument is one comma-separated string; the recipe splits it into the repeated flags `ti` expects.
 
-**Tags**: lowercase singular nouns, max 3, reuse the vocabulary already in `just list` before inventing. Tags are a filter (`just list "tag1"`), not a taxonomy — choose the ones someone would actually filter by.
+**Tags**: lowercase singular nouns, max 3, reuse the vocabulary already in `pi-just mose list` before inventing. Tags are a filter (`pi-just mose list "tag1"`), not a taxonomy — choose the ones someone would actually filter by.
 
 ## Workflow B — Distilling rules from existing material
 
@@ -101,7 +101,7 @@ Source can be Third Brain notes, a work session, a post-mortem, a document.
 
 1. **Harvest candidates.** For `tb`: notes of kind `protocollo` are rules almost by definition. `attrito` notes often hide a rule ("questo modello fallisce quando X" → "se X, non usare questo modello"). `dato`/`sintesi` notes yield a rule only when they imply a clear behavioural consequence. Most don't, and forcing one produces vague advice. Don't convert knowledge just to fill the store. A small set of sharp rules beats a large set of noise. Every weak rule makes retrieval worse for the good ones.
    ```bash
-   just tb-browse protocollo 50
+   pi-just mose tb-browse protocollo 50
    ```
 2. **Convert** each candidate through the anatomy. Find the situation in which the protocol applies — that is the `if`. Compress the instruction into a dry imperative `do`, and drop the note's `why` entirely: it stays in `tb`. Cross-project only — project-specific protocols stay out.
 3. **Dedupe against `ti` and within the batch**, same as Workflow A step 3. When several notes yield the same context, that is one rule with multiple `do` entries, not several rules.

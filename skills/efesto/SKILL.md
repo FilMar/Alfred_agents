@@ -24,7 +24,7 @@ the whole audit; nothing else in this skill matters more.
    Don't make the user repeat what already happened.
 2. **Check for an existing skill first.**
    ```
-   just -f skills/efesto/justfile roster
+   pi-just efesto roster
    ```
    A duplicate skill is the same failure mode as a duplicate rule inside
    one skill. Say it once. Extend the existing skill, or point to it,
@@ -33,8 +33,8 @@ the whole audit; nothing else in this skill matters more.
    someone else has likely built it** (a language's test runner, a common
    CLI wrapper, a well-known workflow):
    ```
-   just -f skills/efesto/justfile search "<task keywords>"
-   just -f skills/efesto/justfile search-info <skill-name>
+   pi-just efesto search "<task keywords>"
+   pi-just efesto search-info <skill-name>
    ```
    `search-info` prints the full `SKILL.md` of one registry result — read
    it for the shape and the trigger phrasing, not to copy verbatim. This
@@ -46,12 +46,12 @@ the whole audit; nothing else in this skill matters more.
    clear completion criterion.
 5. **Draft the `justfile`, if needed.** Any time the skill would otherwise
    call an external CLI or a script, wrap that call in a recipe instead.
-   `SKILL.md` then calls only `just <recipe>` — see Rule 3 below.
+   `SKILL.md` then calls only `pi-just efesto <recipe>` — see Rule 3 below.
 6. **Run the audit** (Reference, below) against all three rules. Fix what
    fails.
 7. **Test it for real**:
    ```
-   just -f skills/efesto/justfile test-skill <skill_path> "<realistic task>"
+   pi-just efesto test-skill <skill_path> "<realistic task>"
    ```
    This runs the skill in a throwaway `th` member, inside a sandbox — read
    the note on `test-skill` in the Reference section before you run it, so
@@ -148,8 +148,8 @@ gap. A missing recipe is a small, cheap fix; a direct CLI call in
 Check this automatically:
 
 ```
-just -f skills/efesto/justfile lint <skill_path>
-just -f skills/efesto/justfile lint-all [<dir>]
+pi-just efesto lint <skill_path>
+pi-just efesto lint-all [<dir>]
 ```
 
 `lint` reads every command inside a fenced code block in `SKILL.md` and

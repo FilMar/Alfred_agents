@@ -11,19 +11,19 @@ Determine the URL type and use the correct recipe. All recipes are in this skill
 
 **YouTube** (URL contains `youtube.com` or `youtu.be`):
 ```bash
-just youtube "<URL1>" ["<URL2>" ...]
+pi-just polo youtube "<URL1>" ["<URL2>" ...]
 ```
 Supports multiple URLs in a single call. If a video fails, the script reports the error and continues with the others.
 
 **GitHub** (URL contains `github.com`):
 ```bash
-just raw-github "<URL>"
+pi-just polo raw-github "<URL>"
 ```
 The recipe converts `github.com/.../blob/...` to `raw.githubusercontent.com` automatically.
 
 **Web article** (any other URL):
 ```bash
-just article "<URL>"
+pi-just polo article "<URL>"
 ```
 
 Print the output to stdout without modifications. If the recipe fails, show the error without inventing alternatives.

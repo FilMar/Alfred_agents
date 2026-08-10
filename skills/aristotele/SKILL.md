@@ -28,19 +28,19 @@ These roles do not change over time. You never "promote" a `dato` to `sintesi`, 
 All recipes take **positional args** in the order shown — never `--flags`. A flag-style or `NAME=value` argument aborts with the correct usage.
 
 ```bash
-just search "<query>" [limit] [depth]        # semantic search (defaults: 10, 1)
-just map "<query>" [limit]                   # deep cluster scan: depth 2 + hubs included
-just browse <kind> [limit] ["<ISO date>"]    # scroll notes of one kind (default limit 20)
-just save "<what>" "<why>" <kind> ["tag1,tag2"] ["<source>"]
-just add-ref <id> "<target-id>:<reason>"     # add one ref, append-only
-just tags                          # list tags by frequency — maps thematic clusters
-just graph                         # visualise the graph in the browser
+pi-just aristotele search "<query>" [limit] [depth]        # semantic search (defaults: 10, 1)
+pi-just aristotele map "<query>" [limit]                   # deep cluster scan: depth 2 + hubs included
+pi-just aristotele browse <kind> [limit] ["<ISO date>"]    # scroll notes of one kind (default limit 20)
+pi-just aristotele save "<what>" "<why>" <kind> ["tag1,tag2"] ["<source>"]
+pi-just aristotele add-ref <id> "<target-id>:<reason>"     # add one ref, append-only
+pi-just aristotele tags                          # list tags by frequency — maps thematic clusters
+pi-just aristotele graph                         # visualise the graph in the browser
 ```
 
 ### Output format
 
-- **`just search`** / **`just map`** → array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `refs`, `backrefs` are **under `.note`**.
-- **`just browse`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
+- **`pi-just aristotele search`** / **`pi-just aristotele map`** → array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `refs`, `backrefs` are **under `.note`**.
+- **`pi-just aristotele browse`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
 
 ---
 
@@ -51,24 +51,24 @@ just graph                         # visualise the graph in the browser
 Before intervening, understand what is there. Start from the tag map to understand the dominant thematic clusters:
 
 ```bash
-just tags
+pi-just aristotele tags
 ```
 
 Then explore by type:
 
 ```bash
-just browse dato 50
-just browse attrito 20
-just browse sintesi 20
+pi-just aristotele browse dato 50
+pi-just aristotele browse attrito 20
+pi-just aristotele browse sintesi 20
 ```
 
 Map existing Hubs — plain `search` does not return them:
 
 ```bash
-just browse indice 50
+pi-just aristotele browse indice 50
 ```
 
-Finally use `just map "<query>"` (depth-2 search with hubs included) to see existing connections and already-formed clusters.
+Finally use `pi-just aristotele map "<query>"` (depth-2 search with hubs included) to see existing connections and already-formed clusters.
 
 Look for:
 - **Dense clusters**: groups of notes with many refs/backrefs in common — Hub candidates
@@ -82,13 +82,13 @@ After scanning, classify opportunities in priority order:
 | Operation | When |
 |---|---|
 | **Create a Hub** (`kind: indice`) | Cluster with 5+ correlated notes without a compression node |
-| **Add refs** (`just add-ref`) | Two logically connected notes without an explicit link |
-| **Link isolated note** (`just add-ref`) | A note without refs/backrefs that has logical connections not yet explicit |
-| **Create a synthesis** (`just save ... sintesi`) | A pattern emerges from 3+ notes but has not yet been explicitly articulated |
+| **Add refs** (`pi-just aristotele add-ref`) | Two logically connected notes without an explicit link |
+| **Link isolated note** (`pi-just aristotele add-ref`) | A note without refs/backrefs that has logical connections not yet explicit |
+| **Create a synthesis** (`pi-just aristotele save ... sintesi`) | A pattern emerges from 3+ notes but has not yet been explicitly articulated |
 
 ### 3. Distil before saving
 
-Before executing any `just save`, isolate the concept from its origin. Ask yourself: **if I had found this idea in a book, how would I formulate it?**
+Before executing any `pi-just aristotele save`, isolate the concept from its origin. Ask yourself: **if I had found this idea in a book, how would I formulate it?**
 
 The `why` test: it must answer "why does this concept deserve to exist in the graph" — not "how it emerged". If your answer is "it came from a discussion about X" or "in response to Y", stop. Dig deeper until you find the real foundation. If you can't, the concept is not mature yet.
 
@@ -112,13 +112,13 @@ Before writing `what` and `why`, read all the notes in the cluster. The Hub is n
 - make a non-obvious statement that would not fit in any single note
 
 ```bash
-just save \
+pi-just aristotele save \
   "<synthetic statement that captures the cluster pattern — not a title, a thesis>" \
   "<what emerges from the whole: what is confirmed, what is contradicted, where the productive tension lies>" \
   indice "<common-tag>"
 
-just add-ref <note-id-1> "<hub-id>:<why this note contributes to the pattern>"
-just add-ref <note-id-2> "<hub-id>:<why this note contributes to the pattern>"
+pi-just aristotele add-ref <note-id-1> "<hub-id>:<why this note contributes to the pattern>"
+pi-just aristotele add-ref <note-id-2> "<hub-id>:<why this note contributes to the pattern>"
 # ...
 ```
 
@@ -127,12 +127,12 @@ Right example — `what`: "The mind does not perceive reality — it builds fast
 
 **Adding a missing ref:**
 ```bash
-just add-ref <note-A-id> "<note-B-id>:<explicit reason for the connection>"
+pi-just aristotele add-ref <note-A-id> "<note-B-id>:<explicit reason for the connection>"
 ```
 
 **Creating a synthesis:**
 ```bash
-just save \
+pi-just aristotele save \
   "<the pattern articulated as a non-obvious statement>" \
   "<why this pattern deserves to be made explicit>" \
   sintesi
@@ -143,7 +143,7 @@ just save \
 If you have executed significant structural interventions (new Hubs, many refs), you can visualise the updated graph:
 
 ```bash
-just graph
+pi-just aristotele graph
 ```
 
 At the end, list compactly:
