@@ -1,18 +1,34 @@
 # stateless_cockpit
 
 ```yaml
-tags: [project, cockpit, web-ui, memory]
+tags: [project, cockpit, pi-extension, memory]
 sources: [conversation, tools/cockpit/README.md]
-updated: 2026-08-09
+updated: 2026-08-10
 ```
 
 ## Overview
 
-A personal web UI, reachable only inside the tailnet, for talking to the agent from any device. It drops the classic chat model (one long message history) for a **single continuous session with episodic stateless execution**: every request rebuilds a compact context from scratch, the agent answers with no memory of its own, and the session state is re-condensed after each turn. Status: **paused 2026-08-09** — see Pause below. Founded 2026-08-08 via the `piano` skill — `tools/cockpit/` holds README.md, justfile and CLAUDE.md. It is meant to **replace both the Matrix interactive chat and pi-web**; Matrix shuts down entirely (see Foundation decisions below). `pi-web` stays up in the meantime — the pause changes nothing about its status, it simply keeps being the default since nothing has replaced it yet.
+Talking to the agent with a **single continuous session with episodic stateless execution**: every turn rebuilds a compact context from scratch, the agent answers with no memory of its own, and the session state is re-condensed after each turn. Status: **pivoted 2026-08-10** — see Pivot below; this supersedes the Pause and drops the web UI entirely. Founded 2026-08-08 via the `piano` skill — `tools/cockpit/` holds README.md, justfile and CLAUDE.md (pre-pivot artifacts, not yet updated to match). It is meant to **replace both the Matrix interactive chat and pi-web**; Matrix shuts down entirely (see Foundation decisions below). `pi-web` stays up in the meantime — nothing so far has replaced it.
+
+## Pivot (2026-08-10)
+
+**Supersedes the Pause below.** Decision: drop the web UI (Hono + HTMX + Tailwind) and the external app that spawned a fresh pi SDK session per turn. The cockpit becomes instead a **TypeScript extension of pi itself**, run in **RPC mode** (stdin/stdout JSONL) as a single persistent process. This removes the spawn-per-turn cost mechanically — there is no more per-turn `spawnSandboxed` of a fresh `bun` process (fork + bwrap + SDK boot + session init) to eliminate, because the process never dies between turns. This *is* the "persistent process" fix that was next-step 1 under Pause, arrived at by a different route.
+
+Architecture mapped onto native pi extension hooks (verified against `extensions.md` and `compaction.md` in the pi docs):
+
+- **bank / ledger / condense** (delta-merged summary + append-only ledger, see Amendments below) → hook `session_before_compact`: receives the messages to summarize and the previous summary, lets the extension return a custom `{ compaction: { summary, ... } }` or `{ cancel: true }`. Replaces the bespoke condense logic designed from scratch.
+- **retrieval from `tb`/`ti` every turn** → hooks `before_agent_start` / `context`: inject messages and modify the system prompt before each model call, with no external process needed.
+- **`/mem`, `/safe`, `/clean`, hats (`/black`, `/white`, ...), `/edit-memory`** → `pi.registerCommand()`, native slash commands with `getArgumentCompletions()` for autocomplete.
+- **`emit_widget`** → `pi.registerTool()` — kept only if a widget-shaped output is still useful once there is no browser to render it in; open question, not decided.
+- **process persistence** → pi's RPC mode itself: one warm process, JSONL over stdin/stdout.
+
+**Trade-off, explicit and accepted**: this drops the original requirement of "a web UI reachable from any device on the tailnet via browser." Access becomes RPC/CLI behind the tailnet — a phone needs an SSH/terminal client, not a browser tab with rendered widgets. This is a deliberate scope cut, not an implementation detail.
+
+`feature/cockpit-skeleton` is unaffected by the pivot: still left as-is, no merge or cleanup obligation. No implementation of the pivot has started; this section records the architectural decision only.
 
 ## Pause (2026-08-09)
 
-**Not abandoned — paused pending a decision.** The build is further along than earlier wiki text suggested: real implementation exists on branch `feature/cockpit-skeleton` (never merged to `main`), through commit `08c6f73` ("ezperimental cockpit", 2026-08-09). Milestones reached on the branch: Hono server + HTMX UI + command handlers, `bank`/`router`/`turn` modules with tests, and three working edges — `retrieve` (direct `tb`/`ti` calls), `condense` (direct Ollama call), `runAgent` (a generalized `th` session). The branch is left as-is, no merge or cleanup obligation.
+**Superseded by Pivot above (2026-08-10).** Kept for the diagnosis history — the spawn-per-turn cost identified here is what the pivot eliminates by construction. **Not abandoned — paused pending a decision.** The build is further along than earlier wiki text suggested: real implementation exists on branch `feature/cockpit-skeleton` (never merged to `main`), through commit `08c6f73` ("ezperimental cockpit", 2026-08-09). Milestones reached on the branch: Hono server + HTMX UI + command handlers, `bank`/`router`/`turn` modules with tests, and three working edges — `retrieve` (direct `tb`/`ti` calls), `condense` (direct Ollama call), `runAgent` (a generalized `th` session). The branch is left as-is, no merge or cleanup obligation.
 
 **Why paused**: the first end-to-end test (against a cloud model, not the local target) came back slow and clunky. Diagnosed in conversation:
 - **Slow — mechanical, not a model problem.** `runAgent` does `spawnSandboxed` of a fresh `bun` process every turn (fork + bwrap + SDK boot + session init), paying that cost even on trivial exchanges, before the model answers at all.
@@ -36,7 +52,9 @@ Each turn runs this pipeline:
 
 Hot memory is short-term session state only. Long-term memory stays where it already lives: Third Brain in (retrieval via christopher), Third Brain out (consolidation via platone).
 
-## Components
+## Components (pre-pivot, superseded)
+
+Recorded as designed before the Pivot above; the Hono/HTMX backend and per-turn SDK spawn described here are dropped. Kept for what still transfers 1:1 onto pi extension hooks (see Pivot's mapping) — the bank format, the slash command list, and the amendments below are unaffected by the pivot.
 
 - **Backend** — TypeScript on Bun, **Hono** (settled at foundation: same dual-entrypoint pattern as `tb`/`ti`, see [style_dual_entrypoint](style_dual_entrypoint) — Fastify discarded).
 - **Agent** — the **pi SDK** (`@earendil-works/pi-coding-agent`), fresh session per turn, full toolset (skills, web, bash), wrapped in `th`'s sandbox. Model backend is Ollama.
