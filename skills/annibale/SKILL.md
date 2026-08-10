@@ -32,10 +32,10 @@ Issue every orchestration command through this skill's justfile. Never invoke th
 
 **Skills are not members.** `christopher`, `socrate`, `aristotele`, `omero`, `feynman`, etc. are system skills — never pass them as `--member` to the runner.
 
-To use a skill, instruct a real member in the task passed to `just run`:
+To use a skill, instruct a real member in the task passed to `just -f "path to justfile" run`:
 
 ```bash
-just run <member> "Use the christopher skill to retrieve what the Third Brain knows about: <topic>"
+just -f ".../annibale/justfile" run <member> "Use the christopher skill to retrieve what the Third Brain knows about: <topic>"
 ```
 
 If you have no suitable member, use a neutral tmp as a relay. Name the skill in the task, not in the member flag. That is what matters.
@@ -47,7 +47,7 @@ If you have no suitable member, use a neutral tmp as a relay. Name the skill in 
 First:
 
 ```bash
-just members
+just -f ".../annibale/justfile" members
 ```
 
 Classify results into three buckets:
@@ -74,7 +74,7 @@ I can proceed with neutral temporary members anyway — do you want me to?
 If the user wants to proceed immediately, create neutral tmps with this skill's justfile:
 
 ```bash
-just member-tmp <name> <hat-core> "<role>"
+just -f ".../annibale/justfile" member-tmp <name> <hat-core> "<role>"
 ```
 
 One member per needed hat, nothing more.
