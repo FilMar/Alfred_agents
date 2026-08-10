@@ -164,7 +164,7 @@ just info 12          # full details + change history
 just start 12         # start working (task becomes "active")
 just stop 12          # stop working
 just done 12          # complete the task
-just delete 12        # delete the task
+just delete 12        # reject the task: tag +rejected, drop all other tags (no delete)
 ```
 
 Add an annotation (note) to a task:

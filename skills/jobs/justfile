@@ -64,9 +64,9 @@ info id:
 done id:
     task {{id}} done
 
-# Delete a task
+# Reject a task: tag +rejected and drop all other tags (no delete)
 delete id:
-    task {{id}} delete
+    task {{id}} modify +rejected -next -waiting -someday -routine -focus -execute -reflect -rest -emotion -cura -amministrazione -personale -lavoro -idea
 
 # Start working on a task
 start id:
