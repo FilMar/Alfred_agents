@@ -1,6 +1,7 @@
+import { spawn } from "node:child_process";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-export default function (pi) {
+export default function (pi: ExtensionAPI): void {
   pi.on("before_agent_start", async (event) => {
     if (!event.prompt?.trim()) return;
 
@@ -17,7 +18,12 @@ export default function (pi) {
         const tiData = JSON.parse(tiResult.value);
         const tiFormatted = tiData
           .slice(0, 3)
-          .map((r) => `**If**: ${r.if || "—"}\n**Do**: ${r.do || "—"}${r.tags?.length ? `\nTags: ${r.tags.join(", ")}` : ""}`)
+          .map((r: { if?: string; do?: string; tags?: string[] }) => {
+            const ifPart = r.if || "—";
+            const doPart = r.do || "—";
+            const tags = r.tags?.length ? `\nTags: ${r.tags.join(", ")}` : "";
+            return `**If**: ${ifPart}\n**Do**: ${doPart}${tags}`;
+          })
           .join("\n\n");
         context += `## Third Identity (ti) matches\n\n${tiFormatted}\n\n`;
       } catch {
@@ -31,7 +37,7 @@ export default function (pi) {
         const tbData = JSON.parse(tbResult.value);
         const tbFormatted = tbData
           .slice(0, 5)
-          .map((r) => {
+          .map((r: { note?: { what?: string; why?: string; tags?: string[]; kind?: string }; what?: string; why?: string; kind?: string }) => {
             const what = r.note?.what || r.what || "—";
             const why = r.note?.why || r.why || "—";
             const tags = r.note?.tags?.length ? `\nTags: ${r.note.tags.join(", ")}` : "";
@@ -59,30 +65,33 @@ export default function (pi) {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
-async function execSearch(cmd, query, opts = {}) {
+async function execSearch(
+  cmd: string,
+  query: string,
+  opts: { limit?: number; minScore?: number; depth?: number } = {},
+): Promise<string> {
   const args = [query, "--limit", String(opts.limit ?? 5), "--min-score", String(opts.minScore ?? 0.6)];
   if (opts.depth) args.push("--depth", String(opts.depth));
 
   try {
     const { stdout } = await runCommand(cmd, args);
     return stdout.trim();
-  } catch (err) {
+  } catch {
     return "";
   }
 }
 
-function runCommand(cmd, args) {
+function runCommand(cmd: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
-    const { spawn } = require("node:child_process");
     const child = spawn(cmd, args, { shell: false });
 
     let stdout = "";
     let stderr = "";
 
-    child.stdout.on("data", (d) => (stdout += d));
-    child.stderr.on("data", (d) => (stderr += d));
+    child.stdout.on("data", (d: Buffer) => (stdout += d));
+    child.stderr.on("data", (d: Buffer) => (stderr += d));
 
-    child.on("close", (code) => {
+    child.on("close", (code: number | null) => {
       if (code === 0) resolve({ stdout, stderr });
       else reject(new Error(`exit ${code}: ${stderr}`));
     });
