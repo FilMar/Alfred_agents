@@ -12,10 +12,10 @@ guard := justfile_directory() / "scripts/guard.sh"
 default:
     @just --list
 
-# Search the Third Brain.
-search query *FLAGS:
-    @"{{guard}}" 'Usage: just search "<query>" [tb flags] — the query is the first positional argument' "$1"
-    @tb search "$1" {{FLAGS}}
+# Search the Third Brain. Drops results below min_score (default 0.6).
+search query min_score="0.6" *FLAGS:
+    @"{{guard}}" 'Usage: just search "<query>" [min_score] [tb flags] — the query is the first positional argument' "$1"
+    @tb search "$1" --min-score "{{min_score}}" {{FLAGS}}
 
 # Browse notes by kind, date, etc.
 browse *FLAGS:

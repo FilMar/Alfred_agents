@@ -59,7 +59,7 @@ The test: **can you phrase it so that doing it and not doing it look different?*
 All recipes take **positional args** in the order shown — never `--flags`. A flag-style or `NAME=value` argument aborts with the correct usage.
 
 ```bash
-pi-just mose search "<draft context>" [limit]      # default limit 5
+pi-just mose search "<draft context>" [limit] [min_score]   # default limit 5, min_score 0.6
 pi-just mose add "<context>" "<action>" ["tag1,tag2"]
 pi-just mose append-do <id> "<new action>"
 pi-just mose list ["tag1,tag2"]                    # all rules, optionally filtered by tags

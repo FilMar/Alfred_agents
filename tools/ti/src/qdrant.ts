@@ -18,7 +18,10 @@ export async function upsertPoint(id: string, vector: number[], payload: any): P
   });
 }
 
-export async function queryPoints(vector: number[], options: { limit?: number; filter?: any }): Promise<any> {
+export async function queryPoints(
+  vector: number[],
+  options: { limit?: number; filter?: any; score_threshold?: number },
+): Promise<any> {
   return qdrantClient.request("POST", "/collections/pi_identity/points/query", {
     query: vector,
     with_payload: true,

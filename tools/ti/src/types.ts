@@ -9,6 +9,8 @@ export interface IdentityEntry {
 export interface SearchOptions {
   limit?: number;
   tags?: string[];
+  /** Minimum score (0-1) to keep a result. No default: no filter. */
+  min_score?: number;
 }
 
 /** Normalizza una lista di tag: split su virgola, trim, rimuove vuoti. */

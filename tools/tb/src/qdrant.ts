@@ -258,6 +258,7 @@ export async function search(vector: number[], options: SearchOptions = {}): Pro
         limit: options.limit ?? 10,
         with_payload: true,
         ...(filter && { filter }),
+        ...(options.min_score !== undefined && { score_threshold: options.min_score }),
       },
     );
   } else {
@@ -270,6 +271,7 @@ export async function search(vector: number[], options: SearchOptions = {}): Pro
         limit: options.limit ?? 10,
         with_payload: true,
         ...(filter && { filter }),
+        ...(options.min_score !== undefined && { score_threshold: options.min_score }),
       },
     );
   }

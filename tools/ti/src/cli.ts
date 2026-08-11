@@ -67,11 +67,13 @@ program
   .description("Semantic search for context rules")
   .option("--limit <n>", "Maximum number of results", "10")
   .option("--tags <tag>", "Filter by tag (repeatable)", collect, [] as string[])
+  .option("--min-score <n>", "Minimum similarity score (0-1) to keep a result")
   .action(async (query: string, opts) => {
     await requireServices({ needsEmbedding: true });
     const results = await identity.searchEntries(query, {
       limit: parseInt(opts.limit, 10),
       tags: opts.tags.length ? normalizeTags(opts.tags) : undefined,
+      min_score: opts.minScore !== undefined ? parseFloat(opts.minScore) : undefined,
     });
     out(results);
   });

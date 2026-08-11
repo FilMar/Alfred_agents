@@ -40,7 +40,11 @@ export async function searchEntries(query: string, options: SearchOptions): Prom
   const vector = data.embeddings[0];
   
   const filter = options.tags?.length ? { must: [{ key: "tags", match: { any: options.tags } }] } : undefined;
-  const res = await qdrant.queryPoints(vector, { limit: options.limit ?? 10, filter });
+  const res = await qdrant.queryPoints(vector, {
+    limit: options.limit ?? 10,
+    filter,
+    ...(options.min_score !== undefined && { score_threshold: options.min_score }),
+  });
 
   return (res.result?.points ?? []).map((hit: any) => ({
     id: hit.id,

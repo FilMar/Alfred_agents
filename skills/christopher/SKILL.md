@@ -16,7 +16,7 @@ All commands are issued through this skill's justfile. Never invoke the memory C
 ## Available recipes
 
 ```bash
-pi-just christopher search "<query>" [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--evidence-only] [--include-hubs]
+pi-just christopher search "<query>" [min_score] [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--evidence-only] [--include-hubs]
 pi-just christopher browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
 pi-just christopher random                        # random note — for unguided lateral exploration
 pi-just christopher tags                          # list tags by frequency — maps the conceptual territory
@@ -34,6 +34,7 @@ pi-just christopher tags                          # list tags by frequency — m
 
 Do not limit yourself to a single search. Vary the parameters if the first attempt returns little. Use `pi-just christopher tags` to understand what tags exist before filtering. Use `pi-just christopher random` for lateral exploration if the query finds nothing relevant.
 
+- **`min_score`**: drops results with score below this value. Default `0.6`. Lower it (or pass `0`) when a query is broad and returns too little.
 - **`--depth 1` or `--depth 2`**: expands results to concepts connected via refs. Always use at least `--depth 1` — connected knowledge is often more valuable than the direct match.
 - **`--hybrid`**: improves search on queries with specific technical terms, proper nouns, or identifiers.
 - **`--evidence-only`**: restricts to facts only (`dato`) — useful if you want only what is verified, not intuitions or tensions.

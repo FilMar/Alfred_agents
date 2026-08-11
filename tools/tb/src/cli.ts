@@ -180,6 +180,7 @@ program
   .option("--kind <kind>", "Filter by semantic type (repeatable)", collect, [] as string[])
   .option("--evidence-only", "Restringe ai tipi evidence-oriented")
   .option("--include-hubs", "Includi note di tipo indice nella ricerca")
+  .option("--min-score <n>", "Minimum similarity score (0-1) to keep a result")
   .action(async (query: string, opts) => {
     await requireServices({ needsEmbedding: true });
 
@@ -191,6 +192,7 @@ program
       kind: opts.kind.length ? (opts.kind as NoteType[]) : undefined,
       evidence_only: opts.evidenceOnly ?? false,
       include_hubs: opts.includeHubs ?? false,
+      min_score: opts.minScore !== undefined ? parseFloat(opts.minScore) : undefined,
     };
 
     const results = await searchNotes(query, options);

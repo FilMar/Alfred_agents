@@ -104,6 +104,8 @@ export interface SearchOptions {
   query_text?: string;
   /** Se true, include le note kind:"indice" nella ricerca. Default: false (escluse). */
   include_hubs?: boolean;
+  /** Score minimo (0-1) per includere un risultato. Nessun default: nessun filtro. */
+  min_score?: number;
 }
 
 export interface Citation {
