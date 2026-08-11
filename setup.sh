@@ -48,6 +48,19 @@ link "$REPO/tools/tb/src/cli.ts"  "$HOME/.local/bin/tb"  "~/.local/bin/tb"
 link "$REPO/tools/th/src/cli.ts"  "$HOME/.local/bin/th"  "~/.local/bin/th"
 link "$REPO/tools/ti/src/cli.ts"  "$HOME/.local/bin/ti"  "~/.local/bin/ti"
 
+# --- tb_ti extension (claude hook + pi extension) ---
+if command -v claude &>/dev/null || command -v pi &>/dev/null; then
+    echo "tb_ti extension"
+    if command -v claude &>/dev/null; then
+        mkdir -p "$CLAUDE/hooks"
+        link "$REPO/extensions/tb_ti/claude.sh" "$CLAUDE/hooks/inject-ti-tb-context.sh" "~/.claude/hooks/inject-ti-tb-context.sh"
+    fi
+    if command -v pi &>/dev/null; then
+        mkdir -p "$PI/extensions"
+        link "$REPO/extensions/tb_ti/pi.ts" "$PI/extensions/tb_ti.ts" "~/.pi/agent/extensions/tb_ti.ts"
+    fi
+fi
+
 # --- systemd user services (tb, ti HTTP API) ---
 echo "systemd user services (tb, ti)"
 mkdir -p "$HOME/.config/systemd/user"
