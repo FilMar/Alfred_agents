@@ -46,3 +46,36 @@ adjust-rent FULL_AMOUNT REDUCTION SINCE:
 [no-cd]
 split-selftransfer AMOUNT INVEST MATCH_TEXT="Filippo Mariani" INVEST_CATEGORY="investimenti" EXTRA_MATCH="":
     uv run {{gen}}/scripts/split_selftransfer.py {{quote(AMOUNT)}} {{quote(INVEST)}} {{quote(MATCH_TEXT)}} {{quote(INVEST_CATEGORY)}} {{quote(EXTRA_MATCH)}}
+
+# Terminal line chart of the monthly total for one category or "totale". Quick look, no atlante needed.
+[no-cd]
+plot TARGET YEARS="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    root="${ESSAYS_ROOT:-$HOME/git_projects/essays}"
+    expr="true"
+    if [ "{{TARGET}}" != "totale" ]; then
+        expr="category eq \"{{TARGET}}\""
+    fi
+    if [ -n "{{YEARS}}" ]; then
+        years_list=$(echo "{{YEARS}}" | awk -F, '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i<NF?",":"")}')
+        if [ "$expr" = "true" ]; then
+            expr="source_year in [$years_list]"
+        else
+            expr="$expr && source_year in [$years_list]"
+        fi
+    fi
+    xan filter "$expr" "$root/.bank.csv" | xan plot -LT date amount -g months
+
+# Terminal sparkline of total spending per category, one line each. Quick breakdown, no atlante needed.
+[no-cd]
+categories YEARS="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    root="${ESSAYS_ROOT:-$HOME/git_projects/essays}"
+    if [ -n "{{YEARS}}" ]; then
+        years_list=$(echo "{{YEARS}}" | awk -F, '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i<NF?",":"")}')
+        xan filter "source_year in [$years_list]" "$root/.bank.csv" | xan spark amount -g category
+    else
+        xan spark amount -g category "$root/.bank.csv"
+    fi

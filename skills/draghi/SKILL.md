@@ -66,6 +66,18 @@ income), `category`, `description`, `description_full`, `source_year`.
    Each writes a JSON file with `labels` and `values` arrays, ready for
    atlante's `bar` or `line` recipe. Read the file, then call atlante.
 
+5b. **Quick terminal preview, no atlante needed.** When the user just wants
+   a fast look, right after an import or mid-conversation:
+   ```
+   pi-just draghi plot <category|totale> [years]
+   pi-just draghi categories [years]
+   ```
+   `plot` draws a line chart of the monthly total straight in the
+   terminal. `categories` draws one sparkline per category, for a
+   spending breakdown at a glance. Both filter directly on `.bank.csv`
+   with `xan` — use these instead of atlante when the user does not need
+   a shareable picture.
+
 6. **Adjust recurring rent for a roommate paying cash.** When part of a
    rent row is covered off-ledger (e.g. a roommate pays their share in
    cash), reduce the recorded amount:
