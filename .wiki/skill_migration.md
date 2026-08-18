@@ -50,10 +50,15 @@ No justfile, nothing to migrate: `piano`, `omero`.
 
 ## After the fleet
 
-- [ ] `alfred.md` — replace `pi-just` references.
-- [ ] `CLAUDE.md` (global `~/.claude/CLAUDE.md` and project) — quick-lookup lines, roster line.
-- [ ] Dotfiles — remove the `pi-just` shell function and `just` from skill docs.
-- [ ] `ti` — rewrite the justfile-era rules (via mose, user confirms).
+- [x] `alfred.md` — quick-lookups now call `tb`/`ti` directly; roster via `scripts/roster.py`; "justfiles" dropped from the public-artifact list (2026-08-18). `~/.claude/CLAUDE.md` is a symlink to `alfred.md`, so it is covered by the same edit.
+- [x] `CLAUDE.md` (project) — checked clean, no justfile references.
+- [x] Dotfiles — `pi-just` removed by the user (2026-08-18).
+- [x] `ti` — 10 justfile-era rules found (the tasklist said two): 3 deleted
+  without replacement (defend-the-layer, pure-CLI-from-scripts, just
+  parsing workaround for `gh api`), 7 rewritten to the direct-CLI +
+  scripts convention via mose (2026-08-18). Store has zero
+  justfile-tagged rules left. Known CLI gap: `ti list` caps at 10 rows
+  with no flag to page — inventory needed `ti search` sweeps.
 - [x] `.wiki/` — this page, [skill_pattern](skill_pattern), [agenti](agenti) roster command updated 2026-08-18; `th_cli` and `architettura` checked clean.
 
 ## Next pass (planned, not started): router SKILL.md
