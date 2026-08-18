@@ -80,16 +80,14 @@ the whole audit; nothing else in this skill matters more.
 
 ### Migrate a skill off its justfile
 
-Old skills wrap their CLI calls in a `justfile`. That layer is retired.
-Follow `references/MIGRATION.md` step by step.
+The justfile layer is retired. Follow `references/MIGRATION.md` step by
+step.
 
 ### Package a skill
 
 ```
 python3 scripts/package_skill.py <skill_path> [<output_dir>]
 ```
-
-This validates the frontmatter, then zips the folder into a `.skill` file.
 
 ### Writing the description
 
@@ -160,10 +158,9 @@ type, and skills are always on the public side of it.
 `SKILL.md` calls the tools it needs directly — `tb`, `ti`, `th`, `gh`,
 whatever the skill is about. The prose and the CLI meet with no layer in
 between: one source of truth, nothing to keep in sync. The CLI's
-`--help` is the authority on flag syntax; the skill is the authority on
-procedure. When a documented command fails or a flag is in doubt, read
-`<cli> --help` before trying variants — every skill states this once
-near its commands.
+`--help` is the authority on syntax; the skill, on procedure. When a
+command fails or a flag is in doubt, read `--help` before trying
+variants — each skill states this once near its commands.
 
 Deterministic sequences are the one exception. When a step is multi-step,
 fixed-order, and reused the same way every run, it becomes one executable
