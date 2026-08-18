@@ -8,6 +8,10 @@ updated: 2026-08-18
 
 ## Log
 
+## [2026-08-18] revision | Fleet migration complete — 18 skills off justfiles
+
+All 18 skills in [skill_migration](skill_migration) migrated and committed, one commit per skill. Fleet-wide lint clean (21/21 OK), zero justfiles and zero guard.sh left under skills/. Clio's systemd service (installed and in-repo template) repointed to scripts/backup_all.sh; timer stays disabled. Still open, deliberately deferred: alfred.md, CLAUDE.md quick-lookups, dotfiles pi-just removal, ti rule rewrites.
+
 ## [2026-08-18] ingest | Skill convention: justfile layer retired
 
 - Rewrote [skill_pattern](skill_pattern): SKILL.md calls the CLI directly; deterministic multi-step sequences live in `scripts/` (executable, `# desc:` header); deep dives in `references/`. Efesto owns and lints the convention.
