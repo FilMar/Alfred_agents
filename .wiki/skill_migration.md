@@ -56,6 +56,32 @@ No justfile, nothing to migrate: `piano`, `omero`.
 - [ ] `ti` — rewrite the justfile-era rules (via mose, user confirms).
 - [x] `.wiki/` — this page, [skill_pattern](skill_pattern), [agenti](agenti) roster command updated 2026-08-18; `th_cli` and `architettura` checked clean.
 
+## Next pass (planned, not started): router SKILL.md
+
+Decided 2026-08-18, deliberately deferred until the direct-CLI convention
+has seen real use. Goal: aggressive progressive disclosure — SKILL.md
+becomes a small router (~50-60 lines) that composes per task direction.
+
+Design rules agreed:
+
+1. The router holds only three things: identity + trigger (frontmatter),
+   the invariants valid on every run (hard behaviour contracts), and a
+   dispatch table `task direction → references/<task>.md`. No procedure
+   content. Invariants live only in the router, never copied into branch
+   files.
+2. Dispatch lines are pointers, not summaries — a line says when to read
+   the branch file, never how to do the task, or the model acts on the
+   summary and skips the file.
+3. Split by task direction, not by size. Single-procedure skills stay
+   one file (polo, ulisse, christopher, ...). The ~60-line cap applies
+   only to skills that have `references/` branches.
+
+Work list when it starts: efesto first (rule 1 rewrite + lint: cap for
+router skills, dead-reference check — a references/ file never pointed
+from SKILL.md). Then the multi-direction skills: jobs, annibale, fury,
+aristotele, platone, linus, piano, vinci, indiana, mose; borderline ones
+decided in audit.
+
 ## Cross-references
 
 - [skill_pattern](skill_pattern) — the target convention
