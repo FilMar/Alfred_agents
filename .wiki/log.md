@@ -4,9 +4,16 @@
 
 tags: [log, storico]
 sources: []
-updated: 2026-07-02
+updated: 2026-08-18
 
 ## Log
+
+## [2026-08-18] ingest | Skill convention: justfile layer retired
+
+- Rewrote [skill_pattern](skill_pattern): SKILL.md calls the CLI directly; deterministic multi-step sequences live in `scripts/` (executable, `# desc:` header); deep dives in `references/`. Efesto owns and lints the convention.
+- New page [skill_migration](skill_migration): ordered tasklist of the 18 skills still on justfiles (christopher and mose first — CLAUDE.md quick-lookups), plus post-fleet cleanup (alfred.md, CLAUDE.md, dotfiles, ti rules).
+- [agenti](agenti): roster command updated to `python3 skills/efesto/scripts/roster.py`.
+- [index](index): skill_pattern row updated, skill_migration row added.
 
 ## [2026-08-10] revision | Stateless Cockpit pivots to a pi extension — web UI dropped
 

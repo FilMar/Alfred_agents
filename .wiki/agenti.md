@@ -23,7 +23,7 @@ A `SKILL.md` file contains:
 The roster is deliberately **not** tabled here — a copy in the wiki goes stale (a previous table claimed 14 skills while `skills/` held 17). The single source of truth is the filesystem; print it on demand:
 
 ```
-just -f skills/efesto/justfile roster
+python3 skills/efesto/scripts/roster.py
 ```
 
 One line per skill (name + first sentence of its `SKILL.md` description), derived from the frontmatter at print time — renames and additions show up automatically.
