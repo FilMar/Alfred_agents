@@ -1,6 +1,7 @@
-"""Print the skill roster with full descriptions, read live from disk.
-
-Scans every <skills_root>/*/SKILL.md and prints one block per skill: name,
+#!/usr/bin/env python3
+# desc: Print every skill's name and full description, read live from disk.
+# usage: list_skills.py [skills-root]
+"""Scans every <skills_root>/*/SKILL.md and prints one block per skill: name,
 then the full `description` field. Nothing is pre-saved — add or rename a
 skill and this list follows.
 """
