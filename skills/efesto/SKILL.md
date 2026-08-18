@@ -159,7 +159,11 @@ type, and skills are always on the public side of it.
 
 `SKILL.md` calls the tools it needs directly — `tb`, `ti`, `th`, `gh`,
 whatever the skill is about. The prose and the CLI meet with no layer in
-between: one source of truth, nothing to keep in sync.
+between: one source of truth, nothing to keep in sync. The CLI's
+`--help` is the authority on flag syntax; the skill is the authority on
+procedure. When a documented command fails or a flag is in doubt, read
+`<cli> --help` before trying variants — every skill states this once
+near its commands.
 
 Deterministic sequences are the one exception. When a step is multi-step,
 fixed-order, and reused the same way every run, it becomes one executable
@@ -194,7 +198,6 @@ read, not a grep.
 
 ## Communicating with the user
 
-People with very different backgrounds use this skill. Some are new to
-terminals, some are experienced developers. Write for the person in front
-of you. If you are not sure they know a term like "frontmatter" or
-"shebang", explain it in a short phrase.
+People with very different backgrounds use this skill. Write for the
+person in front of you. If you are not sure they know a term like
+"frontmatter" or "shebang", explain it in a short phrase.

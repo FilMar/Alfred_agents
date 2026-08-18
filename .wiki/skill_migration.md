@@ -65,10 +65,12 @@ becomes a small router (~50-60 lines) that composes per task direction.
 Design rules agreed:
 
 1. The router holds only three things: identity + trigger (frontmatter),
-   the invariants valid on every run (hard behaviour contracts), and a
-   dispatch table `task direction → references/<task>.md`. No procedure
-   content. Invariants live only in the router, never copied into branch
-   files.
+   the invariants valid on every run (hard behaviour contracts, e.g.
+   "ermes never sends", and the `--help` rule: the CLI's `--help` is the
+   authority on flag syntax, the skill on procedure — read it before
+   trying variants when a command fails), and a dispatch table
+   `task direction → references/<task>.md`. No procedure content.
+   Invariants live only in the router, never copied into branch files.
 2. Dispatch lines are pointers, not summaries — a line says when to read
    the branch file, never how to do the task, or the model acts on the
    summary and skips the file.
