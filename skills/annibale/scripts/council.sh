@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Flow harness: Council of Experts.
+# desc: Flow harness for the Council of Experts: parallel member fan-out, polling, validation, synthesis.
+# usage: council.sh --task "<problem>" --members "<m1,m2,m3>" [flags — see references/council.md]
 #
 # Code drives the phases; the AI reasons only inside member runs.
 # Annibale picks the roster and launches this script — it cannot skip

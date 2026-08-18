@@ -44,7 +44,7 @@ Proceed?
 Once the user confirms, run from the **project root**:
 
 ```bash
-skills/annibale/flows/council.sh \
+skills/annibale/scripts/council.sh \
   --task "<problem verbatim or refined>" \
   --members "knuth-black,jobs-yellow,turing-green" \
   [--rounds N]       # default 1; add rounds when first synthesis opens new tensions
@@ -71,7 +71,7 @@ Final synthesis goes to stdout. Per-member logs and outputs are in `/tmp/th-flow
 If a round fails or the process crashes, relaunch with the same `--run-id`. Completed steps are skipped; failed or missing ones are re-executed.
 
 ```bash
-skills/annibale/flows/council.sh \
+skills/annibale/scripts/council.sh \
   --task "<same problem>" \
   --members "<same members>" \
   --run-id council-20260702-143021   # printed by the first run

@@ -91,17 +91,17 @@ Flows available in the annibale skill:
 
 | File | Nature | How to use |
 |---|---|---|
-| `flows/debate.md` | Interactive, Socratic | Read it and follow the steps — the user is in the loop between phases |
-| `flows/tdd-coding.md` | Sequential, code-first | Read it and follow the steps |
-| `flows/council.md` | Harness-driven | Read it for Phase 0 (roster selection), then launch `flows/council.sh` |
+| `references/debate.md` | Interactive, Socratic | Read it and follow the steps — the user is in the loop between phases |
+| `references/tdd-coding.md` | Sequential, code-first | Read it and follow the steps |
+| `references/council.md` | Harness-driven | Read it for Phase 0 (roster selection), then launch `scripts/council.sh` |
 
 For `council`: your cognitive job is Phase 0 only — who sits at the table and with what problem. Then launch it:
 
 ```bash
-flows/council.sh --task "<problem>" --members "<member1,member2,member3>"
+scripts/council.sh --task "<problem>" --members "<member1,member2,member3>"
 ```
 
-The script drives everything else: parallel fan-out, polling, validation, synthesis. Do not re-implement the fan-out manually. See `flows/council.md` for the full flag list and the resume workflow.
+The script drives everything else: parallel fan-out, polling, validation, synthesis. Do not re-implement the fan-out manually. See `references/council.md` for the full flag list and the resume workflow.
 
 To list available flows:
 
