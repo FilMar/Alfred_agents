@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""
-Quick validation script for skills - minimal version
-"""
+# desc: Validate a skill's SKILL.md frontmatter: YAML shape, name, description, allowed keys.
+# usage: validate.py <skill-dir>
+"""Frontmatter validation for skills. Also used as a library by lint and package."""
 
 import sys
 import os
@@ -95,7 +95,7 @@ def validate_skill(skill_path):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python quick_validate.py <skill_directory>")
+        print("usage: validate.py <skill-dir>")
         sys.exit(1)
     
     valid, message = validate_skill(sys.argv[1])

@@ -1,14 +1,21 @@
 ---
 name: efesto
-description: "Use this skill to create, write, review, or fix a skill (SKILL.md + justfile) in this repo. Covers: turning a workflow or idea into a new skill; auditing or improving an existing skill; checking a skill against the three core rules — predictability, English-only easy-English text, and the justfile convention; running a skill for a real test; packaging a skill to share. If the user is talking about a skill as something to make, fix, review, standardize, test, or package — use this skill."
-compatibility: "This skill's own justfile (skills/efesto/justfile). SKILL.md never calls a script or `th` directly — only `just` recipes from that justfile."
+description: "Use this skill to create, write, review, or fix a skill (SKILL.md + scripts/ + references/) in this repo. Covers: turning a workflow or idea into a new skill; auditing or improving an existing skill; checking a skill against the three core rules — predictability, English-only easy-English text, and the direct-CLI scripts convention; migrating a skill off its old justfile; running a skill for a real test; packaging a skill to share. If the user is talking about a skill as something to make, fix, review, standardize, migrate, test, or package — use this skill."
 ---
 
 # Efesto
 
-Efesto creates and audits skills. A skill is a `SKILL.md` (the instructions)
-plus, if it wraps a CLI or a script, a `justfile` (the only door to that
-CLI or script).
+Efesto creates and audits skills. A skill is a folder with three parts:
+
+- `SKILL.md` — the instructions. It is a router: it keeps only what every
+  run needs, and it calls the real CLI directly.
+- `scripts/` — optional. One executable file per deterministic multi-step
+  sequence. Every script describes itself with a `# desc:` header.
+- `references/` — optional. One file per deep-dive topic. `SKILL.md`
+  links to them; read one only when the task needs it.
+
+Commands below use paths relative to this skill's folder. Resolve them
+against the base directory shown when the skill loads.
 
 Every skill Efesto touches — new or old — must pass three rules. They are
 the whole audit; nothing else in this skill matters more.
@@ -24,7 +31,7 @@ the whole audit; nothing else in this skill matters more.
    Don't make the user repeat what already happened.
 2. **Check for an existing skill first.**
    ```
-   pi-just efesto roster
+   python3 scripts/roster.py
    ```
    A duplicate skill is the same failure mode as a duplicate rule inside
    one skill. Say it once. Extend the existing skill, or point to it,
@@ -33,40 +40,56 @@ the whole audit; nothing else in this skill matters more.
    someone else has likely built it** (a language's test runner, a common
    CLI wrapper, a well-known workflow):
    ```
-   pi-just efesto search "<task keywords>"
-   pi-just efesto search-info <skill-name>
+   skills-cli search "<task keywords>"
+   skills-cli info <skill-name>
    ```
-   `search-info` prints the full `SKILL.md` of one registry result — read
-   it for the shape and the trigger phrasing, not to copy verbatim. This
-   step is inspiration, not obligation: skip it for anything narrow or
-   specific to this repo's own tools.
+   `info` prints the full `SKILL.md` of one registry result — read it for
+   the shape and the trigger phrasing, not to copy verbatim. Inspiration,
+   not obligation: skip it for anything narrow or repo-specific.
+   Research only — nothing gets installed.
 4. **Draft `SKILL.md`.** Frontmatter: `name`, `description` (the trigger —
-   see "Writing the description" below), `compatibility` if it wraps a
-   justfile. Body: the steps the agent follows, in order, each with a
-   clear completion criterion.
-5. **Draft the `justfile`, if needed.** Any time the skill would otherwise
-   call an external CLI or a script, wrap that call in a recipe instead.
-   `SKILL.md` then calls only `pi-just efesto <recipe>` — see Rule 3 below.
+   see "Writing the description" below). Body: the steps the agent
+   follows, in order, each with a clear completion criterion, calling the
+   real CLI directly. When a step needs long task-specific detail, move
+   that detail to a file under `references/` and link it from the step.
+5. **Draft `scripts/`, if needed.** Write a script for a sequence that is
+   multi-step, deterministic, and reused the same way every run. A single
+   CLI call stays as prose in `SKILL.md`. Follow the script contract in
+   Rule 3.
 6. **Run the audit** (Reference, below) against all three rules. Fix what
    fails.
 7. **Test it for real**:
    ```
-   pi-just efesto test-skill <skill_path> "<realistic task>"
+   scripts/test_skill.sh <skill_path> "<realistic task>"
    ```
-   This runs the skill in a throwaway `th` member, inside a sandbox — read
-   the note on `test-skill` in the Reference section before you run it, so
-   a sandbox limit doesn't get mistaken for a bug in the skill.
+   This runs the skill in a throwaway `th` member, inside a bwrap
+   sandbox: only the current directory, `~/.pi`, `~/.bun`, and `/tmp`
+   are writable. A write failure elsewhere is the sandbox at work, not a
+   bug in the skill.
 8. **Ask the user to look at the result** and tell you what's wrong. Fix,
    retest, repeat until they're satisfied.
 
 ### Improve an existing skill
 
-1. Read the current `SKILL.md` and `justfile` in full.
+1. Read the current `SKILL.md`, `scripts/` and `references/` in full.
 2. Run the audit against all three rules — this alone often finds most of
    what needs fixing.
 3. Add whatever the user is asking for, then re-run the audit — a fix for
    one rule can break another (e.g. a new example written in Italian).
-4. Test it for real, same as step 5 above.
+4. Test it for real, same as step 7 above.
+
+### Migrate a skill off its justfile
+
+Old skills wrap their CLI calls in a `justfile`. That layer is retired.
+Follow `references/MIGRATION.md` step by step.
+
+### Package a skill
+
+```
+python3 scripts/package_skill.py <skill_path> [<output_dir>]
+```
+
+This validates the frontmatter, then zips the folder into a `.skill` file.
 
 ### Writing the description
 
@@ -88,15 +111,17 @@ the same output. Read the skill once for structure, once for prose, and
 check it against these failure modes:
 
 - **Sprawl** — the skill is too long, even if every line is true and
-  unique. Fix: move reference material the agent only needs *sometimes*
-  into a linked file under `references/`, and point to it from `SKILL.md`.
-  Keep in `SKILL.md` only what every run needs: the steps, and reference
+  unique. Fix: move material the agent only needs *sometimes* into a
+  linked file under `references/`, and point to it from `SKILL.md`. Keep
+  in `SKILL.md` only what every run needs: the steps, and reference
   every branch reads.
 - **Sediment** — old instructions nobody removed because deleting felt
   risky. Fix: for every line, ask "does this still bear on what the skill
   does?" — if not, delete it, don't soften it.
 - **Duplication** — the same rule or fact stated in more than one place.
   Fix: say it once, and point to that one place from everywhere else.
+  Script descriptions live in the `# desc:` headers — `SKILL.md` points
+  at the scripts, it does not re-describe them.
 - **No-op** — an instruction the model already follows by default, costing
   context for nothing (e.g. "be thorough" — the model already tries to
   be). Fix: cut it, or replace it with a sharper word (e.g. "exhaustive").
@@ -115,8 +140,8 @@ it when a term above needs the fuller definition, not by default.
 
 ### Rule 2 — English-only, easy English
 
-Every skill file (`SKILL.md`, `justfile` comments, scripts, commit
-messages) is written in English, easy-English style:
+Every skill file (`SKILL.md`, scripts, reference files, commit messages)
+is written in English, easy-English style:
 
 - Short sentences. One idea per sentence.
 - No subordinate clauses where two sentences would do.
@@ -126,71 +151,50 @@ messages) is written in English, easy-English style:
   script").
 - No idioms — they don't translate and they don't parse reliably.
 
-This applies to anything public or shareable: skills, justfiles, code,
-commit messages, READMEs. It does not apply to the Third Brain or personal
-notes, which stay in Italian — that split is by audience, not by file
+This applies to anything public or shareable. The Third Brain and
+personal notes stay in Italian — the split is by audience, not by file
 type, and skills are always on the public side of it.
 
-### Rule 3 — Skill vs justfile
+### Rule 3 — Direct CLI + scripts
 
-`SKILL.md` never calls an external CLI or a script directly — not `tb`,
-`ti`, `th`, `gh`, `himalaya`, `task`, `typst`, a bare `python3 script.py`,
-nothing. Every such call goes through a `just` recipe in the skill's own
-`justfile`. This keeps every CLI call in one place. That one place is
-easy to test and easy to guard, instead of loose commands scattered
-through the prose.
+`SKILL.md` calls the tools it needs directly — `tb`, `ti`, `th`, `gh`,
+whatever the skill is about. The prose and the CLI meet with no layer in
+between: one source of truth, nothing to keep in sync.
 
-**If no recipe fits what the skill needs to do, propose a new justfile
-recipe** — don't inline a workaround in `SKILL.md` to route around the
-gap. A missing recipe is a small, cheap fix; a direct CLI call in
-`SKILL.md` is a rule violation that will resurface at the next audit.
+Deterministic sequences are the one exception. When a step is multi-step,
+fixed-order, and reused the same way every run, it becomes one executable
+file under `scripts/`, and `SKILL.md` calls that file. Scripts call the
+pure CLI too.
 
-Check this automatically:
+The script contract:
+
+- executable, with a shebang line;
+- a `# desc: <one line>` header in the first 5 lines;
+- a `# usage: ...` header when it takes arguments;
+- bash scripts set `set -euo pipefail` and validate their arguments.
+
+The threshold cuts both ways: a sequence reused identically belongs in a
+script; a script that wraps a single command gets deleted and its command
+inlined in `SKILL.md`.
+
+The list of a skill's scripts is computed from the headers, so it cannot
+go stale. Check the contract with `lint`:
 
 ```
-pi-just efesto lint <skill_path>
-pi-just efesto lint-all [<dir>]
+scripts/list_scripts.sh <skill_path>          # list scripts + descriptions
+python3 scripts/lint_skill.py [<skill_path>]  # no arg: every skill in the repo
 ```
 
-`lint` reads every command inside a fenced code block in `SKILL.md` and
-flags:
-- an unknown recipe, or the wrong number of arguments for one,
-- a flag-style argument (`--x`) passed to a recipe that isn't variadic,
-- a bare CLI call that should go through a recipe (warning),
-- a recipe with fixed positional parameters but no `guard` line in its
-  body, when the skill has a `scripts/guard.sh` (warning).
-
-`lint` cannot see rule 1 or rule 2 — those need a read, not a grep.
-
-## Reference: the justfile recipes
-
-- **`roster`** — list every skill under the skills root: name and the
-  first sentence of its description, read fresh from the filesystem each
-  time.
-- **`validate <skill_path>`** — check `SKILL.md`'s frontmatter shape: valid
-  YAML, `name` present and kebab-case, `description` present and under the
-  length limit, no stray frontmatter keys.
-- **`test-skill <skill_path> <task>`** — run the skill for real. It creates
-  a throwaway `th` member, runs your task against it with an instruction
-  to use the skill, then deletes the member. **This runs inside a bwrap
-  sandbox**: only the current directory, `~/.pi`, `~/.bun`, and `/tmp` are
-  writable — everywhere else is read-only by design. If the test run fails
-  to write somewhere else, that is the sandbox, not a bug in the skill —
-  the recipe's task text already tells the member this, but keep it in
-  mind when you read the result.
-- **`lint <skill_path>`** / **`lint-all [<dir>]`** — Rule 3, see above.
-- **`search <query>`** — search the public `skills-cli` registry for
-  existing skills matching a query. Research only — it never installs
-  anything.
-- **`search-info <skill_name>`** — print one registry skill's metadata and
-  full `SKILL.md`, fetched from its source repo. Read it for shape and
-  phrasing, not to copy verbatim.
-- **`package <skill_path> [<output_dir>]`** — zip the skill folder into a
-  `.skill` file for distribution, after running `validate` on it.
+`lint` flags a leftover `justfile`, a `just`/`pi-just` call in a code
+block, a script with no `# desc:` header, a `SKILL.md` reference to a
+missing script, a script `SKILL.md` never mentions, invalid frontmatter
+(via `validate.py`), and a `SKILL.md` long enough to need a
+`references/` split. `lint` cannot see rule 1 or rule 2 — those need a
+read, not a grep.
 
 ## Communicating with the user
 
 People with very different backgrounds use this skill. Some are new to
 terminals, some are experienced developers. Write for the person in front
 of you. If you are not sure they know a term like "frontmatter" or
-"recipe", explain it in a short phrase.
+"shebang", explain it in a short phrase.

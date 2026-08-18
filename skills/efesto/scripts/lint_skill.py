@@ -1,168 +1,129 @@
 #!/usr/bin/env python3
-"""Lint a skill: every `just` invocation in SKILL.md must match the justfile.
+# desc: Lint a skill: frontmatter shape plus the direct-CLI scripts convention (rule 3).
+"""Lint a skill against the structure rules.
 
 Checks:
-  ERROR  unknown recipe
-  ERROR  flag-style arg (--x) passed to a recipe without a variadic parameter
-  ERROR  too many args for a fixed-arity recipe / too few required args
-  WARN   direct CLI call (tb, ti, th, himalaya, gh, ...) inside a code block
-  WARN   recipe uses fixed-arity positional params but has no guard.sh line
+  ERROR  SKILL.md missing, or frontmatter invalid (see validate.py)
+  ERROR  legacy justfile present in the skill folder
+  ERROR  `just` or `pi-just` call inside a SKILL.md code block
+  ERROR  a script lacks a `# desc:` header in its first 5 lines
+  ERROR  SKILL.md references a script that is not in scripts/
+  WARN   a script is never mentioned in SKILL.md (dead script?)
+  WARN   a script is not executable
+  WARN   scripts/guard.sh present (justfile-era leftover)
+  WARN   SKILL.md is over 200 lines (move detail to references/)
 
-Doc-style lines (containing <placeholders> or [optional] tokens) are checked
-for recipe existence and the flag rule only — argument counting is skipped.
-
-Usage: lint_skill.py <skill-dir> [<skill-dir> ...]
+Usage: lint_skill.py [<skill-dir> ...]
+No args: lint every skill under this repo's skills root.
 Exit: 0 clean, 1 errors found.
 """
-import json
+import os
 import re
 import shlex
-import subprocess
 import sys
 from pathlib import Path
 
-WRAPPED_CLIS = {"tb", "ti", "th", "himalaya", "task", "go-task", "gh", "typst"}
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from validate import validate_skill
 
-
-def load_recipes(justfile: Path):
-    out = subprocess.run(
-        ["just", "-f", str(justfile), "--dump", "--dump-format", "json"],
-        capture_output=True, text=True,
-    )
-    if out.returncode != 0:
-        return None, f"justfile does not parse: {out.stderr.strip()}"
-    data = json.loads(out.stdout)
-    recipes = {}
-    for name, r in data.get("recipes", {}).items():
-        params = r.get("parameters", [])
-        recipes[name] = {
-            "min": sum(1 for p in params if p.get("default") is None
-                       and p.get("kind") == "singular")
-                 + sum(1 for p in params if p.get("kind") == "plus"),
-            "max": None if any(p.get("kind") in ("star", "plus") for p in params)
-                   else len(params),
-            "variadic": any(p.get("kind") in ("star", "plus") for p in params),
-            "params": params,
-            "body": r.get("body", []),
-        }
-    return recipes, None
+SKILLS_ROOT = Path(__file__).resolve().parents[2]
+MAX_SKILL_MD_LINES = 200
+DESC_HEADER_LINES = 5
+SKIP_SCRIPT_FILES = {"__init__.py"}
 
 
 def iter_command_lines(skill_md: str):
     """Yield (lineno, command) for lines inside fenced code blocks."""
     in_fence = False
-    buf, buf_start = "", 0
     for i, raw in enumerate(skill_md.split("\n"), 1):
-        line = raw.rstrip()
-        if line.lstrip().startswith("```"):
+        line = raw.strip()
+        if line.startswith("```"):
             in_fence = not in_fence
             continue
-        if not in_fence:
-            continue
-        stripped = line.strip()
-        if buf:
-            buf += " " + stripped.rstrip("\\").strip()
-            if not stripped.endswith("\\"):
-                yield buf_start, buf
-                buf = ""
-            continue
-        if stripped.endswith("\\"):
-            buf, buf_start = stripped.rstrip("\\").strip(), i
-            continue
-        if stripped:
-            yield i, stripped
+        if in_fence and line:
+            yield i, line
+
+
+def script_files(skill_dir: Path):
+    scripts_dir = skill_dir / "scripts"
+    if not scripts_dir.is_dir():
+        return []
+    return [
+        f for f in sorted(scripts_dir.iterdir())
+        if f.is_file() and f.name not in SKIP_SCRIPT_FILES
+    ]
+
+
+def has_desc_header(f: Path) -> bool:
+    try:
+        head = f.read_text(errors="replace").splitlines()[:DESC_HEADER_LINES]
+    except OSError:
+        return False
+    return any(line.startswith("# desc: ") for line in head)
 
 
 def lint(skill_dir: Path):
     errors, warnings = [], []
-    justfile = skill_dir / "justfile"
-    skill_md = skill_dir / "SKILL.md"
-    if not skill_md.exists():
+    skill_md_path = skill_dir / "SKILL.md"
+    if not skill_md_path.exists():
         return [f"{skill_dir}: no SKILL.md"], []
-    if not justfile.exists():
-        # Only a problem if SKILL.md references just recipes.
-        if re.search(r"^\s*just\s", skill_md.read_text(), re.M):
-            return [f"{skill_dir}: SKILL.md references `just` but there is no justfile"], []
-        return [], []
 
-    recipes, err = load_recipes(justfile)
-    if err:
-        return [f"{skill_dir}: {err}"], []
+    ok, msg = validate_skill(skill_dir)
+    if not ok:
+        errors.append(f"frontmatter: {msg}")
 
-    # guard.sh presence check for fixed-arity multi-param recipes
-    guard_expected = (skill_dir / "scripts" / "guard.sh").exists()
-    for name, r in recipes.items():
-        n_singular = sum(1 for p in r["params"] if p.get("kind") == "singular")
-        if n_singular >= 1 and not r["variadic"] and name != "default":
-            body_text = " ".join(str(x) for x in r["body"])
-            if guard_expected and "guard" not in body_text:
-                warnings.append(f"{justfile.name}: recipe `{name}` has positional params but no guard line")
+    if (skill_dir / "justfile").exists():
+        errors.append("legacy justfile present — migrate it (efesto references/MIGRATION.md)")
 
-    for lineno, cmd in iter_command_lines(skill_md.read_text()):
+    text = skill_md_path.read_text(encoding="utf-8")
+    if len(text.splitlines()) > MAX_SKILL_MD_LINES:
+        warnings.append(
+            f"SKILL.md is over {MAX_SKILL_MD_LINES} lines — move detail to references/"
+        )
+
+    for lineno, cmd in iter_command_lines(text):
         cmd = cmd.lstrip("$ ").split("#", 1)[0].strip()
-        if not cmd:
-            continue
         try:
             toks = shlex.split(cmd)
         except ValueError:
             continue
-        if not toks:
+        if toks and toks[0] in ("just", "pi-just"):
+            errors.append(
+                f"SKILL.md:{lineno}: `{toks[0]}` call — call the CLI directly or a script"
+            )
+
+    referenced = set(re.findall(r"scripts/([A-Za-z0-9_.-]+)", text))
+    scripts = script_files(skill_dir)
+    names = {f.name for f in scripts}
+    for name in sorted(referenced - names):
+        errors.append(f"SKILL.md references scripts/{name} but the file does not exist")
+
+    for f in scripts:
+        if f.name == "guard.sh":
+            warnings.append("scripts/guard.sh is a justfile-era leftover — delete it")
             continue
-        head = toks[0]
-        if head in WRAPPED_CLIS:
-            warnings.append(f"SKILL.md:{lineno}: direct CLI call `{cmd[:60]}` — should go through a recipe")
-            continue
-        if head != "just":
-            continue
-        args = toks[1:]
-        # strip -f/--justfile <path> (resolving cross-skill targets) and other options
-        target = recipes
-        while args and args[0].startswith("-"):
-            if args[0] in ("-f", "--justfile") and len(args) > 1:
-                jf = Path(args[1].replace("~", str(Path.home())))
-                candidates = [jf, skill_dir.parent / jf.name if jf.name == "justfile" else jf,
-                              skill_dir.parent.parent / jf]
-                # also try interpreting `skills/<name>/justfile` relative to the skills dir
-                if len(jf.parts) >= 2:
-                    candidates.append(skill_dir.parent / jf.parts[-2] / jf.parts[-1])
-                resolved = next((c for c in candidates if c.exists()), None)
-                if resolved and resolved != justfile:
-                    target, ferr = load_recipes(resolved)
-                    if ferr:
-                        target = None
-                args = args[2:]
-            else:
-                args = args[1:]
-        if not args or target is None:
-            continue
-        recipe, rargs = args[0], args[1:]
-        if re.search(r"[<>]", recipe):  # doc placeholder like `just <recipe> ...`
-            continue
-        if recipe not in target:
-            errors.append(f"SKILL.md:{lineno}: unknown recipe `{recipe}`")
-            continue
-        r = target[recipe]
-        flags = [a for a in rargs if a.startswith("--")]
-        if flags and not r["variadic"]:
-            errors.append(f"SKILL.md:{lineno}: flag-style arg {flags[0]} to fixed-arity recipe `{recipe}`")
-            continue
-        doc_style = any(re.search(r"[<\[\]>]", a) for a in rargs)
-        if doc_style or r["variadic"]:
-            continue
-        if r["max"] is not None and len(rargs) > r["max"]:
-            errors.append(f"SKILL.md:{lineno}: `{recipe}` takes at most {r['max']} args, got {len(rargs)}")
-        elif len(rargs) < r["min"]:
-            errors.append(f"SKILL.md:{lineno}: `{recipe}` needs at least {r['min']} args, got {len(rargs)}")
+        if not has_desc_header(f):
+            errors.append(
+                f"scripts/{f.name}: no `# desc:` header in the first {DESC_HEADER_LINES} lines"
+            )
+        if not os.access(f, os.X_OK):
+            warnings.append(f"scripts/{f.name}: not executable (chmod +x)")
+        if f.name not in text:
+            warnings.append(f"scripts/{f.name}: never mentioned in SKILL.md (dead script?)")
+
     return errors, warnings
 
 
 def main():
-    if len(sys.argv) < 2:
-        print(__doc__)
+    if len(sys.argv) > 1:
+        dirs = [Path(a).resolve() for a in sys.argv[1:]]
+    else:
+        dirs = [d for d in sorted(SKILLS_ROOT.iterdir()) if (d / "SKILL.md").exists()]
+    if not dirs:
+        print(f"no skills found under {SKILLS_ROOT}", file=sys.stderr)
         sys.exit(2)
     total_err = 0
-    for arg in sys.argv[1:]:
-        d = Path(arg)
+    for d in dirs:
         errors, warnings = lint(d)
         if errors or warnings:
             print(f"== {d.name}")
