@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# desc: Filter SVILUPPO items by status, reading gh project item-list JSON from stdin.
+# usage: proj_by_status.py <status>
 """Filter SVILUPPO items by status. Takes status as argv[1]."""
 import sys, json
 

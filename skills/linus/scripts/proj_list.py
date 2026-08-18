@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# desc: List all SVILUPPO items sorted by status, reading gh project item-list JSON from stdin.
 """List all SVILUPPO items sorted by status."""
 import sys, json
 
