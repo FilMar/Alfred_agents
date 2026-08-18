@@ -177,17 +177,23 @@ export function spawnDetached(
 
 // ─── Session building ─────────────────────────────────────────────────────────
 
-function resolveModel(modelStr: string) {
+async function resolveModel(modelStr: string) {
   const [provider, ...rest] = modelStr.split("/");
   const modelId = rest.join("/");
   if (!provider || !modelId) throw new Error(`Formato model non valido: usa "provider/model-id" (es. anthropic/claude-opus-4-5)`);
   const knownProviders = getProviders();
-  if (!knownProviders.includes(provider as KnownProvider)) {
-    throw new Error(`Provider non valido: "${provider}". Provider disponibili: ${knownProviders.join(", ")}`);
+  if (knownProviders.includes(provider as KnownProvider)) {
+    const model = getModel(provider as KnownProvider, modelId as never);
+    if (model) return model;
   }
-  const model = getModel(provider as KnownProvider, modelId as never);
-  if (!model) throw new Error(`Model non trovato: "${modelStr}". Usa: th models`);
-  return model;
+  // Custom providers from models.json (e.g. ollama) live in the model
+  // registry, not in the static provider list — fall back to it before
+  // giving up on the model id.
+  const { modelRegistry } = createRegistry();
+  const available = await modelRegistry.getAvailable();
+  const custom = available.find((m) => m.provider === provider && m.id === modelId);
+  if (custom) return custom;
+  throw new Error(`Model non trovato: "${modelStr}". Usa: th models`);
 }
 
 async function buildSession(
@@ -198,7 +204,7 @@ async function buildSession(
     throw new Error(`Thinking level non valido: "${opts.thinkingLevel}". Valori accettati: ${THINKING_LEVELS.join(", ")}`);
   }
 
-  const model = opts.modelStr ? resolveModel(opts.modelStr) : undefined;
+  const model = opts.modelStr ? await resolveModel(opts.modelStr) : undefined;
 
   const autoInstantiated = ensureLocalMember(memberName);
   if (autoInstantiated) process.stderr.write(`info: istanziato "${memberName}" da globale in .th/members/\n`);
