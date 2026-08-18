@@ -1,11 +1,13 @@
 ---
 name: jobs
-description: "Manages tasks via Taskwarrior through a justfile abstraction layer. Capture, organize, track and complete tasks with GTD semantics using Areas of Focus, Workflow states, and Energy levels. Use it for any task management activity: add, list, modify, complete, or review tasks, manage projects and contexts, check overdue or active work. Use it even if the user does not mention Taskwarrior by name."
+description: "Manages tasks via Taskwarrior (the `task` CLI) with GTD semantics. Capture, organize, track and complete tasks using Areas of Focus, Workflow states, and Energy levels. Use it for any task management activity: add, list, modify, complete, or review tasks, manage projects and contexts, check overdue or active work. Use it even if the user does not mention Taskwarrior by name."
 ---
 
 # Jobs
 
-Jobs manages tasks through a `justfile` that wraps Taskwarrior. Always use the recipes in this skill's `justfile` instead of calling `task` directly, via the `pi-just jobs <recipe>` wrapper. The justfile provides GTD-semantic names and handles quoting. Run `pi-just jobs default` to see all recipes.
+Jobs manages tasks with Taskwarrior (`task`), organized with a GTD system.
+Call `task` directly. Taskwarrior's syntax is `task <filter> <command> <mods>`
+— the filter comes before the command.
 
 ## Custom GTD System
 
@@ -39,66 +41,58 @@ The system organizes tasks along three dimensions:
 Add a task to the inbox (no categorization, just a description):
 
 ```bash
-pi-just jobs add "Buy bread"
-pi-just jobs add "Send report" due:tomorrow
+task add "Buy bread"
+task add "Send report" due:tomorrow
 ```
 
 To capture an already-categorized task (if it's clear at the moment):
 
 ```bash
-pi-just jobs add "Write chapter 3" project:WriteBook +personale +next +focus
-pi-just jobs add "Pay electricity bill" +amministrazione +next +execute due:eom
-pi-just jobs add "Meditation" +cura +routine +rest due:today recur:daily
+task add "Write chapter 3" project:WriteBook +personale +next +focus
+task add "Pay electricity bill" +amministrazione +next +execute due:eom
+task add "Meditation" +cura +routine +rest due:today recur:daily
 ```
+
+`recur:daily` / `recur:weekly` makes a task a routine. Taskwarrior
+generates future instances automatically as each due date passes.
 
 The inbox holds tasks with no `+next`, `+waiting`, `+someday`, or `+routine` tag. These tasks wait to be clarified:
 
 ```bash
-pi-just jobs list -next -waiting -someday -routine
+task -next -waiting -someday -routine list
 ```
 
 ## Clarify & Organize
 
-Assign area of focus, workflow state, energy, project:
+Assign area of focus, workflow state, energy, project with `task <id> modify`.
+A tag adds with `+tag`, removes with `-tag`:
 
 ```bash
-# Assign area of focus
-pi-just jobs tag 12 emotion
-pi-just jobs tag 12 cura
-pi-just jobs tag 12 amministrazione
-pi-just jobs tag 12 personale
-pi-just jobs tag 12 lavoro
+# Assign area of focus (pick one: emotion, cura, amministrazione, personale, lavoro)
+task 12 modify +emotion
 
-# Assign workflow state
-pi-just jobs tag 12 next
-pi-just jobs tag 12 waiting
-pi-just jobs tag 12 someday
-pi-just jobs tag 12 routine
+# Assign workflow state (pick one: next, waiting, someday, routine)
+task 12 modify +next
 
-# Assign energy
-pi-just jobs tag 12 focus
-pi-just jobs tag 12 execute
-pi-just jobs tag 12 reflect
-pi-just jobs tag 12 rest
+# Assign energy (pick one: focus, execute, reflect, rest)
+task 12 modify +focus
 
 # Assign project
-pi-just jobs proj 12 WriteBook
-pi-just jobs proj 12 JapanTrip
+task 12 modify project:WriteBook
 
 # Remove a tag
-pi-just jobs untag 12 next      # e.g. move from next to waiting
-pi-just jobs untag 12 focus
+task 12 modify -next      # e.g. move from next to waiting
 
 # Set a due date
-pi-just jobs due 12 tomorrow
-pi-just jobs due 12 2025-08-15
-pi-just jobs due 12 eom         # end of month
+task 12 modify due:tomorrow
+task 12 modify due:2025-08-15
+task 12 modify due:eom         # end of month
 
 # Remove the due date
-pi-just jobs nodue 12
+task 12 modify due:
 
 # Generic edit (any Taskwarrior modifier)
-pi-just jobs modify 12 due:eom +urgent project:Work
+task 12 modify due:eom +urgent project:Work
 ```
 
 ## Reflect
@@ -106,166 +100,98 @@ pi-just jobs modify 12 due:eom +urgent project:Work
 ### By Workflow State
 
 ```bash
-pi-just jobs next-actions     # all ready actions (+next)
-pi-just jobs waiting-list      # waiting on someone (+waiting)
-pi-just jobs someday           # someday/maybe list (+someday)
-pi-just jobs routine           # recurring habits (+routine)
+task +next next            # all ready actions
+task +waiting list         # waiting on someone
+task +someday list         # someday/maybe list
+task +routine list         # recurring habits
 ```
 
 ### By Area of Focus
 
 ```bash
-pi-just jobs emotion          # tasks in the Emotion area
-pi-just jobs cura             # tasks in the Cura area
-pi-just jobs amministrazione   # tasks in the Amministrazione area
-pi-just jobs personale         # tasks in the Personale area
-pi-just jobs lavoro            # tasks in the Lavoro area
+task +emotion next   # swap the area tag: cura, amministrazione, personale, lavoro
 ```
 
 ### By Energy Required
 
 ```bash
-pi-just jobs focus            # tasks that need deep work
-pi-just jobs exec             # mechanical tasks to execute
-pi-just jobs reflect          # reflection/planning tasks
-pi-just jobs rest             # low-energy tasks
+task +focus next           # deep work
+task +execute exec         # mechanical tasks to execute
+task +reflect next         # reflection/planning tasks
+task +rest next            # low-energy tasks
 ```
 
 ### Other Useful Reports
 
 ```bash
-pi-just jobs next             # most urgent tasks (sorted by urgency)
-pi-just jobs overdue          # overdue tasks
-pi-just jobs active           # started but not completed tasks
-pi-just jobs completed        # completed tasks
-pi-just jobs projects         # project overview with task counts
-pi-just jobs tags             # all tags in use
-pi-just jobs calendar         # calendar with due dates
+task next                  # most urgent tasks (sorted by urgency)
+task +OVERDUE list         # overdue tasks
+task active                # started but not completed tasks
+task completed             # completed tasks
+task projects              # project overview with task counts
+task tags                  # all tags in use
+task calendar              # calendar with due dates
+task 12 information        # full details of one task + change history
 ```
 
-### Lists with Custom Filters
-
-```bash
-pi-just jobs list                          # all pending
-pi-just jobs list project:WriteBook        # by project
-pi-just jobs list +emotion +next           # area + state
-pi-just jobs list +focus due.before:tomorrow  # energy + due date
-```
-
-### Full Details of a Task
-
-```bash
-pi-just jobs info 12          # full details + change history
-```
+Lists take any filter, combined freely: `task project:WriteBook list`,
+`task +emotion +next list`, `task +focus due.before:tomorrow list`.
 
 ## Engage
 
 ```bash
-pi-just jobs start 12         # start working (task becomes "active")
-pi-just jobs stop 12          # stop working
-pi-just jobs done 12          # complete the task
-pi-just jobs delete 12        # reject the task: tag +rejected, drop all other tags (no delete)
+task 12 start               # start working (task becomes "active")
+task 12 stop                # stop working
+task 12 done                # complete the task
+```
+
+Reject a task (tag `+rejected`, drop all other tags — no delete):
+
+```bash
+task 12 modify +rejected -next -waiting -someday -routine -focus -execute -reflect -rest -emotion -cura -amministrazione -personale -lavoro -idea
 ```
 
 Add an annotation (note) to a task:
 
 ```bash
-pi-just jobs annotate 12 "Sent email to Marco for clarification"
+task 12 annotate "Sent email to Marco for clarification"
 ```
-
-## Routine
-
-Create routines with recurrence:
-
-```bash
-# Daily routine
-pi-just jobs add "Meditation" +cura +routine +rest due:today recur:daily
-
-# Weekly routine
-pi-just jobs add "Weekly review" +personale +routine +reflect due:today recur:weekly
-```
-
-Taskwarrior generates future instances automatically as each due date passes.
 
 ## Export
 
 Export tasks to JSON for programmatic processing:
 
 ```bash
-pi-just jobs export                          # all pending
-pi-just jobs export project:Home status:pending
-pi-just jobs export +next +emotion
+task export                          # all pending
+task project:Home status:pending export
+task +next +emotion export
 ```
 
 ## Raw
 
-When the abstraction doesn't cover what you need, call Taskwarrior directly:
+When the GTD prose above doesn't cover what you need, call Taskwarrior directly — anything `task` supports works:
 
 ```bash
-pi-just jobs raw burndown.weekly
-pi-just jobs raw 12 duplicate
-pi-just jobs raw stats
-pi-just jobs raw +emotion calendar
+task burndown.weekly
+task 12 duplicate
+task stats
+task +emotion calendar
 ```
 
 ## Recommended Workflow
 
-### 1. Capture
-Write down everything on your mind, without categorizing:
-```bash
-pi-just jobs add "Generic task"
-```
-
-### 2. Clarify
-Process the inbox regularly (daily or weekly):
-```bash
-pi-just jobs list -next -waiting -someday -routine   # tasks to clarify
-```
-
-For each task, ask yourself:
-- Is it actionable? If not, delete it or move it to `+someday`
-- What's the next physical action?
-- Which area of focus does it belong to? (`+emotion`, `+cura`, etc.)
-- How much energy does it need? (`+focus`, `+execute`, `+reflect`, `+rest`)
-- Is it part of a project? (`project:Name`)
-- What's its state? (`+next`, `+waiting`, `+someday`, `+routine`)
-
-### 3. Organize
-Apply the categorization:
-```bash
-pi-just jobs tag 12 emotion
-pi-just jobs tag 12 next
-pi-just jobs tag 12 focus
-pi-just jobs proj 12 WriteBook
-```
-
-### 4. Reflect (Review)
-- **Daily:** `pi-just jobs next` and `pi-just jobs routine` to see what to do today
-- **Weekly:** `pi-just jobs someday` to review future projects, `pi-just jobs projects` for an overview
-- **Monthly:** `pi-just jobs calendar` for long-term planning
-
-### 5. Engage (Execute)
-Choose based on:
-- Physical context (where you are, what tools you have)
-- Available time (5 min vs 2 hours)
-- Mental energy (high vs low)
-- Priority (urgency + importance)
-
-```bash
-pi-just jobs focus      # if you have energy and time for deep work
-pi-just jobs exec       # if you have little time/energy, mechanical tasks
-pi-just jobs rest       # if you're tired, light habits
-```
+The five GTD steps — Capture, Clarify, Organize, Reflect, Engage — mapped
+to the commands above. See `references/WORKFLOW.md` for the full walk-through.
 
 ## Contexts
 
 Taskwarrior supports predefined contexts that filter lists automatically:
 
 ```bash
-pi-just jobs context-list         # see available contexts
-pi-just jobs context-set next     # activate context: show only +next
-pi-just jobs context-set focus    # activate context: show only +focus
-pi-just jobs context-none         # deactivate context
+task context list         # see available contexts
+task context next         # activate context: show only +next
+task context focus        # activate context: show only +focus
+task context none         # deactivate context
 ```
 
 Available contexts: `next`, `waiting`, `someday`, `routine`, `focus`, `exec`, `reflect`, `rest`, `emotion`, `cura`, `amministrazione`, `personale`, `lavoro`.
