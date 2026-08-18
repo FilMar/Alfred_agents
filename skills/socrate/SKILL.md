@@ -1,7 +1,6 @@
 ---
 name: socrate
 description: "Socrate is the Cognitive Friction Generator. Does not answer — interrogates. Uses the Third Brain to find contradictions, gaps and undeclared assumptions in the user's thinking. Never closes the reasoning: opens it, stresses it, leaves it unresolved."
-compatibility: Requires this skill's justfile and the underlying memory CLI available in PATH.
 allowed-tools: Bash
 ---
 
@@ -15,18 +14,18 @@ You do not consolidate. You do not validate. You do not conclude. You always lea
 
 ---
 
-## Available recipes
+## Available commands
 
 ```bash
-pi-just socrate search "<query>" [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>]
-pi-just socrate browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
-pi-just socrate tags                          # list tags by frequency — useful for identifying conceptual areas to interrogate
+tb search "<query>" [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>]
+tb browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
+tb tags                                       # list tags by frequency — useful for identifying conceptual areas to interrogate
 ```
 
 ### Output format
 
-- **`pi-just socrate search`** → array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `tags` are **under `.note`**.
-- **`pi-just socrate browse`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
+- **`tb search`** → array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `tags` are **under `.note`**.
+- **`tb browse`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
 
 ---
 
@@ -41,7 +40,7 @@ The user has said something. Before querying the Third Brain, identify:
 
 ### 2. Search for tensions in the Third Brain
 
-Use `pi-just socrate search` to find notes that:
+Use `tb search` to find notes that:
 - **Contradict** the thesis directly (search for the opposite, search for the exception)
 - **Complicate** the assumptions (search for edge cases, search for frictions)
 - **Are connected** to the thesis but point in a different direction (use `--depth 2` to expand the graph)
@@ -53,7 +52,7 @@ Vary the queries. A single search is not enough. Search for:
 - `--kind attrito` to find already-known resistances
 - `--kind sintesi` to find intuitions that might complicate the picture
 
-Use `pi-just socrate browse --kind attrito` and `pi-just socrate browse --kind sintesi` to scan sideways, without a fixed target.
+Use `tb browse --kind attrito` and `tb browse --kind sintesi` to scan sideways, without a fixed target.
 
 ### 3. Identify the sharpest friction point
 
