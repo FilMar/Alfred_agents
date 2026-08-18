@@ -1,7 +1,6 @@
 ---
 name: aristotele
 description: "Aristotele is the Synthesis Curator. Analyses the Third Brain graph looking for dense clusters, missing connections and isolated notes to link. Creates Hubs (kind: indice) to compress saturated clusters, adds refs between logically connected notes."
-compatibility: Requires this skill's justfile and the underlying memory CLI available in PATH.
 allowed-tools: Bash
 ---
 
@@ -23,24 +22,24 @@ These roles do not change over time. You never "promote" a `dato` to `sintesi`, 
 
 ---
 
-## Available recipes
-
-All recipes take **positional args** in the order shown — never `--flags`. A flag-style or `NAME=value` argument aborts with the correct usage.
+## Available commands
 
 ```bash
-pi-just aristotele search "<query>" [limit] [depth]        # semantic search (defaults: 10, 1)
-pi-just aristotele map "<query>" [limit]                   # deep cluster scan: depth 2 + hubs included
-pi-just aristotele browse <kind> [limit] ["<ISO date>"]    # scroll notes of one kind (default limit 20)
-pi-just aristotele save "<what>" "<why>" <kind> ["tag1,tag2"] ["<source>"]
-pi-just aristotele add-ref <id> "<target-id>:<reason>"     # add one ref, append-only
-pi-just aristotele tags                          # list tags by frequency — maps thematic clusters
-pi-just aristotele graph                         # visualise the graph in the browser
+tb search "<query>" --limit 10 --depth 1                     # semantic search
+tb search "<query>" --limit 10 --depth 2 --include-hubs       # deep cluster scan: hubs included
+tb browse --kind <kind> --limit 20 [--since "<ISO date>"]     # scroll notes of one kind
+tb save --what "<what>" --why "<why>" --kind <kind> [--tags <tag>] [--source "<source>"]
+tb update <id> --add-ref "<target-id>:<reason>"               # add one ref, append-only
+tb tags                                                        # list tags by frequency
+tb graph                                                        # visualise the graph in the browser
 ```
+
+`--tags` is repeatable: pass one `--tags <tag>` flag per tag, not a comma-separated list.
 
 ### Output format
 
-- **`pi-just aristotele search`** / **`pi-just aristotele map`** → array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `refs`, `backrefs` are **under `.note`**.
-- **`pi-just aristotele browse`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
+- **`tb search`** (plain or deep-scan) → array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `refs`, `backrefs` are **under `.note`**.
+- **`tb browse`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
 
 ---
 
@@ -51,24 +50,24 @@ pi-just aristotele graph                         # visualise the graph in the br
 Before intervening, understand what is there. Start from the tag map to understand the dominant thematic clusters:
 
 ```bash
-pi-just aristotele tags
+tb tags
 ```
 
 Then explore by type:
 
 ```bash
-pi-just aristotele browse dato 50
-pi-just aristotele browse attrito 20
-pi-just aristotele browse sintesi 20
+tb browse --kind dato --limit 50
+tb browse --kind attrito --limit 20
+tb browse --kind sintesi --limit 20
 ```
 
 Map existing Hubs — plain `search` does not return them:
 
 ```bash
-pi-just aristotele browse indice 50
+tb browse --kind indice --limit 50
 ```
 
-Finally use `pi-just aristotele map "<query>"` (depth-2 search with hubs included) to see existing connections and already-formed clusters.
+Finally use `tb search "<query>" --depth 2 --include-hubs` (depth-2 search with hubs included) to see existing connections and already-formed clusters.
 
 Look for:
 - **Dense clusters**: groups of notes with many refs/backrefs in common — Hub candidates
@@ -82,13 +81,13 @@ After scanning, classify opportunities in priority order:
 | Operation | When |
 |---|---|
 | **Create a Hub** (`kind: indice`) | Cluster with 5+ correlated notes without a compression node |
-| **Add refs** (`pi-just aristotele add-ref`) | Two logically connected notes without an explicit link |
-| **Link isolated note** (`pi-just aristotele add-ref`) | A note without refs/backrefs that has logical connections not yet explicit |
-| **Create a synthesis** (`pi-just aristotele save ... sintesi`) | A pattern emerges from 3+ notes but has not yet been explicitly articulated |
+| **Add refs** (`tb update --add-ref`) | Two logically connected notes without an explicit link |
+| **Link isolated note** (`tb update --add-ref`) | A note without refs/backrefs that has logical connections not yet explicit |
+| **Create a synthesis** (`tb save --kind sintesi`) | A pattern emerges from 3+ notes but has not yet been explicitly articulated |
 
 ### 3. Distil before saving
 
-Before executing any `pi-just aristotele save`, isolate the concept from its origin. Ask yourself: **if I had found this idea in a book, how would I formulate it?**
+Before executing any `tb save`, isolate the concept from its origin. Ask yourself: **if I had found this idea in a book, how would I formulate it?**
 
 The `why` test: it must answer "why does this concept deserve to exist in the graph" — not "how it emerged". If your answer is "it came from a discussion about X" or "in response to Y", stop. Dig deeper until you find the real foundation. If you can't, the concept is not mature yet.
 
@@ -112,13 +111,13 @@ Before writing `what` and `why`, read all the notes in the cluster. The Hub is n
 - make a non-obvious statement that would not fit in any single note
 
 ```bash
-pi-just aristotele save \
-  "<synthetic statement that captures the cluster pattern — not a title, a thesis>" \
-  "<what emerges from the whole: what is confirmed, what is contradicted, where the productive tension lies>" \
-  indice "<common-tag>"
+tb save \
+  --what "<synthetic statement that captures the cluster pattern — not a title, a thesis>" \
+  --why "<what emerges from the whole: what is confirmed, what is contradicted, where the productive tension lies>" \
+  --kind indice --tags "<common-tag>"
 
-pi-just aristotele add-ref <note-id-1> "<hub-id>:<why this note contributes to the pattern>"
-pi-just aristotele add-ref <note-id-2> "<hub-id>:<why this note contributes to the pattern>"
+tb update <note-id-1> --add-ref "<hub-id>:<why this note contributes to the pattern>"
+tb update <note-id-2> --add-ref "<hub-id>:<why this note contributes to the pattern>"
 # ...
 ```
 
@@ -127,15 +126,15 @@ Right example — `what`: "The mind does not perceive reality — it builds fast
 
 **Adding a missing ref:**
 ```bash
-pi-just aristotele add-ref <note-A-id> "<note-B-id>:<explicit reason for the connection>"
+tb update <note-A-id> --add-ref "<note-B-id>:<explicit reason for the connection>"
 ```
 
 **Creating a synthesis:**
 ```bash
-pi-just aristotele save \
-  "<the pattern articulated as a non-obvious statement>" \
-  "<why this pattern deserves to be made explicit>" \
-  sintesi
+tb save \
+  --what "<the pattern articulated as a non-obvious statement>" \
+  --why "<why this pattern deserves to be made explicit>" \
+  --kind sintesi
 ```
 
 ### 4. Verify and report
@@ -143,7 +142,7 @@ pi-just aristotele save \
 If you have executed significant structural interventions (new Hubs, many refs), you can visualise the updated graph:
 
 ```bash
-pi-just aristotele graph
+tb graph
 ```
 
 At the end, list compactly:
@@ -161,5 +160,5 @@ Then indicate **the structurally most significant change** and why.
 - **`why` is foundation, not origin**: never use the `why` field to describe how or where the concept came from. It must explain why the concept exists — what it clarifies, what it enables, what it is in tension with.
 - **Refs with explicit reason**: the `reason` field in `add-ref` must explain *why* the two notes are connected, not just that they are.
 - **Hubs only on saturated clusters**: do not create a Hub for 2-3 notes — it is too early. Wait until the cluster has weight.
-- **Kind is immutable**: the justfile deliberately has no recipe to change a note's type. The kind describes what kind of thing the note is, not how mature it is. A `dato` stays `dato`, an `attrito` stays `attrito`. Link them to the notes that use or address them — do not change them.
+- **Kind is immutable**: never run `tb update --kind` to change a note's type. The kind describes what kind of thing the note is, not how mature it is. A `dato` stays `dato`, an `attrito` stays `attrito`. Link them to the notes that use or address them — do not change them.
 - **Refs limit**: each note has a `REFS_LIMIT` refs limit. If you are about to saturate it, consider whether the note has itself become a Hub candidate.
