@@ -1,3 +1,6 @@
+#!/usr/bin/env -S uv run --script
+# desc: Monthly time series for one category or the total, with a 3-month moving average
+# usage: trend.py <category|totale> [year,year,...]
 # /// script
 # requires-python = ">=3.11"
 # dependencies = ["polars"]

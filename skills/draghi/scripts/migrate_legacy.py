@@ -1,3 +1,5 @@
+#!/usr/bin/env -S uv run --script
+# desc: One-time migration of legacy spese2021.csv / spese2022.csv into .bank.csv
 # /// script
 # requires-python = ">=3.11"
 # dependencies = ["polars"]

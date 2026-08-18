@@ -1,3 +1,6 @@
+#!/usr/bin/env -S uv run --script
+# desc: Split a recurring self-transfer row into an investment portion and a remainder
+# usage: split_selftransfer.py <amount> <invest_amount> [match_text] [invest_category] [extra_match]
 # /// script
 # requires-python = ">=3.11"
 # dependencies = ["polars"]

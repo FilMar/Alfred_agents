@@ -1,3 +1,6 @@
+#!/usr/bin/env -S uv run --script
+# desc: Per-category totals for one year, compared with the previous year
+# usage: summary.py <year>
 # /// script
 # requires-python = ">=3.11"
 # dependencies = ["polars"]
