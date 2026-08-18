@@ -9,41 +9,61 @@ Backs up **Qdrant** to MEGA cloud storage, with an optional systemd timer.
 
 ## When to use this skill
 
-- Backing up a Qdrant collection to MEGA (snapshot API → download → gzip → upload)
+- Backing up a Qdrant collection to MEGA (snapshot API -> download -> gzip -> upload)
 - Restoring a Qdrant collection from a MEGA backup
 - Checking MEGA storage space and login status
 - Managing automatic backups (weekly systemd timer)
 
 ## Main commands
 
-Arguments are **positional**: `pi-just clio <recipe> <arg1> <arg2>`, not `key=value`.
+### Status
 
 ```bash
-# Backup
-pi-just clio clio-backup-qdrant <collection>         # One collection, retain=5
-pi-just clio clio-backup-qdrant <collection> 10     # Custom retention
-pi-just clio clio-backup-all                         # All collections in QDRANT_COLLECTIONS
+mega-whoami         # Login status
+mega-df -h           # Space used
+```
 
-# Restore
-pi-just clio clio-restore-qdrant <collection> <backup.tar.gz>
-# Example: pi-just clio clio-restore-qdrant supertest qdrant-supertest-20260728-184022.tar.gz
+### Backup
 
-# Timer (automatic backup)
-pi-just clio clio-enable-timer                      # Enable weekly timer (Monday 04:00)
-pi-just clio clio-disable-timer                     # Disable timer
-pi-just clio clio-timer-status                      # Timer status
+```bash
+scripts/backup_qdrant.sh <collection>          # One collection, retain=5
+scripts/backup_qdrant.sh <collection> 10        # Custom retention
+scripts/backup_all.sh                           # All collections in QDRANT_COLLECTIONS
+```
 
-# Status and logs
-pi-just clio clio-status                            # MEGA login and available space
-pi-just clio clio-logs [lines=N]                    # Last N backup log lines
+### Restore
+
+```bash
+scripts/restore_qdrant.sh <collection> <backup.tar.gz>
+# Example: scripts/restore_qdrant.sh supertest qdrant-supertest-20260728-184022.tar.gz
+```
+
+### Timer (automatic backup)
+
+```bash
+scripts/enable_timer.sh                          # Enable weekly timer (Monday 04:00)
+scripts/disable_timer.sh                         # Disable timer
+systemctl --user list-timers clio-backup.timer  # Timer status
+journalctl --user -u clio-backup -n 10 --no-pager  # Latest log
+```
+
+### Logs
+
+```bash
+tail -n 50 "$HOME/.local/log/clio-backup.log"   # Last 50 backup log lines
 ```
 
 ## Architecture
 
 Three-level pattern:
-1. **Recipe `clio-backup-qdrant`**: backs up one collection with configurable retention (default 5). Syntax: `pi-just clio clio-backup-qdrant <collection> [retain]`.
-2. **Recipe `clio-backup-all`**: loops over a list of collections defined in the justfile. Edit the `QDRANT_COLLECTIONS` array to customize it.
-3. **Recipe `clio-enable-timer`**: installs a systemd user unit that runs `clio-backup-all` every Monday at 04:00.
+1. **`scripts/backup_qdrant.sh`**: backs up one collection with configurable
+   retention (default 5). Usage: `backup_qdrant.sh <collection> [retain]`.
+2. **`scripts/backup_all.sh`**: loops over a list of collections and calls
+   `backup_qdrant.sh` for each. Edit the `QDRANT_COLLECTIONS` array inside
+   the script to customize it.
+3. **`scripts/enable_timer.sh`**: installs a systemd user unit that runs
+   `scripts/backup_all.sh` every Monday at 04:00. The unit's `ExecStart`
+   line must point at this script's absolute path, not at a justfile.
 
 All backups write to `~/.local/log/clio-backup.log`.
 
@@ -57,20 +77,21 @@ All backups write to `~/.local/log/clio-backup.log`.
 
 ## Extending it
 
-The system is intentionally minimal: one backup recipe (`clio-backup-qdrant`).
+The system is intentionally minimal: one backup script (`backup_qdrant.sh`).
 
 To add other backup types (PostgreSQL, files, Git, etc.), follow this convention:
 
-1. Add a dedicated recipe to the justfile (e.g. `clio-backup-postgres`)
-2. Add it to the `clio-backup-all` array
-3. Log to `$HOME/.local/log/clio-backup.log`
-4. Upload to `/clio/<type>/` on MEGA
+1. Add a dedicated script under `scripts/` (e.g. `backup_postgres.sh`),
+   following the script contract in `skills/efesto/SKILL.md` (Rule 3).
+2. Call it from `backup_all.sh`.
+3. Log to `$HOME/.local/log/clio-backup.log`.
+4. Upload to `/clio/<type>/` on MEGA.
 
 ## Configuration
 
 | Variable | Default | Use |
 |-----------|---------|-----|
-| `CLIO_HOME` | `$HOME/.pi/agent/skills/clio` | Skill path (for `clio-enable-timer`) |
+| `CLIO_HOME` | `$HOME/.pi/agent/skills/clio` | Skill path (for `scripts/enable_timer.sh`) |
 
 ## Requirements
 
@@ -82,5 +103,5 @@ To add other backup types (PostgreSQL, files, Git, etc.), follow this convention
 
 ## Resources
 
-- `justfile` — recipes
+- `scripts/` — backup, restore, and timer scripts
 - `systemd/clio-backup.service`, `systemd/clio-backup.timer` — timer units
