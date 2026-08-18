@@ -1,3 +1,4 @@
+// desc: Shared helpers for all chart generators: arg parsing, base HTML, output (library, not an entry point).
 /**
  * D3-Schema Shared Utilities
  * Theme and common helpers for all chart generators.

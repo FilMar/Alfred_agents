@@ -169,7 +169,7 @@ pure CLI too.
 The script contract:
 
 - executable, with a shebang line;
-- a `# desc: <one line>` header in the first 5 lines;
+- a `# desc: <one line>` header in the first 5 lines (`// desc:` in JavaScript);
 - a `# usage: ...` header when it takes arguments;
 - bash scripts set `set -euo pipefail` and validate their arguments.
 

@@ -1,3 +1,6 @@
+#!/usr/bin/env bun
+// desc: Draw a bar chart as a standalone interactive D3 HTML file.
+// usage: bun schema-bar.js --data <json> --labels <json> [--output <file>] [--title <t>]
 /**
  * Bar chart generator
  * Creates vertical bar charts with D3.js.

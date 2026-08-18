@@ -1,3 +1,4 @@
+// desc: Atlante look and feel: theme and chart config shared by every generator (library, not an entry point).
 /**
  * Atlante look and feel.
  *

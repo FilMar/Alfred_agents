@@ -1,3 +1,6 @@
+#!/usr/bin/env bun
+// desc: Draw a node-and-link force graph as a standalone interactive D3 HTML file.
+// usage: bun schema-force.js --nodes <json> --links <json> [--output <file>] [--title <t>]
 /**
  * Force-directed graph generator
  * Creates interactive HTML graphs with D3.js force simulation.

@@ -1,3 +1,6 @@
+#!/usr/bin/env bun
+// desc: Draw a pie or donut chart as a standalone interactive D3 HTML file.
+// usage: bun schema-pie.js --data <json> --labels <json> [--donut true] [--output <file>] [--title <t>]
 /**
  * Pie / Donut chart generator
  * Creates interactive pie/donut charts with D3.js.

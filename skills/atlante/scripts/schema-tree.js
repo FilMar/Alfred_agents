@@ -1,3 +1,6 @@
+#!/usr/bin/env bun
+// desc: Draw a hierarchy tree as a standalone interactive D3 HTML file.
+// usage: bun schema-tree.js --data <json> [--output <file>] [--title <t>]
 /**
  * Tree / Hierarchical chart generator
  * Creates centered tree diagrams with D3.js.

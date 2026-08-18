@@ -1,3 +1,6 @@
+#!/usr/bin/env bun
+// desc: Draw a scatter or line plot as a standalone interactive D3 HTML file.
+// usage: bun schema-xy.js --data <json> [--line true] [--output <file>] [--title <t>] [--xlabel <x>] [--ylabel <y>]
 /**
  * XY / Scatter / Line chart generator
  * Creates scatter plots and line charts with D3.js.

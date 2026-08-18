@@ -46,30 +46,30 @@ chart type. Quote each JSON argument as one shell string.
 Bar chart - `--data` and `--labels` are JSON arrays of the same length:
 
 ```bash
-bun schema-bar.js --data '[100,200,150]' --labels '["Q1","Q2","Q3"]' --output revenue.html --title "Revenue by quarter"
+bun scripts/schema-bar.js --data '[100,200,150]' --labels '["Q1","Q2","Q3"]' --output revenue.html --title "Revenue by quarter"
 ```
 
-Pie and donut - same arguments, `schema-pie.js` draws both. Add
+Pie and donut - same arguments, `scripts/schema-pie.js` draws both. Add
 `--donut true` for the donut:
 
 ```bash
-bun schema-pie.js --data '[40,30,20]' --labels '["A","B","C"]'
-bun schema-pie.js --data '[40,30,20]' --labels '["A","B","C"]' --donut true --output split.html --title "Split by area"
+bun scripts/schema-pie.js --data '[40,30,20]' --labels '["A","B","C"]'
+bun scripts/schema-pie.js --data '[40,30,20]' --labels '["A","B","C"]' --donut true --output split.html --title "Split by area"
 ```
 
 Scatter and line - `--data` is a JSON array of `[x, y]` pairs.
-`schema-xy.js` draws both. Add `--line true` to join the points in order:
+`scripts/schema-xy.js` draws both. Add `--line true` to join the points in order:
 
 ```bash
-bun schema-xy.js --data '[[0,0],[1,2],[2,4]]'
-bun schema-xy.js --data '[[0,10],[1,14],[2,9]]' --line true --output trend.html --title "Monthly trend" --xlabel Month --ylabel Euro
+bun scripts/schema-xy.js --data '[[0,0],[1,2],[2,4]]'
+bun scripts/schema-xy.js --data '[[0,10],[1,14],[2,9]]' --line true --output trend.html --title "Monthly trend" --xlabel Month --ylabel Euro
 ```
 
 Tree - `--data` is one nested JSON object, each node has `label` and
 optional `children`:
 
 ```bash
-bun schema-tree.js --data '{"label":"Root","children":[{"label":"A"},{"label":"B"}]}'
+bun scripts/schema-tree.js --data '{"label":"Root","children":[{"label":"A"},{"label":"B"}]}'
 ```
 
 Force graph - `--nodes` and `--links` are JSON arrays. A node `type` of
@@ -77,7 +77,7 @@ Force graph - `--nodes` and `--links` are JSON arrays. A node `type` of
 on the arrow:
 
 ```bash
-bun schema-force.js --nodes '[{"id":"A","label":"Start","type":"start"},{"id":"B"}]' --links '[{"source":"A","target":"B"}]'
+bun scripts/schema-force.js --nodes '[{"id":"A","label":"Start","type":"start"},{"id":"B"}]' --links '[{"source":"A","target":"B"}]'
 ```
 
 Open the result:
@@ -88,10 +88,10 @@ xdg-open revenue.html
 
 ## Look
 
-Everything about how a chart looks lives in `config.js`: the color theme
+Everything about how a chart looks lives in `scripts/config.js`: the color theme
 (Catppuccin Mocha, dark), the series palette, chart size, node radius,
 whether pies show a legend and bars show their values.
 
 None of it is an argument, because none of it changes from one chart to
-the next. When the user wants a different look, edit `config.js` once. All
+the next. When the user wants a different look, edit `scripts/config.js` once. All
 charts made after that follow it.

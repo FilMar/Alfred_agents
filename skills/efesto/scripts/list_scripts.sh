@@ -19,6 +19,6 @@ for f in "$dir"/*; do
     case "$(basename "$f")" in
         __init__.py) continue ;;
     esac
-    desc="$(sed -n '1,5{s/^# desc: //p}' "$f" | head -1)"
+    desc="$(sed -n '1,5{s|^# desc: ||p; s|^// desc: ||p}' "$f" | head -1)"
     printf '%s\t%s\n' "$(basename "$f")" "${desc:-(no desc header)}"
 done

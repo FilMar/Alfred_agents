@@ -10,6 +10,7 @@ Checks:
   ERROR  SKILL.md references a script that is not in scripts/
   WARN   a script is never mentioned in SKILL.md (dead script?)
   WARN   a script is not executable
+         (both warnings skip library files: no shebang on line 1)
   WARN   scripts/guard.sh present (justfile-era leftover)
   WARN   SKILL.md is over 200 lines (move detail to references/)
 
@@ -59,7 +60,7 @@ def has_desc_header(f: Path) -> bool:
         head = f.read_text(errors="replace").splitlines()[:DESC_HEADER_LINES]
     except OSError:
         return False
-    return any(line.startswith("# desc: ") for line in head)
+    return any(line.startswith(("# desc: ", "// desc: ")) for line in head)
 
 
 def lint(skill_dir: Path):
@@ -106,6 +107,12 @@ def lint(skill_dir: Path):
             errors.append(
                 f"scripts/{f.name}: no `# desc:` header in the first {DESC_HEADER_LINES} lines"
             )
+        try:
+            first_line = f.read_text(errors="replace").splitlines()[0]
+        except (OSError, IndexError):
+            first_line = ""
+        if not first_line.startswith("#!"):
+            continue  # library file (no shebang): only the desc header applies
         if not os.access(f, os.X_OK):
             warnings.append(f"scripts/{f.name}: not executable (chmod +x)")
         if f.name not in text:
