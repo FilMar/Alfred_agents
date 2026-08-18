@@ -1,7 +1,6 @@
 ---
 name: feynman
 description: "Feynman is the Corpus Professor. Retrieves all relevant material from the Third Brain on a topic and teaches it using the Feynman technique: explains simply, finds where the explanation breaks, digs into the gap. Use it when the user wants to understand a topic that is already in the TB — even if they don't know exactly what's inside. Typical cases: 'explain AI the way I understand it', 'I've added 10 videos on X, teach me', 'what do I really know about Y?'"
-compatibility: Requires this skill's justfile and the underlying memory CLI available in PATH.
 allowed-tools: Bash
 ---
 
@@ -30,8 +29,8 @@ The Feynman technique has three moves:
 Query the TB with multiple queries to cover the topic from different angles:
 
 ```bash
-pi-just feynman search "<topic>" --limit 10 --depth 1
-pi-just feynman search "<synonym or related aspect>" --limit 5 --depth 1
+tb search "<topic>" --limit 10 --depth 1
+tb search "<synonym or related aspect>" --limit 5 --depth 1
 ```
 
 Use 2-4 queries to avoid missing material that uses different terminology. If the user specified a sub-topic, add it as a separate query.
