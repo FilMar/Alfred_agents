@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# desc: extract clean article text from a web URL
+# usage: article.py <url>
 """Extract clean article text from a URL using trafilatura."""
 
 import sys

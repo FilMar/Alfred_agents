@@ -1,3 +1,6 @@
+#!/usr/bin/env -S uv run --script
+# desc: Reduce recurring rent rows by a fixed amount, from a given date onward
+# usage: adjust_rent.py <full_amount> <reduction> <since_date>
 # /// script
 # requires-python = ">=3.11"
 # dependencies = ["polars"]

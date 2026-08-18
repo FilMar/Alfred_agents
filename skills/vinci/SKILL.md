@@ -10,7 +10,6 @@ description: >-
   ask to turn their experience into a typeset resume. Also trigger it for
   "fammi il CV", "curriculum in typst", "rifammi il résumé", "converti
   questo profilo LinkedIn in CV" (Italian phrasings the user may use).
-compatibility: Requires this skill's justfile and `typst` available in PATH.
 allowed-tools: Bash, Read, Write, Edit
 ---
 
@@ -72,10 +71,11 @@ sample data.
 
 ### 4. Check that it compiles
 
-If `typst` is available, **always compile** before handing it over:
+If `typst` is available, **always compile** before handing it over. Run this
+in the user's working directory, where the `.typ` file lives:
 
 ```bash
-pi-just vinci compile cv_mario_rossi.typ
+typst compile cv_mario_rossi.typ
 ```
 
 If it errors, read the error and fix the `.typ` — a CV that doesn't compile
@@ -88,12 +88,13 @@ rules below and tell the user, suggesting how to install it
 Give the user the `.typ` path and the command to compile it:
 
 ```bash
-pi-just vinci compile cv_mario_rossi.typ
+typst compile cv_mario_rossi.typ
 ```
 
-(`typst compile` produces the PDF; `pi-just vinci watch cv_mario_rossi.typ` for a live
-preview). Remind them that all the data lives in the DATI block, so they can
-tweak it themselves.
+This produces the PDF next to the source file. For a live preview that
+recompiles on every save, use `typst watch cv_mario_rossi.typ` instead.
+Remind them that all the data lives in the DATI block, so they can tweak it
+themselves.
 
 ## Typst syntax rules (so you don't break the file when editing DATI)
 

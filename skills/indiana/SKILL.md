@@ -1,7 +1,6 @@
 ---
 name: indiana
 description: "Indiana is the Code Archaeologist. Digs into software projects — new and old — to extract artefacts: hidden structural patterns, technical debt, buried architectural decisions. Does not fix — diagnoses."
-compatibility: Requires this skill's justfile, Bash access to the project filesystem and the underlying memory CLI.
 allowed-tools: Bash, Read
 ---
 
@@ -27,28 +26,28 @@ Every analysis answers three questions:
 
 ### 1. First Survey (Map the Territory)
 
-Before reading a line of code, understand the context using this skill's justfile:
+Before reading a line of code, understand the context:
 
 ```bash
-pi-just indiana files <path>            # high-level structure (maxdepth 2)
-pi-just indiana dirs <path>             # directory tree (maxdepth 3)
+find <path> -maxdepth 2 -type f -name '*' | sort     # high-level structure
+find <path> -maxdepth 3 -type d | sort                # directory tree
 
 # Languages and frameworks
 read <path>/package.json || read <path>/requirements.txt || read <path>/Cargo.toml || read <path>/go.mod || read <path>/pom.xml
 
 # Project history
-bash "git -C {{path}} log --oneline -20"
-bash "git -C {{path}} log --stat --oneline -5"
-bash "git -C {{path}} shortlog -sn --no-merges | head -10"
+git -C <path> log --oneline -20
+git -C <path> log --stat --oneline -5
+git -C <path> shortlog -sn --no-merges | head -10
 
 # Immediate health signals
-pi-just indiana files <path> 1 '*.md'              # markdown docs
-pi-just indiana pain <path>                      # TODO/FIXME/HACK comments
+find <path> -maxdepth 1 -type f -name '*.md' | sort   # markdown docs
+grep -rn "TODO\|FIXME\|HACK\|XXX\|workaround\|kludge\|hotfix" <path> --include="*.py" --include="*.ts" --include="*.go" --include="*.js" 2>/dev/null | grep -v node_modules | head -30
 ```
 
 Then search the Third Brain for what you already know about these stacks:
 ```bash
-pi-just indiana tb-search "<main language or framework>"
+tb search "<main language or framework>" --limit 5
 ```
 
 ### 2. Layer Dig (Layer Analysis)
@@ -63,25 +62,25 @@ Read the project in layers, from general to particular:
 **Layer 2 — Real architecture**
 ```bash
 # Entry points
-bash "find <path> \( -name 'main.*' -o -name 'index.*' -o -name 'app.*' \) | grep -v node_modules | grep -v '.git'"
+find <path> \( -name 'main.*' -o -name 'index.*' -o -name 'app.*' \) | grep -v node_modules | grep -v '.git'
 
 # Where is the business logic? Compare with where it should be.
-pi-just indiana counts <path>/src
+scripts/counts.sh <path>/src
 
 # External dependencies
-bash "grep -r 'import\|require\|from' <path>/src --include='*.ts' --include='*.py' --include='*.go' | grep -v 'node_modules\|\.git' | sed 's/.*from //' | sort | uniq -c | sort -rn | head -20"
+grep -r 'import\|require\|from' <path>/src --include='*.ts' --include='*.py' --include='*.go' | grep -v 'node_modules\|\.git' | sed 's/.*from //' | sort | uniq -c | sort -rn | head -20
 ```
 
 **Layer 3 — Debt signals**
 ```bash
 # Largest files (God objects?)
-pi-just indiana giants <path>
+find <path> -name "*.py" -o -name "*.ts" -o -name "*.go" -o -name "*.js" -o -name "*.rs" | grep -v node_modules | xargs wc -l 2>/dev/null | sort -rn | head -15
 
 # Most-modified files (hotspots)
-pi-just indiana hotspots <path>
+git -C <path> log --format=format: --name-only | grep -v "^$" | sort | uniq -c | sort -rn | head -15
 
 # Pain comments
-pi-just indiana pain <path>
+grep -rn "TODO\|FIXME\|HACK\|XXX\|workaround\|kludge\|hotfix" <path> --include="*.py" --include="*.ts" --include="*.go" --include="*.js" 2>/dev/null | grep -v node_modules | head -30
 ```
 
 ### 3. Trap Identification

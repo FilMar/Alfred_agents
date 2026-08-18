@@ -1,162 +1,103 @@
 ---
-tags: [pi, skills, convention, justfile]
-sources: [skills/*/SKILL.md, skills/*/justfile]
-updated: 2026-08-10
+tags: [pi, skills, convention, scripts]
+sources: [skills/efesto/SKILL.md, skills/efesto/references/MIGRATION.md, skills/*/SKILL.md]
+updated: 2026-08-18
 ---
 
 # Skill Pattern
 
-Every operational skill in `skills/` is **two files**: `SKILL.md` + `justfile`.
+Every skill in `skills/` is one folder with up to three parts:
 
-- `SKILL.md` is the instruction set the model reads.
-- `justfile` is the executable boundary the model calls.
+- `SKILL.md` — the instruction set the model reads. It is a **router**: it
+  keeps only what every run needs, and it calls the real CLI **directly**
+  (`tb`, `ti`, `th`, `gh`, ...).
+- `scripts/` — optional. One executable file per **deterministic
+  multi-step sequence**. Every script self-describes with a `# desc:`
+  header.
+- `references/` — optional. One file per deep-dive topic. `SKILL.md`
+  links to them; the model reads one only when the task needs it.
 
-The model must never invoke a CLI tool directly from `SKILL.md`. It issues a `just` recipe, always through the `pi-just` wrapper (see below). The recipe hides the underlying binary, its flags, and its plumbing.
+The convention is owned and enforced by **efesto**
+(`skills/efesto/SKILL.md`, the three rules). This page records it for the
+project; efesto's copy is normative.
 
 ---
 
-## Calling convention: `pi-just`
+## Why direct CLI (justfile layer retired, 2026-08-18)
 
-Every recipe call in `SKILL.md` uses `pi-just <skill> <recipe> [args...]`, never bare `just` and never `just -f <path>`:
+Until 2026-08-18 every CLI call went through a per-skill `justfile`
+(called via a `pi-just` wrapper). Retired because the layer duplicated
+the interface: every change had to land in both `SKILL.md` and the
+justfile, the two drifted, and most recipes were one-line wrappers.
+The replacement keeps one source of truth per call:
+
+- One-line CLI call → written directly in `SKILL.md` prose.
+- Multi-step deterministic sequence → one script in `scripts/`, called
+  from `SKILL.md`. Scripts call the pure CLI too.
+
+One lesson from the justfile era survives: **scripts run with the
+caller's cwd**. A script that needs its own location resolves it from
+`$0` (bash) or `__file__` (Python) — it does not assume cwd.
+
+---
+
+## The script contract
+
+- Executable, with a shebang line.
+- `# desc: <one line>` header in the first 5 lines.
+- `# usage: ...` header when it takes arguments.
+- Bash scripts set `set -euo pipefail` and validate their arguments.
+- The threshold cuts both ways: a sequence reused identically belongs in
+  a script; a script that wraps a single command gets deleted and its
+  command inlined in `SKILL.md`.
+
+Script lists are computed, never written by hand:
 
 ```bash
-pi-just christopher search "Zettelkasten" --limit 5 --depth 1
+skills/efesto/scripts/list_scripts.sh <skill_path>   # names + desc headers
 ```
 
-`pi-just` is a shell function (in dotfiles, `PI_REPO` exported):
+---
+
+## Audit and lint
 
 ```bash
-pi-just() {
-  local skill="$1"; shift
-  local f
-  f=$(find "$PI_REPO/skills" "$PI_REPO/tools" -maxdepth 2 -name justfile -path "*/$skill/justfile" 2>/dev/null | head -1)
-  if [[ -z "$f" ]]; then
-    echo "pi-just: no justfile found for skill '$skill'" >&2
-    return 1
-  fi
-  just --justfile "$f" --working-directory "$(pwd)" "$@"
-}
+python3 skills/efesto/scripts/lint_skill.py [<skill_path>]  # no arg: whole fleet
 ```
 
-Why not bare `just` or `just -f`:
-
-- **Bare `just <recipe>`** only works if the shell's cwd already happens to be the skill's own directory. It breaks the moment the recipe is invoked from anywhere else (e.g. a `th` member spawned by `annibale`, or a skill called from another skill's context).
-- **`cd skills/<name> && just ...`** is worse: the Bash tool's cwd persists across calls in the same session, so this silently changes the working directory for every subsequent command — including unrelated ones.
-- **`just -f <path>/justfile <recipe>`** finds the right justfile but, by `just`'s own default behavior, also switches the recipe's working directory to the justfile's directory. Fine for skills that only touch their own internal state (e.g. `mose`, `fury`), but wrong for anything that reads or writes files in the *caller's* actual working directory — `vinci` compiling a `.typ` the user is editing, `draghi` importing a CSV from the current project, a `th` member `annibale` launches that must operate on the real project tree, not on `skills/annibale/`.
-
-`pi-just` resolves the justfile path from `PI_REPO` (so it works from any cwd) and explicitly pins `--working-directory` to the caller's actual `$(pwd)` (so the recipe's file operations land in the right place). One function, same call shape, correct in both cases — no per-skill judgment call needed.
-
----
-
-## Why
-
-Separation keeps the skill stable when the tool changes:
-
-- Swap `tb` from local CLI to HTTP API → change the `justfile`, not the skill instructions.
-- Change `th` command syntax → change the `justfile`.
-- Move from `himalaya` to another mail client → change the `justfile`.
-
-It also prevents the model from confusing **skill** with **member**. A skill is executed inline by reading its `SKILL.md`. A `th` member is a separate agent launched only through orchestrator recipes. The justfile is the clean boundary between the two.
-
----
-
-## Anatomy
-
-### SKILL.md
-
-- **Frontmatter**: `name`, `description` (trigger text), `compatibility` (must say "this skill's justfile + underlying ... available"), `allowed-tools`.
-- **Body**: prose instructions + code blocks that show only `just` recipes.
-- **No direct CLI references**: no `tb`, `ti`, `th`, `gh`, `himalaya`, `taskwarrior`, `python`, `curl`, etc. in command examples.
-
-### justfile
-
-- Lives in the same directory as `SKILL.md`.
-- Exposes semantic recipes named after what the skill does, not after the wrapped binary.
-- Handles all flag plumbing, defaults, quoting, and multi-step commands.
-- For multi-word arguments uses `just` positional parameters or `variadic *FLAGS`.
-
-Example from `skills/christopher/justfile`:
-
-```just
-default:
-    @just --list
-
-search query *FLAGS:
-    tb search "{{query}}" {{FLAGS}}
-
-browse *FLAGS:
-    tb browse {{FLAGS}}
-
-random:
-    tb random
-
-tags:
-    tb tags
-```
-
-Used in `SKILL.md` as:
-
-```bash
-pi-just christopher search "Zettelkasten" --limit 5 --depth 1
-```
-
----
-
-## Migration checklist
-
-When creating or updating a skill:
-
-1. Does the skill touch an external CLI? If yes, it needs a `justfile`.
-2. Does `SKILL.md` show any command that is not `pi-just <skill> ...`? If yes, wrap it.
-3. Does `compatibility` mention the skill's `justfile` instead of the raw binary?
-4. Do all examples use the recipe names defined in the justfile, called through `pi-just`?
+Lint flags: leftover `justfile`, `just`/`pi-just` calls in `SKILL.md`
+code blocks, scripts without `# desc:`, references to missing scripts,
+scripts never mentioned in `SKILL.md`, invalid frontmatter, `SKILL.md`
+over 200 lines (split into `references/`). Rules 1 (predictability) and
+2 (easy English) need a read, not a grep — see efesto.
 
 ---
 
 ## Non-operational skills
 
-Some skills do not wrap a CLI and do not need a `justfile`:
-
-- `piano` — pure dialogue, produces markdown files via Claude tools.
-- `vinci` — pure file editing inside Typst templates.
-- `omero` — uses Claude native tools (`Read`, `Write`, `Edit`, `Glob`, `Grep`) on `.wiki/`.
-
-If a later evolution adds an external dependency, add a `justfile` then.
-
----
-
-## Current skills following the pattern
-
-| Skill | justfile wraps |
-|---|---|
-| linus | `gh` |
-| ermes | `himalaya`, `ti` (triage rules) |
-| jobs | `taskwarrior` |
-| annibale | `th` (member/run/flow orchestration) |
-| fury | `th` (member management) |
-| efesto | `th`, `pi`, Python scripts |
-| christopher | `tb` read |
-| feynman | `tb` search |
-| socrate | `tb` read |
-| aristotele | `tb` read/write |
-| platone | `tb`, `ti add` |
-| mose | `ti` |
-| polo | `python3` scripts |
-| indiana | `find`, `grep`, `git`, `tb` search |
+Some skills use only Claude native tools and need no `scripts/`:
+`piano` (dialogue), `vinci` (file editing), `omero` (`Read`/`Write`/
+`Edit`/`Glob`/`Grep` on `.wiki/`).
 
 ---
 
 ## Anti-patterns
 
-- **Skill calls a member directly**: `th run --member christopher ...` inside a skill is wrong. Use the skill itself inline, or route through `annibale` recipes.
-- **Direct binary in SKILL.md**: `tb search ...`, `gh issue create ...`, etc. belong in `justfile`, not in the markdown instructions.
-- **No justfile for a CLI-wrapping skill**: the skill is not yet complete.
-- **Bare `just <recipe>` or `just -f <path> <recipe>`**: works by accident when the cwd matches, breaks silently otherwise (wrong justfile found, or recipe runs with the wrong working directory). Always `pi-just <skill> <recipe>`.
+- **Skill calls a member directly**: `th run --member christopher ...`
+  inside a skill is wrong. Use the skill itself inline, or route through
+  annibale.
+- **Wrapper recipe/script around a single command**: inline the command
+  in `SKILL.md` instead.
+- **Hand-written script inventory**: lists of scripts in `SKILL.md` or
+  wiki pages go stale; derive them from the `# desc:` headers.
+- **`pi-just` / `just -f` calls**: justfile-era leftovers; lint flags
+  them. See [skill_migration](skill_migration).
 
 ---
 
-## Related
+## Cross-references
 
+- [skill_migration](skill_migration) — ordered tasklist of skills still on the justfile layer
 - [agenti](agenti) — list of available skills and their roles
-- [th_cli](th_cli) — the runner that lives behind annibale/fury justfiles
+- [th_cli](th_cli) — the runner used by annibale/fury and by efesto's test script
 - [architettura](architettura) — the three layers: `tb`, `th`, `.wiki/`

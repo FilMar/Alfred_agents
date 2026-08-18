@@ -1,3 +1,7 @@
+#!/usr/bin/env -S uv run --script
+# desc: Write a trend or summary JSON file shaped for atlante's bar/line recipes
+# usage: export_chart.py trend <category|totale> <years|''> <output.json>
+# usage: export_chart.py summary <year> <output.json>
 # /// script
 # requires-python = ">=3.11"
 # dependencies = ["polars"]

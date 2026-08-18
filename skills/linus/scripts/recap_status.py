@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# desc: Print SVILUPPO status breakdown with visual bars and in-progress items, reading gh JSON from stdin.
 """Print SVILUPPO status breakdown with visual bars and in-progress items."""
 import sys, json
 

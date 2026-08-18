@@ -5,35 +5,35 @@
       "id": 1,
       "name": "recap-creation",
       "prompt": "fammi vedere a che punto siamo con lo sviluppo",
-      "expected_output": "L'agente legge la skill linus, esegue `just recap` dalla directory della skill, e presenta il risultato: breakdown dello status del progetto SVILUPPO con conteggi e barre, lista item in progress, PR aperte e branch aperti.",
+      "expected_output": "L'agente legge la skill linus, esegue `scripts/recap.sh`, e presenta il risultato: breakdown dello status del progetto SVILUPPO con conteggi e barre, lista item in progress, PR aperte e branch aperti.",
       "files": []
     },
     {
       "id": 2,
       "name": "issue-list-and-view",
       "prompt": "fammi vedere le issue aperte su server_api e poi mostrami i dettagli della piu' recente",
-      "expected_output": "L'agente usa `just issue-list server_api` per listare le issue aperte, identifica il numero della piu' recente, poi usa `just issue-view server_api <numero>` per mostrare i dettagli.",
+      "expected_output": "L'agente usa `gh issue list --repo Emotion-SRL/server_api --state open` per listare le issue aperte, identifica il numero della piu' recente, poi usa `gh issue view <numero> --repo Emotion-SRL/server_api` per mostrare i dettagli.",
       "files": []
     },
     {
       "id": 3,
       "name": "status-filter-and-move",
       "prompt": "mostrami cosa c'e' in backlog nel progetto e poi sposta la issue 'smembrare in vari servizi fast api' su ready",
-      "expected_output": "L'agente prima esegue `just proj-by-status Backlog` per mostrare gli item, identifica l'item ID della issue cercata, poi esegue `just proj-move <item-id> Ready`. Se la issue non e' in Backlog (potrebbe essere gia' in Ready), l'agente lo segnala.",
+      "expected_output": "L'agente prima esegue `gh project item-list 4 --owner Emotion-SRL --format json | python3 scripts/proj_by_status.py Backlog` per mostrare gli item, identifica l'item ID della issue cercata, poi esegue `gh project item-edit --id <item-id> --project-id PVT_kwDOBGn_Wc4BZ0Ec --field-id PVTSSF_lADOBGn_Wc4BZ0EczhUwJEU --single-select-option-id 61e4505c` (option-id di Ready). Se la issue non e' in Backlog (potrebbe essere gia' in Ready), l'agente lo segnala.",
       "files": []
     },
     {
       "id": 4,
       "name": "pr-status-check",
       "prompt": "quante PR aperte abbiamo adesso e chi le ha aperte?",
-      "expected_output": "L'agente esegue `just prs` e presenta i risultati in forma leggibile: numero di PR aperte, per ciascuna repo, numero, titolo, autore e data.",
+      "expected_output": "L'agente esegue la ricerca PR aperte via `gh search prs --owner Emotion-SRL --state open ...` e presenta i risultati in forma leggibile: numero di PR aperte, per ciascuna repo, numero, titolo, autore e data.",
       "files": []
     },
     {
       "id": 5,
       "name": "repo-discovery",
       "prompt": "quali repo abbiamo in Emotion-SRL?",
-      "expected_output": "L'agente esegue `just repos` e presenta la lista dei repo con visibilita' e data di ultimo aggiornamento.",
+      "expected_output": "L'agente esegue `gh repo list Emotion-SRL --limit 100 --json name,visibility,updatedAt ...` e presenta la lista dei repo con visibilita' e data di ultimo aggiornamento.",
       "files": []
     }
   ]

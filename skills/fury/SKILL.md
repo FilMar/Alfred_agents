@@ -1,7 +1,6 @@
 ---
 name: fury
 description: "Fury designs and builds the member team for a project. It reads the project context (README, roadmap, CLAUDE.md). It proposes a calibrated roster with hats and specific roles. Use it to build or revise the agent team for a project. Use it at the start of a project. Use it when the roster is empty. Use it when you want to add missing perspectives. Use it when you suspect the current team does not cover the work well."
-compatibility: Requires this skill's justfile and the underlying member runner available in PATH.
 allowed-tools: Bash, Read
 ---
 
@@ -11,7 +10,7 @@ Design the team. You do not execute flows — you build who executes them.
 
 Your job has five steps. Read the project. Understand what perspectives it needs. Propose a calibrated team. Gather feedback. Then generate all members at once.
 
-All member-management commands in this skill are issued through its justfile. Never invoke the member runner CLI directly from these instructions.
+Issue every member-management command through the `th` CLI directly.
 
 ---
 
@@ -36,7 +35,7 @@ Do not invent context. If the files are missing or empty, say so and ask the use
 ## 2. Read the current roster state
 
 ```bash
-pi-just fury members
+th member list
 ```
 
 Classify:
@@ -73,6 +72,8 @@ The **role** describes who the member is — their domain, career, professional 
 - Do not create members for system skills (christopher, socrate, aristotele, platone, feynman, omero, etc.) — they are skills, not members. They are invoked by naming them in the task passed to the runner.
 - Max 10 members total, including those already present.
 
+Use `th hats get <hat-core>` if you have doubts about the exact cognitive role of a hat before assigning it.
+
 Present the proposal in readable form and ask for confirmation:
 
 ```
@@ -100,20 +101,20 @@ Do not create anything until the user approves. Incorporate requested changes, r
 For each approved member, first check whether a global with a compatible hat and role exists:
 
 ```bash
-pi-just fury members --global
-pi-just fury member-get <global-name>   # if it looks suitable
+th member list --global
+th member get <global-name>   # if it looks suitable
 ```
 
 If the global's hat **and role** are compatible:
 
 ```bash
-pi-just fury clone <name> <global-name>
+th member create <name> --from <global-name>
 ```
 
 Otherwise create from scratch:
 
 ```bash
-pi-just fury create <name> <hat-core> "<project-specific role>" --tools read,bash
+th member create <name> --hat <hat-core> --role "<project-specific role>" --tools read,bash
 ```
 
 Create all members in sequence. After each creation, confirm with the output.
@@ -125,9 +126,9 @@ Create all members in sequence. After each creation, confirm with the output.
 There is no direct update. To modify:
 
 ```bash
-pi-just fury member-get <name>      # read current state
-pi-just fury delete <name>          # delete
-pi-just fury create <name> <hat> "<new role>" --tools read,bash
+th member get <name>      # read current state
+th member delete <name>   # delete
+th member create <name> --hat <hat-core> --role "<new role>" --tools read,bash
 ```
 
 ---
@@ -135,12 +136,13 @@ pi-just fury create <name> <hat> "<new role>" --tools read,bash
 ## Reading stats to improve the team
 
 ```bash
-pi-just fury history
-pi-just fury history --member <name>   # filter by member
-pi-just fury history --limit <n>       # change number of runs
+th history                        # last 20 runs (JSON)
+th history --member <name>        # filter by specific member
+th history --limit <n>            # change number of runs returned
+th get <run_id>                   # metadata + output if still on disk
 ```
 
-For each run: `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`.
+Each record: `id`, `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`, `out_path`, `log_path`.
 
 If a member has repeated errors or timeouts → the role is probably too vague or the tools are insufficient. Propose concrete changes based on the data.
 
@@ -149,61 +151,9 @@ If a member has repeated errors or timeouts → the role is probably too vague o
 ## Promoting a member to global
 
 ```bash
-pi-just fury promote <name>          # copies to ~/.th/members/
-pi-just fury promote <name> --force  # overwrites if already exists
+th member promote <name>          # copies to ~/.th/members/
+th member promote <name> --force  # overwrites if already exists
 ```
-
----
-
-## Command reference
-
-### Members
-
-```bash
-# List members
-pi-just fury members                    # local + global + tmp
-pi-just fury members --local            # only .th/members/
-pi-just fury members --global           # only ~/.th/members/
-pi-just fury members --tmp              # only /tmp/.th/members/
-
-# Detail
-pi-just fury member-get <name>         # full JSON: hat, role, tools, skills, scope
-
-# Creation
-pi-just fury create <name> <hat-core> "<role>" [FLAGS]
-# available flags:
-#   --tools read,bash    # default tools for the member
-#   --tmp                # creates in /tmp instead of .th/members/
-
-pi-just fury clone <name> <global-name>   # inherits hat+role+tools from global
-
-# Deletion
-pi-just fury delete <name>             # removes the member file
-
-# Promotion to global
-pi-just fury promote <name>             # copies to ~/.th/members/
-pi-just fury promote <name> --force   # overwrites if already exists
-```
-
-### Hats
-
-```bash
-pi-just fury hats                        # list all available hats
-pi-just fury hat <hat-core>             # show the full hat markdown
-```
-
-Use `pi-just fury hat <hat>` if you have doubts about the exact cognitive role before assigning it to a member.
-
-### History
-
-```bash
-pi-just fury history                     # last 20 runs (JSON)
-pi-just fury history --member <name>   # filter by specific member
-pi-just fury history --limit <n>       # change number of runs returned
-pi-just fury get <run_id>              # metadata + output if still on disk
-```
-
-Each record: `id`, `member`, `task`, `status` (done/error/timeout), `started_at`, `finished_at`, `out_path`, `log_path`.
 
 ---
 

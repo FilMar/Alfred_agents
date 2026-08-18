@@ -1,7 +1,6 @@
 ---
 name: mose
 description: "Mosè is the Rule Legislator. Writes atomic context→action rules for Third Identity (`ti`) — the store of what to DO given a situation, distinct from Third Brain which stores what is KNOWN. Use it whenever the user wants to add a behavioural rule, turn a lesson or mistake into a rule, extract rules from Third Brain notes or session output, or clean up / deduplicate the ti store. Strong triggers: 'add a rule', 'ti add', 'make this a rule', 'ricordati di fare X quando Y', 'populate ti', 'extract rules from tb', any 'when X happens, do Y' the user wants persisted."
-compatibility: Requires this skill's justfile and access to the `ti` and `tb` CLIs.
 allowed-tools: Bash
 ---
 
@@ -54,17 +53,21 @@ The test: **can you phrase it so that doing it and not doing it look different?*
 
 ---
 
-## Available recipes
+## Available commands
 
-All recipes take **positional args** in the order shown — never `--flags`. A flag-style or `NAME=value` argument aborts with the correct usage.
+Call the `ti` and `tb` CLIs directly. Never wrap them in another layer.
 
 ```bash
-pi-just mose search "<draft context>" [limit] [min_score]   # default limit 5, min_score 0.6
-pi-just mose add "<context>" "<action>" ["tag1,tag2"]
-pi-just mose append-do <id> "<new action>"
-pi-just mose list ["tag1,tag2"]                    # all rules, optionally filtered by tags
-pi-just mose tb-browse <kind> [limit]              # default limit 50
+ti search "<draft context>" --limit 5 --min-score 0.6
+ti add --if "<context>" --do "<action>" --tags "<tag1>" --tags "<tag2>"
+ti append-do <id> --do "<new action>"
+ti list --tags "<tag1>" --tags "<tag2>"            # omit --tags for all rules
+tb browse --kind <kind> --limit 50
 ```
+
+`--tags` is a repeatable flag, one tag per flag — not a comma-separated
+string. When a user gives you tags as `"tag1,tag2"`, split on the comma
+and pass one `--tags` per tag.
 
 ---
 
@@ -74,10 +77,10 @@ pi-just mose tb-browse <kind> [limit]              # default limit 50
 2. **Draft** the rule applying the anatomy above. Splitting into multiple rules is normal — say so.
 3. **Dedupe** (mandatory, before proposing):
    ```bash
-   pi-just mose search "<draft context>"
+   ti search "<draft context>" --limit 5 --min-score 0.6
    ```
    - Same context, same action → nothing to do; tell the user.
-   - Same context, new action → propose `pi-just mose append-do <id> "<action>"` instead of a new rule.
+   - Same context, new action → propose `ti append-do <id> --do "<action>"` instead of a new rule.
    - Overlapping context → sharpen the draft `if` until the two situations are distinguishable, or merge.
 4. **Propose and wait.** Show the rule in this format and do not save until confirmed:
    ```
@@ -89,11 +92,10 @@ pi-just mose tb-browse <kind> [limit]              # default limit 50
    ```
 5. **Save** after confirmation:
    ```bash
-   pi-just mose add "<context>" "<action>" "tag1,tag2"
+   ti add --if "<context>" --do "<action>" --tags "tag1" --tags "tag2"
    ```
-   The tags argument is one comma-separated string; the recipe splits it into the repeated flags `ti` expects.
 
-**Tags**: lowercase singular nouns, max 3, reuse the vocabulary already in `pi-just mose list` before inventing. Tags are a filter (`pi-just mose list "tag1"`), not a taxonomy — choose the ones someone would actually filter by.
+**Tags**: lowercase singular nouns, max 3, reuse the vocabulary already in `ti list` before inventing. Tags are a filter (`ti list --tags "tag1"`), not a taxonomy — choose the ones someone would actually filter by.
 
 ## Workflow B — Distilling rules from existing material
 
@@ -101,7 +103,7 @@ Source can be Third Brain notes, a work session, a post-mortem, a document.
 
 1. **Harvest candidates.** For `tb`: notes of kind `protocollo` are rules almost by definition. `attrito` notes often hide a rule ("questo modello fallisce quando X" → "se X, non usare questo modello"). `dato`/`sintesi` notes yield a rule only when they imply a clear behavioural consequence. Most don't, and forcing one produces vague advice. Don't convert knowledge just to fill the store. A small set of sharp rules beats a large set of noise. Every weak rule makes retrieval worse for the good ones.
    ```bash
-   pi-just mose tb-browse protocollo 50
+   tb browse --kind protocollo --limit 50
    ```
 2. **Convert** each candidate through the anatomy. Find the situation in which the protocol applies — that is the `if`. Compress the instruction into a dry imperative `do`, and drop the note's `why` entirely: it stays in `tb`. Cross-project only — project-specific protocols stay out.
 3. **Dedupe against `ti` and within the batch**, same as Workflow A step 3. When several notes yield the same context, that is one rule with multiple `do` entries, not several rules.

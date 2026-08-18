@@ -1,13 +1,19 @@
 ---
 name: atlante
 description: Atlante turns data into a standalone interactive HTML chart, drawn with D3.js. Use it for any request to see data as a picture - bar chart, pie or donut, scatter or line plot, hierarchy tree, or a node-and-link graph. Trigger phrases include "make me a chart", "plot this", "graph these numbers", "show me a diagram", "visualize this", "grafico", "diagramma", "mostrami". Also use it when another skill has produced numbers and the next step is to show them.
-compatibility: needs bun and just. The chart loads D3 from a CDN, so it needs internet to open.
 ---
 
 # Atlante
 
 Atlante writes one self-contained HTML file per chart. Open it in a browser
-and it works: drag, zoom, hover tooltips. There is no server.
+and it works: drag, zoom, hover tooltips. There is no server. It needs
+`bun`, and internet the first time a chart opens, since it loads D3 from a
+CDN.
+
+Commands below use paths relative to this skill's folder. Resolve them
+against the base directory shown when the skill loads. `OUTPUT` is
+written relative to the caller's current directory, not to this skill's
+folder.
 
 ## Steps
 
@@ -15,8 +21,8 @@ and it works: drag, zoom, hover tooltips. There is no server.
    two fit, pick the one that answers the user's actual question.
 2. **Shape the data into the JSON the recipe wants.** Numbers stay numbers,
    labels stay strings.
-3. **Run the recipe.** Pass `OUTPUT` a name of its own when an earlier
-   chart would be overwritten. Pass `TITLE` whenever you know what the
+3. **Run the recipe.** Give `--output` a name of its own when an earlier
+   chart would be overwritten. Give `--title` whenever you know what the
    chart is about, which is almost always.
 4. **Tell the user the file path**, and offer to open it.
 
@@ -24,64 +30,68 @@ and it works: drag, zoom, hover tooltips. There is no server.
 
 | Data shape | Recipe |
 |---|---|
-| One number per category | `bar` |
-| Parts of a whole | `pie`, or `donut` |
-| Pairs of numbers, unordered | `scatter` |
-| A series over time or order | `line` |
-| Parent-child hierarchy | `tree` |
-| Things connected to other things | `force` |
+| One number per category | bar |
+| Parts of a whole | pie, or donut |
+| Pairs of numbers, unordered | scatter |
+| A series over time or order | line |
+| Parent-child hierarchy | tree |
+| Things connected to other things | force |
 
 ## Recipes
 
-Arguments are positional and in this order. `OUTPUT` and `TITLE` have
-defaults, but they come before the axis labels, so pass them to reach
-`XLABEL` and `YLABEL`.
+Every generator is a `bun` script that takes `--flag value` arguments.
+`--output` defaults to `schema.html`, `--title` defaults to a name for the
+chart type. Quote each JSON argument as one shell string.
 
-Bar - values and labels, same length:
+Bar chart - `--data` and `--labels` are JSON arrays of the same length:
 
 ```bash
-pi-just atlante bar '[100,200,150]' '["Q1","Q2","Q3"]' revenue.html "Revenue by quarter"
+bun scripts/schema-bar.js --data '[100,200,150]' --labels '["Q1","Q2","Q3"]' --output revenue.html --title "Revenue by quarter"
 ```
 
-Pie and donut - same arguments, different look:
+Pie and donut - same arguments, `scripts/schema-pie.js` draws both. Add
+`--donut true` for the donut:
 
 ```bash
-pi-just atlante pie '[40,30,20]' '["A","B","C"]'
-pi-just atlante donut '[40,30,20]' '["A","B","C"]' split.html "Split by area"
+bun scripts/schema-pie.js --data '[40,30,20]' --labels '["A","B","C"]'
+bun scripts/schema-pie.js --data '[40,30,20]' --labels '["A","B","C"]' --donut true --output split.html --title "Split by area"
 ```
 
-Scatter and line - an array of `[x, y]` pairs. `line` joins them in order:
+Scatter and line - `--data` is a JSON array of `[x, y]` pairs.
+`scripts/schema-xy.js` draws both. Add `--line true` to join the points in order:
 
 ```bash
-pi-just atlante scatter '[[0,0],[1,2],[2,4]]'
-pi-just atlante line '[[0,10],[1,14],[2,9]]' trend.html "Monthly trend" "Month" "Euro"
+bun scripts/schema-xy.js --data '[[0,0],[1,2],[2,4]]'
+bun scripts/schema-xy.js --data '[[0,10],[1,14],[2,9]]' --line true --output trend.html --title "Monthly trend" --xlabel Month --ylabel Euro
 ```
 
-Tree - one nested object, each node has `label` and optional `children`:
+Tree - `--data` is one nested JSON object, each node has `label` and
+optional `children`:
 
 ```bash
-pi-just atlante tree '{"label":"Root","children":[{"label":"A"},{"label":"B"}]}'
+bun scripts/schema-tree.js --data '{"label":"Root","children":[{"label":"A"},{"label":"B"}]}'
 ```
 
-Force graph - nodes and links. A node `type` of `start`, `end` or
-`decision` changes its shape. A link `label` shows text on the arrow:
+Force graph - `--nodes` and `--links` are JSON arrays. A node `type` of
+`start`, `end` or `decision` changes its shape. A link `label` shows text
+on the arrow:
 
 ```bash
-pi-just atlante force '[{"id":"A","label":"Start","type":"start"},{"id":"B"}]' '[{"source":"A","target":"B"}]'
+bun scripts/schema-force.js --nodes '[{"id":"A","label":"Start","type":"start"},{"id":"B"}]' --links '[{"source":"A","target":"B"}]'
 ```
 
 Open the result:
 
 ```bash
-pi-just atlante open revenue.html
+xdg-open revenue.html
 ```
 
 ## Look
 
-Everything about how a chart looks lives in `config.js`: the color theme
+Everything about how a chart looks lives in `scripts/config.js`: the color theme
 (Catppuccin Mocha, dark), the series palette, chart size, node radius,
 whether pies show a legend and bars show their values.
 
 None of it is an argument, because none of it changes from one chart to
-the next. When the user wants a different look, edit `config.js` once. All
+the next. When the user wants a different look, edit `scripts/config.js` once. All
 charts made after that follow it.

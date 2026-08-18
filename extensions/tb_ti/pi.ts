@@ -70,7 +70,7 @@ async function execSearch(
   query: string,
   opts: { limit?: number; minScore?: number; depth?: number } = {},
 ): Promise<string> {
-  const args = [query, "--limit", String(opts.limit ?? 5), "--min-score", String(opts.minScore ?? 0.6)];
+  const args = ["search", query, "--limit", String(opts.limit ?? 5), "--min-score", String(opts.minScore ?? 0.6)];
   if (opts.depth) args.push("--depth", String(opts.depth));
 
   try {

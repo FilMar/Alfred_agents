@@ -1,3 +1,4 @@
+# desc: Shared paths, schema, and parsing helpers imported by the other draghi scripts
 """Shared paths, schema, and parsing helpers for the draghi skill."""
 import os
 from pathlib import Path

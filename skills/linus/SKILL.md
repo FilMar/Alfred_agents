@@ -1,43 +1,55 @@
 ---
 name: linus
-description: "Manages GitHub for Emotion-SRL via gh through a justfile abstraction layer. Handles issues, the SVILUPPO Project V2 (status, size, assignment), and gives a recap of project state, open PRs, and branches across all org repos. Use it for issues, project status, moving items in the SVILUPPO board, a recap of open work, listing PRs or branches, or any other GitHub management task for Emotion-SRL. Use it even if the user does not mention gh or the project by name."
+description: "Manages GitHub for Emotion-SRL via gh. Handles issues, the SVILUPPO Project V2 (status, size, assignment), and gives a recap of project state, open PRs, and branches across all org repos. Use it for issues, project status, moving items in the SVILUPPO board, a recap of open work, listing PRs or branches, or any other GitHub management task for Emotion-SRL. Use it even if the user does not mention gh or the project by name."
 ---
 
 # Linus
 
-Linus manages GitHub for Emotion-SRL through a `justfile` that wraps the `gh` CLI. Always use the recipes in this skill's `justfile` instead of calling `gh` directly. The justfile handles the SVILUPPO project configuration, status option IDs, and cross-repo iteration for you.
+Linus manages GitHub for Emotion-SRL. It calls `gh` directly, and uses the
+scripts in `scripts/` for the actions that chain more than one `gh` call.
 
 ## Context
 
 - **Organization**: Emotion-SRL
-- **Project**: SVILUPPO (Project V2, number 4)
+- **Project**: SVILUPPO (Project V2, number 4), project ID `PVT_kwDOBGn_Wc4BZ0Ec`
+- **Status field ID**: `PVTSSF_lADOBGn_Wc4BZ0EczhUwJEU`
+- **Size field ID**: `PVTSSF_lADOBGn_Wc4BZ0EczhUwJRk`
 - **Status flow**: Backlog → Ready → In progress → Testing → Done
 - **Sizes**: XS, S, M, L, XL
 
 ## Issues
 
-Create an issue and automatically add it to SVILUPPO with status=Backlog:
+Create an issue and add it to SVILUPPO with status Backlog (issue create,
+project item-add, item-edit — three chained calls):
 
 ```bash
-pi-just linus issue-create server_api "Fix invoice calculation"
-pi-just linus issue-create-body server_api "Fix invoice" "Detailed description here"
+scripts/issue_create.sh server_api "Fix invoice calculation"
+scripts/issue_create.sh server_api "Fix invoice" "Detailed description here"
 ```
 
 List and view issues:
 
 ```bash
-pi-just linus issue-list server_api           # open issues in one repo
-pi-just linus issue-list-all                  # all open issues across the org
-pi-just linus issue-view server_api 42        # full details
+gh issue list --repo Emotion-SRL/server_api --state open
+gh issue view 42 --repo Emotion-SRL/server_api
+```
+
+List all open issues across the org:
+
+```bash
+gh search issues --owner Emotion-SRL --state open \
+    --json repository,number,title,updatedAt \
+    --jq '.[] | "\(.repository.nameWithOwner)#\(.number)\t\(.title)\t\(.updatedAt[0:10])"' \
+    | column -t -s $'\t'
 ```
 
 Manage issues:
 
 ```bash
-pi-just linus issue-close server_api 42
-pi-just linus issue-assign server_api 42 FilMar
-pi-just linus issue-label server_api 42 bug
-pi-just linus issue-comment server_api 42 "Working on this"
+gh issue close 42 --repo Emotion-SRL/server_api
+gh issue edit 42 --repo Emotion-SRL/server_api --add-assignee FilMar
+gh issue edit 42 --repo Emotion-SRL/server_api --add-label bug
+gh issue comment 42 --repo Emotion-SRL/server_api --body "Working on this"
 ```
 
 ## Project SVILUPPO
@@ -45,63 +57,101 @@ pi-just linus issue-comment server_api 42 "Working on this"
 List all items with their status, repo, and assignee:
 
 ```bash
-pi-just linus proj-list
+gh project item-list 4 --owner Emotion-SRL --format json | python3 scripts/proj_list.py
 ```
 
 Filter by status:
 
 ```bash
-pi-just linus proj-by-status "In progress"
-pi-just linus proj-by-status Backlog
-pi-just linus proj-in-progress              # shortcut
+gh project item-list 4 --owner Emotion-SRL --format json | python3 scripts/proj_by_status.py "In progress"
+gh project item-list 4 --owner Emotion-SRL --format json | python3 scripts/proj_by_status.py Backlog
 ```
 
-Move an item to a new status (accepts case-insensitive names):
+Move an item to a new status. Pick the option ID for the target status from
+the table below, then run the edit:
 
 ```bash
-pi-just linus proj-move PVTI_lADOBGn_Wc4BZ0EczgvCCyk "In progress"
-pi-just linus proj-move PVTI_lADOBGn_Wc4BZ0EczgvCCyk Done
+gh project item-edit --id PVTI_lADOBGn_Wc4BZ0EczgvCCyk --project-id PVT_kwDOBGn_Wc4BZ0Ec \
+    --field-id PVTSSF_lADOBGn_Wc4BZ0EczhUwJEU --single-select-option-id <option-id>
 ```
 
-Set size on an item:
+| Status | option-id |
+|---|---|
+| Backlog | `f75ad846` |
+| Ready | `61e4505c` |
+| In progress | `47fc9ee4` |
+| Testing | `df73e18b` |
+| Done | `98236657` |
+
+Set size on an item. Pick the option ID from the table, then run the edit:
 
 ```bash
-pi-just linus proj-size PVTI_lADOBGn_Wc4BZ0EczgvCCyk M
-pi-just linus proj-size PVTI_lADOBGn_Wc4BZ0EczgvCCyk XL
+gh project item-edit --id PVTI_lADOBGn_Wc4BZ0EczgvCCyk --project-id PVT_kwDOBGn_Wc4BZ0Ec \
+    --field-id PVTSSF_lADOBGn_Wc4BZ0EczhUwJRk --single-select-option-id <option-id>
 ```
 
-Add an existing issue to SVILUPPO (defaults to Backlog):
+| Size | option-id |
+|---|---|
+| XS | `6c6483d2` |
+| S | `f784b110` |
+| M | `7515a9f1` |
+| L | `817d0097` |
+| XL | `db339eb2` |
+
+Add an existing issue to SVILUPPO with status Backlog (item-add, item-edit —
+two chained calls):
 
 ```bash
-pi-just linus proj-add server_api 42
+scripts/proj_add.sh server_api 42
+```
+
+Create a draft item directly in SVILUPPO, not linked to any repo issue,
+status Backlog (item-create, item-edit — two chained calls):
+
+```bash
+scripts/proj_draft_create.sh "Title" "Body text"
 ```
 
 ## Recap
 
-The headline feature. Shows a complete picture of the work state:
+The headline feature. Shows a complete picture of the work state: status
+breakdown with in-progress items, open PRs, and open branches across every
+repo in the org. It chains a project query, a PR search, and a per-repo
+branch loop:
 
 ```bash
-pi-just linus recap
+scripts/recap.sh
 ```
 
-This outputs three sections:
-1. **Status breakdown** — item count per status column, with a visual bar, plus the list of items currently In progress
-2. **Open pull requests** — all open PRs across Emotion-SRL repos, with repo, number, title, author, and last update
-3. **Open branches** — all non-main/master branches across repos
+`recap.sh` calls `scripts/recap_status.py` for the status breakdown and
+`scripts/branches.sh` for the branch loop.
 
 For partial views:
 
 ```bash
-pi-just linus prs              # open PRs only
-pi-just linus branches         # open branches only
-pi-just linus repos            # all repos in the org
+gh search prs --owner Emotion-SRL --state open \
+    --json repository,number,title,author,updatedAt \
+    --jq '.[] | "\(.repository.nameWithOwner)#\(.number)\t\(.title)\t@\(.author.login)\t\(.updatedAt[0:10])"' \
+    | column -t -s $'\t'
+
+scripts/branches.sh              # open branches, looping over every repo in the org
+
+gh repo list Emotion-SRL --limit 100 --json name,visibility,updatedAt \
+    --jq '.[] | "\(.name)\t\(.visibility)\t\(.updatedAt[0:10])"' | column -t -s $'\t'
 ```
 
 ## Escape hatch
 
-When the abstraction doesn't cover what you need:
+When this skill doesn't cover what you need, call `gh` directly:
 
 ```bash
-pi-just linus raw repo view Emotion-SRL/server_api
-pi-just linus raw api repos/Emotion-SRL/server_api/branches
+gh repo view Emotion-SRL/server_api
+gh api repos/Emotion-SRL/server_api/branches
 ```
+
+## Known issue
+
+`issue_create.sh` and `proj_draft_create.sh` pass title and body unquoted
+through a shell variable. An apostrophe in the text (e.g. "tower's") is
+safe now, since the scripts use double quotes, but test a new value once
+if it contains other shell metacharacters like `` ` `` or `$`.

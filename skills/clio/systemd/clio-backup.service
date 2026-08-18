@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/just -f /home/filippo/.pi/agent/skills/clio/justfile clio-backup-all
+ExecStart=/home/filippo/.pi/agent/skills/clio/scripts/backup_all.sh
 WorkingDirectory=/home/filippo
 Environment=PATH=/usr/bin:/bin:/usr/sbin:/sbin
 

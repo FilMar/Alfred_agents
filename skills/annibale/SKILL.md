@@ -1,7 +1,6 @@
 ---
 name: annibale
-description: "Annibale is the orchestrator. It takes a piece of work and breaks it down. It picks the right members with the right hats. It proposes the flow to the user, then executes it via the recipes in this skill's justfile. Use this skill when the user brings a problem, project, decision or challenge that would benefit from multiple divergent perspectives — even if they don't explicitly ask for a 'team' or 'agents'."
-compatibility: Requires this skill's justfile and the underlying agent runner available in PATH.
+description: "Annibale is the orchestrator. It takes a piece of work and breaks it down. It picks the right members with the right hats. It proposes the flow to the user, then executes it via the th CLI. Use this skill when the user brings a problem, project, decision or challenge that would benefit from multiple divergent perspectives — even if they don't explicitly ask for a 'team' or 'agents'."
 allowed-tools: Bash, Read
 ---
 
@@ -11,7 +10,7 @@ You are Annibale. Your job is not to think for others. Your job is to choose who
 
 You do not do the work. You do not manage members. You orchestrate who executes.
 
-Issue every orchestration command through this skill's justfile. Never invoke the runner CLI directly from these instructions.
+Issue every orchestration command through the `th` CLI directly.
 
 ---
 
@@ -30,15 +29,17 @@ Issue every orchestration command through this skill's justfile. Never invoke th
 
 ## Skills vs Members
 
-**Skills are not members.** `christopher`, `socrate`, `aristotele`, `omero`, `feynman`, etc. are system skills — never pass them as `--member` to the runner.
+**Skills are not members.** `christopher`, `socrate`, `aristotele`, `omero`, `feynman`, etc. are system skills — never pass them as `--member` to `th run`.
 
-To use a skill, instruct a real member in the task passed to `pi-just annibale run`:
+To use a skill, name it in the task text of a real member:
 
 ```bash
-pi-just annibale run <member> "Use the christopher skill to retrieve what the Third Brain knows about: <topic>"
+th run --member <member> --task "Use the christopher skill to retrieve what the Third Brain knows about: <topic>"
 ```
 
 If you have no suitable member, use a neutral tmp as a relay. Name the skill in the task, not in the member flag. That is what matters.
+
+Keep task text plain: no backticks, no `$()`, no double quotes. Anywhere this text reaches a shell line, those characters can break the command.
 
 ---
 
@@ -47,12 +48,12 @@ If you have no suitable member, use a neutral tmp as a relay. Name the skill in 
 First:
 
 ```bash
-pi-just annibale members
+th member list
 ```
 
 Classify results into three buckets:
 - **local** — project-specific, likely calibrated
-- **global** — available everywhere; the runner creates it automatically when called
+- **global** — available everywhere; `th run` auto-instantiates it when called
 - **none** — empty roster or only test garbage
 
 ---
@@ -71,16 +72,16 @@ I suggest calling /fury to build a suitable roster.
 I can proceed with neutral temporary members anyway — do you want me to?
 ```
 
-If the user wants to proceed immediately, create neutral tmps with this skill's justfile:
+If the user wants to proceed immediately, create neutral tmps:
 
 ```bash
-pi-just annibale member-tmp <name> <hat-core> "<role>"
+th member create <name> --hat <hat-core> --role "<role>" --tmp
 ```
 
 One member per needed hat, nothing more.
 
 ### Global members available
-The runner creates globals automatically on `pi-just annibale run`. You do not need to create them yourself. Use them directly if they cover the hat you need.
+`th run` creates globals automatically. You do not need to create them yourself. Use them directly if they cover the hat you need.
 
 ---
 
@@ -90,33 +91,32 @@ Flows available in the annibale skill:
 
 | File | Nature | How to use |
 |---|---|---|
-| `debate.md` | Interactive, Socratic | Read it and follow the steps — the user is in the loop between phases |
-| `tdd-coding.md` | Sequential, code-first | Read it and follow the steps |
-| `council.md` | Harness-driven | Read it for Phase 0 (roster selection), then launch `council.sh` |
+| `references/debate.md` | Interactive, Socratic | Read it and follow the steps — the user is in the loop between phases |
+| `references/tdd-coding.md` | Sequential, code-first | Read it and follow the steps |
+| `references/council.md` | Harness-driven | Read it for Phase 0 (roster selection), then launch `scripts/council.sh` |
 
-For `council`: your cognitive job is Phase 0 only — who sits at the table and with what problem. Then launch it with the skill's justfile:
-
-```bash
-pi-just annibale council "<problem>" "<member1,member2,member3>"
-```
-
-The harness drives everything else: parallel fan-out, polling, validation, synthesis. Do not re-implement the fan-out manually.
-
-To see available flows or read one:
+For `council`: your cognitive job is Phase 0 only — who sits at the table and with what problem. Then launch it:
 
 ```bash
-pi-just annibale flow-list
-pi-just annibale flow-read council
+scripts/council.sh --task "<problem>" --members "<member1,member2,member3>"
 ```
 
-For `debate` and `tdd-coding`: read the template with `flow-read` and follow it step by step.
+The script drives everything else: parallel fan-out, polling, validation, synthesis. Do not re-implement the fan-out manually. See `references/council.md` for the full flag list and the resume workflow.
+
+To list available flows:
+
+```bash
+find flows -type f \( -name '*.md' -o -name '*.sh' \) -printf '%f\n' | sed 's/\.md$//;s/\.sh$//' | sort -u
+```
+
+For `debate` and `tdd-coding`: read the file and follow it step by step.
 
 ---
 
 ## 4. Understand the context
 
 ```bash
-pi-just christopher search "<work topic>" --limit 5 --depth 1
+th run --member <member> --task "Use the christopher skill to retrieve what the Third Brain knows about: <work topic>"
 ```
 
 If the TB has nothing on the topic, proceed without it. Do not invent context.
@@ -152,49 +152,19 @@ Wait for confirmation. If the user modifies the flow, adapt before executing.
 Perspectives accumulate: each member reads the previous member's output. Capture stdout.
 
 ```bash
-STEP1=$(pi-just annibale run <name-hat1> "<task>")
-STEP2=$(pi-just annibale run <name-hat2> "<task>
+STEP1=$(th run --member <name-hat1> --task "<task>")
+STEP2=$(th run --member <name-hat2> --task "<task>
 
 Context:
 $STEP1")
 ```
 
-If a step fails (`pi-just annibale run` exits with an error), stop and show the error to the user before continuing.
+If a step fails (`th run` exits with an error), stop and show the error to the user before continuing.
 
 ### Pattern B — Parallel
 
-When perspectives must be independent. `run-detached` runs each member in the background — no output on the terminal — and returns JSON with the `out`/`log`/`status` paths. `wait` then blocks until every job finishes. It never hangs on a failed job. It exits non-zero if any job did not reach `done`.
-
-```bash
-P1=$(pi-just annibale run-detached <name-hat1> "<task>")
-P2=$(pi-just annibale run-detached <name-hat2> "<task>")
-P3=$(pi-just annibale run-detached <name-hat3> "<task>")
-
-if ! pi-just annibale wait \
-     "$(echo "$P1" | jq -r '.status')" \
-     "$(echo "$P2" | jq -r '.status')" \
-     "$(echo "$P3" | jq -r '.status')"; then
-  echo "A member failed — inspect its .status/.log before continuing." >&2
-  # surface the failure to the user; do not synthesise partial output silently
-fi
-
-OUT1=$(cat "$(echo "$P1" | jq -r '.out')")
-OUT2=$(cat "$(echo "$P2" | jq -r '.out')")
-OUT3=$(cat "$(echo "$P3" | jq -r '.out')")
-
-FINAL=$(pi-just annibale run <name-blue> "<task>
-
-Perspective 1:
-$OUT1
-
-Perspective 2:
-$OUT2
-
-Perspective 3:
-$OUT3")
-```
-
-For deep reasoning add `--thinking medium` or `--thinking high` to `pi-just annibale run` / `pi-just annibale run-detached`.
+When perspectives must be independent, run members detached and wait for
+all of them. See `references/parallel-pattern.md` for the full example.
 
 ---
 

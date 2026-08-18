@@ -1,3 +1,6 @@
+#!/usr/bin/env -S uv run --script
+# desc: Import one official bank export CSV into essays/.bank.csv
+# usage: import_csv.py <file.csv>
 # /// script
 # requires-python = ">=3.11"
 # dependencies = ["polars"]

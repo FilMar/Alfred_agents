@@ -1,9 +1,9 @@
-"""Print the skill roster from the filesystem.
-
-Scans every <skills_root>/*/SKILL.md, parses the frontmatter (name,
-description) and prints one line per skill: name — first sentence of the
-description. Nothing is pre-saved: rename a skill and the roster follows.
-"""
+#!/usr/bin/env python3
+# desc: Print the skill roster: one line per skill, name and first sentence of its description.
+# usage: roster.py [skills-root]
+"""Scans every <skills_root>/*/SKILL.md and prints name + first sentence of
+the description. Nothing is pre-saved: rename a skill and the roster follows.
+Default root: this repo's skills/ folder."""
 
 import re
 import sys
@@ -40,7 +40,7 @@ def first_sentence(text: str, limit: int = 110) -> str:
 
 
 def main() -> int:
-    root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()
+    root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[2]
     rows = []
     for skill_md in sorted(root.glob("*/SKILL.md")):
         fm = parse_frontmatter(skill_md.read_text(encoding="utf-8"))

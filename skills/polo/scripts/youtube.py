@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# desc: extract the transcript from one or more YouTube URLs
+# usage: youtube.py <url> [url2 ...]
 """Extract clean transcript from one or more YouTube URLs using youtube_transcript_api."""
 
 import sys
