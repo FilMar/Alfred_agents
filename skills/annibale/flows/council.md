@@ -15,10 +15,10 @@ Pick members that cover different angles of the problem:
 - **Size**: 2–5 members (hard cap; override with `COUNCIL_MAX_MEMBERS` env var)
 - **Synth**: default `von-neumann-blue`; swap if a domain-specific synthesiser fits better
 
-If a needed profile does not exist, create a temporary member first with this skill's justfile:
+If a needed profile does not exist, create a temporary member first:
 
 ```bash
-just member-tmp <name> <hat-core> "<role>"
+th member create <name> --hat <hat-core> --role "<role>" --tmp
 ```
 
 Propose the roster to the user before launching:
@@ -44,7 +44,9 @@ Proceed?
 Once the user confirms, run from the **project root**:
 
 ```bash
-just -f skills/annibale/justfile council "<problem verbatim or refined>" "knuth-black,jobs-yellow,turing-green" \
+skills/annibale/flows/council.sh \
+  --task "<problem verbatim or refined>" \
+  --members "knuth-black,jobs-yellow,turing-green" \
   [--rounds N]       # default 1; add rounds when first synthesis opens new tensions
   [--synth <member>] # default von-neumann-blue
   [--run-id ID]      # omit on first run; reuse to resume a crashed run
@@ -54,8 +56,8 @@ just -f skills/annibale/justfile council "<problem verbatim or refined>" "knuth-
 
 The harness:
 1. Validates that every member exists (fail fast — no half-started runs)
-2. Launches all experts in parallel via this skill's `run-detached` recipe
-3. Blocks on the `wait` recipe with crash detection until every expert is terminal
+2. Launches all experts in parallel with `th run --detach`
+3. Blocks on `th wait` with crash detection until every expert is terminal
 4. Validates that every output is non-empty before synthesising
 5. Runs the synth member sequentially with all perspectives
 6. Accumulates the synthesis as context for round N+1
@@ -69,7 +71,9 @@ Final synthesis goes to stdout. Per-member logs and outputs are in `/tmp/th-flow
 If a round fails or the process crashes, relaunch with the same `--run-id`. Completed steps are skipped; failed or missing ones are re-executed.
 
 ```bash
-just -f skills/annibale/justfile council "<same problem>" "<same members>" \
+skills/annibale/flows/council.sh \
+  --task "<same problem>" \
+  --members "<same members>" \
   --run-id council-20260702-143021   # printed by the first run
 ```
 
