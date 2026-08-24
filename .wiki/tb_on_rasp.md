@@ -1,11 +1,9 @@
 # Third Brain on the Rasp
 
-## Frontmatter
-
 ```yaml
 tags: [architecture, tb, raspberry, matrix]
 sources: [conversation, tools/tb/src/infra.ts]
-updated: 2026-07-16
+updated: 2026-08-18
 ```
 
 ## Decision
@@ -34,7 +32,7 @@ This is exactly a `requiresDesktop: true` orchestrator task: schedulable, the Ra
 
 ## Phase 8 revision
 
-[roadmap](roadmap) Phase 8 currently says "Telegram interface with separate topics" — this now contradicts the Matrix-vs-Telegram rationale documented in Pillar 5 of [orchestrator_overview](orchestrator_overview): a Telegram bot querying the TB would expose personal memory outside the Tailscale perimeter, to anyone holding the bot token. Phase 8's interface channel becomes **Matrix** (dedicated bot); the `pi-core` idea (Qdrant + SQLite container on the personal server = the Rasp) is unchanged.
+The Matrix-vs-Telegram rationale is documented in Pillar 5 of [orchestrator_overview](orchestrator_overview): a Telegram bot querying the TB would expose personal memory outside the Tailscale perimeter, to anyone holding the bot token. Phase 8's interface channel is **Matrix** (dedicated bot); the `pi-core` idea (Qdrant + SQLite container on the personal server = the Rasp) is unchanged.
 
 ## Cross-references
 

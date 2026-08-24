@@ -1,8 +1,8 @@
----
+```yaml
 tags: [architecture, raspberry, orchestrator]
 sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts, tools/orchestrator/src]
-updated: 2026-07-20
----
+updated: 2026-08-18
+```
 
 # Raspberry Orchestrator: System Overview
 

@@ -1,8 +1,8 @@
----
+```yaml
 tags: [pi, skills, migration, tasklist]
 sources: [skills/efesto/references/MIGRATION.md, skills/*/justfile]
 updated: 2026-08-18
----
+```
 
 # Skill Migration — justfile → direct CLI + scripts
 

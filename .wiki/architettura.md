@@ -1,10 +1,10 @@
 # Architecture
 
-## Frontmatter
-
+```yaml
 tags: [architecture, tb, th, layer]
 sources: [README.md, setup.sh, alfred.md, tools/tb/src/infra.ts]
-updated: 2026-07-16
+updated: 2026-08-18
+```
 
 ## The three layers
 
@@ -66,7 +66,7 @@ The wiki needs no install — it is plain markdown in `.wiki/`, maintained by th
 
 - [agenti](agenti) — available agents and roles
 - [th_cli](th_cli) — full `th` CLI
-- [roadmap](roadmap) — development phase status
+- [roadmap](roadmap) — future task list
 - [tb_on_rasp](tb_on_rasp) — tb backing services moving to the Rasp
 - [rasp_node](rasp_node) — everything running on the Rasp
 - [ti_module](ti_module) — the new context→behavior memory layer

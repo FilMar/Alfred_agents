@@ -1,12 +1,20 @@
 # Log
 
-## Frontmatter
-
+```yaml
 tags: [log, storico]
 sources: []
 updated: 2026-08-18
+```
 
 ## Log
+
+## [2026-08-18] revision | Frontmatter aligned to fenced yaml
+
+All 18 pages migrated to the new convention: fenced `yaml` block at top, no `## Frontmatter` heading, no `---` delimiters. Converted: agenti, architettura, index, log, roadmap, th_cli (bare yaml under heading); procedural_memory_gaps, rasp_node, style_dual_entrypoint, style_tb_ti_layering, tb_on_rasp (heading removed); orchestrator_overview, roadmap_orchestrator, skill_migration, skill_pattern (`---` style). `updated` bumped on all touched pages.
+
+## [2026-08-18] revision | Roadmap flattened to a task list
+
+[roadmap](roadmap) rewritten from a phase-by-phase document to a flat task list — one line per task, deep dives in linked files. Phase numbers kept as labels (referenced across the wiki). Cross-references updated in architettura, procedural_memory_gaps, rasp_node, stateless_cockpit, tb_on_rasp; index gained the missing roadmap entry.
 
 ## [2026-08-18] ingest | Router pass planned — recorded in skill_migration
 

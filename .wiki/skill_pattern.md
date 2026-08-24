@@ -1,8 +1,8 @@
----
+```yaml
 tags: [pi, skills, convention, scripts]
 sources: [skills/efesto/SKILL.md, skills/efesto/references/MIGRATION.md, skills/*/SKILL.md]
 updated: 2026-08-18
----
+```
 
 # Skill Pattern
 

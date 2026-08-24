@@ -1,11 +1,9 @@
 # Style: tb/ti layered architecture and coding standards
 
-## Frontmatter
-
 ```yaml
 tags: [architecture, tb, ti, style, coding-standards]
 sources: [tools/tb/CLAUDE.md, tools/ti/CLAUDE.md]
-updated: 2026-07-27
+updated: 2026-08-18
 ```
 
 ## Description

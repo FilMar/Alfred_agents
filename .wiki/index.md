@@ -8,6 +8,7 @@
 | [agenti](agenti) | Available agents, roles, triggers |
 | [th_cli](th_cli) | CLI reference for `th` — commands, flags, examples |
 | [orchestrator_overview](orchestrator_overview) | General system design and the five core pillars |
+| [roadmap](roadmap) | Future task list — one line per task, deep dives in linked files |
 | [roadmap_orchestrator](roadmap_orchestrator) | Implementation plan for the Raspberry Orchestrator service — paused 2026-07-21 |
 | [ti_module](ti_module) | Third Identity: dedicated Qdrant collection for context→behavior rules |
 | [tl_module](tl_module) | Third Log: unified REST event log replacing `th.db`, shared by `th`/`tb`/`ti` |
@@ -21,8 +22,8 @@
 | [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards shared by `tb`/`ti` |
 | [log](log) | Wiki update history |
 
-## Frontmatter
-
+```yaml
 tags: [pi, index, architecture]
 sources: [README.md, alfred.md]
-updated: 2026-07-28
+updated: 2026-08-18
+```

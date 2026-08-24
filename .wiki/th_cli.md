@@ -1,10 +1,10 @@
 # th CLI
 
-## Frontmatter
-
+```yaml
 tags: [th, cli, reference, agents, orchestration]
 sources: [tools/th/src/cli.ts, tools/th/src/runner.ts, tools/th/src/members.ts, tools/th/src/db.ts]
-updated: 2026-07-16
+updated: 2026-08-18
+```
 
 ## Overview
 
