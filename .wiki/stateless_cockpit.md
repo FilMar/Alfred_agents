@@ -89,7 +89,7 @@ Settled via `piano`; these close every open question of the original proposal.
 ## Cross-references
 
 - [orchestrator_overview](orchestrator_overview) — Pillar 5 rationale (risk now accepted, see decisions) and the Interactive pi Chat this replaces
-- [roadmap](roadmap) — worksite 4, now paused; Phase 8 (Personal Server) is the closest numbered phase
+- [roadmap](roadmap) — Phase 8 (Personal Server) is the closest numbered phase
 - [rasp_node](rasp_node) — the host of the whole v1
 - [style_dual_entrypoint](style_dual_entrypoint) — the Hono pattern the backend follows
 - [architettura](architettura) — tb/ti layers used for retrieval

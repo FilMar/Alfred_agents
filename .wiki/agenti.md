@@ -1,10 +1,10 @@
 # Agents
 
-## Frontmatter
-
+```yaml
 tags: [agents, skills, th, hats]
 sources: [README.md, skills/, annibale/SKILL.md]
-updated: 2026-07-27
+updated: 2026-08-18
+```
 
 ## Overview
 

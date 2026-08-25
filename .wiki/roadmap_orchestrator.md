@@ -1,8 +1,8 @@
----
+```yaml
 tags: [roadmap, raspberry, orchestrator]
 sources: [conversation, tools/th/src/cli.ts, tools/th/src/runner.ts, tools/orchestrator/src, tests/orchestrator.test.ts, tests/orchestrator.phase2.test.ts]
-updated: 2026-07-20
----
+updated: 2026-08-18
+```
 
 # Roadmap: Raspberry Orchestrator
 

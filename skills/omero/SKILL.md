@@ -12,78 +12,29 @@ The wiki is a directory of markdown files at `.wiki/` in the project root. You o
 
 If `wiki.md` exists in the project root, read it before every operation — it overrides the default conventions below.
 
-Templates for new pages live next to this skill in `templates/` (`page.md`, `style.md`, `index.md`). Copy one and fill it in rather than writing structure from memory.
-
----
-
 ## Setup
 
-If `.wiki/` does not exist, create it and seed the index:
+If `.wiki/` does not exist, create it and seed the skeleton. The full base layout is in `references/STRUCTURE.md`.
 
 1. Create `.wiki/index.md` from `templates/index.md`, substituting the project name.
-2. Tell the user the wiki is initialised.
-
----
+2. Create `.wiki/log.md` from `templates/log.md`.
+3. Create `.wiki/roadmap.md` from `templates/roadmap.md`.
+4. Tell the user the wiki is initialised.
 
 ## Operations
 
-### Ingest
+Four operations. Each has its own reference file — read it only when that operation is the task.
 
-The user points to files or directories to ingest. You:
-
-1. Read the sources with `Read`.
-2. Discover what already exists: `Glob .wiki/*.md`, then `Read` the relevant pages.
-3. Discuss key points with the user if the material is dense or ambiguous.
-4. Write or update the page:
-   - New page → copy `templates/page.md`, fill it, `Write` to `.wiki/<name>.md`.
-   - Existing page → `Read` it, then `Edit` the affected `## Section` in place. Do not rewrite the whole file.
-5. Update cross-references in related pages (`Read` + `Edit` the `## Cross-references` section).
-6. Update the index `.wiki/index.md` (`## Pages` section).
-7. Update the log: `Read` `.wiki/log.md` (create it with a `## Log` heading if absent), then `Edit` to prepend a new entry under `## Log`:
-   `## [YYYY-MM-DD] ingest | <title>`
-
-### Query
-
-The user asks a question. You:
-
-1. `Grep` the query across `.wiki/` to find relevant pages.
-2. `Read` the pages found.
-3. Answer with citations: `[Text](page_name)`.
-4. If the answer is rich and reusable, save it as a new page.
-
-The wiki holds the combined knowledge. Do not read the project source files to answer queries. If the wiki does not contain the answer, say so explicitly and propose ingesting the missing material.
-
-### Style
-
-Documentation of patterns, conventions and code structure. It records how the code writes things and how to extend it. Style pages are named `style_<name>.md`.
-
-1. When a significant pattern or non-obvious convention emerges, create `.wiki/style_<name>.md` from `templates/style.md`.
-2. Fill the sections:
-   - **How it is written** — explain the pattern with context (why that choice).
-   - **How to extend** — concrete steps for adding new similar cases.
-   - **Example** — representative code snippet.
-3. List existing style pages with `Glob .wiki/style_*.md`; `Read` to inspect.
-
-Update style pages when the code evolves and the pattern changes — `Edit` the affected section. An outdated style page is worse than no style page.
-
-### Lint
-
-The user requests a health-check. You:
-
-1. `Glob .wiki/*.md` — list all pages.
-2. `Read` each one.
-3. Flag:
-   - Contradictions between pages.
-   - Orphan pages (no incoming links).
-   - Concepts mentioned without a dedicated page.
-   - Statements replaced by more recent sources.
-4. Propose open questions to explore.
-
----
+| Operation | When | Read |
+|-----------|------|------|
+| Ingest | user points to files or directories | `references/ingest.md` |
+| Query | user asks a question | `references/query.md` |
+| Style | a pattern or convention emerges | `references/style.md` |
+| Lint | user requests a health-check | `references/lint.md` |
 
 ## Default conventions
 
-If the project has no `wiki.md` with its own conventions:
+Used on every operation that writes a page.
 
 - Page names: `category_subject` (lowercase, underscore — the file is `<name>.md`).
 - Structure: H2 sections (`## Section Name`).
@@ -95,9 +46,10 @@ If the project has no `wiki.md` with its own conventions:
   ```
 - Internal links: `[Text](page_name)` — without extension.
 - Each page ends with `## Cross-references`.
-- Special pages: `index` (catalogue with `## Pages` section), `log` (history with `## Log` section).
+- Special pages: `index` (catalogue with `## Pages` section), `log` (history with `## Log` section), `roadmap` (future task list with `## Tasks` section).
+- English style for page text: see `references/GLOSSARY.md`.
 
----
+Templates for new pages live next to this skill in `templates/` (`page.md`, `style.md`, `index.md`). Copy one and fill it in rather than writing structure from memory.
 
 ## Rules
 

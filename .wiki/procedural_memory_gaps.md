@@ -1,11 +1,9 @@
 # Procedural Memory Gaps
 
-## Frontmatter
-
 ```yaml
 tags: [architecture, memory, th, roadmap]
 sources: [conversation]
-updated: 2026-07-16
+updated: 2026-08-18
 ```
 
 ## Context
@@ -62,7 +60,7 @@ Three moves, cheapest first:
 
 ## Cross-references
 
-- [roadmap](roadmap) — Phase 2C, Phase 7, Phase 8 planning this extends
+- [roadmap](roadmap) — Phase 7 planning this extends
 - [agenti](agenti) — skills vs. `th` members distinction
 - [architettura](architettura) — the three layers (`tb`, `th`, `.wiki/`) and why they don't overlap
 - [th_cli](th_cli) — `th.db` schema and `th history`/`th stats` commands

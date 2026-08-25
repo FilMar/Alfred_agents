@@ -1,11 +1,9 @@
 # Style: dual entrypoint (CLI + HTTP API)
 
-## Frontmatter
-
 ```yaml
 tags: [architecture, tb, ti, hono, style]
 sources: [tools/tb/src/api.ts, tools/tb/src/cli.ts, tools/tb/src/types.ts, tools/ti/src/api.ts, tools/ti/src/cli.ts, tools/ti/src/types.ts]
-updated: 2026-07-23
+updated: 2026-08-18
 ```
 
 ## Description
