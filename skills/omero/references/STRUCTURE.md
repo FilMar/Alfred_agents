@@ -10,7 +10,7 @@ Every wiki starts with these files in `.wiki/`:
 |------|---------|
 | `index.md` | The catalogue. A table of Page + Content, one row per page. Updated on every ingest. |
 | `log.md` | The history. Append-only record of changes. |
-| `roadmap.md` | The future task list. One line per task, deep dives in linked files. |
+| `roadmap.md` | The future task list. One short line per task, no code names, grouped by area; reason and plan in the linked page. |
 | `<name>.md` | Content pages. Named `category_subject`. |
 | `style_<name>.md` | Style pages. Document patterns and conventions. |
 

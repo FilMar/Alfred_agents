@@ -46,7 +46,7 @@ The history page (`log.md`). Append-only. Records what changed and when, each en
 
 ### Roadmap
 
-The future task list (`roadmap.md`). A flat list of open work — one line per task, deep dives in linked files. Both potential and agreed tasks live here.
+The future task list (`roadmap.md`). One line per task, ten words or fewer, no code names. Group tasks under an H3 per area (engine, render, one per game). A group can start with one plain sentence of status. The reason and the plan live in the linked page, never in the line. Both potential and agreed tasks live here.
 
 ### Cross-Reference
 
