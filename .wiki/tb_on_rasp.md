@@ -3,12 +3,12 @@
 ```yaml
 tags: [architecture, tb, raspberry, matrix]
 sources: [conversation, tools/tb/src/infra.ts]
-updated: 2026-08-18
+updated: 2026-08-26
 ```
 
 ## Decision
 
-Host the Third Brain on the Rasp and query it from anywhere via a dedicated Matrix bot — no agent needed for reads. This revises [roadmap](roadmap) Phase 8 (see below).
+Host the Third Brain on the Rasp and query it from anywhere via a dedicated Matrix bot — no agent needed for reads. This revises the personal server task in [roadmap](roadmap), rasp area (see below).
 
 ## Why it is nearly free
 
@@ -30,13 +30,13 @@ Corpus migration or embedding-model change is the one slow case on the Pi — an
 
 This is exactly a `requiresDesktop: true` orchestrator task: schedulable, the Rasp wakes the Desktop via WoL, the job runs, the Desktop shuts down. The existing architecture covers this case with zero additions.
 
-## Phase 8 revision
+## Personal server revision
 
-The Matrix-vs-Telegram rationale is documented in Pillar 5 of [orchestrator_overview](orchestrator_overview): a Telegram bot querying the TB would expose personal memory outside the Tailscale perimeter, to anyone holding the bot token. Phase 8's interface channel is **Matrix** (dedicated bot); the `pi-core` idea (Qdrant + SQLite container on the personal server = the Rasp) is unchanged.
+The Matrix-vs-Telegram rationale is documented in Pillar 5 of [orchestrator_overview](orchestrator_overview): a Telegram bot querying the TB would expose personal memory outside the Tailscale perimeter, to anyone holding the bot token. The personal server's interface channel is **Matrix** (dedicated bot); the `pi-core` idea (Qdrant + SQLite container on the personal server = the Rasp) is unchanged.
 
 ## Cross-references
 
 - [orchestrator_overview](orchestrator_overview) — Pillar 5 perimeter and Matrix-vs-Telegram rationale
-- [roadmap](roadmap) — Phase 8, revised by this decision
+- [roadmap](roadmap) — rasp area, revised by this decision
 - [architettura](architettura) — the `tb` layer
 - [rasp_node](rasp_node) — full view of services on the Rasp

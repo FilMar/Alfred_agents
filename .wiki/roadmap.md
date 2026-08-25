@@ -3,23 +3,44 @@
 ```yaml
 tags: [roadmap, tasks]
 sources: []
-updated: 2026-08-18
+updated: 2026-08-26
 ```
 
 ## Tasks
 
-- [ ] **Phase 6 — Career Coach** — consult TB before each response, calibrated on real history.
-- [ ] **Phase 7 — Per-hat metrics** — `th stats [--member]`, aggregate member performance over time.
-- [ ] **Phase 8 — Personal Server** — `pi-core` container (Qdrant + SQLite), Matrix bot, nightly Mega backup. Detail: [rasp_node](rasp_node)
-- [ ] **Orchestrator Phase 2** — WoL, `i_wake`, provisioning pipeline. Detail: [roadmap_orchestrator](roadmap_orchestrator)
-- [ ] **TB-on-Rasp migration** — needs the Rasp provisioned (Qdrant + Ollama). Detail: [tb_on_rasp](tb_on_rasp)
-- [ ] **Events table / procedural memory** — independent, value accrues slowly. Detail: [procedural_memory_gaps](procedural_memory_gaps)
-- [ ] **Stateless Cockpit resume** — paused 2026-08-09, branch `feature/cockpit-skeleton`. Detail: [stateless_cockpit](stateless_cockpit)
-- [ ] **`th` HTTP API entrypoint** — `POST /run` detached + `GET /runs`. Detail: [th_cli](th_cli)
+One line per task. The reason and the plan live in the linked page.
+
+### memory
+
+- [ ] Learn from outcomes: procedural memory for members and skills. [detail](procedural_memory_gaps)
+- [ ] Per-hat metrics, aggregated over time. [detail](procedural_memory_gaps)
+- [ ] Add a relevance cutoff to search. [detail](ti_module)
+- [ ] Career coach: consult memory before each answer. No detail page yet.
+
+### th
+
+- [ ] Add an HTTP entry point to run agents. [detail](th_cli)
+
+### rasp
+
+Paused since 2026-07-21. The memory stack came first.
+
+- [ ] Personal server: provision the always-on node. [detail](rasp_node)
+- [ ] Move the Third Brain to the Rasp. [detail](tb_on_rasp)
+- [ ] Finish the orchestrator: audit gate, chat bridge, hardening. [detail](roadmap_orchestrator)
+
+### cockpit
+
+Paused 2026-08-09. Pivoted to a pi extension 2026-08-10, not started.
+
+- [ ] Resume the cockpit as a pi extension. [detail](stateless_cockpit)
+
+### skills
+
+- [ ] Router pass: shrink each big skill to a dispatch table. [detail](skill_migration)
 
 ## Cross-references
 
+- [index](index)
 - [architettura](architettura) — system overview
 - [agenti](agenti) — completed operative skills
-- [procedural_memory_gaps](procedural_memory_gaps) — what Phase 7 still leaves uncovered
-- [tb_on_rasp](tb_on_rasp) — TB hosted on the Rasp, Matrix bot for agent-free reads

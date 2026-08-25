@@ -3,10 +3,14 @@
 ```yaml
 tags: [log, history]
 sources: []
-updated: 2026-08-25
+updated: 2026-08-26
 ```
 
 ## Log
+
+## [2026-08-26] revision | Roadmap aligned to the area-grouped template
+
+[roadmap](roadmap) rewritten to the new template: tasks grouped under an H3 per area (memory, th, rasp, cockpit, skills), one line per task, ten words or fewer, no code names, a `[detail](page)` link per line, one plain status sentence for paused areas. Phase labels dropped. Content changes: the stale "Orchestrator Phase 2" line (Phase 2 is done since 2026-07-17) became "finish the orchestrator" pointing at Phases 3-4; two planned items already recorded elsewhere joined the list — the search relevance cutoff ([ti_module](ti_module)) and the skill router pass ([skill_migration](skill_migration)). The career coach task has no detail page; flagged in the line. Inbound links that cited "Phase 7"/"Phase 8" repointed to areas in procedural_memory_gaps, tb_on_rasp, stateless_cockpit, rasp_node.
 
 ## [2026-08-25] revision | Language aligned to the easy-English glossary
 

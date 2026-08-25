@@ -3,7 +3,7 @@
 ```yaml
 tags: [architecture, memory, th, roadmap]
 sources: [conversation]
-updated: 2026-08-18
+updated: 2026-08-26
 ```
 
 ## Context
@@ -12,7 +12,7 @@ updated: 2026-08-18
 
 The existing roadmap has two pieces that look like procedural memory but are not:
 - **Phase 2C (done)**: `th.db` (SQLite) tracks every `th run` — id, member, task, status, timestamps. Per-member/hat execution history.
-- **Phase 7 (planned)**: `th stats` — aggregate metrics per hat over time (output quality, tokens, duration).
+- **Per-hat metrics (planned, [roadmap](roadmap) memory area)**: `th stats` — aggregate metrics per hat over time (output quality, tokens, duration).
 
 Both are **evaluative/scoring layers only**. They measure how well a member/hat performs; they do not extract, store, or revise reusable procedures. They also do not touch the skills system (`.claude/skills/*.md`) at all — skills are a separate, disconnected mechanism, authored manually (e.g. via the Efesto skill).
 
@@ -20,9 +20,9 @@ Both are **evaluative/scoring layers only**. They measure how well a member/hat 
 
 In dependency order — each presupposes the data or mechanism from the one above it.
 
-1. **No telemetry on skills.** `th.db` tracks execution + score per `th` member/hat (Phase 2C/7). Skills (omero, platone, polo, efesto, etc.) have no equivalent: no log of invocation frequency, context, or outcome. The measurement side is only half-covered — `th` members yes, skills no.
+1. **No telemetry on skills.** `th.db` tracks execution + score per `th` member/hat (Phase 2C, plus the planned per-hat metrics). Skills (omero, platone, polo, efesto, etc.) have no equivalent: no log of invocation frequency, context, or outcome. The measurement side is only half-covered — `th` members yes, skills no.
 
-2. **No extraction of the procedure from the outcome.** Even with Phase 7 complete, what you get is a score ("this member performs well"), not *which specific action/tool-call sequence* produced that result. A step is needed that, given a successful run, isolates the action pattern itself — not just a judgment about it.
+2. **No extraction of the procedure from the outcome.** Even with per-hat metrics complete, what you get is a score ("this member performs well"), not *which specific action/tool-call sequence* produced that result. A step is needed that, given a successful run, isolates the action pattern itself — not just a judgment about it.
 
 3. **No trigger-indexed procedure store.** `tb` indexes by semantic similarity of content; skills are triggered by hand-written descriptions. Missing: a store of procedures indexed by "what situational context should invoke this", derived from data, not declared upfront by an author.
 
@@ -60,7 +60,7 @@ Three moves, cheapest first:
 
 ## Cross-references
 
-- [roadmap](roadmap) — Phase 7 planning this extends
+- [roadmap](roadmap) — memory area: the per-hat metrics task this extends
 - [agenti](agenti) — skills vs. `th` members distinction
 - [architettura](architettura) — the three layers (`tb`, `th`, `.wiki/`) and why they don't overlap
 - [th_cli](th_cli) — `th.db` schema and `th history`/`th stats` commands
