@@ -86,3 +86,4 @@ th run --member von-neumann-blue --task "find clusters in..." --detach
 - [architettura](architettura) — system overview and sandbox
 - [th_cli](th_cli) — full `th` commands
 - [procedural_memory_gaps](procedural_memory_gaps) — why skills and `th` members don't yet learn from outcomes
+- [th_control_boundary](th_control_boundary) — planned constraint: verification always runs outside `th`, never inside a member's own run

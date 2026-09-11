@@ -2,8 +2,8 @@
 
 ```yaml
 tags: [roadmap, tasks]
-sources: []
-updated: 2026-08-26
+sources: [conversation]
+updated: 2026-09-11
 ```
 
 ## Tasks
@@ -20,13 +20,14 @@ One line per task. The reason and the plan live in the linked page.
 ### th
 
 - [ ] Add an HTTP entry point to run agents. [detail](th_cli)
+- [ ] Constrain annibale to simple processes: every check runs as a script or a controller-side step, never inside `th` itself. [detail](th_control_boundary)
 
 ### rasp
 
 Paused since 2026-07-21. The memory stack came first.
 
 - [ ] Personal server: provision the always-on node. [detail](rasp_node)
-- [ ] Move the Third Brain to the Rasp. [detail](tb_on_rasp)
+- [x] Move the Third Brain and Third Identity to the Rasp — both live and confirmed working. [detail](tb_on_rasp)
 - [ ] Finish the orchestrator: audit gate, chat bridge, hardening. [detail](roadmap_orchestrator)
 
 ### cockpit

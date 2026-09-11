@@ -1,10 +1,14 @@
 # Third Brain on the Rasp
 
 ```yaml
-tags: [architecture, tb, raspberry, matrix]
+tags: [architecture, tb, ti, raspberry, matrix]
 sources: [conversation, tools/tb/src/infra.ts]
-updated: 2026-08-26
+updated: 2026-09-11
 ```
+
+## Status (2026-09-11)
+
+Done and confirmed working in daily use: both `tb` and `ti` point at the Qdrant + Ollama containers on the Rasp, from desktop and laptop. `ti` was smoke-tested against the live Rasp instance at founding time ([ti_module](ti_module)); this update confirms sustained production use, not just a one-off test. Single source of truth for both memory layers, as planned below.
 
 ## Decision
 
@@ -20,7 +24,7 @@ Reading the TB needs no intelligence: `tb search` is deterministic retrieval. A 
 
 ## Target configuration
 
-Two containers on the Rasp — **Qdrant** (vectors + note payloads) and **Ollama** (query embeddings). All clients point there: desktop CLI, laptop CLI, Matrix bot. Both reachable only inside the Tailscale perimeter, consistent with Pillar 5 of [orchestrator_overview](orchestrator_overview).
+Two containers on the Rasp — **Qdrant** (vectors + note payloads, shared by `tb`'s notes and `ti`'s dedicated `pi_identity` collection) and **Ollama** (query embeddings). All clients point there: desktop CLI, laptop CLI, Matrix bot. Both reachable only inside the Tailscale perimeter, consistent with Pillar 5 of [orchestrator_overview](orchestrator_overview).
 
 Feasibility: `nomic-embed-text` (~137M params, ~270MB F16) runs fine on a Pi 4/5 via Ollama on ARM64 — hundreds of ms per query embedding on a Pi 5, ~1-2s on a Pi 4. Irrelevant for single-user queries.
 
@@ -38,5 +42,7 @@ The Matrix-vs-Telegram rationale is documented in Pillar 5 of [orchestrator_over
 
 - [orchestrator_overview](orchestrator_overview) — Pillar 5 perimeter and Matrix-vs-Telegram rationale
 - [roadmap](roadmap) — rasp area, revised by this decision
-- [architettura](architettura) — the `tb` layer
+- [architettura](architettura) — the `tb`/`ti` layers
 - [rasp_node](rasp_node) — full view of services on the Rasp
+- [ti_module](ti_module) — `ti`'s `pi_identity` collection, sharing this Qdrant instance
+- [hook_context_injection](hook_context_injection) — automatic `tb`/`ti` retrieval on every prompt, built on this shared instance

@@ -3,10 +3,14 @@
 ```yaml
 tags: [log, history]
 sources: []
-updated: 2026-08-26
+updated: 2026-09-11
 ```
 
 ## Log
+
+## [2026-09-11] ingest | tb/ti confirmed live on the Rasp, prompt-injection hook, th control boundary
+
+Three updates from conversation. (1) [tb_on_rasp](tb_on_rasp) and [rasp_node](rasp_node): `tb` and `ti` are live and confirmed working on the Rasp's shared Qdrant/Ollama instance, not just a smoke-tested target — [roadmap](roadmap) rasp area's "Move the Third Brain to the Rasp" task marked done, widened to include `ti`. (2) New page [hook_context_injection](hook_context_injection): `extensions/tb_ti/` (`pi.ts` for the pi coding agent, `claude.sh` for Claude Code) runs `tb`/`ti` search automatically on every prompt (`--min-score 0.6`) and injects matches into context, replacing the manual "Search Before Answer" step. Ingested straight from both source files after the user pointed at the directory. (3) New page [th_control_boundary](th_control_boundary): planned constraint on annibale — every check/verification runs as a script or controller-side step, never inside a `th` member's own run; worked TDD example recorded; added to [roadmap](roadmap) `th` area. Index and cross-references updated in architettura, agenti.
 
 ## [2026-08-26] revision | Roadmap aligned to the area-grouped template
 

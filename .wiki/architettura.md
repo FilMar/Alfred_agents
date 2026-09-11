@@ -72,3 +72,4 @@ The wiki needs no install — it is plain markdown in `.wiki/`, maintained by th
 - [ti_module](ti_module) — the new context→behavior memory layer
 - [tl_module](tl_module) — the new unified event log, replacing `th.db`
 - [style_dual_entrypoint](style_dual_entrypoint) — the CLI+HTTP API pattern behind `tb serve`/`ti serve`
+- [hook_context_injection](hook_context_injection) — automatic `tb`/`ti` search injected on every prompt

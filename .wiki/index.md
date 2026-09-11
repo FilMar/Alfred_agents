@@ -18,6 +18,8 @@
 | [skill_pattern](skill_pattern) | Conventions for skills: `SKILL.md` calls the CLI directly + `scripts/` + `references/` (justfile layer retired 2026-08-18) |
 | [skill_migration](skill_migration) | Ordered tasklist of the skills still to migrate off their justfiles |
 | [stateless_cockpit](stateless_cockpit) | Founded 2026-08-08, pivoted 2026-08-10 to a pi extension in RPC mode (web UI dropped): episodic stateless execution, `/mem` banks — replaces Matrix chat and pi-web |
+| [hook_context_injection](hook_context_injection) | `UserPromptSubmit` hook: automatic `tb`/`ti` search on every prompt, injected into context |
+| [th_control_boundary](th_control_boundary) | Planned annibale constraint: verification always outside `th`, never inside a member's own run |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI+HTTP API pattern (Hono) shared by `tb serve`/`ti serve` |
 | [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards shared by `tb`/`ti` |
 | [log](log) | Wiki update history |
@@ -25,5 +27,5 @@
 ```yaml
 tags: [pi, index, architecture]
 sources: [README.md, alfred.md]
-updated: 2026-08-26
+updated: 2026-09-11
 ```
