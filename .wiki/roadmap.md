@@ -20,7 +20,7 @@ One line per task. The reason and the plan live in the linked page.
 ### th
 
 - [ ] Add an HTTP entry point to run agents. [detail](th_cli)
-- [ ] Constrain annibale to simple processes: every check runs as a script or a controller-side step, never inside `th` itself. [detail](th_control_boundary)
+- [x] Constrain annibale to simple processes: every check runs as a script or a controller-side step, never inside `th` itself. [detail](th_control_boundary)
 
 ### rasp
 

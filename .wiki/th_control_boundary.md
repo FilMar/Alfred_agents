@@ -2,15 +2,15 @@
 
 ```yaml
 tags: [architecture, th, annibale, workflow]
-sources: [conversation]
+sources: [skills/annibale/SKILL.md, skills/annibale/references/tdd-coding.md]
 updated: 2026-09-11
 ```
 
 ## Principle
 
-Every check or verification in a `th` workflow must run as a script, or as a step owned by the controller (whoever launches `th` — the user, or a wrapping script) — never as an action a `th` member takes itself. A member's job stops at producing output (usually code); confirming that output is correct is never the member's own call.
+Every check or verification in a `th` workflow must run as: Annibale itself, a deterministic script, or the user — never as an action a `th` member takes itself. A member's job stops at producing output (usually code); confirming that output is correct is never the member's own call, and it is never handed off to a *different* member either — a delegated check is still opaque, only readable after the fact as a verdict, not something the controller can read or steer while it happens.
 
-This is a planned constraint on **annibale**: today annibale can decompose a problem and let a member both act and check its own work in the same run. The change forces every workflow annibale designs down to the simplest shape — act, stop, hand back — with verification always external.
+This constrains **annibale**: before this change annibale could decompose a problem and let a member both act and check its own work in the same run. The rule forces every workflow annibale designs down to the simplest shape — act, stop, hand back — with verification always external and visible.
 
 ## Why
 
@@ -27,7 +27,17 @@ At no point does `th` run the tests, judge its own output, or decide whether to 
 
 ## Status
 
-Not yet implemented — a planned modification to annibale's flow design, recorded on the roadmap ([roadmap](roadmap), `th` area). No detail beyond the principle and the TDD example above exists yet.
+**Done (2026-09-11).** Implemented in the annibale skill:
+
+- `SKILL.md`, `## Rules`: new rule — verification is never delegated to a member, only to Annibale, a deterministic script, or the user.
+- `references/tdd-coding.md`, Phase 2 (Stub): compiler/type-check now runs as an explicit Annibale step, not left implicit.
+- `references/tdd-coding.md`, Phase 3 (Tests): the test command now explicitly runs as an Annibale step, not the black member that wrote the tests.
+- `references/tdd-coding.md`, Phase 4 (Implement loop): the pseudocode `# run the test runner` / `# if all tests pass → break` became real bash (`TEST_OUTPUT`/`TEST_EXIT`, an `ITER` counter capping at 3) run by Annibale between iterations; the member's task text now explicitly says "Do not run the test suite yourself" — needed because the coder member holds `bash` tool access and could otherwise self-verify.
+- `references/tdd-coding.md`, `## Rules`: mirrors the `SKILL.md` rule for readers who only open this file.
+
+Verified with `python3 skills/efesto/scripts/lint_skill.py skills/annibale` — clean.
+
+Out of scope, deliberately: Phase 5 (Review) still has black/white members critique the code. This is not a check in the gate sense — no member decides pass/fail; Annibale reads the critique and decides whether to loop back to Phase 4. Left unchanged.
 
 ## Cross-references
 

@@ -72,7 +72,7 @@ Rules:
 - The code must already compile (or pass type-check) in this state"
 ```
 
-Manually verify it compiles before moving on.
+Annibale runs the compiler or type-checker itself, not the member, and confirms it succeeds before moving on.
 
 ---
 
@@ -91,7 +91,7 @@ Rules:
 - Do not mock what you can test for real"
 ```
 
-Run the test runner and verify all tests fail. If any already pass, the test is wrong.
+Annibale runs the test command directly — not the black member — and confirms every test fails. If any already pass, the test is wrong.
 
 ---
 
@@ -99,6 +99,7 @@ Run the test runner and verify all tests fail. If any already pass, the test is 
 
 ```bash
 ERRORS="<initial test runner output>"
+ITER=0
 
 while true; do
   th run --member <name-white> --task "Implement the functions to make the tests pass.
@@ -110,15 +111,25 @@ Tests:
 <phase 3 output>
 
 Current errors:
-$ERRORS"
+$ERRORS
 
-  # run the test runner
-  # if all tests pass → break
-  # otherwise update $ERRORS and continue
+Do not run the test suite yourself. Write the code and stop."
+
+  # Annibale runs the test command itself here — never the member:
+  TEST_OUTPUT=$(<test-command> 2>&1)
+  TEST_EXIT=$?
+  ITER=$((ITER + 1))
+
+  if [ "$TEST_EXIT" -eq 0 ]; then
+    break
+  fi
+  if [ "$ITER" -ge 3 ]; then
+    echo "3 iterations, still failing — stop and present the problem to the user." >&2
+    break
+  fi
+  ERRORS="$TEST_OUTPUT"
 done
 ```
-
-If after 3 iterations the tests still don't pass, stop and present the problem to the user.
 
 ---
 
@@ -173,3 +184,4 @@ Architectural decisions:
 - **The loop has a limit.** After 3 fruitless iterations, escalate to the user.
 - **Review is separate from implementation.** Do not review during the loop.
 - **Omero always closes.** The wiki is part of the deliverable, not an option.
+- **Verification never runs inside the member.** Annibale runs the compiler and the test command itself, between phases — never the member, and never the same run that produced the code.

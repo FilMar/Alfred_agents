@@ -181,3 +181,4 @@ After Blue, read all outputs and present concrete decisions to the user. Do not 
 - **Do not use more hats than necessary.** Three focused hats beat six generic ones.
 - **Blue always closes.** No open flows.
 - **Repeatable flows → script.** If a flow makes sense to repeat identically, propose formalising it.
+- **Verification is never delegated to a member.** A member produces output and stops. The check that decides pass/fail — tests, compiler, any deterministic gate — runs as: Annibale itself, a deterministic script, or the user. Never inside a `th run`, not even to a different member from the author.
