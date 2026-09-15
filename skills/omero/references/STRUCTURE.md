@@ -8,15 +8,14 @@ Every wiki starts with these files in `.wiki/`:
 
 | File | Purpose |
 |------|---------|
-| `index.md` | The catalogue. A table of Page + Content, one row per page. Updated on every ingest. |
+| `index.md` | The catalogue. A table of live decisions, one row each. Updated on every ingest. |
 | `log.md` | The history. Append-only record of changes. |
-| `roadmap.md` | The future task list. One short line per task, no code names, grouped by area; reason and plan in the linked page. |
-| `<name>.md` | Content pages. Named `category_subject`. |
-| `style_<name>.md` | Style pages. Document patterns and conventions. |
+| `roadmap.md` | The future task list. One short line per task, no code names, grouped by area; reason and plan in the linked decision. |
+| `<topic>_<slug>.md` | Decision files. One decision, one topic, never edited once written. A style or code convention is a decision too, under topic `style_<name>`. |
 
 ## Templates
 
-New files are copied from `templates/` (next to this skill): `index.md`, `log.md`, `roadmap.md`, `page.md`, `style.md`. Copy one and fill it in rather than writing structure from memory.
+New files are copied from `templates/` (next to this skill): `index.md`, `log.md`, `roadmap.md`, `page.md`. Copy one and fill it in rather than writing structure from memory.
 
 ## Init
 

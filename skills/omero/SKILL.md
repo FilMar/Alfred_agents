@@ -34,29 +34,31 @@ Four operations. Each has its own reference file — read it only when that oper
 
 ## Default conventions
 
-Used on every operation that writes a page.
+Used on every operation that writes a decision.
 
-- Page names: `category_subject` (lowercase, underscore — the file is `<name>.md`).
-- Structure: H2 sections (`## Section Name`).
-- Frontmatter as a fenced `yaml` block at the top of the page:
+- A decision file records one decision on one topic. Name: `<topic>_<slug>.md`, lowercase, underscore — e.g. `core_ca_chunk_one_store_not_two.md`. The topic is the shared prefix; `Glob .wiki/<topic>_*.md` lists every decision made on it, no separate topic index needed.
+- A decision file never changes once written — a typo fix is the only exception. A change of course is a new file, never an edit to the old one.
+- Structure: H2 sections `## Decision`, `## Why`, `## Cross-references`.
+- Frontmatter as a fenced `yaml` block at the top:
   ```yaml
-  tags: [category, subject]
+  tags: [topic, words]
   sources: [path/relative/to/source.md]
-  updated: YYYY-MM-DD
+  replaces: [old_decision_file]   # omit when this is not a replacement
   ```
-- Internal links: `[Text](page_name)` — without extension.
-- Each page ends with `## Cross-references`.
-- Special pages: `index` (catalogue with `## Pages` section), `log` (history with `## Log` section), `roadmap` (future task list with `## Tasks` section).
+- A decision is **live** when no other decision names it in `replaces`. A superseded decision stays on disk as history but drops out of `index.md`.
+- Internal links: `[Text](decision_file)` — without extension.
+- Special pages, mutable and edited in place: `index` (catalogue of live decisions, `## Pages` section), `log` (append-only history, `## Log` section), `roadmap` (future task list, `## Tasks` section).
 - English style for page text: see `references/GLOSSARY.md`.
 
-Templates for new pages live next to this skill in `templates/` (`page.md`, `style.md`, `index.md`). Copy one and fill it in rather than writing structure from memory.
+Templates live next to this skill in `templates/` (`page.md`, `index.md`, `log.md`, `roadmap.md`). Copy one and fill it in rather than writing structure from memory.
 
 ## Rules
 
 - Never modify source files for wiki reasons.
 - Operate only inside `.wiki/`. Never touch project source to write the wiki.
-- Edit sections surgically — do not rewrite a whole page to change one section.
+- Never edit a written decision's body. Write a new decision with `replaces` set, then update `index.md` and any cross-reference that should point at it. `index.md`, `log.md`, `roadmap.md` are the only files edited in place.
+- A decision describes only its own topic. If it depends on another topic, link to that topic's live decisions instead of repeating them.
 - Never invent facts not present in the sources — if they are missing, say so.
 - Every significant session closes with a commit suggestion.
-- If the project is technical: code snippets are welcome in pages.
+- If the project is technical: code snippets are welcome in decisions.
 - If the project is narrative: internal consistency is law — flag every contradiction.
