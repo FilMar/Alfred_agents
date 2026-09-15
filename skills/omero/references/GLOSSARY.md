@@ -18,65 +18,81 @@ The rule serves two readers at once: a human skimming the page, and the agent th
 
 ## The wiki
 
-### Page
+### Decision
 
-A markdown file in `.wiki/`. Name is `category_subject` (lowercase, underscore). Structure is H2 sections. Ends with a `## Cross-references` section.
+A markdown file in `.wiki/` that records one decision on one topic. Name is `<topic>_<slug>` (lowercase, underscore). Structure is `## Decision`, `## Why`, `## Cross-references`. Once written, its body never changes — a typo fix is the only exception. A change of course is a new decision file, never an edit to the old one.
+
+### Topic
+
+The prefix a group of decisions share, e.g. `core_ca_chunk`. Not a file of its own — `Glob .wiki/<topic>_*.md` lists every decision made on it, in the order they were written. A style or code convention is a topic too, named `style_<name>`.
+
+### Replaces
+
+A field in a decision's frontmatter: the filename(s) of the decision(s) it replaces. Written once, on the new file — the old file is never touched.
+
+### Live decision
+
+A decision no other decision names in its `replaces` field. It is the current word on its topic and belongs in `index.md`.
+
+### Superseded decision
+
+A decision some other decision names in `replaces`. It stays on disk as history — it is never deleted — but drops out of `index.md`.
 
 ### Source
 
-A project file the page was built from. Tracked in the page's `sources:` frontmatter. The wiki reads sources but never modifies them.
+A project file a decision was built from. Tracked in its `sources:` frontmatter. The wiki reads sources but never modifies them.
 
 ### Frontmatter
 
-A fenced `yaml` block at the top of the page. Holds `tags`, `sources`, `updated`. It is metadata — put classification here, not in the page name.
+A fenced `yaml` block at the top of a decision. Holds `tags`, `sources`, `replaces` (omitted when the decision replaces nothing). It is metadata — put classification here, not in the file name. Special pages (`index`, `log`, `roadmap`) keep an `updated: YYYY-MM-DD` field instead of `replaces`, since they are mutable.
 
 ### Tag
 
-A label in frontmatter. Groups pages by theme. Live in frontmatter, never in the file name — the name is a stable identifier; a tag is metadata. Adding a tag must never force a rename.
+A label in frontmatter. Groups decisions by theme. Lives in frontmatter, never in the file name — the name is a stable identifier; a tag is metadata. Adding a tag must never force a rename.
 
 ## Navigation
 
 ### Index
 
-The catalogue page (`index.md`). A table listing every page with a link and a one-line summary. Updated on every ingest. It is the entry point for a query.
+The catalogue page (`index.md`). A table listing every live decision with a link and a one-line summary. Updated on every ingest — a row is added for a new decision and removed for the one it superseded. It is the entry point for a query.
 
 ### Log
 
-The history page (`log.md`). Append-only. Records what changed and when, each entry starting `## [YYYY-MM-DD] <op> | <title>`. A prefix makes the log parseable with simple tools.
+The history page (`log.md`). Append-only. Records what changed and when, each entry starting `## [YYYY-MM-DD] <op> | <link to the decision>`. A prefix makes the log parseable with simple tools. It points at decisions; it does not restate them.
 
 ### Roadmap
 
-The future task list (`roadmap.md`). One line per task, ten words or fewer, no code names. Group tasks under an H3 per area (engine, render, one per game). A group can start with one plain sentence of status. The reason and the plan live in the linked page, never in the line. Both potential and agreed tasks live here.
+The future task list (`roadmap.md`). One line per task, ten words or fewer, no code names. Group tasks under an H3 per area (engine, render, one per game). A group can start with one plain sentence of status. The reason and the plan live in the linked decision, never in the line. Both potential and agreed tasks live here.
 
 ### Cross-Reference
 
-A link from one page to another. Written in the `## Cross-references` section and inside the body. The wiki's value lives here: the connections are already written, not recomputed at query time.
+A link from one decision to another. Written in the `## Cross-references` section and inside the body. The wiki's value lives here: the connections are already written, not recomputed at query time.
 
 ## Operations
 
 ### Ingest
 
-Reading a source and integrating it into the wiki. Updates the page, the cross-references, the index and the log. Procedure: `ingest.md`.
+Reading a source and turning it into a decision. Writes a new decision file (or edits a same-session typo), updates cross-references, the index and the log. Procedure: `ingest.md`.
 
 ### Query
 
-Answering a question from the wiki. Grep, read the found pages, answer with citations. Procedure: `query.md`.
+Answering a question from the wiki. Grep, read the decisions found, answer with citations. Procedure: `query.md`.
 
 ### Style
 
-Writing a `style_<name>.md` page for a pattern or convention. Records how the code writes things and how to extend it. Procedure: `style.md`.
+A style or code convention recorded as a decision under topic `style_<name>`. Records the pattern and how to extend it. Procedure: `style.md`.
 
 ### Lint
 
-The health-check. Flags contradictions, orphan pages, missing concept pages, stale statements. Procedure: `lint.md`.
+The health-check. Flags contradictions, orphan decisions, missing concept decisions, a `replaces` target that does not exist, and an `index.md` out of step with which decisions are live. Procedure: `lint.md`.
 
 ### Orphan
 
-A page no other page links to. Lint flags it: without inbound links it cannot be found.
+A decision no other decision links to. Lint flags it: without inbound links it cannot be found.
 
 ### Contradiction
 
-Two pages that say things that conflict. Lint flags it; in narrative projects it is a hard error.
+Two decisions that say things that conflict. Lint flags it; in narrative projects it is a hard error.
 
 ## Language of this glossary
 
