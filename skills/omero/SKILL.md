@@ -17,9 +17,8 @@ If `wiki.md` exists in the project root, read it before every operation — it o
 If `.wiki/` does not exist, create it and seed the skeleton. The full base layout is in `references/STRUCTURE.md`.
 
 1. Create `.wiki/index.md` from `templates/index.md`, substituting the project name.
-2. Create `.wiki/log.md` from `templates/log.md`.
-3. Create `.wiki/roadmap.md` from `templates/roadmap.md`.
-4. Tell the user the wiki is initialised.
+2. Create `.wiki/roadmap.md` from `templates/roadmap.md`.
+3. Tell the user the wiki is initialised.
 
 ## Operations
 
@@ -36,27 +35,30 @@ Four operations. Each has its own reference file — read it only when that oper
 
 Used on every operation that writes a decision.
 
-- A decision file records one decision on one topic. Name: `<topic>_<slug>.md`, lowercase, underscore — e.g. `core_ca_chunk_one_store_not_two.md`. The topic is the shared prefix; `Glob .wiki/<topic>_*.md` lists every decision made on it, no separate topic index needed.
+- A decision file records exactly one decision on one topic. Name: `<topic>_<slug>.md`, lowercase, underscore — e.g. `core_ca_chunk_one_store_not_two.md`. The topic is the shared prefix; `Glob .wiki/<topic>_*.md` lists every decision made on it, no separate topic index needed.
+- One decision per file, always. Two choices made in the same session on the same topic are two files. The slug is long and says the whole decision. A file stays under 100 lines; a longer one holds more than one decision — split it.
+- The wiki records the why. The code is the what: the current state of a topic lives in its source files, and a decision does not restate it. A design target with no code yet is the one case where the decision is also the state.
 - A decision file never changes once written — a typo fix is the only exception. A change of course is a new file, never an edit to the old one.
-- Structure: H2 sections `## Decision`, `## Why`, `## Cross-references`.
-- Frontmatter as a fenced `yaml` block at the top:
-  ```yaml
+- Structure: real YAML frontmatter first, delimited by `---` on the line before and after, no H1 above or below it — the file name is the page's identity. Then H2 sections `## Decision`, `## Why`, `## Cross-references`.
+  ```
+  ---
   tags: [topic, words]
   sources: [path/relative/to/source.md]
   replaces: [old_decision_file]   # omit when this is not a replacement
+  ---
   ```
 - A decision is **live** when no other decision names it in `replaces`. A superseded decision stays on disk as history but drops out of `index.md`.
 - Internal links: `[Text](decision_file)` — without extension.
-- Special pages, mutable and edited in place: `index` (catalogue of live decisions, `## Pages` section), `log` (append-only history, `## Log` section), `roadmap` (future task list, `## Tasks` section).
+- Special pages, mutable and edited in place: `index` (catalogue of live decisions, `## Pages` section) and `roadmap` (future task list, `## Tasks` section). There is no log: git history is the log.
 - English style for page text: see `references/GLOSSARY.md`.
 
-Templates live next to this skill in `templates/` (`page.md`, `index.md`, `log.md`, `roadmap.md`). Copy one and fill it in rather than writing structure from memory.
+Templates live next to this skill in `templates/` (`page.md`, `index.md`, `roadmap.md`). Copy one and fill it in rather than writing structure from memory.
 
 ## Rules
 
 - Never modify source files for wiki reasons.
 - Operate only inside `.wiki/`. Never touch project source to write the wiki.
-- Never edit a written decision's body. Write a new decision with `replaces` set, then update `index.md` and any cross-reference that should point at it. `index.md`, `log.md`, `roadmap.md` are the only files edited in place.
+- Never edit a written decision's body. Write a new decision with `replaces` set, then update `index.md` and any cross-reference that should point at it. `index.md` and `roadmap.md` are the only files edited in place.
 - A decision describes only its own topic. If it depends on another topic, link to that topic's live decisions instead of repeating them.
 - Never invent facts not present in the sources — if they are missing, say so.
 - Every significant session closes with a commit suggestion.

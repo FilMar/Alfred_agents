@@ -9,17 +9,18 @@ Every wiki starts with these files in `.wiki/`:
 | File | Purpose |
 |------|---------|
 | `index.md` | The catalogue. A table of live decisions, one row each. Updated on every ingest. |
-| `log.md` | The history. Append-only record of changes. |
 | `roadmap.md` | The future task list. One short line per task, no code names, grouped by area; reason and plan in the linked decision. |
-| `<topic>_<slug>.md` | Decision files. One decision, one topic, never edited once written. A style or code convention is a decision too, under topic `style_<name>`. |
+| `<topic>_<slug>.md` | Decision files. Exactly one decision, one topic, under 100 lines, never edited once written. A style or code convention is a decision too, under topic `style_<name>`. |
+
+There is no history file. Git holds the history of the wiki, and a superseded decision stays on disk.
 
 ## Templates
 
-New files are copied from `templates/` (next to this skill): `index.md`, `log.md`, `roadmap.md`, `page.md`. Copy one and fill it in rather than writing structure from memory.
+New files are copied from `templates/` (next to this skill): `index.md`, `roadmap.md`, `page.md`. Copy one and fill it in rather than writing structure from memory.
 
 ## Init
 
-At setup, Omero creates `index.md`, `log.md`, `roadmap.md` from templates and substitutes the project name. The index is seeded with rows for `log` and `roadmap`.
+At setup, Omero creates `index.md` and `roadmap.md` from templates and substitutes the project name. The index is seeded with a row for `roadmap`.
 
 ## The three layers
 

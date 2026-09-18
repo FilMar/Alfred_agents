@@ -20,11 +20,13 @@ The rule serves two readers at once: a human skimming the page, and the agent th
 
 ### Decision
 
-A markdown file in `.wiki/` that records one decision on one topic. Name is `<topic>_<slug>` (lowercase, underscore). Structure is `## Decision`, `## Why`, `## Cross-references`. Once written, its body never changes — a typo fix is the only exception. A change of course is a new decision file, never an edit to the old one.
+A markdown file in `.wiki/` that records exactly one decision on one topic. Name is `<topic>_<slug>` (lowercase, underscore); the slug is long and says the whole decision. Structure is `## Decision`, `## Why`, `## Cross-references`. Under 100 lines — a longer file holds more than one decision and gets split. Once written, its body never changes — a typo fix is the only exception. A change of course is a new decision file, never an edit to the old one.
+
+A decision records the why. The what — the current state of a topic — lives in the code, and a decision does not restate it. A design target with no code yet is the one case where the decision is also the state.
 
 ### Topic
 
-The prefix a group of decisions share, e.g. `core_ca_chunk`. Not a file of its own — `Glob .wiki/<topic>_*.md` lists every decision made on it, in the order they were written. A style or code convention is a topic too, named `style_<name>`.
+The prefix a group of decisions share, e.g. `core_ca_chunk`. Not a file of its own — `Glob .wiki/<topic>_*.md` lists every decision made on it. The files have no order; `replaces` says which one is live. A style or code convention is a topic too, named `style_<name>`.
 
 ### Replaces
 
@@ -44,7 +46,7 @@ A project file a decision was built from. Tracked in its `sources:` frontmatter.
 
 ### Frontmatter
 
-A fenced `yaml` block at the top of a decision. Holds `tags`, `sources`, `replaces` (omitted when the decision replaces nothing). It is metadata — put classification here, not in the file name. Special pages (`index`, `log`, `roadmap`) keep an `updated: YYYY-MM-DD` field instead of `replaces`, since they are mutable.
+Real YAML frontmatter at the top of a decision, between two `---` lines. Holds `tags`, `sources`, `replaces` (omitted when the decision replaces nothing). It is metadata — put classification here, not in the file name. Special pages (`index`, `roadmap`) keep an `updated: YYYY-MM-DD` field instead of `replaces`, since they are mutable.
 
 ### Tag
 
@@ -55,10 +57,6 @@ A label in frontmatter. Groups decisions by theme. Lives in frontmatter, never i
 ### Index
 
 The catalogue page (`index.md`). A table listing every live decision with a link and a one-line summary. Updated on every ingest — a row is added for a new decision and removed for the one it superseded. It is the entry point for a query.
-
-### Log
-
-The history page (`log.md`). Append-only. Records what changed and when, each entry starting `## [YYYY-MM-DD] <op> | <link to the decision>`. A prefix makes the log parseable with simple tools. It points at decisions; it does not restate them.
 
 ### Roadmap
 
@@ -72,7 +70,7 @@ A link from one decision to another. Written in the `## Cross-references` sectio
 
 ### Ingest
 
-Reading a source and turning it into a decision. Writes a new decision file (or edits a same-session typo), updates cross-references, the index and the log. Procedure: `ingest.md`.
+Reading a source and turning it into a decision. Writes a new decision file (or edits a same-session typo), updates cross-references and the index. Procedure: `ingest.md`.
 
 ### Query
 

@@ -1,10 +1,8 @@
-# <topic>_<slug>
-
-```yaml
+---
 tags: [topic, words]
 sources: [path/relative/to/source]
 replaces: []
-```
+---
 
 ## Decision
 
