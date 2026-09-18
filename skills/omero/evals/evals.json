@@ -3,38 +3,40 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "La skill omero è stata aggiornata: ora opera direttamente sui file `.wiki/` con Read/Write/Edit invece di una CLI. Aggiorna la pagina wiki `agenti_skill` nel progetto `/home/filippo/git_projects/pi` per riflettere questo cambiamento — in particolare la descrizione di Omero e gli strumenti che usa.",
-      "expected_output": "La pagina .wiki/agenti_skill.md viene letta e poi aggiornata con Edit sulla sezione interessata. Il log .wiki/log.md viene aggiornato con una nuova entry. Nessuna riscrittura integrale della pagina.",
+      "prompt": "La skill omero è stata aggiornata: ora opera direttamente sui file `.wiki/` con Read/Write/Edit invece di una CLI. Registra questo cambio di rotta nella wiki del progetto `/home/filippo/git_projects/pi`, dove una decisione precedente descrive ancora Omero come utente di una CLI.",
+      "expected_output": "Trova la decisione viva sul topic con Glob `.wiki/<topic>_*.md` e Read. Scrive una nuova decisione `.wiki/<topic>_<slug>.md` da `templates/page.md` con `replaces:` che punta alla vecchia. Non modifica la vecchia. Aggiorna `.wiki/index.md`: aggiunge la nuova riga, rimuove quella superata. Nessun log.",
       "files": [],
       "expectations": [
-        "Legge `.wiki/agenti_skill.md` con Read prima di scrivere — non scrive alla cieca",
-        "Usa Edit per aggiornare la sezione interessata, non riscrive l'intera pagina",
-        "Aggiorna `.wiki/log.md` con una nuova entry sotto `## Log`",
+        "Usa Glob e Read per trovare la decisione viva prima di scrivere",
+        "Scrive un file nuovo con `replaces:` invece di modificare la decisione esistente",
+        "Un solo file, sotto le 100 righe, con una sola decisione",
+        "Aggiorna `.wiki/index.md` togliendo la riga superata",
+        "Non crea né aggiorna alcun `.wiki/log.md`",
         "Opera solo dentro `.wiki/`, non tocca i sorgenti del progetto"
       ]
     },
     {
       "id": 2,
       "prompt": "Sto lavorando nel progetto `/home/filippo/git_projects/pi`. Come è strutturato l'orchestratore th e come si definisce un nuovo member? Rispondi basandoti sulla wiki.",
-      "expected_output": "Risposta basata sulla wiki: usa Grep su `.wiki/` e Read per trovare le info, poi risponde con citazioni alle pagine. Se la wiki non contiene la risposta, lo dichiara e propone di ingestare il materiale.",
+      "expected_output": "Risposta basata sulla wiki: usa Grep su `.wiki/` e Read per trovare le decisioni, poi risponde con citazioni. Se la wiki non contiene la risposta, lo dichiara e propone di ingestare il materiale.",
       "files": [],
       "expectations": [
         "Usa Grep su `.wiki/` per cercare prima di rispondere",
-        "Usa Read per leggere le pagine rilevanti trovate",
-        "Cita pagine wiki nella risposta con `[Testo](nome_pagina)`",
+        "Usa Read per leggere le decisioni rilevanti trovate",
+        "Cita decisioni nella risposta con `[Testo](nome_file)`",
         "Non legge i sorgenti del progetto per rispondere; se manca, lo dichiara"
       ]
     },
     {
       "id": 3,
-      "prompt": "Nel progetto `/home/filippo/git_projects/pi` è emerso un pattern ricorrente: ogni CLI espone i comandi con commander e stampa output JSON con un helper `out()`. Documenta questa convenzione come style page.",
-      "expected_output": "Crea `.wiki/style_cli_output.md` dal template style, popolando le sezioni Description / How it is written / How to extend / Example. Aggiorna l'indice.",
+      "prompt": "Nel progetto `/home/filippo/git_projects/pi` è emerso un pattern ricorrente: ogni CLI espone i comandi con commander e stampa output JSON con un helper `out()`. Documenta questa convenzione nella wiki.",
+      "expected_output": "Crea una decisione `.wiki/style_cli_output_<slug>.md` da `templates/page.md`, con il pattern e uno snippet in `## Decision` e la ragione in `## Why`. Aggiorna l'indice.",
       "files": [],
       "expectations": [
-        "Crea una pagina `.wiki/style_<name>.md` partendo dal template `templates/style.md`",
-        "Popola le sezioni How it is written, How to extend, Example",
-        "Aggiorna `.wiki/index.md` con la nuova pagina",
-        "Usa Write per la nuova pagina ed Edit per l'indice"
+        "Crea un file `.wiki/style_<name>_<slug>.md` partendo da `templates/page.md`",
+        "Sezioni `## Decision`, `## Why`, `## Cross-references`; lo snippet sta in Decision, il perché in Why",
+        "Aggiorna `.wiki/index.md` con la nuova decisione",
+        "Usa Write per il file nuovo ed Edit per l'indice"
       ]
     }
   ]

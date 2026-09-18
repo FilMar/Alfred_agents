@@ -69,7 +69,7 @@ function handleGetTaskStatus(id: string, base: string): Response {
   }
   const located = locate(id, base);
   if (!located) {
-    return errorResponse(404, `Istanza "${id}" non trovata.`);
+    return errorResponse(404, `Instance "${id}" not found.`);
   }
   return jsonResponse(200, { ...located.instance, status: located.state });
 }
@@ -120,7 +120,7 @@ export function startServer(
         return handleGetTaskStatus(id, base);
       }
 
-      return errorResponse(404, `Rotta non trovata: ${method} ${path}`);
+      return errorResponse(404, `Route not found: ${method} ${path}`);
     },
   });
 

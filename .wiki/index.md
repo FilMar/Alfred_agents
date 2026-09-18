@@ -1,31 +1,45 @@
-# Wiki — pi
+---
+tags: [pi, index]
+sources: []
+updated: 2026-09-18
+---
 
 ## Pages
 
 | Page | Content |
 |------|---------|
-| [architettura](architettura) | The layers: tb, th, the `.wiki/` (Omero) — roles, boundaries, cooperation |
-| [agenti](agenti) | Available agents, roles, triggers |
-| [th_cli](th_cli) | CLI reference for `th` — commands, flags, examples |
-| [orchestrator_overview](orchestrator_overview) | General system design and the five core pillars |
-| [roadmap](roadmap) | Future task list — grouped by area, one line per task, detail in linked pages |
-| [roadmap_orchestrator](roadmap_orchestrator) | Implementation plan for the Raspberry Orchestrator service — paused 2026-07-21 |
-| [ti_module](ti_module) | Third Identity: dedicated Qdrant collection for context→behavior rules |
-| [tl_module](tl_module) | Third Log: unified REST event log replacing `th.db`, shared by `th`/`tb`/`ti` |
-| [procedural_memory_gaps](procedural_memory_gaps) | What's missing for `th` members and skills to learn from outcomes |
-| [tb_on_rasp](tb_on_rasp) | Third Brain hosted on the Rasp, Matrix bot for agent-free queries |
-| [rasp_node](rasp_node) | The Rasp as a node: all services it hosts and provisioning order |
-| [skill_pattern](skill_pattern) | Conventions for skills: `SKILL.md` calls the CLI directly + `scripts/` + `references/` (justfile layer retired 2026-08-18) |
-| [skill_migration](skill_migration) | Ordered tasklist of the skills still to migrate off their justfiles |
-| [stateless_cockpit](stateless_cockpit) | Founded 2026-08-08, pivoted 2026-08-10 to a pi extension in RPC mode (web UI dropped): episodic stateless execution, `/mem` banks — replaces Matrix chat and pi-web |
-| [hook_context_injection](hook_context_injection) | `UserPromptSubmit` hook: automatic `tb`/`ti` search on every prompt, injected into context |
-| [th_control_boundary](th_control_boundary) | Planned annibale constraint: verification always outside `th`, never inside a member's own run |
-| [style_dual_entrypoint](style_dual_entrypoint) | CLI+HTTP API pattern (Hono) shared by `tb serve`/`ti serve` |
-| [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards shared by `tb`/`ti` |
-| [log](log) | Wiki update history |
+| [roadmap](roadmap) | Future task list |
+| [core_orthogonal_layers_no_overlap](core_orthogonal_layers_no_overlap) | The five layers and the no-overlap boundary |
+| [core_tb_stateless_single_source](core_tb_stateless_single_source) | CLIs hold no state; Qdrant + Ollama over HTTP |
+| [core_td_mvr_removed](core_td_mvr_removed) | Ghost tools removed; git holds the history |
+| [th_sandbox_bwrap_fixed_binds](th_sandbox_bwrap_fixed_binds) | bwrap profile; run warns, sandbox-exec refuses |
+| [th_detached_runs_state_in_tmp](th_detached_runs_state_in_tmp) | Detached runs keep state in /tmp files |
+| [th_http_api_scoped_no_db](th_http_api_scoped_no_db) | Planned th HTTP API; glob over /tmp, no DB |
+| [th_verification_outside_members](th_verification_outside_members) | Verification never inside a member's run |
+| [agents_skills_inline_members_via_th](agents_skills_inline_members_via_th) | Skills run inline; members only via th |
+| [agents_roster_lives_on_filesystem](agents_roster_lives_on_filesystem) | Roster derived from the filesystem, never tabled |
+| [agents_named_after_famous_figures](agents_named_after_famous_figures) | Naming rule: famous figure with matching trait |
+| [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) | tb/ti search injected on every prompt |
+| [memory_procedural_six_gaps](memory_procedural_six_gaps) | The six gaps to procedural memory |
+| [memory_log_first_three_moves](memory_log_first_three_moves) | Grow on data, not hypotheses; log first |
+| [memory_tl_unified_event_log](memory_tl_unified_event_log) | tl: one REST event log, founded not built |
+| [memory_ti_context_action_rules](memory_ti_context_action_rules) | ti: dedicated if/do collection, dumb client |
+| [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) | tb + ti live on the Rasp, confirmed in use |
+| [orchestrator_minimal_rest_surface](orchestrator_minimal_rest_surface) | Four REST endpoints, one entry point |
+| [orchestrator_run_task_matrix_only](orchestrator_run_task_matrix_only) | Ad-hoc execution only via Matrix |
+| [orchestrator_adversarial_audit_static](orchestrator_adversarial_audit_static) | Audit at ingestion; static parsing everywhere |
+| [orchestrator_filesystem_state_no_db](orchestrator_filesystem_state_no_db) | Catalog + queue as filesystem; directory is state |
+| [orchestrator_boot_callback_wake_window](orchestrator_boot_callback_wake_window) | WoL + i_wake + batching + ping reconciliation |
+| [orchestrator_bwrap_task_execution](orchestrator_bwrap_task_execution) | Audited tasks run under th's sandbox |
+| [orchestrator_tailscale_perimeter_matrix_bot](orchestrator_tailscale_perimeter_matrix_bot) | One network perimeter; Matrix bot, not Telegram |
+| [orchestrator_metadata_exported_constants](orchestrator_metadata_exported_constants) | Script metadata as exported constants |
+| [orchestrator_remaining_work](orchestrator_remaining_work) | Phases 3-4, known bugs, future ideas |
+| [rasp_services_provisioning_order](rasp_services_provisioning_order) | What runs on the Rasp and in which order |
+| [cockpit_pivot_pi_extension_rpc](cockpit_pivot_pi_extension_rpc) | Cockpit as a pi extension in RPC mode |
+| [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
+| [skill_router_pass_planned](skill_router_pass_planned) | Router pass design, deliberately deferred |
+| [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |
+| [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards |
+| [wiki_decision_chain_structure](wiki_decision_chain_structure) | The wiki itself: immutable decision chains |
 
-```yaml
-tags: [pi, index, architecture]
-sources: [README.md, alfred.md]
-updated: 2026-09-11
-```
+Only live decisions are listed — a decision superseded by a newer one (see `replaces` in its frontmatter) is dropped from this table, not deleted from disk.

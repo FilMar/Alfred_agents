@@ -1,15 +1,17 @@
-# <page_name>
-
-```yaml
-tags: [category, subject]
+---
+tags: [topic, words]
 sources: [path/relative/to/source]
-updated: YYYY-MM-DD
-```
+replaces: []
+---
 
-## Overview
+## Decision
 
-<one paragraph: what this page is about>
+<what was decided, stated plainly>
+
+## Why
+
+<the reason. Alternatives that lost, and what they would have cost>
 
 ## Cross-references
 
-- [Related page](related_page)
+- [Related decision](related_decision)

@@ -1,4 +1,4 @@
-// ─── Costanti enumerabili ─────────────────────────────────────────────────────
+// ─── Enum constants ─────────────────────────────────────────────────────
 
 export const NOTE_TYPES = [
   "dato",
@@ -9,41 +9,41 @@ export const NOTE_TYPES = [
   "indice",
 ] as const;
 
-// ─── Tipi derivati ────────────────────────────────────────────────────────────
+// ─── Derived types ────────────────────────────────────────────────────────────
 
 export type NoteType = (typeof NOTE_TYPES)[number];
 
 /**
- * Tipo semantico della nota — immutabile dopo la creazione.
- * - dato: fatto grezzo, costante, parametro tecnico
- * - protocollo: istruzioni, routine, procedure "se A allora B"
- * - sintesi: ponti creativi, intuizioni, conclusioni non ovvie
- * - attrito: bug, errori, tensioni, resistenze
- * - configurazione: decisioni prese, setup, preferenze
- * - indice: note madri che condensano cluster densi
+ * Semantic kind of a note — immutable after creation.
+ * - dato: raw fact, constant, technical parameter
+ * - protocollo: instructions, routines, "if A then B" procedures
+ * - sintesi: creative bridges, insights, non-obvious conclusions
+ * - attrito: bugs, errors, tensions, frictions
+ * - configurazione: taken decisions, setup, preferences
+ * - indice: mother notes that condense dense clusters
  */
 
-/** Restituisce true per i tipi citabili e fondati su fonte. */
+/** Returns true for source-backed, citable kinds. */
 export function isEvidence(kind: NoteType): boolean {
   return kind === "dato";
 }
 
-/** Type guard: valida un kind arbitrario contro l'enum NOTE_TYPES. */
+/** Type guard: validates an arbitrary kind against the NOTE_TYPES enum. */
 export function isValidKind(kind: string): kind is NoteType {
   return (NOTE_TYPES as readonly string[]).includes(kind);
 }
 
-/** Normalizza una lista di tag: split su virgola, trim, rimuove vuoti. */
+/** Normalizes a tag list: split on commas, trim, drop empties. */
 export function normalizeTags(tags: string[]): string[] {
   return tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean);
 }
 
-/** Estrae un messaggio leggibile da un errore di tipo sconosciuto. */
+/** Extracts a readable message from an unknown error type. */
 export function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-/** Testo canonico da vettorizzare per una nota: contesto + contenuto. */
+/** Canonical text to embed for a note: context + content. */
 export function noteToText(note: Pick<Note, "why" | "what">): string {
   return `${note.why}\n\n${note.what}`;
 }
@@ -51,60 +51,60 @@ export function noteToText(note: Pick<Note, "why" | "what">): string {
 // ─── Link ─────────────────────────────────────────────────────────────────────
 
 export interface Link {
-  /** ID della nota collegata */
+  /** ID of the linked note */
   id: string;
-  /** Ragione esplicita del collegamento */
+  /** Explicit reason for the link */
   reason: string;
 }
 
 // ─── Note ────────────────────────────────────────────────────────────────────
 
 export interface Note {
-  /** SHA256(what + ":" + when) formattato come UUID — deterministico, immutabile */
+  /** SHA256(what + ":" + when) formatted as UUID — deterministic, immutable */
   id: string;
-  /** ISO 8601 — timestamp di creazione, immutabile */
+  /** ISO 8601 — creation timestamp, immutable */
   when: string;
-  /** Contesto: perché questa nota è nata — immutabile */
+  /** Context: why this note was born — immutable */
   why: string;
-  /** Contenuto: l'idea atomica — immutabile */
+  /** Content: the atomic idea — immutable */
   what: string;
-  /** Etichette per filtro */
+  /** Tags for filtering */
   tags: string[];
-  /** Tipo semantico — immutabile dopo la creazione. */
+  /** Semantic kind — immutable after creation. */
   kind: NoteType;
-  /** URI della fonte originale — opzionale */
+  /** URI of the original source — optional */
   source?: string;
-  /** Rete di connessioni — mutabile, append-only, limite in REFS_LIMIT */
+  /** Connection network — mutable, append-only, capped by REFS_LIMIT */
   refs: Link[];
-  /** ID delle note che referenziano questa — gestito automaticamente, append-only */
+  /** IDs of notes referencing this one — managed automatically, append-only */
   backrefs?: string[];
 }
 
 // ─── Search ──────────────────────────────────────────────────────────────────
 
 export interface SearchOptions {
-  /** Filtra per tag (OR). */
+  /** Filter by tags (OR). */
   tags?: string[];
-  /** Filtra per tipo semantico (OR). */
+  /** Filter by semantic kind (OR). */
   kind?: NoteType[];
-  /** Numero massimo di risultati dal vettore. Default: 10. */
+  /** Max results from the vector search. Default: 10. */
   limit?: number;
   /**
-   * Profondità di traversal dei refs.
-   * 0 = solo ricerca vettoriale.
-   * 1 = vettoriale + 1 hop di refs (default).
-   * 2 = vettoriale + refs + refs dei refs.
+   * Depth of refs traversal.
+   * 0 = vector search only.
+   * 1 = vector + 1 hop of refs (default).
+   * 2 = vector + refs + refs of refs.
    */
   depth?: number;
-  /** Se true, restringe la ricerca ai soli tipi evidence-oriented (osservazione, lemma). */
+  /** If true, restricts the search to evidence kinds only (see isEvidence). */
   evidence_only?: boolean;
-  /** Se true, usa hybrid retrieval (dense + sparse + RRF fusion via Query API). Default: false. */
+  /** If true, uses hybrid retrieval (dense + sparse + RRF fusion via Query API). Default: false. */
   hybrid?: boolean;
-  /** Testo della query originale. Richiesto se hybrid=true. */
+  /** Original query text. Required when hybrid=true. */
   query_text?: string;
-  /** Se true, include le note kind:"indice" nella ricerca. Default: false (escluse). */
+  /** If true, includes kind:"indice" notes in the search. Default: false (excluded). */
   include_hubs?: boolean;
-  /** Score minimo (0-1) per includere un risultato. Nessun default: nessun filtro. */
+  /** Minimum score (0-1) to include a result. No default: no filter. */
   min_score?: number;
 }
 
@@ -118,4 +118,4 @@ export interface Citation {
 
 export type SearchResult =
   | { note: Note; score: number; via: "search"; citation?: Citation }
-  | { note: Note; score: null; via: "correlato" };
+  | { note: Note; score: null; via: "related" };

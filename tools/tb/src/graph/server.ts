@@ -41,7 +41,7 @@ function pca2d(vectors: number[][]): Array<[number, number]> {
     v.reduce((s, x, i) => s + x * pc2[i], 0),
   ]);
 
-  // normalizza in [-1, 1]
+  // normalize into [-1, 1]
   const maxAbs = Math.max(...coords.flatMap(([x, y]) => [Math.abs(x), Math.abs(y)]), 1e-9);
   return coords.map(([x, y]) => [x / maxAbs, y / maxAbs]);
 }
@@ -53,7 +53,7 @@ interface GraphNode {
   label: string;
   kind: string;
   tags: string[];
-  px: number; // posizione PCA normalizzata [-1, 1]
+  px: number; // normalized PCA position [-1, 1]
   py: number;
 }
 

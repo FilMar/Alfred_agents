@@ -45,7 +45,7 @@ export class InstanceNotFoundError extends Error {}
 export function transition(id: string, from: QueueState, to: QueueState, base = resolveBaseDir()): void {
   const src = instancePath(base, from, id);
   if (!existsSync(src)) {
-    throw new InstanceNotFoundError(`Istanza "${id}" non trovata in stato "${from}".`);
+    throw new InstanceNotFoundError(`Instance "${id}" not found in state "${from}".`);
   }
   renameSync(src, instancePath(base, to, id));
 }

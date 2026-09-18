@@ -24,10 +24,10 @@ const SAFE_NAME_RE = /^[a-zA-Z0-9_-]+$/;
 
 export function validateName(name: string): void {
   if (!SAFE_NAME_RE.test(name)) {
-    throw new Error(`Nome non valido: "${name}". Usa solo lettere, cifre, "-" e "_".`);
+    throw new Error(`Invalid name: "${name}". Use only letters, digits, "-" and "_".`);
   }
   if (name.includes("/") || name.includes("\\")) {
-    throw new Error(`Nome non valido: "${name}". Non sono ammessi path separator.`);
+    throw new Error(`Invalid name: "${name}". Path separators are not allowed.`);
   }
 }
 
@@ -122,7 +122,7 @@ export function listTasks(base = resolveBaseDir()): RaspberryTask[] {
  */
 export function updateVerdict(name: string, verdict: Verdict, base = resolveBaseDir()): RaspberryTask {
   const task = getTask(name, base);
-  if (!task) throw new Error(`Task "${name}" non trovato nel catalogo.`);
+  if (!task) throw new Error(`Task "${name}" not found in the catalog.`);
   task.verdict = verdict;
   writeFileSync(entryPath(base, name), JSON.stringify(task, null, 2) + "\n", "utf-8");
   return task;

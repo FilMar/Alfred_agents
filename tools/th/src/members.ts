@@ -3,37 +3,37 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import type { Member } from "./types.js";
 
-// ─── Percorsi ─────────────────────────────────────────────────────────────────
+// ─── Paths ─────────────────────────────────────────────────────────────────
 
 function resolveHatsDir(): string {
   const fromEnv = process.env.TH_HATS_DIR;
   if (fromEnv) {
-    if (!existsSync(fromEnv)) throw new Error(`TH_HATS_DIR non trovato: "${fromEnv}"`);
+    if (!existsSync(fromEnv)) throw new Error(`TH_HATS_DIR not found: "${fromEnv}"`);
     return fromEnv;
   }
   const fromMeta = new URL("../hats", import.meta.url).pathname;
   if (existsSync(fromMeta)) return fromMeta;
-  // fallback: cerca relativo all'eseguibile (utile per binary compilati)
+  // fallback: look relative to the executable (useful for compiled binaries)
   const fromBin = join(process.argv[1] ?? "", "../hats");
   if (existsSync(fromBin)) return fromBin;
-  throw new Error(`Directory hats non trovata. Imposta TH_HATS_DIR oppure esegui da tools/th/.`);
+  throw new Error(`Hats directory not found. Set TH_HATS_DIR or run from tools/th/.`);
 }
 
 const MEMBERS_DIR = process.env.TH_MEMBERS_DIR ?? join(process.cwd(), ".th", "members");
 const TMP_MEMBERS_DIR = process.env.TH_TMP_MEMBERS_DIR ?? join("/tmp", ".th", "members");
 const GLOBAL_MEMBERS_DIR = process.env.TH_GLOBAL_MEMBERS_DIR ?? join(homedir(), ".th", "members");
 
-// ─── Validazione ──────────────────────────────────────────────────────────────
+// ─── Validation ──────────────────────────────────────────────────────────────
 
 const SAFE_NAME_RE = /^[a-zA-Z0-9_-]+$/;
 
 export function validateName(name: string): void {
   if (!SAFE_NAME_RE.test(name)) {
-    throw new Error(`Nome non valido: "${name}". Usa solo lettere, cifre, "-" e "_".`);
+    throw new Error(`Invalid name: "${name}". Use only letters, digits, "-" and "_".`);
   }
-  // ridondante ma esplicita: blocca path traversal
+  // redundant but explicit: blocks path traversal
   if (name.includes("/") || name.includes("\\")) {
-    throw new Error(`Nome non valido: "${name}". Non sono ammessi path separator.`);
+    throw new Error(`Invalid name: "${name}". Path separators are not allowed.`);
   }
 }
 
@@ -47,7 +47,7 @@ function loadHat(hat: string): string {
     const available = readdirSync(hatsDir)
       .filter((f) => f.endsWith(".md"))
       .map((f) => f.replace(".md", ""));
-    throw new Error(`Hat "${hat}" non trovato. Disponibili: ${available.join(", ")}`);
+    throw new Error(`Hat "${hat}" not found. Available: ${available.join(", ")}`);
   }
   return readFileSync(hatPath, "utf-8");
 }
@@ -64,7 +64,7 @@ function parseFrontmatter(content: string): Record<string, string> {
   );
 }
 
-// Gestisce sia la sintassi inline YAML `[a, b]` sia le righe con trattino `- a`
+// Handles both inline YAML syntax `[a, b]` and dash lines `- a`
 function parseList(raw: string | undefined): string[] {
   if (!raw) return [];
   const trimmed = raw.trim();
@@ -73,14 +73,14 @@ function parseList(raw: string | undefined): string[] {
     return trimmed.slice(1, -1).split(",").map((t) => t.trim()).filter(Boolean);
   }
   if (trimmed.startsWith("-")) {
-    // multi-line YAML collassato su una sola stringa (edge case da parse manuale)
+    // multi-line YAML collapsed onto one string (manual-parse edge case)
     return trimmed.split(/\n?\s*-\s+/).map((t) => t.trim()).filter(Boolean);
   }
-  // valore singolo senza parentesi
+  // single value without brackets
   return trimmed ? [trimmed] : [];
 }
 
-// ─── Lettura member da file ────────────────────────────────────────────────────
+// ─── Reading a member from file ────────────────────────────────────────────────────
 
 function resolveMemberPath(name: string): string {
   validateName(name);
@@ -90,7 +90,7 @@ function resolveMemberPath(name: string): string {
   if (existsSync(tmp)) return tmp;
   const global = join(GLOBAL_MEMBERS_DIR, `${name}.md`);
   if (existsSync(global)) return global;
-  throw new Error(`Membro "${name}" non trovato (cercato in .th/members/, /tmp/.th/members/, ~/.th/members/).`);
+  throw new Error(`Member "${name}" not found (looked in .th/members/, /tmp/.th/members/, ~/.th/members/).`);
 }
 
 function parseMemberContent(name: string, content: string): { member: Member; body: string } {
@@ -109,12 +109,12 @@ function parseMemberContent(name: string, content: string): { member: Member; bo
 
 export function createMember(name: string, hat: string, role: string, tools: string[], tmp = false): Member {
   validateName(name);
-  if (role.includes("\n")) throw new Error(`Il ruolo non può contenere newline. Usa una riga singola.`);
+  if (role.includes("\n")) throw new Error(`Role cannot contain newlines. Use a single line.`);
 
   const dir = tmp ? TMP_MEMBERS_DIR : MEMBERS_DIR;
   const memberPath = join(dir, `${name}.md`);
 
-  if (existsSync(memberPath)) throw new Error(`Membro "${name}" esiste già.`);
+  if (existsSync(memberPath)) throw new Error(`Member "${name}" already exists.`);
 
   // Validate the hat exists now (fail fast), but store it by reference only.
   // The hat content is resolved at load time so fixing a hat updates every member.
@@ -127,7 +127,7 @@ export function createMember(name: string, hat: string, role: string, tools: str
     `tools: [${tools.join(", ")}]`,
     `---`,
     ``,
-    `## Ruolo`,
+    `## Role`,
     ``,
     role,
     ``,
@@ -191,11 +191,11 @@ export function promoteMember(name: string, force = false): Member {
     if (existsSync(local)) return local;
     const tmp = join(TMP_MEMBERS_DIR, `${name}.md`);
     if (existsSync(tmp)) return tmp;
-    throw new Error(`Membro "${name}" non trovato in locale o tmp.`);
+    throw new Error(`Member "${name}" not found in local or tmp.`);
   })();
   const destPath = join(GLOBAL_MEMBERS_DIR, `${name}.md`);
   if (existsSync(destPath) && !force) {
-    throw new Error(`Membro globale "${name}" esiste già. Usa --force per sovrascrivere.`);
+    throw new Error(`Global member "${name}" already exists. Use --force to overwrite.`);
   }
   mkdirSync(GLOBAL_MEMBERS_DIR, { recursive: true });
   copyFileSync(srcPath, destPath);
@@ -206,9 +206,9 @@ export function createMemberFrom(name: string, globalName: string): Member {
   validateName(name);
   validateName(globalName);
   const srcPath = join(GLOBAL_MEMBERS_DIR, `${globalName}.md`);
-  if (!existsSync(srcPath)) throw new Error(`Membro globale "${globalName}" non trovato.`);
+  if (!existsSync(srcPath)) throw new Error(`Global member "${globalName}" not found.`);
   const destPath = join(MEMBERS_DIR, `${name}.md`);
-  if (existsSync(destPath)) throw new Error(`Membro "${name}" esiste già.`);
+  if (existsSync(destPath)) throw new Error(`Member "${name}" already exists.`);
   mkdirSync(MEMBERS_DIR, { recursive: true });
   let content = readFileSync(srcPath, "utf-8");
   if (name !== globalName) content = content.replace(/^name: .+$/m, `name: ${name}`);
@@ -216,15 +216,15 @@ export function createMemberFrom(name: string, globalName: string): Member {
   return getMember(name);
 }
 
-/** Garantisce che il membro esista localmente. Se trovato solo in globale, lo copia in locale.
- *  Ritorna true se è stato auto-istanziato da globale. */
+/** Guarantees the member exists locally. If found only globally, copies it to local.
+ *  Returns true if it was auto-instantiated from global. */
 export function ensureLocalMember(name: string): boolean {
   validateName(name);
   if (existsSync(join(MEMBERS_DIR, `${name}.md`))) return false;
   if (existsSync(join(TMP_MEMBERS_DIR, `${name}.md`))) return false;
   const globalPath = join(GLOBAL_MEMBERS_DIR, `${name}.md`);
   if (!existsSync(globalPath)) {
-    throw new Error(`Membro "${name}" non trovato (cercato in .th/members/, /tmp/.th/members/, ~/.th/members/).`);
+    throw new Error(`Member "${name}" not found (looked in .th/members/, /tmp/.th/members/, ~/.th/members/).`);
   }
   mkdirSync(MEMBERS_DIR, { recursive: true });
   copyFileSync(globalPath, join(MEMBERS_DIR, `${name}.md`));

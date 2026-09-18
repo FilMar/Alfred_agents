@@ -18,7 +18,7 @@ export class HttpError extends Error {
 export class HttpClient {
   constructor(private readonly config: HttpClientConfig) {}
 
-  // Ritorna la Response grezza senza lanciare su non-ok.
+  // Returns the raw Response without throwing on non-ok.
   async fetch(method: string, path: string, body?: unknown): Promise<Response> {
     return globalThis.fetch(`${this.config.baseUrl}${path}`, {
       method,
@@ -28,7 +28,7 @@ export class HttpClient {
     });
   }
 
-  // Lancia HttpError se la risposta non è ok.
+  // Throws HttpError if the response is not ok.
   async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const res = await this.fetch(method, path, body);
     if (!res.ok) {
@@ -93,7 +93,7 @@ export async function getCollectionInfo(name: string): Promise<CollectionCheck> 
   if (check.ok) return { exists: true, info: await check.json() };
   if (check.status === 404) return { exists: false };
   const text = await check.text();
-  throw new Error(`Qdrant: errore su GET collection — ${check.status} ${text}`);
+  throw new Error(`Qdrant: error on GET collection — ${check.status} ${text}`);
 }
 
 // PUT /collections/{name} with an arbitrary body (vectors config, etc). 409 (already
