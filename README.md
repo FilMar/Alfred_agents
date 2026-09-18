@@ -1,14 +1,16 @@
 # Pi
 
-Personal cognitive augmentation system. Three orthogonal layers that cooperate without overlapping.
+Personal cognitive augmentation system. Five orthogonal layers that cooperate without overlapping.
 
-## The Three Layers
+## The Layers
 
 | Access | Name | Purpose |
 |--------|------|---------|
-| `tb` (CLI) | Third Brain | Semantic memory: ideas, concepts, connections. Immutable associative graph with hybrid search and hubs. |
-| `th` (CLI) | Third Hand | Agent orchestration with de Bono hats. Project members, sequential and parallel flows. |
+| `tb` (CLI + HTTP) | Third Brain | Semantic memory: ideas, concepts, connections. Additive associative graph with hybrid search and hubs. Notes are never deleted; refs and tags can be updated. |
+| `th` (CLI) | Third Hand | Agent orchestration with de Bono hats. Project members, sequential and parallel flows, bwrap sandbox. |
 | `.wiki/` (Omero skill) | Third Wiki | Local project wiki: pages, style guides, code conventions. Plain markdown, maintained by Omero. Lives and dies with the project. |
+| `ti` (CLI + HTTP) | Third Identity | Context→behavior rules: what to do in a given situation. Dedicated Qdrant collection, same shape as `tb`. |
+| `tl` (REST, planned) | Third Log | Unified structured event log shared by `th`/`tb`/`ti`. Founded, not yet implemented. |
 
 ## Agents
 
@@ -27,6 +29,20 @@ Personal cognitive augmentation system. Three orthogonal layers that cooperate w
 | `efesto` | Creates and improves skills |
 | `omero` | Maintains the local project wiki in `.wiki/` |
 | `ermes` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) |
+| `mose` | Writes atomic context→action rules for the Third Identity |
+| `jobs` | Manages tasks via Taskwarrior with GTD semantics |
+| `linus` | Manages GitHub via gh: issues, project board, recaps |
+| `atlante` | Turns data into standalone interactive HTML charts (D3.js) |
+| `vinci` | Generates a Curriculum Vitae in Typst from conversation |
+| `clio` | Backs up Qdrant to MEGA cloud: snapshots, restores, timer |
+| `draghi` | Imports bank export CSVs into an expense ledger, computes trends |
+| `ulisse` | Skill navigator: points to the right skill instead of doing the task |
+
+Full, always-current roster (derived from the filesystem at print time):
+
+```bash
+python3 skills/efesto/scripts/roster.py
+```
 
 ## Setup
 
@@ -34,7 +50,7 @@ Personal cognitive augmentation system. Three orthogonal layers that cooperate w
 ./setup.sh
 ```
 
-Requires `bun`. Installs the `tb`, `th` symlinks in `~/.local/bin/`, links the identity (`alfred.md`) and the `skills/` directory into both `~/.claude/` and `~/.pi/agent/`.
+Requires `bun`. Installs the `tb`, `th`, `ti` symlinks in `~/.local/bin/`, links the identity (`alfred.md`) and the `skills/` directory into both `~/.claude/` and `~/.pi/agent/`, links the `tb_ti` extension (automatic `tb`/`ti` context injection) and the systemd user services for the `tb`/`ti` HTTP APIs.
 
 ---
 
@@ -50,7 +66,7 @@ Before answering on a topic that might be in the TB:
 tb search "<topic>" --depth 1
 ```
 
-For complex problems that benefit from multiple perspectives: Annibale orchestrates a multi-hat flow via its justfile.
+For complex problems that benefit from multiple perspectives: Annibale orchestrates a multi-hat flow. Read its SKILL.md and follow it.
 To extract content from URLs or videos: Polo.
 
 ### On a project — Omero
