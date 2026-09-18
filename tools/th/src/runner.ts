@@ -42,9 +42,9 @@ function bwrapArgs(): string[] {
 }
 
 const warnNoBwrap = () =>
-  process.stderr.write("warn: bwrap non disponibile — esecuzione SENZA sandbox\n");
+  process.stderr.write("warn: bwrap not available — running WITHOUT sandbox\n");
 
-/** Re-exec il processo corrente sotto bwrap. Non ritorna se bwrap è disponibile. */
+/** Re-exec the current process under bwrap. Does not return if bwrap is available. */
 export function ensureSandboxed(): void {
   if (process.env[SANDBOXED]) return;
   if (!hasBwrap()) {
@@ -73,11 +73,11 @@ export function spawnSandboxed(
   });
 }
 
-/** Esegue un binario arbitrario nel sandbox inoltrando stdio ed exit code.
- *  Senza bwrap rifiuta: chi chiama sandbox-exec vuole il sandbox, non un degrado silenzioso. */
+/** Runs an arbitrary binary in the sandbox, forwarding stdio and exit code.
+ *  Without bwrap it refuses: whoever calls sandbox-exec wants the sandbox, not a silent degradation. */
 export function sandboxExec(bin: string, args: string[]): Promise<number> {
   if (!hasBwrap()) {
-    throw new Error("bwrap non trovato: sandbox-exec rifiuta di eseguire senza sandbox. Installa bubblewrap.");
+    throw new Error("bwrap not found: sandbox-exec refuses to run without a sandbox. Install bubblewrap.");
   }
   return new Promise((resolve, reject) => {
     const child = spawnSandboxed(bin, args, { stdio: "inherit" });
@@ -180,7 +180,7 @@ export function spawnDetached(
 async function resolveModel(modelStr: string) {
   const [provider, ...rest] = modelStr.split("/");
   const modelId = rest.join("/");
-  if (!provider || !modelId) throw new Error(`Formato model non valido: usa "provider/model-id" (es. anthropic/claude-opus-4-5)`);
+  if (!provider || !modelId) throw new Error(`Invalid model format: use "provider/model-id" (e.g. anthropic/claude-opus-4-5)`);
   const knownProviders = getProviders();
   if (knownProviders.includes(provider as KnownProvider)) {
     const model = getModel(provider as KnownProvider, modelId as never);
@@ -193,7 +193,7 @@ async function resolveModel(modelStr: string) {
   const available = await modelRegistry.getAvailable();
   const custom = available.find((m) => m.provider === provider && m.id === modelId);
   if (custom) return custom;
-  throw new Error(`Model non trovato: "${modelStr}". Usa: th models`);
+  throw new Error(`Model not found: "${modelStr}". Run: th models`);
 }
 
 async function buildSession(
@@ -201,13 +201,13 @@ async function buildSession(
   opts: RunMemberOpts,
 ): Promise<{ session: AgentSession }> {
   if (opts.thinkingLevel && !THINKING_LEVELS.includes(opts.thinkingLevel as ThinkingLevel)) {
-    throw new Error(`Thinking level non valido: "${opts.thinkingLevel}". Valori accettati: ${THINKING_LEVELS.join(", ")}`);
+    throw new Error(`Invalid thinking level: "${opts.thinkingLevel}". Accepted values: ${THINKING_LEVELS.join(", ")}`);
   }
 
   const model = opts.modelStr ? await resolveModel(opts.modelStr) : undefined;
 
   const autoInstantiated = ensureLocalMember(memberName);
-  if (autoInstantiated) process.stderr.write(`info: istanziato "${memberName}" da globale in .th/members/\n`);
+  if (autoInstantiated) process.stderr.write(`info: instantiated "${memberName}" from global into .th/members/\n`);
   const { member, systemPrompt } = loadMember(memberName);
 
   const loader = new DefaultResourceLoader({

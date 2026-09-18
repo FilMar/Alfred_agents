@@ -13,12 +13,12 @@ export interface SearchOptions {
   min_score?: number;
 }
 
-/** Normalizza una lista di tag: split su virgola, trim, rimuove vuoti. */
+/** Normalizes a tag list: split on commas, trim, drop empties. */
 export function normalizeTags(tags: string[]): string[] {
   return tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean);
 }
 
-/** Estrae un messaggio leggibile da un errore di tipo sconosciuto. */
+/** Extracts a readable message from an unknown error type. */
 export function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }

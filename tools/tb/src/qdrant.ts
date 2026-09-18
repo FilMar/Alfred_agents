@@ -101,7 +101,7 @@ export async function ensureCollection(): Promise<void> {
 
 // ─── CRUD ────────────────────────────────────────────────────────────────────
 
-/** Salva (o sovrascrive) una nota con il suo vettore. Nessuna business logic. */
+/** Saves (or overwrites) a note with its vector. No business logic. */
 export async function upsert(note: Note, vector: number[]): Promise<void> {
   const sparse = buildSparseVector(noteToText(note));
   await qdrantClient.request("PUT", `/collections/${COLLECTION}/points?wait=true`, {
@@ -115,7 +115,7 @@ export async function upsert(note: Note, vector: number[]): Promise<void> {
   });
 }
 
-/** Aggiorna campi specifici del payload di una nota. */
+/** Updates specific fields of a note's payload. */
 export async function setPayload(id: string, payload: Record<string, unknown>): Promise<void> {
   await qdrantClient.request("POST", `/collections/${COLLECTION}/points/payload?wait=true`, {
     payload,
@@ -123,7 +123,7 @@ export async function setPayload(id: string, payload: Record<string, unknown>): 
   });
 }
 
-/** Recupera note per ID. Ritorna [] su 404. */
+/** Fetches notes by ID. Returns [] on 404. */
 export async function getByIds(ids: string[]): Promise<Note[]> {
   if (ids.length === 0) return [];
 
@@ -142,7 +142,7 @@ export async function getByIds(ids: string[]): Promise<Note[]> {
   return data.result.map((r) => r.payload).filter(Boolean);
 }
 
-/** Restituisce l'ID di una nota casuale usando un vettore random normalizzato. O(log n), no Ollama. */
+/** Returns a random note ID using a normalized random vector. O(log n), no Ollama. */
 export async function randomNoteId(): Promise<string | null> {
   const v = Array.from({ length: VECTOR_SIZE }, () => Math.random() * 2 - 1);
   const norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0));
@@ -224,7 +224,7 @@ async function traverseCorrelates(
     for (const note of linked) {
       if (!seen.has(note.id) && seen.size < MAX_CORRELATES_VISITED) {
         seen.add(note.id);
-        results.push({ note, score: null, via: "correlato" });
+        results.push({ note, score: null, via: "related" });
         frontier.push(note);
       }
     }

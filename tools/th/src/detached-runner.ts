@@ -7,7 +7,7 @@ type JobPaths = { out: string; log: string; status: string };
 const [memberName, task, pathsJson, optsJson] = process.argv.slice(2);
 
 if (!memberName || !task || !pathsJson || !optsJson) {
-  process.stderr.write("detached-runner: argomenti mancanti\n");
+  process.stderr.write("detached-runner: missing arguments\n");
   process.exit(1);
 }
 

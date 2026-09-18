@@ -48,31 +48,31 @@ function makeRun(overrides: Record<string, unknown> = {}) {
 }
 
 describe("validateName", () => {
-  it("accetta lettere, cifre, trattino, underscore", () => {
+  it("accepts letters, digits, dash, underscore", () => {
     expect(() => validateName("mario")).not.toThrow();
     expect(() => validateName("mario-rossi")).not.toThrow();
     expect(() => validateName("mario_rossi")).not.toThrow();
     expect(() => validateName("Mario123")).not.toThrow();
   });
 
-  it("rifiuta stringa vuota", () => {
+  it("rejects an empty string", () => {
     expect(() => validateName("")).toThrow();
   });
 
-  it("rifiuta path traversal con slash", () => {
+  it("rejects path traversal with slash", () => {
     expect(() => validateName("../etc/passwd")).toThrow();
     expect(() => validateName("a/b")).toThrow();
   });
 
-  it("rifiuta backslash", () => {
+  it("rejects backslash", () => {
     expect(() => validateName("a\\b")).toThrow();
   });
 
-  it("rifiuta spazi", () => {
+  it("rejects spaces", () => {
     expect(() => validateName("mario rossi")).toThrow();
   });
 
-  it("rifiuta caratteri speciali", () => {
+  it("rejects special characters", () => {
     expect(() => validateName("mario@rossi")).toThrow();
     expect(() => validateName("mario.rossi")).toThrow();
     expect(() => validateName("mario!")).toThrow();
@@ -80,23 +80,23 @@ describe("validateName", () => {
 });
 
 describe("run history", () => {
-  it("insert e get per id completo", () => {
+  it("insert and get by full id", () => {
     const r = makeRun();
     insertRun(r);
     expect(getRun(r.id)).toMatchObject({ id: r.id, member: r.member, status: "running" });
   });
 
-  it("get per prefisso id", () => {
+  it("get by id prefix", () => {
     const r = makeRun();
     insertRun(r);
     expect(getRun(r.id.slice(0, 8))).toMatchObject({ id: r.id });
   });
 
-  it("get su id inesistente → null", () => {
+  it("get on a missing id → null", () => {
     expect(getRun("non-esiste")).toBeNull();
   });
 
-  it("finishRun aggiorna status e finished_at", () => {
+  it("finishRun updates status and finished_at", () => {
     const r = makeRun();
     insertRun(r);
     finishRun(r.id, "done");
@@ -105,7 +105,7 @@ describe("run history", () => {
     expect(result?.finished_at).toBeDefined();
   });
 
-  it("finishRun salva token e costo", () => {
+  it("finishRun saves tokens and cost", () => {
     const r = makeRun();
     insertRun(r);
     finishRun(r.id, "done", { inputTokens: 1200, outputTokens: 340, costUsd: 0.0123 });
@@ -115,14 +115,14 @@ describe("run history", () => {
     expect(result?.cost_usd).toBeCloseTo(0.0123);
   });
 
-  it("finishRun senza usage lascia token a undefined", () => {
+  it("finishRun without usage leaves tokens undefined", () => {
     const r = makeRun();
     insertRun(r);
     finishRun(r.id, "done");
     expect(getRun(r.id)?.input_tokens).toBeUndefined();
   });
 
-  it("listRuns ordine decrescente per started_at", () => {
+  it("listRuns descending order by started_at", () => {
     const r1 = makeRun({ started_at: "2024-01-01T00:00:00.000Z" });
     const r2 = makeRun({ started_at: "2024-01-02T00:00:00.000Z" });
     insertRun(r1);
@@ -131,22 +131,22 @@ describe("run history", () => {
     expect(ids.indexOf(r2.id)).toBeLessThan(ids.indexOf(r1.id));
   });
 
-  it("listRuns filtra per membro", () => {
-    const r = makeRun({ member: "membro-specifico" });
+  it("listRuns filters by member", () => {
+    const r = makeRun({ member: "member-specific" });
     insertRun(r);
-    const results = listRuns({ member: "membro-specifico" });
-    expect(results.every(x => x.member === "membro-specifico")).toBe(true);
+    const results = listRuns({ member: "member-specific" });
+    expect(results.every(x => x.member === "member-specific")).toBe(true);
   });
 });
 
 describe("waitForJobs", () => {
-  it("ritorna ok=true per tutti i job done", async () => {
+  it("returns ok=true when all jobs are done", async () => {
     const paths = [statusFile("a", "done"), statusFile("b", "done")];
     const outcomes = await waitForJobs(paths, 5);
     expect(outcomes.every(o => o.ok)).toBe(true);
   });
 
-  it("non si appende su un job in errore e lo segna ok=false (regressione hang)", async () => {
+  it("does not hang on an errored job and marks it ok=false (hang regression)", async () => {
     const paths = [statusFile("ok", "done"), statusFile("ko", "error: boom")];
     const outcomes = await waitForJobs(paths, 5);
     expect(outcomes[0]?.ok).toBe(true);
@@ -154,13 +154,13 @@ describe("waitForJobs", () => {
     expect(outcomes[1]?.status).toBe("error: boom");
   });
 
-  it("tratta lo stato timeout come terminale", async () => {
+  it("treats the timeout state as terminal", async () => {
     const paths = [statusFile("t", "timeout")];
     const outcomes = await waitForJobs(paths, 5);
     expect(outcomes[0]?.ok).toBe(false);
   });
 
-  it("capisce la transizione running → done", async () => {
+  it("understands the running → done transition", async () => {
     const p = statusFile("trans", "running");
     const waiting = waitForJobs([p], 10);
     writeFileSync(p, "done");
@@ -169,8 +169,8 @@ describe("waitForJobs", () => {
   });
 });
 
-describe("hat per riferimento", () => {
-  it("risolve l'hat a runtime: modificarlo aggiorna il member, niente snapshot", () => {
+describe("hat by reference", () => {
+  it("resolves the hat at runtime: changing it updates the member, no snapshot", () => {
     const hatsDir = join(TEST_BASE, "hats-ref");
     mkdirSync(hatsDir, { recursive: true });
     const prev = process.env.TH_HATS_DIR;
@@ -178,18 +178,18 @@ describe("hat per riferimento", () => {
     try {
       const hatPath = join(hatsDir, "ref-core.md");
       writeFileSync(hatPath, "HAT V1");
-      createMember("ref-test", "ref-core", "ruolo di prova", ["read"]);
+      createMember("ref-test", "ref-core", "test role", ["read"]);
 
-      // il file del member NON contiene il testo dell'hat: solo il riferimento
+      // the member file does NOT contain the hat text: only the reference
       const fileContent = readFileSync(join(process.env.TH_MEMBERS_DIR!, "ref-test.md"), "utf8");
       expect(fileContent).toContain("hat: ref-core");
       expect(fileContent).not.toContain("HAT V1");
 
       const v1 = loadMember("ref-test").systemPrompt;
-      expect(v1).toContain("ruolo di prova");
+      expect(v1).toContain("test role");
       expect(v1).toContain("HAT V1");
 
-      // l'hat cambia; il member non viene ricreato → loadMember riflette la nuova versione
+      // the hat changes; the member is not recreated → loadMember reflects the new version
       writeFileSync(hatPath, "HAT V2");
       const v2 = loadMember("ref-test").systemPrompt;
       expect(v2).toContain("HAT V2");
@@ -202,68 +202,68 @@ describe("hat per riferimento", () => {
 });
 
 describe("member globals", () => {
-  it("promote sposta locale → globale", () => {
-    createMember("promo-test", "blue-core", "ruolo test", ["read"]);
+  it("promote moves local → global", () => {
+    createMember("promo-test", "blue-core", "test role", ["read"]);
     promoteMember("promo-test");
     const groups = listMembers({ global: true });
     expect(groups.global.some(m => m.name === "promo-test")).toBe(true);
   });
 
-  it("promote fallisce se globale esiste già senza --force", () => {
+  it("promote fails when global already exists without --force", () => {
     createMember("promo-force", "blue-core", "ruolo", ["read"]);
     promoteMember("promo-force");
-    expect(() => promoteMember("promo-force")).toThrow(/esiste già/);
+    expect(() => promoteMember("promo-force")).toThrow(/already exists/);
   });
 
-  it("promote con --force sovrascrive", () => {
-    createMember("promo-overwrite", "blue-core", "originale", ["read"]);
+  it("promote with --force overwrites", () => {
+    createMember("promo-overwrite", "blue-core", "original", ["read"]);
     promoteMember("promo-overwrite");
-    // crea nuovo locale con ruolo diverso e promuove con force
+    // create a new local member with a different role and promote with force
     const localPath = join(process.env.TH_MEMBERS_DIR!, "promo-overwrite.md");
     rmSync(localPath);
-    createMember("promo-overwrite", "black-core", "aggiornato", ["read"]);
+    createMember("promo-overwrite", "black-core", "updated", ["read"]);
     expect(() => promoteMember("promo-overwrite", true)).not.toThrow();
     expect(getMember("promo-overwrite").hat).toBe("black-core");
   });
 
-  it("createMemberFrom crea locale da globale", () => {
-    createMember("base-global", "yellow-core", "ruolo base", ["read"]);
+  it("createMemberFrom creates a local member from a global one", () => {
+    createMember("base-global", "yellow-core", "base role", ["read"]);
     promoteMember("base-global");
     createMemberFrom("local-from-global", "base-global");
     const groups = listMembers({ local: true });
     expect(groups.local.some(m => m.name === "local-from-global")).toBe(true);
   });
 
-  it("createMemberFrom fallisce se globale non esiste", () => {
-    expect(() => createMemberFrom("nessuno", "inesistente")).toThrow(/non trovato/);
+  it("createMemberFrom fails when global does not exist", () => {
+    expect(() => createMemberFrom("nobody", "nonexistent")).toThrow(/not found/);
   });
 
-  it("ensureLocalMember non fa nulla se esiste già in locale", () => {
+  it("ensureLocalMember does nothing when it already exists locally", () => {
     createMember("already-local", "blue-core", "ruolo", ["read"]);
     expect(ensureLocalMember("already-local")).toBe(false);
   });
 
-  it("ensureLocalMember auto-istanzia da globale se manca in locale/tmp", () => {
+  it("ensureLocalMember auto-instantiates from global when missing in local/tmp", () => {
     createMember("only-global", "blue-core", "ruolo", ["read"]);
     promoteMember("only-global");
     rmSync(join(process.env.TH_MEMBERS_DIR!, "only-global.md"));
     expect(ensureLocalMember("only-global")).toBe(true);
-    // ora esiste in locale
+    // now it exists locally
     expect(ensureLocalMember("only-global")).toBe(false);
   });
 
-  it("ensureLocalMember lancia se non trovato da nessuna parte", () => {
-    expect(() => ensureLocalMember("non-esiste-davvero")).toThrow(/non trovato/);
+  it("ensureLocalMember throws when found nowhere", () => {
+    expect(() => ensureLocalMember("does-not-exist-at-all")).toThrow(/not found/);
   });
 
-  it("listMembers senza filtri restituisce 3 gruppi", () => {
+  it("listMembers without filters returns 3 groups", () => {
     const groups = listMembers();
     expect(groups).toHaveProperty("local");
     expect(groups).toHaveProperty("global");
     expect(groups).toHaveProperty("tmp");
   });
 
-  it("listMembers --local non include globali o tmp", () => {
+  it("listMembers --local does not include global or tmp", () => {
     const groups = listMembers({ local: true });
     expect(groups.global).toHaveLength(0);
     expect(groups.tmp).toHaveLength(0);
@@ -271,28 +271,28 @@ describe("member globals", () => {
 });
 
 describe("sanitize", () => {
-  it("rimuove ANSI escape codes", () => {
-    expect(sanitize("\x1b[31mrosso\x1b[0m")).toBe("rosso");
+  it("removes ANSI escape codes", () => {
+    expect(sanitize("\x1b[31mred\x1b[0m")).toBe("red");
     expect(sanitize("\x1b[1;32mbold green\x1b[0m")).toBe("bold green");
   });
 
-  it("rimuove caratteri di controllo (tranne tab/LF/CR)", () => {
+  it("removes control characters (except tab/LF/CR)", () => {
     expect(sanitize("a\x01b\x02c")).toBe("abc");
     expect(sanitize("a\tb\nc\rd")).toBe("a\tb\nc\rd");
   });
 
-  it("rimuove caratteri Unicode sopra U+00FF", () => {
+  it("removes Unicode characters above U+00FF", () => {
     expect(sanitize("a→b")).toBe("ab");
   });
 
-  it("non tocca testo ASCII printable", () => {
+  it("leaves printable ASCII text untouched", () => {
     const s = "hello world [tool:Read] result 42";
     expect(sanitize(s)).toBe(s);
   });
 });
 
 describe("makeJobPaths", () => {
-  it("tutti i path condividono lo stesso base e hanno l'estensione corretta", () => {
+  it("all paths share the same base and have the right extension", () => {
     const paths = makeJobPaths("test-member");
     const base = paths.status.replace(/\.status$/, "");
     expect(paths.out).toBe(`${base}.out`);
@@ -304,16 +304,16 @@ describe("makeJobPaths", () => {
 describe("sandboxExec", () => {
   const bwrapAvailable = spawnSync("which", ["bwrap"], { stdio: "ignore" }).status === 0;
 
-  it.skipIf(!bwrapAvailable)("esegue un binario e ritorna exit code 0", async () => {
+  it.skipIf(!bwrapAvailable)("runs a binary and returns exit code 0", async () => {
     expect(await sandboxExec("true", [])).toBe(0);
   });
 
-  it.skipIf(!bwrapAvailable)("inoltra l'exit code non-zero", async () => {
+  it.skipIf(!bwrapAvailable)("forwards a non-zero exit code", async () => {
     expect(await sandboxExec("sh", ["-c", "exit 3"])).toBe(3);
   });
 
-  it.skipIf(!bwrapAvailable)("il sandbox blocca le scritture fuori dai bind path", async () => {
-    // $HOME è ro-bind (solo ~/.pi, ~/.bun, cwd e /tmp sono scrivibili)
+  it.skipIf(!bwrapAvailable)("the sandbox blocks writes outside the bind paths", async () => {
+    // $HOME is ro-bind (only ~/.pi, ~/.bun, cwd and /tmp are writable)
     const code = await sandboxExec("sh", ["-c", `touch "$HOME/th-sandbox-test-${process.pid}" 2>/dev/null`]);
     expect(code).not.toBe(0);
   });
@@ -324,7 +324,7 @@ describe("checkStaleness (crash detection)", () => {
     return { mtime: 0, lastChange: Date.now() - lastChangeMsAgo };
   }
 
-  it("marca crashed se stale e PID morto", () => {
+  it("marks crashed when stale and PID dead", () => {
     const statusPath = join(TEST_BASE, "cs-dead.status");
     const pidPath = statusPath.replace(/\.status$/, ".pid");
     writeFileSync(statusPath, "running");
@@ -334,7 +334,7 @@ describe("checkStaleness (crash detection)", () => {
     expect(readFileSync(statusPath, "utf8")).toBe("error: process died unexpectedly");
   });
 
-  it("NON marca crashed se stale ma PID ancora vivo", () => {
+  it("does NOT mark crashed when stale but PID still alive", () => {
     const statusPath = join(TEST_BASE, "cs-alive.status");
     const pidPath = statusPath.replace(/\.status$/, ".pid");
     writeFileSync(statusPath, "running");
@@ -344,19 +344,19 @@ describe("checkStaleness (crash detection)", () => {
     expect(readFileSync(statusPath, "utf8")).toBe("running");
   });
 
-  it("NON marca crashed se .out aggiornato di recente (non stale)", () => {
+  it("does NOT mark crashed when .out is fresh (not stale)", () => {
     const statusPath = join(TEST_BASE, "cs-fresh.status");
     const outPath = statusPath.replace(/\.status$/, ".out");
     const pidPath = statusPath.replace(/\.status$/, ".pid");
     writeFileSync(statusPath, "running");
-    writeFileSync(outPath, "output fresco");
+    writeFileSync(outPath, "fresh output");
     writeFileSync(pidPath, "9999999");
     const state = { mtime: 0, lastChange: Date.now() };
     checkStaleness(statusPath, state, Date.now());
     expect(readFileSync(statusPath, "utf8")).toBe("running");
   });
 
-  it("aggiorna lastChange quando mtime di .out cambia", () => {
+  it("updates lastChange when the .out mtime changes", () => {
     const statusPath = join(TEST_BASE, "cs-mtime.status");
     const outPath = statusPath.replace(/\.status$/, ".out");
     writeFileSync(statusPath, "running");

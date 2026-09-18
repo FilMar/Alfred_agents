@@ -19,12 +19,12 @@ const TIMEOUT_RE = /export\s+const\s+timeoutSec\s*=\s*(\d+)\s*;?/;
 export function extractMetadata(source: string): TaskMetadata {
   const scheduleMatch = source.match(SCHEDULE_RE);
   if (!scheduleMatch) {
-    throw new Error("Metadata mancante: export const schedule non trovato nel sorgente.");
+    throw new Error("Missing metadata: export const schedule not found in the source.");
   }
 
   const desktopMatch = source.match(REQUIRES_DESKTOP_RE);
   if (!desktopMatch) {
-    throw new Error("Metadata mancante: export const requiresDesktop non trovato nel sorgente.");
+    throw new Error("Missing metadata: export const requiresDesktop not found in the source.");
   }
 
   const timeoutMatch = source.match(TIMEOUT_RE);

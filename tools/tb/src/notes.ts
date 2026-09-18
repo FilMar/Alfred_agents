@@ -5,7 +5,7 @@ import { REFS_LIMIT } from "./infra.js";
 import { noteToText } from "./types.js";
 import type { Note, NoteType, Link, SearchOptions, SearchResult } from "./types.js";
 
-// ─── Serendipità ──────────────────────────────────────────────────────────────
+// ─── Serendipity ──────────────────────────────────────────────────────────────
 
 export async function randomNote(): Promise<Note | null> {
   const id = await randomNoteId();
@@ -14,7 +14,7 @@ export async function randomNote(): Promise<Note | null> {
   return found.length > 0 ? found[0] : null;
 }
 
-// ─── Backref (invariante del grafo) ──────────────────────────────────────────
+// ─── Backref (graph invariant) ──────────────────────────────────────────────
 
 async function appendBackref(targetId: string, sourceId: string): Promise<void> {
   const found = await getByIds([targetId]);
@@ -26,7 +26,7 @@ async function appendBackref(targetId: string, sourceId: string): Promise<void> 
   await setPayload(targetId, { backrefs: [...existing, sourceId] });
 }
 
-// ─── API pubblica ─────────────────────────────────────────────────────────────
+// ─── Public API ──────────────────────────────────────────────────────────────
 
 export interface CreateNoteParams {
   what: string;
@@ -61,23 +61,23 @@ export async function createNote(params: CreateNoteParams): Promise<Note> {
 
 export async function addRefs(id: string, newRefs: Link[]): Promise<Note> {
   const found = await getByIds([id]);
-  if (found.length === 0) throw new Error(`Nota non trovata: ${id}`);
+  if (found.length === 0) throw new Error(`Note not found: ${id}`);
 
   const current = found[0];
   const new_ids = [...new Set(newRefs.map(nr => nr.id))];
   const notes = await getByIds(new_ids);
   if (new_ids.length != notes.length) {
-    // Se c'è una discrepanza, troviamo quale ID manca per fare un messaggio d'errore preciso
+    // If there is a mismatch, find which ID is missing to give a precise error message
     const foundIds = new Set(notes.map(r => r.id));
     const missingId = new_ids.find(id => !foundIds.has(id));
-    throw new Error(`Nota link ${missingId} non trovata per la nota corrente ${id}`);
+    throw new Error(`Linked note ${missingId} not found for note ${id}`);
   }
   const merged = [...current.refs, ...newRefs];
 
   if (merged.length > REFS_LIMIT) {
     throw new Error(
-      `Limite refs raggiunto (${merged.length}/${REFS_LIMIT}). ` +
-      `Consolida le note correlate in un Hub (kind: "indice") e poi aggiungi l'Hub come ref.`,
+      `Refs limit reached (${merged.length}/${REFS_LIMIT}). ` +
+      `Consolidate related notes into a Hub (kind: "indice") and then add the Hub as a ref.`,
     );
   }
   await setPayload(id, { refs: merged });
@@ -90,13 +90,13 @@ export async function addRefs(id: string, newRefs: Link[]): Promise<Note> {
 
 export async function changeKind(id: string, kind: NoteType): Promise<void> {
   const found = await getByIds([id]);
-  if (found.length === 0) throw new Error(`Nota non trovata: ${id}`);
+  if (found.length === 0) throw new Error(`Note not found: ${id}`);
   await setPayload(id, { kind });
 }
 
 export async function changeTags(id: string, tags: string[]): Promise<void> {
   const found = await getByIds([id]);
-  if (found.length === 0) throw new Error(`Nota non trovata: ${id}`);
+  if (found.length === 0) throw new Error(`Note not found: ${id}`);
   await setPayload(id, { tags });
 }
 

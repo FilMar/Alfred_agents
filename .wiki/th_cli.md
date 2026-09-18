@@ -3,7 +3,7 @@
 ```yaml
 tags: [th, cli, reference, agents, orchestration]
 sources: [tools/th/src/cli.ts, tools/th/src/runner.ts, tools/th/src/members.ts, tools/th/src/db.ts]
-updated: 2026-08-18
+updated: 2026-09-18
 ```
 
 ## Overview
@@ -53,7 +53,7 @@ th run --member <name> --task "<task>" [options]
 | `--detach` | Background: returns immediately `{pid, out, log, status}`. Status in `/tmp/th-*.status` |
 | `--timeout <sec>` | Aborts the session after N seconds |
 
-**bwrap sandbox**: automatic if `bwrap` is in PATH. Read-only on everything except `cwd`, `~/.pi`, `~/.bun`, `/tmp`. If `bwrap` is missing, `th run` proceeds unsandboxed but warns on stderr (`warn: bwrap non disponibile — esecuzione SENZA sandbox`) — it never degrades silently.
+**bwrap sandbox**: automatic if `bwrap` is in PATH. Read-only on everything except `cwd`, `~/.pi`, `~/.bun`, `/tmp`. If `bwrap` is missing, `th run` proceeds unsandboxed but warns on stderr (`warn: bwrap not available — running WITHOUT sandbox`) — it never degrades silently.
 
 **Known issue — silent death mid-run (observed 2026-07-21, unconfirmed root cause)**: twice in the same session, a `--detach` run reported `.status: done` / exit code 0 with an empty or truncated `.out`, while the `.log` showed the agent stopping mid-reasoning (once mid code-write, once mid a botched `sed`/`mv` cleanup) with no final message. Nothing in the visible output flagged the run as incomplete — only reading the raw `.log` exposed it. Until root-caused, treat any `--detach` result with a suspiciously short `.out` as suspect and check the `.log` tail before trusting it, especially for runs that write files (the second incident wiped [log](log) with a broken shell one-liner before dying, undetected until manually inspected).
 
