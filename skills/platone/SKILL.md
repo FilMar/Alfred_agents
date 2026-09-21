@@ -30,51 +30,54 @@ Before saving, use Richard Feynman's method to strip away fake complexity:
 - **Mechanism > Label**: do not just name something (e.g. "Adversarial Synergy"). Describe *how the mechanism works*. Understanding lives in the process, not the term.
 - **No jargon**: if you must use a technical term, explain it right away in simple words. If a word only makes you sound smart, drop it.
 
-### 3. Store (Interactive proposal)
+### 3. Store (Batch proposal)
 
-For each simplified concept, **do not save immediately**. Propose it to the user and wait for confirmation.
+**Do not save immediately.** Propose the notes to the user in batches of at most 5 and wait for one confirmation per batch. Ten concepts means two batches; twelve means three.
 
 **Step 3a — Check for duplicates:**
 ```bash
-tb tags                                       # tag vocabulary — consult first
-tb search "<key concept>" --limit 5           # search for similar ideas semantically
+tb tags                                                 # tag vocabulary — consult first
+tb search "<key concept>" --limit 5 --no-hits           # similar ideas; --no-hits keeps the usage counter clean
 ```
 
-**Step 3b — Propose the note:**
+**Step 3b — Propose one batch:**
 
-Present the proposed note to the user in this format:
+Present all the notes of the batch together, numbered, in this format:
 
 ```
-Proposed note [N/TOTAL]:
+Batch [B/TOTAL_BATCHES] — notes N..M of TOTAL
 
+[N]
   what: <atomic idea>
   why:  <reason for relevance>
   kind: <type>
   tags: <tag1, tag2, tag3>
   [source: <source, if applicable>]
+  connections: [<id>] <why it is connected> | (none)
 
-Connections found in TB:
-  - [<id>] <note title> — <why it is connected>
-  - [<id>] <note title> — <why it is connected>
-  (or: no connections found)
+[N+1]
+  ...
 
-Confirm? You can modify fields or add refs you see.
+Confirm the batch? Answer per number to modify, add refs or skip.
 ```
 
 **Step 3c — Wait for response:**
 
-The user can:
-- Confirm ("ok", "yes", "go ahead") → save as is
-- Modify a field ("change kind to attrito", "update tags to psychology,bias") → apply the change to the proposal and save
-- Add refs ("add ref to <id>: <reason>") → include in the save
-- Discard ("skip", "don't save") → move to the next one
+One answer covers the whole batch. The user can:
+- Confirm all ("ok", "yes", "go ahead") → save every note as is
+- Modify a field of one note ("2: kind attrito", "3: tags psychology,bias") → apply and save
+- Add refs to one note ("1: ref <id>: <reason>") → include in the save
+- Skip one or more ("skip 2 and 4") → save the others
+- Discard the batch ("skip all") → move to the next batch
 
-Only after confirmation execute:
+Only after confirmation execute, for each confirmed note:
 ```bash
 tb save --what "<atomic idea>" --why "<reason>" --kind <type> --tags tag1 --tags tag2 [--source "<uri>"]
 tb update <new-id> --tags tag1 --tags tag2             # if the user modified tags
 tb update <new-id> --add-ref "<id>:<reason>"           # for each confirmed ref
 ```
+
+Then move to the next batch. Never propose a new batch before the previous one is answered.
 
 **Absolute Constraints (Zero Tolerance):**
 - **No Name References**: forbidden to cite team member names.
@@ -140,16 +143,16 @@ When activated:
 1. **Analyse the entire thread** and the final output.
 2. **Distil the concepts**: apply the Feynman Filter and the Purity Constraints to each concept you find. Keep the list in mind. Do not save anything yet.
 3. **Consult the tags**: run `tb tags`. Do this only once.
-4. **For each concept**, in order:
-   a. Run `tb search "<key concept>" --limit 5`. This finds duplicates and connections.
-   b. If it is a semantic duplicate: do not propose it. If it is a partial variation: propose adding a ref to the existing note instead.
-   c. **Propose** the note to the user (use the format from Step 3b) together with the connections you found.
-   d. **Wait for confirmation**. Do not move to the next concept until the user answers.
-   e. Apply the changes the user asks for (fields, extra refs).
-   f. Run `tb save`, and any `tb update --add-ref`.
-   g. Run `tb random`. If a real bridge exists, propose adding it as a ref.
-5. **Check for procedural knowledge**. The session may produce a non-obvious context→action decision. This is not a semantic concept — it is a recurring rule: "in situation X, do Y." If you find one, propose it via `ti add --if "<context>" --do "<action>" --tags tag1 --tags tag2` instead of saving to the Third Brain. `tb` stores knowledge. `ti` stores procedure. Keep the two stores separate.
-6. **At the end**, present the pearls in chat: the most fertile concepts among the ones you saved.
+4. **For each concept**, run `tb search "<key concept>" --limit 5 --no-hits`. This finds duplicates and connections.
+   If it is a semantic duplicate: drop it. If it is a partial variation: propose adding a ref to the existing note instead.
+5. **Split the surviving concepts into batches of at most 5**, in order. For each batch:
+   a. **Propose** the whole batch to the user (use the format from Step 3b) with the connections you found.
+   b. **Wait for one confirmation**. Do not move to the next batch until the user answers.
+   c. Apply the changes the user asks for (fields, extra refs, skips).
+   d. Run `tb save`, and any `tb update --add-ref`, for each confirmed note.
+   e. For each saved note, run `tb random`. If a real bridge exists, propose adding it as a ref.
+6. **Check for procedural knowledge**. The session may produce a non-obvious context→action decision. This is not a semantic concept — it is a recurring rule: "in situation X, do Y." If you find one, propose it via `ti add --if "<context>" --do "<action>" --tags tag1 --tags tag2` instead of saving to the Third Brain. `tb` stores knowledge. `ti` stores procedure. Keep the two stores separate.
+7. **At the end**, present the pearls in chat: the most fertile concepts among the ones you saved.
 
 ---
 
