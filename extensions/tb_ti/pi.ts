@@ -6,8 +6,8 @@ export default function (pi: ExtensionAPI): void {
     if (!event.prompt?.trim()) return;
 
     const [tiResult, tbResult] = await Promise.allSettled([
-      execSearch("ti", event.prompt, { limit: 3, minScore: 0.6 }),
-      execSearch("tb", event.prompt, { depth: 1, limit: 5, minScore: 0.6 }),
+      execSearch("ti", event.prompt, { limit: 2, minScore: 0.8 }),
+      execSearch("tb", event.prompt, { depth: 1, limit: 2, minScore: 0.8 }),
     ]);
 
     let context = "";
@@ -17,7 +17,7 @@ export default function (pi: ExtensionAPI): void {
       try {
         const tiData = JSON.parse(tiResult.value);
         const tiFormatted = tiData
-          .slice(0, 3)
+          .slice(0, 2)
           .map((r: { if?: string; do?: string; tags?: string[] }) => {
             const ifPart = r.if || "—";
             const doPart = r.do || "—";
@@ -36,7 +36,7 @@ export default function (pi: ExtensionAPI): void {
       try {
         const tbData = JSON.parse(tbResult.value);
         const tbFormatted = tbData
-          .slice(0, 5)
+          .slice(0, 2)
           .map((r: { note?: { what?: string; why?: string; tags?: string[]; kind?: string }; what?: string; why?: string; kind?: string }) => {
             const what = r.note?.what || r.what || "—";
             const why = r.note?.why || r.why || "—";
