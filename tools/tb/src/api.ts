@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 
-import { createNote, addRefs, changeKind, changeTags, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
+import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
 import { NOTE_TYPES, isValidKind, normalizeTags, errorMessage } from "./types.js";
 import type { NoteType, SearchOptions } from "./types.js";
 import type { ScrollOptions } from "./qdrant.js";
@@ -36,6 +36,7 @@ const OPENAPI_SPEC = {
                   kind: { type: "array", items: { type: "string", enum: NOTE_TYPES } },
                   evidence_only: { type: "boolean", default: false },
                   include_hubs: { type: "boolean", default: false },
+                  record_hits: { type: "boolean", default: true },
                 },
               },
             },
@@ -111,6 +112,12 @@ const OPENAPI_SPEC = {
         },
         responses: { "200": { description: "Updated" } },
       },
+      delete: {
+        operationId: "deleteNote",
+        summary: "Delete a note and every ref/backref pointing to it",
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        responses: { "200": { description: "Deleted" }, "404": { description: "Note not found" } },
+      },
     },
   },
 } as const;
@@ -134,6 +141,7 @@ app.post("/search", async (c) => {
     kind: body.kind as NoteType[] | undefined,
     evidence_only: body.evidence_only ?? false,
     include_hubs: body.include_hubs ?? false,
+    record_hits: body.record_hits ?? true,
   };
 
   const results = await searchNotes(body.query, options);
@@ -198,6 +206,14 @@ app.patch("/notes/:id", async (c) => {
 
   if (!updated) return c.json({ error: "Nothing to update. Use kind, tags or add_refs." }, 400);
   return c.json({ id, updated: true });
+});
+
+app.delete("/notes/:id", async (c) => {
+  try {
+    return c.json(await deleteNote(c.req.param("id")));
+  } catch (err) {
+    return c.json({ error: errorMessage(err) }, 404);
+  }
 });
 
 // ─── Server ───────────────────────────────────────────────────────────────────

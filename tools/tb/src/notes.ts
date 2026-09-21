@@ -1,8 +1,8 @@
 import { embed } from "./infra.js";
-import { ensureCollection, upsert, setPayload, getByIds, search, scroll, randomNoteId, noteId, listTags } from "./qdrant.js";
+import { ensureCollection, upsert, setPayload, getByIds, search, scroll, scrollLinkedTo, deletePoints, randomNoteId, noteId, listTags } from "./qdrant.js";
 import type { ScrollOptions, TagFacet } from "./qdrant.js";
 import { REFS_LIMIT } from "./infra.js";
-import { noteToText } from "./types.js";
+import { noteToText, withoutLink, nextHit } from "./types.js";
 import type { Note, NoteType, Link, SearchOptions, SearchResult } from "./types.js";
 
 // ─── Serendipity ──────────────────────────────────────────────────────────────
@@ -103,7 +103,45 @@ export async function changeTags(id: string, tags: string[]): Promise<void> {
 export async function searchNotes(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
   await ensureCollection();
   const vector = await embed(query);
-  return search(vector, { ...options, query_text: query });
+  const results = await search(vector, { ...options, query_text: query });
+  if (options.record_hits !== false) await recordHits(results);
+  return results;
+}
+
+/** Counts one hit on every direct search result. A failed write never fails the search. */
+async function recordHits(results: SearchResult[]): Promise<void> {
+  const now = new Date().toISOString();
+  const direct = results.filter((r) => r.via === "search");
+  const writes = direct.map((r) => {
+    const hit = nextHit(r.note, now);
+    Object.assign(r.note, hit);
+    return setPayload(r.note.id, hit);
+  });
+  const settled = await Promise.allSettled(writes);
+  const failed = settled.filter((s) => s.status === "rejected").length;
+  if (failed > 0) process.stderr.write(`Warning: ${failed} hit counter update(s) failed.\n`);
+}
+
+export interface DeleteSummary {
+  id: string;
+  deleted: true;
+  /** Notes that lost a ref or a backref to the deleted note. */
+  unlinked: number;
+}
+
+/** Deletes a note and removes every ref and backref pointing to it. */
+export async function deleteNote(id: string): Promise<DeleteSummary> {
+  const found = await getByIds([id]);
+  if (found.length === 0) throw new Error(`Note not found: ${id}`);
+
+  const linked = await scrollLinkedTo(id);
+  for (const note of linked) {
+    const cleaned = withoutLink(note, id);
+    await setPayload(note.id, { refs: cleaned.refs, backrefs: cleaned.backrefs ?? [] });
+  }
+
+  await deletePoints([id]);
+  return { id, deleted: true, unlinked: linked.length };
 }
 
 export async function browseNotes(options: ScrollOptions = {}): Promise<Note[]> {
