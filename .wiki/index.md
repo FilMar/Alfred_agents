@@ -1,7 +1,7 @@
 ---
 tags: [pi, index]
 sources: []
-updated: 2026-09-18
+updated: 2026-09-22
 ---
 
 ## Pages
@@ -36,6 +36,8 @@ updated: 2026-09-18
 | [orchestrator_remaining_work](orchestrator_remaining_work) | Phases 3-4, known bugs, future ideas |
 | [rasp_services_provisioning_order](rasp_services_provisioning_order) | What runs on the Rasp and in which order |
 | [cockpit_pivot_pi_extension_rpc](cockpit_pivot_pi_extension_rpc) | Cockpit as a pi extension in RPC mode |
+| [graph_note_workbench_direct_manipulation](graph_note_workbench_direct_manipulation) | Replaces tb graph's D3 viewer with an editable workbench |
+| [graph_curation_via_th_agent](graph_curation_via_th_agent) | Curation via a th member, live-streamed, kill-switch not a gate |
 | [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
 | [skill_router_pass_planned](skill_router_pass_planned) | Router pass design, deliberately deferred |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |

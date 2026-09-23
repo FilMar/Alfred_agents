@@ -115,6 +115,14 @@ export async function upsert(note: Note, vector: number[]): Promise<void> {
   });
 }
 
+/** Deletes points by ID. */
+export async function deletePoints(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  await qdrantClient.request("POST", `/collections/${COLLECTION}/points/delete?wait=true`, {
+    points: ids,
+  });
+}
+
 /** Updates specific fields of a note's payload. */
 export async function setPayload(id: string, payload: Record<string, unknown>): Promise<void> {
   await qdrantClient.request("POST", `/collections/${COLLECTION}/points/payload?wait=true`, {
@@ -337,6 +345,41 @@ export async function listTags(limit = 200): Promise<TagFacet[]> {
 }
 
 // ─── Scroll ──────────────────────────────────────────────────────────────────
+
+const SCROLL_PAGE_SIZE = 250;
+const SCROLL_MAX_PAGES = 100;
+
+/** Returns every note that links to `id`, via refs or backrefs. Paginated, bounded. */
+export async function scrollLinkedTo(id: string): Promise<Note[]> {
+  const filter = {
+    should: [
+      { key: "refs[].id", match: { value: id } },
+      { key: "backrefs", match: { value: id } },
+    ],
+  };
+  const results: Note[] = [];
+  let offset: string | null = null;
+
+  for (let page = 0; page < SCROLL_MAX_PAGES; page++) {
+    const body: Record<string, unknown> = {
+      limit: SCROLL_PAGE_SIZE,
+      filter,
+      with_payload: true,
+      with_vector: false,
+      ...(offset && { offset }),
+    };
+    const data = await qdrantClient.request<ScrollResponse<never>>(
+      "POST",
+      `/collections/${COLLECTION}/points/scroll`,
+      body,
+    );
+    results.push(...data.result.points.map((p) => p.payload));
+    if (!data.result.next_page_offset) break;
+    offset = data.result.next_page_offset;
+  }
+
+  return results;
+}
 
 export interface ScrollOptions {
   kind?: NoteType;

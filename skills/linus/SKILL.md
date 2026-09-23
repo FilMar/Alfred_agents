@@ -17,14 +17,24 @@ scripts in `scripts/` for the actions that chain more than one `gh` call.
 - **Status flow**: Backlog → Ready → In progress → Testing → Done
 - **Sizes**: XS, S, M, L, XL
 
+## Language
+
+SVILUPPO is a private board, not a public repo. Write every issue title,
+body, and comment in Italian. This is a local exception to the user's
+general "GitHub content is English" rule — it applies only inside this
+skill.
+
+Keep bodies and comments short and plain: max 10 lines, simple words,
+short sentences.
+
 ## Issues
 
 Create an issue and add it to SVILUPPO with status Backlog (issue create,
 project item-add, item-edit — three chained calls):
 
 ```bash
-scripts/issue_create.sh server_api "Fix invoice calculation"
-scripts/issue_create.sh server_api "Fix invoice" "Detailed description here"
+scripts/issue_create.sh server_api "Correggi calcolo fattura"
+scripts/issue_create.sh server_api "Correggi fattura" "Descrizione dettagliata qui"
 ```
 
 List and view issues:
@@ -49,7 +59,7 @@ Manage issues:
 gh issue close 42 --repo Emotion-SRL/server_api
 gh issue edit 42 --repo Emotion-SRL/server_api --add-assignee FilMar
 gh issue edit 42 --repo Emotion-SRL/server_api --add-label bug
-gh issue comment 42 --repo Emotion-SRL/server_api --body "Working on this"
+gh issue comment 42 --repo Emotion-SRL/server_api --body "Ci sto lavorando"
 ```
 
 ## Project SVILUPPO
@@ -109,7 +119,7 @@ Create a draft item directly in SVILUPPO, not linked to any repo issue,
 status Backlog (item-create, item-edit — two chained calls):
 
 ```bash
-scripts/proj_draft_create.sh "Title" "Body text"
+scripts/proj_draft_create.sh "Titolo" "Testo del corpo"
 ```
 
 ## Recap

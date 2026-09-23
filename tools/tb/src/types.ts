@@ -78,6 +78,10 @@ export interface Note {
   refs: Link[];
   /** IDs of notes referencing this one — managed automatically, append-only */
   backrefs?: string[];
+  /** Times this note was a direct search hit — managed automatically */
+  hits?: number;
+  /** ISO 8601 — last time this note was a direct search hit */
+  last_hit?: string;
 }
 
 // ─── Search ──────────────────────────────────────────────────────────────────
@@ -106,6 +110,24 @@ export interface SearchOptions {
   include_hubs?: boolean;
   /** Minimum score (0-1) to include a result. No default: no filter. */
   min_score?: number;
+  /** If false, direct hits are not counted on the notes. Default: true. */
+  record_hits?: boolean;
+}
+
+// ─── Pure helpers on notes ───────────────────────────────────────────────────
+
+/** Returns the note without any link (ref or backref) to `id`. */
+export function withoutLink(note: Note, id: string): Note {
+  return {
+    ...note,
+    refs: note.refs.filter((r) => r.id !== id),
+    ...(note.backrefs && { backrefs: note.backrefs.filter((b) => b !== id) }),
+  };
+}
+
+/** Returns the hit fields of a note after one more direct search hit. */
+export function nextHit(note: Pick<Note, "hits">, now: string): { hits: number; last_hit: string } {
+  return { hits: (note.hits ?? 0) + 1, last_hit: now };
 }
 
 export interface Citation {

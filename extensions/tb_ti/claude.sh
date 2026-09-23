@@ -10,11 +10,11 @@ prompt=$(jq -r '.prompt // empty' <<<"$input")
 ti_file=$(mktemp)
 tb_file=$(mktemp)
 
-ti search "$prompt" --limit 3 --min-score 0.6 2>/dev/null \
+ti search "$prompt" --limit 2 --min-score 0.8 2>/dev/null \
   | jq -c '[.[] | {if, do, tags, score}]' >"$ti_file" &
 pid_ti=$!
 
-tb search "$prompt" --depth 1 --limit 5 --min-score 0.6 2>/dev/null \
+tb search "$prompt" --depth 1 --limit 2 --min-score 0.8 2>/dev/null \
   | jq -c '[.[] | {what: .note.what, why: .note.why, tags: .note.tags, kind: .note.kind, score}]' >"$tb_file" &
 pid_tb=$!
 

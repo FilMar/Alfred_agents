@@ -8,7 +8,8 @@ import { fileURLToPath } from "node:url";
 import { checkHealth, EMBED_MODEL } from "./infra.js";
 import { serveGraph, GRAPH_PORT } from "./graph/server.js";
 import { serveApi, API_PORT } from "./api.js";
-import { createNote, addRefs, changeKind, changeTags, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
+import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
+import { getByIds } from "./qdrant.js";
 import type { NoteType, SearchOptions } from "./types.js";
 import { NOTE_TYPES, isValidKind, normalizeTags, errorMessage } from "./types.js";
 
@@ -181,6 +182,7 @@ program
   .option("--evidence-only", "Restringe ai tipi evidence-oriented")
   .option("--include-hubs", "Includi note di tipo indice nella ricerca")
   .option("--min-score <n>", "Minimum similarity score (0-1) to keep a result")
+  .option("--no-hits", "Do not count this search as a hit on the returned notes")
   .action(async (query: string, opts) => {
     await requireServices({ needsEmbedding: true });
 
@@ -193,6 +195,7 @@ program
       evidence_only: opts.evidenceOnly ?? false,
       include_hubs: opts.includeHubs ?? false,
       min_score: opts.minScore !== undefined ? parseFloat(opts.minScore) : undefined,
+      record_hits: opts.hits,
     };
 
     const results = await searchNotes(query, options);
@@ -249,6 +252,29 @@ program
     if (!updated) die("Nothing to update. Use --kind, --tags or --add-ref.");
 
     out({ id, updated: true });
+  });
+
+// ─── delete ───────────────────────────────────────────────────────────────────
+
+program
+  .command("delete <id>")
+  .description("Delete a note and every ref/backref pointing to it")
+  .option("--yes", "Confirm the deletion (without it, the note is only shown)")
+  .action(async (id: string, opts) => {
+    await requireServices({ needsEmbedding: false });
+
+    if (!opts.yes) {
+      const found = await getByIds([id]);
+      if (found.length === 0) die(`Note not found: ${id}`);
+      out(found[0]);
+      die("Re-run with --yes to delete this note.");
+    }
+
+    try {
+      out(await deleteNote(id));
+    } catch (err) {
+      die(errorMessage(err));
+    }
   });
 
 // ─── browse ───────────────────────────────────────────────────────────────────

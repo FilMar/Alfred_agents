@@ -1,6 +1,7 @@
 import { describe, it, expect } from "bun:test";
 import { noteId, buildSparseVector } from "../tools/tb/src/qdrant.ts";
-import { isEvidence, noteToText } from "../tools/tb/src/types.ts";
+import { isEvidence, noteToText, withoutLink, nextHit } from "../tools/tb/src/types.ts";
+import type { Note } from "../tools/tb/src/types.ts";
 
 describe("noteId", () => {
   it("deterministic: same input → same output", () => {
@@ -74,5 +75,44 @@ describe("isEvidence", () => {
 describe("noteToText", () => {
   it("joins why and what with a double newline", () => {
     expect(noteToText({ why: "context", what: "idea" })).toBe("context\n\nidea");
+  });
+});
+
+describe("withoutLink", () => {
+  const note: Note = {
+    id: "n1", when: "2024-01-01", what: "w", why: "y", tags: [], kind: "dato",
+    refs: [{ id: "n2", reason: "a" }, { id: "n3", reason: "b" }],
+    backrefs: ["n2", "n4"],
+  };
+
+  it("drops the ref and the backref to the given id", () => {
+    const out = withoutLink(note, "n2");
+    expect(out.refs).toEqual([{ id: "n3", reason: "b" }]);
+    expect(out.backrefs).toEqual(["n4"]);
+  });
+
+  it("leaves the note unchanged when the id is not linked", () => {
+    expect(withoutLink(note, "zz")).toEqual(note);
+  });
+
+  it("does not add backrefs to a note that has none", () => {
+    const { backrefs: _b, ...bare } = note;
+    expect(withoutLink(bare, "n2").backrefs).toBeUndefined();
+  });
+
+  it("does not mutate the input", () => {
+    withoutLink(note, "n2");
+    expect(note.refs).toHaveLength(2);
+    expect(note.backrefs).toHaveLength(2);
+  });
+});
+
+describe("nextHit", () => {
+  it("starts from zero when the note was never hit", () => {
+    expect(nextHit({}, "2024-01-01T00:00:00Z")).toEqual({ hits: 1, last_hit: "2024-01-01T00:00:00Z" });
+  });
+
+  it("increments an existing counter", () => {
+    expect(nextHit({ hits: 4 }, "t").hits).toBe(5);
   });
 });

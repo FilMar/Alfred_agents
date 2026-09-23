@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-09-18
+updated: 2026-09-22
 ---
 
 ## Tasks
@@ -33,6 +33,13 @@ Paused since 2026-07-21. The memory stack came first.
 Paused 2026-08-09. Pivoted to a pi extension 2026-08-10, not started.
 
 - [ ] Resume the cockpit as a pi extension. [detail](cockpit_pivot_pi_extension_rpc)
+
+### graph
+
+Design only, no code yet.
+
+- [ ] Replace tb graph's D3 viewer with an editable note workbench. [detail](graph_note_workbench_direct_manipulation)
+- [ ] Run curation through a th member with live streaming. [detail](graph_curation_via_th_agent)
 
 ### skills
 
