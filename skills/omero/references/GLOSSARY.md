@@ -38,7 +38,7 @@ A decision no other decision names in its `replaces` field. It is the current wo
 
 ### Superseded decision
 
-A decision some other decision names in `replaces`. It stays on disk as history — it is never deleted — but drops out of `index.md`.
+A decision some other decision names in `replaces`. It is renamed with a leading dot (`.<topic>_<slug>.md`) and drops out of `index.md`. It stays on disk as history — it is never deleted — but the dot keeps it out of `ls`, out of `Glob`, and out of ripgrep, which skips hidden files by default. So a search of `.wiki/` returns live decisions only. Links to it keep the dot in the target: `[Text](.old_decision)`.
 
 ### Source
 

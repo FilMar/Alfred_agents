@@ -47,7 +47,7 @@ Used on every operation that writes a decision.
   replaces: [old_decision_file]   # omit when this is not a replacement
   ---
   ```
-- A decision is **live** when no other decision names it in `replaces`. A superseded decision stays on disk as history but drops out of `index.md`.
+- A decision is **live** when no other decision names it in `replaces`. A superseded decision is **renamed with a leading dot** (`.<topic>_<slug>.md`) and drops out of `index.md`. It stays on disk as history — the dot hides it from `ls`, from `Glob`, and from ripgrep, so a search of `.wiki/` cannot return a dead decision as if it were current. Links that point at it keep working: write the target with the dot, `[Text](.old_decision)`.
 - Internal links: `[Text](decision_file)` — without extension.
 - Special pages, mutable and edited in place: `index` (catalogue of live decisions, `## Pages` section) and `roadmap` (future task list, `## Tasks` section). There is no log: git history is the log.
 - English style for page text: see `references/GLOSSARY.md`.

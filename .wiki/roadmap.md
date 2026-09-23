@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-09-22
+updated: 2026-09-23
 ---
 
 ## Tasks
@@ -38,7 +38,11 @@ Paused 2026-08-09. Pivoted to a pi extension 2026-08-10, not started.
 
 Design only, no code yet.
 
-- [ ] Replace tb graph's D3 viewer with an editable note workbench. [detail](graph_note_workbench_direct_manipulation)
+- [ ] Build third_os: read the graph, open a note at the centre. [detail](graph_third_os_webapp_wider_than_workbench)
+- [ ] Edit and create notes from the browser. [detail](graph_third_os_webapp_wider_than_workbench)
+- [ ] Add the agent: debates, notes from links, link bubbles. [detail](graph_third_os_agent_turns_stay_async)
+- [ ] Retire tb graph once third_os covers reading. [detail](graph_third_os_canvas_physics_dom_text)
+- [ ] Bring ti back as a separate view. [detail](graph_third_os_webapp_wider_than_workbench)
 - [ ] Run curation through a th member with live streaming. [detail](graph_curation_via_th_agent)
 
 ### skills

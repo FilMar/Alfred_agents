@@ -1,7 +1,7 @@
 ---
 tags: [pi, index]
 sources: []
-updated: 2026-09-22
+updated: 2026-09-23
 ---
 
 ## Pages
@@ -36,12 +36,15 @@ updated: 2026-09-22
 | [orchestrator_remaining_work](orchestrator_remaining_work) | Phases 3-4, known bugs, future ideas |
 | [rasp_services_provisioning_order](rasp_services_provisioning_order) | What runs on the Rasp and in which order |
 | [cockpit_pivot_pi_extension_rpc](cockpit_pivot_pi_extension_rpc) | Cockpit as a pi extension in RPC mode |
-| [graph_note_workbench_direct_manipulation](graph_note_workbench_direct_manipulation) | Replaces tb graph's D3 viewer with an editable workbench |
+| [graph_third_os_webapp_wider_than_workbench](graph_third_os_webapp_wider_than_workbench) | third_os: read, write and AI over tb's graph; ti out for now |
+| [graph_third_os_imports_tb_as_library](graph_third_os_imports_tb_as_library) | Runs on the Rasp, imports tb's modules, keeps vectors in RAM |
+| [graph_third_os_canvas_physics_dom_text](graph_third_os_canvas_physics_dom_text) | canvas = physics, DOM = text; fake depth, no framework |
+| [graph_third_os_agent_turns_stay_async](graph_third_os_agent_turns_stay_async) | Phase 3 is async: th spawns under bwrap even as a library |
 | [graph_curation_via_th_agent](graph_curation_via_th_agent) | Curation via a th member, live-streamed, kill-switch not a gate |
 | [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
 | [skill_router_pass_planned](skill_router_pass_planned) | Router pass design, deliberately deferred |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |
 | [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards |
-| [wiki_decision_chain_structure](wiki_decision_chain_structure) | The wiki itself: immutable decision chains |
+| [wiki_superseded_hidden_with_dot](wiki_superseded_hidden_with_dot) | The wiki itself: immutable chains; dead decisions hidden with a dot |
 
-Only live decisions are listed — a decision superseded by a newer one (see `replaces` in its frontmatter) is dropped from this table, not deleted from disk.
+Only live decisions are listed. A decision superseded by a newer one (see `replaces` in its frontmatter) is renamed with a leading dot and drops out of this table. It is never deleted.

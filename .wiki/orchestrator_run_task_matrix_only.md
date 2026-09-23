@@ -15,4 +15,4 @@ The Tailscale ACL perimeter is network-only: it does not distinguish roles betwe
 
 - [orchestrator_minimal_rest_surface](orchestrator_minimal_rest_surface) — the REST surface this decision keeps clean
 - [orchestrator_tailscale_perimeter_matrix_bot](orchestrator_tailscale_perimeter_matrix_bot) — the perimeter and the bot channel
-- [orchestrator_run_task_on_rest](orchestrator_run_task_on_rest) — the superseded predecessor
+- [orchestrator_run_task_on_rest](.orchestrator_run_task_on_rest) — the superseded predecessor

@@ -23,6 +23,6 @@ The pause diagnosis (2026-08-09) found the slowness mechanical: `runAgent` spawn
 
 ## Cross-references
 
-- [cockpit_founded_web_ui](cockpit_founded_web_ui) — the superseded founding design this pivots away from
-- [orchestrator_matrix_chat_relay](orchestrator_matrix_chat_relay) — the chat relay this replaces
+- [cockpit_founded_web_ui](.cockpit_founded_web_ui) — the superseded founding design this pivots away from
+- [orchestrator_matrix_chat_relay](.orchestrator_matrix_chat_relay) — the chat relay this replaces
 - [memory_ti_context_action_rules](memory_ti_context_action_rules) — the retrieval the hooks inject

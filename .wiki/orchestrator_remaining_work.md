@@ -32,4 +32,4 @@ Phase 1/2 went through full adversarial review cycles (builder → parallel adve
 
 - [orchestrator_adversarial_audit_static](orchestrator_adversarial_audit_static) — Phase 3 audit integration
 - [orchestrator_filesystem_state_no_db](orchestrator_filesystem_state_no_db) — the pillar the hardening items respect
-- [orchestrator_matrix_chat_relay](orchestrator_matrix_chat_relay) — the chat-bridge history
+- [orchestrator_matrix_chat_relay](.orchestrator_matrix_chat_relay) — the chat-bridge history

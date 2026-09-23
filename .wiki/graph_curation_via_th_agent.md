@@ -15,7 +15,7 @@ Whole-graph curation (`aristotele`'s job: dense clusters, hub notes, bridges bet
 
 ## Why
 
-The per-note review built for grafting ([graph_note_workbench_direct_manipulation](graph_note_workbench_direct_manipulation)) does not fit curation: curation reasons over the whole graph in one pass, and gating every one of its writes behind a click would turn a batch job back into a manual one. Live streaming plus a kill-switch keeps the same spirit — you see what changes before you'd notice it any other way — at a cost curation can actually pay.
+The per-note review built for grafting ([graph_note_workbench_direct_manipulation](.graph_note_workbench_direct_manipulation)) does not fit curation: curation reasons over the whole graph in one pass, and gating every one of its writes behind a click would turn a batch job back into a manual one. Live streaming plus a kill-switch keeps the same spirit — you see what changes before you'd notice it any other way — at a cost curation can actually pay.
 
 `th run` already streams when attached and already tracks per-run state; no new mechanism needed for visibility. The stateless fresh-call pattern for the paused variant follows from how `th` is built, not around it: fighting for a long-lived session would fight the tool.
 
@@ -26,4 +26,5 @@ One known risk carries over unchanged: attached and detached runs have a silent-
 - [agents_skills_inline_members_via_th](agents_skills_inline_members_via_th) — the skill-vs-member boundary this follows
 - [th_http_api_scoped_no_db](th_http_api_scoped_no_db) — why the backend shells out instead of calling HTTP
 - [th_detached_runs_state_in_tmp](th_detached_runs_state_in_tmp) — the silent-death risk the stream view must handle
-- [graph_note_workbench_direct_manipulation](graph_note_workbench_direct_manipulation) — the per-note companion decision
+- [graph_third_os_webapp_wider_than_workbench](graph_third_os_webapp_wider_than_workbench) — the per-note companion decision, now part of `third_os`
+- [graph_third_os_agent_turns_stay_async](graph_third_os_agent_turns_stay_async) — the same subprocess-plus-stream shape, stated as a rule
