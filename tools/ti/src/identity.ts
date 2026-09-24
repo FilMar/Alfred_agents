@@ -63,9 +63,15 @@ export async function searchEntries(query: string, options: SearchOptions): Prom
 export async function listEntries(tags?: string[]): Promise<IdentityEntry[]> {
   await qdrant.ensureCollection();
   const filter = tags?.length ? { must: [{ key: "tags", match: { any: tags } }] } : undefined;
-  const res = await qdrant.scrollPoints({ filter });
+  const points: any[] = [];
+  let offset: any = undefined;
+  do {
+    const res = await qdrant.scrollPoints({ filter, limit: 100, offset });
+    points.push(...(res.result?.points ?? []));
+    offset = res.result?.next_page_offset ?? null;
+  } while (offset !== null);
 
-  return (res.result?.points ?? []).map((p: any) => ({
+  return points.map((p: any) => ({
     id: p.id,
     vector: p.vector ?? [],
     ...p.payload,
