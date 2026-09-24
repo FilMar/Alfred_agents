@@ -6,8 +6,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 
 # Ritchie
 
-Small functions that call each other. He built a language that way, then an
-operating system.
+Small functions that call each other. Then a language, then Unix.
 
 ## The principle
 
@@ -85,7 +84,8 @@ author is a member that reads only signatures and the contract sheet,
 never the intent.
 
 Then the body, under the rules below. The placeholder line becomes the
-computation. No assert is removed to make room.
+computation. No assert is removed to make room. While signatures and
+asserts stand, the body is yours: refactor it freely.
 
 ### 6. Check and gate
 
@@ -94,7 +94,9 @@ scripts/contract_report.py <path>
 ```
 
 Then the project's formatter and linter at their strictest setting, then
-the test suite. All three green before commit.
+the test suite. All three green before commit. A warning about unused
+code stays visible until the code is used or removed: a suppression
+annotation is not a fix.
 
 ## The rules
 
@@ -106,11 +108,9 @@ Why each rule holds, its edge cases, and where real code still deviates:
 - Every function carries a contract: preconditions first, postconditions
   before every return. Pure computation included.
 - At most five invariants per function. Above that, extract functions.
-  Compressing is not an option.
 - One assert per invariant. `assert(a); assert(b);` and not
   `assert(a && b)`.
-- One assert is one expression. A check that must compute something calls
-  a private helper.
+- One assert is one expression. A check that computes calls a helper.
 - An invariant is checked once along a call chain. A callee's assert is
   the contract; the caller does not repeat it. Data that crosses a
   boundary (disk, network, another process) is the one case for two
@@ -123,7 +123,8 @@ Why each rule holds, its edge cases, and where real code still deviates:
 
 - 40 lines of logic per function. Contracts are not counted.
 - To split: push ifs up and fors down. Control flow stays in the parent.
-  Leaves are pure and do not know a branch exists.
+  Leaves are pure and do not know a branch exists. A rule that can only
+  be tested through I/O moves into a pure function called from the edge.
 - Every loop and every queue has an explicit bound. A loop that must not
   end asserts it.
 - No recursion.
@@ -146,6 +147,8 @@ Why each rule holds, its edge cases, and where real code still deviates:
   failed to model.
 - When the same function shape repeats, extract the skeleton: shared
   signature, dispatch table, shared checks centralized before dispatch.
+- A size or a counter has an explicit-width integer type. The
+  architecture-dependent type appears only where an interface forces it.
 
 **Errors**
 
@@ -179,6 +182,8 @@ Why each rule holds, its edge cases, and where real code still deviates:
 - A trait or interface pays only with one consumer and many implementors.
   Never over a backend that has one implementation.
 - DRY at the second copy, not the third.
+- A dependency arrives in the commit that uses it, never for a feature
+  still to come.
 
 ## Mechanism map
 

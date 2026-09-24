@@ -93,6 +93,13 @@ parent and move the branch-free fragments into helpers. The parent holds
 the state in locals and asks helpers to compute what should change, not
 to apply the change. Leaf functions stay pure.
 
+**Pure functions behind the edge.** When a business rule can only be
+exercised through a database, the network or the filesystem, its tests
+become integration tests: slow, flaky, and blind to which rule failed.
+Moving the rule into a pure function called from the entry point gives
+it unit tests in isolation; the integration test then covers only the
+wiring.
+
 **Bounds and recursion** come from TigerStyle unchanged. A loop with no
 bound is an infinite loop waiting for the right input. Recursion is a
 loop whose bound is the stack.
@@ -146,7 +153,20 @@ once.
 one builtin, handle one opcode, draw one widget), the shape becomes a
 shared signature alias, a table or declarative macro that registers name
 and handler, and the shared checks (arity, bounds) run once before
-dispatch. Downstream code trusts the check and asserts it.
+dispatch. Downstream code trusts the check and asserts it. When every
+handler takes the same bundle of mutable references, the bundle becomes
+a context object with methods that delegate to the inner objects.
+
+**One object, two phases.** When a mutable object is about to serve two
+distinct phases of a pipeline (compile and run, build and draw), it has
+two owners, which the principle forbids. Split the responsibilities into
+two structs. If the double role is accepted on purpose, write down that
+the two phases will never be separable: no caching, no parallelism, no
+deferred execution across them.
+
+**Explicit-width integers.** A bare architecture-dependent size type
+says nothing about the range a value can take. The explicit width is
+part of the contract.
 
 **A constructor samples nothing from the world.** No clock, no device, no
 screen, no network at construction. A constructor that does panics
@@ -160,9 +180,9 @@ headless, so tests cannot build the object and benches cannot run.
   are private, so the exception cannot leak into construction code.
 - Code with public fields written before the rule is swept when touched,
   not grandfathered.
-- The `ti` rule on Rust structs (9e3ed919) still allows `pub` fields on
-  pure data types. This skill is stricter: no exception. The `ti` rule is
-  the older wording.
+- The source codebase has 137 non-test uses of the architecture-dependent
+  size type. Rust forces it at every index, so the sweep stops at the
+  index sinks.
 
 ## Errors
 
@@ -175,6 +195,13 @@ is used for the other.
 
 If every call site unwraps a result or always propagates it, that result
 was a contract in disguise: replace it with an assert.
+
+**The shape of a world error.** One error type per phase or module,
+unified in a root error that wraps them transparently. An error that
+reaches the user carries where it happened in the source and a hint on
+what to do. It is born minimal where it happens and gains context at the
+edge of the system, not in the depths: the inner function does not know
+who is asking.
 
 Domain failures inside a system (a division by zero in a scripted
 language, a type mismatch in user input) are values that the normal flow

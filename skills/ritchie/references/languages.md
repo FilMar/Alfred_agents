@@ -71,6 +71,16 @@ Day-to-day runs use `--profile release-checked`. Plain `--release` is the
 shipping build. `cargo test` is a debug build, so contracts fire there
 too.
 
+Layout of a type that grows: one struct, many files. Each file holds
+one `impl` block for one responsibility, with a shared name prefix
+(`vm_run.rs`, `vm_stack.rs`). The `mod.rs` keeps only the struct, its
+constructor and the helpers every file needs. Submodules that only add
+`impl` blocks stay private.
+
+World errors: one enum per phase deriving `thiserror::Error`, a root
+enum with `#[error(transparent)]` and `#[from]` on each variant, source
+span and help text attached where the error meets the user.
+
 Newtype with a consuming accessor, never `.0` at a call site:
 
 ```rust
