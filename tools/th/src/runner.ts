@@ -4,8 +4,8 @@ import { spawn, spawnSync } from "node:child_process";
 import { tmpdir, homedir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { insertRun, finishRun, getRun, type RunUsage } from "./db.js";
-import { archiveRun } from "./archive.js";
+import { archiveRun, SPOOL_SUFFIX } from "./archive.js";
+import type { FinishedRun } from "./archive.js";
 import {
   AuthStorage,
   createAgentSession,
@@ -111,20 +111,6 @@ function truncate(str: string, max: number): string {
 /** Sum billed usage across every assistant message of a finished session.
  *  Input is cumulative per API call (you pay context on each), so summing
  *  reflects real billed usage rather than a single turn. */
-function sumUsage(messages: AgentSession["messages"]): RunUsage {
-  let inputTokens = 0;
-  let outputTokens = 0;
-  let costUsd = 0;
-  for (const m of messages) {
-    const u = (m as { usage?: Usage }).usage;
-    if (!u) continue;
-    inputTokens += (u.input ?? 0) + (u.cacheRead ?? 0) + (u.cacheWrite ?? 0);
-    outputTokens += u.output ?? 0;
-    costUsd += u.cost?.total ?? 0;
-  }
-  return { inputTokens, outputTokens, costUsd };
-}
-
 function createRegistry() {
   const authStorage = AuthStorage.create();
   return { authStorage, modelRegistry: ModelRegistry.create(authStorage) };
@@ -284,7 +270,7 @@ async function promptWithTimeout(session: AgentSession, task: string, timeoutSec
 async function executeSession(
   session: AgentSession,
   task: string,
-  opts: { timeoutSec?: number; statusPath: string; runId: string; emit: (t: string) => void },
+  opts: { timeoutSec?: number; statusPath: string; run: RunSeed; emit: (t: string) => void },
 ): Promise<void> {
   let runStatus: "done" | "error" | "timeout" = "error";
   try {
@@ -305,13 +291,20 @@ async function executeSession(
     writeFileSync(opts.statusPath, `error: ${err instanceof Error ? err.message : String(err)}`);
     throw err;
   } finally {
-    finishRun(opts.runId, runStatus, sumUsage(session.messages));
-    const finished = getRun(opts.runId);
-    if (finished) await archiveRun(finished, session.messages);
+    const run: FinishedRun = { ...opts.run, status: runStatus, finished_at: new Date().toISOString() };
+    await archiveRun(run, session.messages, spoolPathFor(opts.statusPath));
   }
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
+
+/** What a run knows about itself before it ends. The archive fills in the rest. */
+type RunSeed = Omit<FinishedRun, "status" | "finished_at">;
+
+/** The spool sits next to the run's own files, which are its state while it runs. */
+function spoolPathFor(statusPath: string): string {
+  return statusPath.replace(/\.status$/, SPOOL_SUFFIX);
+}
 
 export async function runMember(
   memberName: string,
@@ -321,20 +314,18 @@ export async function runMember(
 ): Promise<void> {
   const { session } = await buildSession(memberName, opts);
 
-  const runId = randomUUID();
-  insertRun({
-    id: runId,
+  const run: RunSeed = {
+    id: randomUUID(),
     member: memberName,
-    task: task.slice(0, 300),
+    task,
     started_at: new Date().toISOString(),
-    status: "running",
-    out_path: paths.out,
-    log_path: paths.log,
-  });
+    ...(opts.timeoutSec !== undefined && { timeout_s: opts.timeoutSec }),
+    ...(opts.thinkingLevel !== undefined && { thinking: opts.thinkingLevel }),
+  };
 
   const { emit, close } = attachIO(session, paths);
   try {
-    await executeSession(session, task, { timeoutSec: opts.timeoutSec, statusPath: paths.status, runId, emit });
+    await executeSession(session, task, { timeoutSec: opts.timeoutSec, statusPath: paths.status, run, emit });
   } finally {
     close();
   }

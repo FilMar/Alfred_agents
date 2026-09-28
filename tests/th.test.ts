@@ -12,7 +12,6 @@ process.env.TH_MEMBERS_DIR = join(TEST_BASE, "local");
 process.env.TH_TMP_MEMBERS_DIR = join(TEST_BASE, "tmp");
 process.env.TH_GLOBAL_MEMBERS_DIR = join(TEST_BASE, "global");
 
-const { insertRun, finishRun, getRun, listRuns } = await import("../tools/th/src/db.ts");
 const { validateName, createMember, createMemberFrom, listMembers, promoteMember, ensureLocalMember, getMember, loadMember } =
   await import("../tools/th/src/members.ts");
 const { waitForJobs, sanitize, checkStaleness, makeJobPaths, sandboxExec, OUT_STALE_MS } = await import("../tools/th/src/runner.ts");
@@ -76,66 +75,6 @@ describe("validateName", () => {
     expect(() => validateName("mario@rossi")).toThrow();
     expect(() => validateName("mario.rossi")).toThrow();
     expect(() => validateName("mario!")).toThrow();
-  });
-});
-
-describe("run history", () => {
-  it("insert and get by full id", () => {
-    const r = makeRun();
-    insertRun(r);
-    expect(getRun(r.id)).toMatchObject({ id: r.id, member: r.member, status: "running" });
-  });
-
-  it("get by id prefix", () => {
-    const r = makeRun();
-    insertRun(r);
-    expect(getRun(r.id.slice(0, 8))).toMatchObject({ id: r.id });
-  });
-
-  it("get on a missing id → null", () => {
-    expect(getRun("non-esiste")).toBeNull();
-  });
-
-  it("finishRun updates status and finished_at", () => {
-    const r = makeRun();
-    insertRun(r);
-    finishRun(r.id, "done");
-    const result = getRun(r.id);
-    expect(result?.status).toBe("done");
-    expect(result?.finished_at).toBeDefined();
-  });
-
-  it("finishRun saves tokens and cost", () => {
-    const r = makeRun();
-    insertRun(r);
-    finishRun(r.id, "done", { inputTokens: 1200, outputTokens: 340, costUsd: 0.0123 });
-    const result = getRun(r.id);
-    expect(result?.input_tokens).toBe(1200);
-    expect(result?.output_tokens).toBe(340);
-    expect(result?.cost_usd).toBeCloseTo(0.0123);
-  });
-
-  it("finishRun without usage leaves tokens undefined", () => {
-    const r = makeRun();
-    insertRun(r);
-    finishRun(r.id, "done");
-    expect(getRun(r.id)?.input_tokens).toBeUndefined();
-  });
-
-  it("listRuns descending order by started_at", () => {
-    const r1 = makeRun({ started_at: "2024-01-01T00:00:00.000Z" });
-    const r2 = makeRun({ started_at: "2024-01-02T00:00:00.000Z" });
-    insertRun(r1);
-    insertRun(r2);
-    const ids = listRuns({ limit: 50 }).map(r => r.id);
-    expect(ids.indexOf(r2.id)).toBeLessThan(ids.indexOf(r1.id));
-  });
-
-  it("listRuns filters by member", () => {
-    const r = makeRun({ member: "member-specific" });
-    insertRun(r);
-    const results = listRuns({ member: "member-specific" });
-    expect(results.every(x => x.member === "member-specific")).toBe(true);
   });
 });
 

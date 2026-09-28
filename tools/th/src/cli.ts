@@ -2,8 +2,10 @@
 import { Command } from "commander";
 import { createMember, createMemberFrom, deleteMember, getHat, getMember, listHats, listMembers, promoteMember } from "./members.js";
 import { ensureSandboxed, listAvailableModels, makeJobPaths, runMember, sandboxExec, spawnDetached, waitForJobs, type RunMemberOpts } from "./runner.js";
-import { getRun, listRuns } from "./db.js";
-import { existsSync, readFileSync } from "node:fs";
+import { archivePending, spooledFiles } from "./archive.js";
+import * as tl from "../../tl/src/client.js";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
@@ -236,23 +238,72 @@ program
         if (isNaN(n) || n <= 0) throw new Error(`--limit must be a positive integer`);
         return n;
     })
-    .action((opts) => {
-        const runs = listRuns({ member: opts.member, limit: opts.limit });
-        if (!runs.length) die("No runs recorded.");
-        out(runs);
+    .action(async (opts) => {
+        const running = inflightRuns().filter((r) => !opts.member || r.member === opts.member);
+        let finished: unknown[] = [];
+        try {
+            const rows = await tl.fetchExchanges({ kind: "subtask", limit: opts.limit ?? 20 });
+            finished = rows
+                .filter((r) => !opts.member || r.actor === opts.member)
+                .map((r) => ({
+                    run: r.session,
+                    member: r.actor,
+                    started_at: r.timestamp,
+                    model: r.model,
+                    tokens_out: r.tokens_out,
+                    ...(r.meta as Record<string, unknown>),
+                }));
+        } catch (err) {
+            process.stderr.write(`warn: archive unreachable, only running jobs shown: ${errorMessage(err)}\n`);
+        }
+        const pending = spooledFiles(tmpdir()).length;
+        if (!running.length && !finished.length) die("No runs found.");
+        out({ running, finished, ...(pending > 0 && { spooled_not_archived: pending }) });
     });
+
+/** A run in flight is its file set in /tmp — the archive only hears from it at the end. */
+function inflightRuns(): Array<{ member: string; started_at: string; status: string; out: string }> {
+    const dir = tmpdir();
+    if (!existsSync(dir)) return [];
+    return readdirSync(dir)
+        .filter((n) => n.startsWith("th-") && n.endsWith(".status"))
+        .map((n) => ({ name: n, path: join(dir, n) }))
+        .filter((f) => readStatus(f.path) === "running")
+        .map((f) => ({
+            member: f.name.replace(/^th-/, "").replace(/-\d+\.status$/, ""),
+            started_at: statSync(f.path).mtime.toISOString(),
+            status: "running",
+            out: f.path.replace(/\.status$/, ".out"),
+        }));
+}
+
+function readStatus(path: string): string {
+    try {
+        return readFileSync(path, "utf8").trim();
+    } catch {
+        return "";
+    }
+}
 
 program
     .command("get <id>")
     .description("Run details (output included if available)")
-    .action((id: string) => {
-        const run = getRun(id);
-        if (!run) die(`Run not found: "${id}"`);
-        let output: string | null = null;
-        if (run.out_path && existsSync(run.out_path)) {
-            output = readFileSync(run.out_path, "utf8");
+    .action(async (id: string) => {
+        try {
+            const rows = await tl.fetchExchanges({ session: id, limit: 1 });
+            if (!rows.length) die(`Run not found in the archive: "${id}". A run still going lives in its files: th history`);
+            const body = await tl.fetchContents(rows[0].id);
+            out({ ...rows[0], input: body.input, output: body.output });
+        } catch (err) {
+            die(errorMessage(err));
         }
-        out({ ...run, output });
+    });
+
+program
+    .command("archive-pending")
+    .description("Send the runs the archive never got, spooled next to their files in /tmp")
+    .action(async () => {
+        out(await archivePending(tmpdir()));
     });
 
 // ─── Parse ────────────────────────────────────────────────────────────────────

@@ -1,6 +1,10 @@
 import { describe, it, expect } from "bun:test";
 
-import { runRows } from "../tools/th/src/archive.ts";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import { archivePending, runRows, spooledFiles, SPOOL_SUFFIX } from "../tools/th/src/archive.ts";
 import type { FinishedRun } from "../tools/th/src/archive.ts";
 import { exchangeId, validateContents, validateExchange, validateSession } from "../tools/tl/src/types.ts";
 
@@ -97,5 +101,61 @@ describe("runRows", () => {
 
   it("has no parent yet: nothing tells th which exchange asked for it", () => {
     expect(runRows(run(), [message()], "kokpit", "/work").exchange).not.toHaveProperty("parent");
+  });
+});
+
+describe("meta of a finished run", () => {
+  it("carries how long it took, in seconds", () => {
+    expect(runRows(run(), [], "kokpit", "/work").exchange.meta).toMatchObject({ duration_s: 240 });
+  });
+
+  it("says which cap a timeout hit", () => {
+    const { exchange } = runRows(run({ status: "timeout", timeout_s: 120 }), [], "kokpit", "/work");
+    expect(exchange.meta).toMatchObject({ status: "timeout", timeout_s: 120 });
+  });
+
+  it("leaves out a cap nobody set", () => {
+    expect(runRows(run(), [], "kokpit", "/work").exchange.meta).not.toHaveProperty("timeout_s");
+  });
+
+  it("records the thinking level when one was asked for", () => {
+    expect(runRows(run({ thinking: "high" }), [], "kokpit", "/work").exchange.meta).toMatchObject({ thinking: "high" });
+  });
+});
+
+describe("the spool, which is the only safety net left", () => {
+  const spoolDir = () => mkdtempSync(join(tmpdir(), "th-spool-test-"));
+
+  it("finds a spooled run", () => {
+    const dir = spoolDir();
+    writeFileSync(join(dir, `th-hat-1${SPOOL_SUFFIX}`), "{}");
+    expect(spooledFiles(dir)).toHaveLength(1);
+  });
+
+  it("ignores the run's other files", () => {
+    const dir = spoolDir();
+    for (const name of ["th-hat-1.status", "th-hat-1.out", "th-hat-1.log", "th-hat-1.pid"]) {
+      writeFileSync(join(dir, name), "running");
+    }
+    expect(spooledFiles(dir)).toEqual([]);
+  });
+
+  it("ignores a file that is not a th run", () => {
+    const dir = spoolDir();
+    writeFileSync(join(dir, `other-thing${SPOOL_SUFFIX}`), "{}");
+    expect(spooledFiles(dir)).toEqual([]);
+  });
+
+  it("returns nothing for a directory that is not there", () => {
+    expect(spooledFiles(join(tmpdir(), "th-spool-absent-dir"))).toEqual([]);
+  });
+
+  it("counts a spooled run it cannot send as failed, and keeps the file", async () => {
+    const dir = spoolDir();
+    const path = join(dir, `th-hat-1${SPOOL_SUFFIX}`);
+    writeFileSync(path, "not json at all");
+    const result = await archivePending(dir);
+    expect(result).toEqual({ sent: 0, failed: 1 });
+    expect(spooledFiles(dir)).toHaveLength(1);
   });
 });
