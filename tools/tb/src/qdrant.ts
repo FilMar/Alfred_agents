@@ -78,17 +78,17 @@ export async function ensureCollection(): Promise<void> {
     };
 
     if (info.result?.config?.params?.sparse_vectors === undefined) {
-      try {
-        await qdrantClient.request("DELETE", `/collections/${COLLECTION}`, undefined);
-      } catch (err) {
-        if (!(err instanceof HttpError && err.status === 404)) throw err;
-      }
-    } else {
-      const schema = info.result?.payload_schema ?? {};
-      const missing = ["tags", "kind", "what", "why"].filter((f) => !(f in schema));
-      if (missing.length > 0) await createIndices(missing);
-      return;
+      throw new Error(
+        `Qdrant: collection '${COLLECTION}' has no sparse vector config. ` +
+        `Migrate it, or point COLLECTION at a collection that has one. ` +
+        `Never fix this by deleting the collection.`,
+      );
     }
+
+    const schema = info.result?.payload_schema ?? {};
+    const missing = ["tags", "kind", "what", "why"].filter((f) => !(f in schema));
+    if (missing.length > 0) await createIndices(missing);
+    return;
   }
 
   await createCollection(COLLECTION, {
