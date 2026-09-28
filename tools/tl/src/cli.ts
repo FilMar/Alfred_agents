@@ -37,14 +37,16 @@ program
   .option("--session <id>", "One session, found by id")
   .option("--all", "Every transcript on this machine")
   .option("--since <iso>", "With --all, only files changed at or after this time")
+  .option("--refresh", "Send every exchange again, so a better parser reaches old rows")
   .action(async (opts) => {
     const chosen = [opts.transcript, opts.session, opts.all].filter(Boolean).length;
     if (chosen !== 1) die("Use exactly one of --transcript, --session or --all.");
 
     try {
-      if (opts.transcript) return out(await ingestTranscript(opts.transcript));
-      if (opts.session) return out(await ingestSession(opts.session));
-      return out(await ingestAll(opts.since));
+      const refresh = opts.refresh ?? false;
+      if (opts.transcript) return out(await ingestTranscript(opts.transcript, refresh));
+      if (opts.session) return out(await ingestSession(opts.session, refresh));
+      return out(await ingestAll(opts.since, refresh));
     } catch (err) {
       die(errorMessage(err));
     }

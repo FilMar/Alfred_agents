@@ -299,16 +299,19 @@ Lo strato episodico. Produce esperienze e archi senza far leggere niente a nessu
 
 - Un exchange si apre su un messaggio utente che porta `origin`. I 276 record che non ce l'hanno sono `/compact`, avvisi di interruzione e iniezioni di skill: **non e deriva di versione**, esistono in tutte. I loro token non si perdono, finiscono nell'exchange precedente.
 - **`subtask` vuol dire `th`, non il subagente nativo di Claude.** Sono tre cose: tu chiedi (`chat`), io delego a un subagente nativo, io delego a un cappello via `th`. La terza non sta nel transcript per niente — `th` fa le sue chiamate in un processo suo — quindi la riga la scrive `th`, dopo la Fase 6. La seconda **non e una riga**: la chiamata al Task e la relazione finale del subagente stanno gia dentro l'output dell'exchange che le ha chieste. Non si conta solo quello che il subagente ha speso dentro di se: misurato, **2,4% dei token di output**, su 8 sessioni di 43.
-- I sidechain stanno in file separati (`<sessione>/subagents/agent-*.jsonl`), quindi escluderli e gratis: `tl` legge solo i transcript di primo livello.
+- I sidechain stanno in file separati (`<sessione>/subagents/agent-*.jsonl`), quindi escluderli e gratis: `tl` legge solo i transcript di primo livello. Vale anche per `pi`, che scrive i sotto-run in `<sessione>/<id>/run-N/` — stessa categoria, stessa esclusione, ottenuta camminando a profondita uno.
+- **Due harness, uno schema.** `pi` e piu pulito di Claude: i risultati dei tool hanno un ruolo loro (`toolResult`), quindi un messaggio `user` e un exchange senza euristiche. Ma i suoi id di messaggio sono corti (otto cifre esadecimali), quindi l'id dell'exchange si **deriva** con SHA256 formattato a UUID, come fa `noteId` in `tb`: una sola forma nell'archivio e idempotenza intatta. L'originale resta in `meta.source_id`, e ogni riga porta `meta.harness`.
+- **`pi` calcola il costo in denaro**, Claude Code no: 0,2344 $ su 794 exchange, in `meta.cost_usd`. E i modelli sono un mondo separato — deepseek, glm, gemma, kimi, minimax contro la famiglia Claude.
+- **`--refresh`**: `--all` salta le righe che l'archivio ha gia, quindi un parser migliorato non le raggiungerebbe mai. Con `--refresh` si rimandano tutte, e l'idempotenza per id fa il resto. Serviva subito: le 967 righe scritte prima di `meta.harness` dicevano `unknown`.
 
 **Misure** (47 transcript, un mese di lavoro)
 
 | | valore |
 |---|---|
-| sessioni / exchange | 43 / 961 |
-| tempo del backfill completo | 1,26 s |
+| sessioni / exchange | **153 / 1763** (Claude 969, `pi` 794) |
+| tempo del backfill completo | 9 s sul rasp, 157 transcript |
 | archivio contro transcript | 23 MB contro 102 MB |
-| secondo giro sugli stessi file | 0 scritture, 961 note |
+| secondo giro sugli stessi file | 0 scritture, 1763 note |
 | testo recuperato da un exchange | 97.000 caratteri |
 
 **Verifica**: 71 test nuovi, sei mutazioni del codice provate una per una — **una e sopravvissuta** e ha smascherato un test che non provava niente (usava una riga senza `usage` per dimostrare che le righe non-risposta vengono ignorate). Corretto. `SELECT *` leggibile per giorno, sessione, macchina e costo. Typecheck ora copre `tb`, `ti` e `tl`: `ti` aveva un `tsconfig.json` che nessuno script eseguiva.

@@ -4,10 +4,11 @@ import {
   dayOf, sumBy, validateContents, validateExchange, validateSession,
 } from "../tools/tl/src/types.ts";
 import type { Exchange } from "../tools/tl/src/types.ts";
-import {
-  isOpener, lineText, modelOf, parseLines, parseTranscript, spans, sumTokens,
-} from "../tools/tl/src/transcript.ts";
-import type { Line } from "../tools/tl/src/transcript.ts";
+import { parseLines, spans } from "../tools/tl/src/transcript.ts";
+import * as claude from "../tools/tl/src/claude.ts";
+import * as pi from "../tools/tl/src/pi.ts";
+import { exchangeId } from "../tools/tl/src/types.ts";
+import { looksLikePi } from "../tools/tl/src/ingest.ts";
 import * as db from "../tools/tl/src/db.ts";
 import { createApp } from "../tools/tl/src/api.ts";
 
@@ -21,16 +22,16 @@ const exchange = (over: Partial<Exchange> = {}): Exchange => ({
   id: ID_A, session: "s1", timestamp: T1, kind: "chat", actor: "alfredo", ...over,
 });
 
-const prompt = (id: string, timestamp: string, text: string): Line => ({
+const prompt = (id: string, timestamp: string, text: string): claude.Line => ({
   type: "user", uuid: id, sessionId: "s1", timestamp, cwd: "/work",
   origin: { kind: "human" }, message: { role: "user", content: text },
 });
 
-const answer = (usage: Record<string, number>, model = "claude-opus-5"): Line => ({
+const answer = (usage: Record<string, number>, model = "claude-opus-5"): claude.Line => ({
   type: "assistant", message: { role: "assistant", model, content: [{ type: "text", text: "ok" }], usage },
 });
 
-const toolResult = (): Line => ({
+const toolResult = (): claude.Line => ({
   type: "user", uuid: "x", message: { role: "user", content: [{ type: "tool_result", content: "42" }] },
 });
 
@@ -126,100 +127,102 @@ describe("sumBy", () => {
   });
 });
 
-// ─── Transcript ───────────────────────────────────────────────────────────────
+// ─── Claude transcripts ─────────────────────────────────────────────────────────
 
-describe("isOpener", () => {
+describe("claude.isOpener", () => {
   it("a human prompt opens an exchange", () => {
-    expect(isOpener(prompt(ID_A, T1, "ciao"))).toBe(true);
+    expect(claude.isOpener(prompt(ID_A, T1, "ciao"))).toBe(true);
   });
 
   it("a tool result never opens one", () => {
-    expect(isOpener(toolResult())).toBe(false);
+    expect(claude.isOpener(toolResult())).toBe(false);
   });
 
   it("a user line without origin does not open one: it is command bookkeeping", () => {
-    expect(isOpener({ type: "user", uuid: ID_A, message: { content: "/compact" } })).toBe(false);
+    expect(claude.isOpener({ type: "user", uuid: ID_A, message: { content: "/compact" } })).toBe(false);
   });
 
   it("an assistant line never opens one", () => {
-    expect(isOpener(answer({}))).toBe(false);
+    expect(claude.isOpener(answer({}))).toBe(false);
   });
 });
 
 describe("spans", () => {
+  const split = (lines: claude.Line[]) => spans(lines, claude.isOpener, claude.isAnswer);
+
   it("everything after an opener belongs to it", () => {
-    const result = spans([prompt(ID_A, T1, "a"), answer({}), toolResult()]);
+    const result = split([prompt(ID_A, T1, "a"), answer({}), toolResult()]);
     expect(result.spans).toHaveLength(1);
     expect(result.spans[0].body).toHaveLength(2);
   });
 
   it("a second opener starts a second span", () => {
-    const result = spans([prompt(ID_A, T1, "a"), answer({}), prompt(ID_B, T2, "b")]);
-    expect(result.spans.map((s) => s.opener.uuid)).toEqual([ID_A, ID_B]);
+    const result = split([prompt(ID_A, T1, "a"), answer({}), prompt(ID_B, T2, "b")]);
+    expect(result.spans.map((sp) => sp.opener.uuid)).toEqual([ID_A, ID_B]);
   });
 
   it("answers before the first opener are counted, not attached", () => {
-    const result = spans([answer({}), prompt(ID_A, T1, "a")]);
+    const result = split([answer({}), prompt(ID_A, T1, "a")]);
     expect(result.orphans).toBe(1);
     expect(result.spans[0].body).toHaveLength(0);
   });
 
   it("no opener means no span", () => {
-    expect(spans([answer({}), toolResult()]).spans).toEqual([]);
+    expect(split([answer({}), toolResult()]).spans).toEqual([]);
   });
 });
 
-describe("sumTokens", () => {
+describe("claude.sumTokens", () => {
   it("adds up every answer in the span", () => {
     const body = [
       answer({ input_tokens: 10, output_tokens: 2, cache_read_input_tokens: 100 }),
       answer({ input_tokens: 5, output_tokens: 3, cache_creation_input_tokens: 7 }),
     ];
-    expect(sumTokens(body)).toEqual({
+    expect(claude.sumTokens(body)).toEqual({
       tokens_in: 15, tokens_out: 5, tokens_cache_read: 100, tokens_cache_write: 7,
     });
   });
 
   it("ignores a line that is not an answer, even when it carries usage", () => {
-    const user: Line = { type: "user", message: { role: "user", content: "x", usage: { input_tokens: 99 } } };
-    expect(sumTokens([user, toolResult()]).tokens_in).toBe(0);
+    const user: claude.Line = { type: "user", message: { role: "user", content: "x", usage: { input_tokens: 99 } } };
+    expect(claude.sumTokens([user, toolResult()]).tokens_in).toBe(0);
   });
 
   it("a span with no answer costs zero", () => {
-    expect(sumTokens([])).toEqual({ tokens_in: 0, tokens_out: 0, tokens_cache_read: 0, tokens_cache_write: 0 });
+    expect(claude.sumTokens([])).toEqual({ tokens_in: 0, tokens_out: 0, tokens_cache_read: 0, tokens_cache_write: 0 });
   });
 });
 
-describe("modelOf", () => {
+describe("claude.modelOf", () => {
   it("takes the last model that answered", () => {
-    expect(modelOf([answer({}, "claude-sonnet-5"), answer({}, "claude-opus-5")])).toBe("claude-opus-5");
+    expect(claude.modelOf([answer({}, "claude-sonnet-5"), answer({}, "claude-opus-5")])).toBe("claude-opus-5");
   });
 
   it("ignores a synthetic model", () => {
-    expect(modelOf([answer({}, "claude-opus-5"), answer({}, "<synthetic>")])).toBe("claude-opus-5");
+    expect(claude.modelOf([answer({}, "claude-opus-5"), answer({}, "<synthetic>")])).toBe("claude-opus-5");
   });
 
   it("returns nothing when nobody answered", () => {
-    expect(modelOf([])).toBeUndefined();
+    expect(claude.modelOf([])).toBeUndefined();
   });
 });
 
-describe("lineText", () => {
+describe("claude.lineText", () => {
   it("reads a plain string", () => {
-    expect(lineText(prompt(ID_A, T1, "ciao"))).toBe("ciao");
+    expect(claude.lineText(prompt(ID_A, T1, "ciao"))).toBe("ciao");
   });
 
   it("keeps a tool call, with its name", () => {
-    const line: Line = { type: "assistant", message: { content: [{ type: "tool_use", name: "Bash", input: { cmd: "ls" } }] } };
-    expect(lineText(line)).toBe('[tool Bash] {"cmd":"ls"}');
+    const line: claude.Line = { type: "assistant", message: { content: [{ type: "tool_use", name: "Bash", input: { cmd: "ls" } }] } };
+    expect(claude.lineText(line)).toBe('[tool Bash] {"cmd":"ls"}');
   });
 
   it("keeps a tool result", () => {
-    expect(lineText(toolResult())).toBe("[result] 42");
+    expect(claude.lineText(toolResult())).toBe("[result] 42");
   });
 
   it("is empty when there is no content", () => {
-    expect(lineText({ type: "system" })).toBe("");
+    expect(claude.lineText({ type: "system" })).toBe("");
   });
 });
 
@@ -229,7 +232,7 @@ describe("parseLines", () => {
   });
 });
 
-describe("parseTranscript", () => {
+describe("claude.parse", () => {
   const lines = [
     prompt(ID_A, T1, "prima domanda"),
     answer({ input_tokens: 10, output_tokens: 20 }),
@@ -238,41 +241,184 @@ describe("parseTranscript", () => {
   ];
 
   it("reads the session from the first line that carries one", () => {
-    expect(parseTranscript(lines, { host: "desktop" }).session)
+    expect(claude.parse(lines, { host: "desktop" }).session)
       .toEqual({ id: "s1", started: T1, host: "desktop", path: "/work" });
   });
 
   it("makes one exchange per prompt", () => {
-    expect(parseTranscript(lines).exchanges).toHaveLength(2);
+    expect(claude.parse(lines).exchanges).toHaveLength(2);
   });
 
   it("gives every exchange a valid row", () => {
-    const rows = parseTranscript(lines).exchanges.map((p) => validateExchange(p.exchange));
+    const rows = claude.parse(lines).exchanges.map((p) => validateExchange(p.exchange));
     expect(rows).toEqual([null, null]);
   });
 
   it("puts the prompt in input and the answer in output", () => {
-    const first = parseTranscript(lines).exchanges[0].contents;
+    const first = claude.parse(lines).exchanges[0].contents;
     expect(first.input).toBe("prima domanda");
     expect(first.output).toBe("ok");
   });
 
-  it("carries the trigger into meta", () => {
-    expect(parseTranscript(lines).exchanges[0].exchange.meta).toEqual({ trigger: "human" });
+  it("names the harness and the trigger in meta", () => {
+    expect(claude.parse(lines).exchanges[0].exchange.meta).toEqual({ harness: "claude", trigger: "human" });
   });
 
   it("every row a transcript yields is a chat: subtask belongs to a th run", () => {
-    const kinds = parseTranscript(lines).exchanges.map((p) => p.exchange.kind);
-    expect(kinds).toEqual(["chat", "chat"]);
+    expect(claude.parse(lines).exchanges.map((p) => p.exchange.kind)).toEqual(["chat", "chat"]);
   });
 
   it("the actor is always alfredo: a hat never writes a transcript", () => {
-    expect(parseTranscript(lines).exchanges[0].exchange.actor).toBe("alfredo");
+    expect(claude.parse(lines).exchanges[0].exchange.actor).toBe("alfredo");
+  });
+
+  it("keeps the transcript's own id, which is already UUID-shaped", () => {
+    expect(claude.parse(lines).exchanges[0].exchange.id).toBe(ID_A);
   });
 
   it("drops a prompt with no id: an exchange without an id cannot be written twice", () => {
-    const broken: Line[] = [{ type: "user", timestamp: T1, sessionId: "s1", origin: { kind: "human" }, message: { content: "x" } }];
-    expect(parseTranscript(broken).exchanges).toEqual([]);
+    const broken: claude.Line[] = [{ type: "user", timestamp: T1, sessionId: "s1", origin: { kind: "human" }, message: { content: "x" } }];
+    expect(claude.parse(broken).exchanges).toEqual([]);
+  });
+});
+
+// ─── pi transcripts ────────────────────────────────────────────────────────────
+
+const piSession = (): pi.Line => ({ type: "session", id: "01a0e953-81b2-776a-8497-a9dadd86438d", timestamp: T1, cwd: "/work" });
+const piPrompt = (id: string, timestamp: string, text: string): pi.Line =>
+  ({ type: "message", id, timestamp, message: { role: "user", content: [{ type: "text", text }] } });
+const piAnswer = (usage: Record<string, unknown>, model = "glm-5.3-flash:cloud"): pi.Line =>
+  ({ type: "message", id: "a1", timestamp: T2, message: { role: "assistant", model, provider: "ollama", content: [{ type: "text", text: "ok" }], usage } });
+const piToolResult = (): pi.Line =>
+  ({ type: "message", id: "t1", message: { role: "toolResult", content: [{ type: "text", text: "42" }] } });
+
+describe("pi.isOpener", () => {
+  it("a user message opens an exchange", () => {
+    expect(pi.isOpener(piPrompt("m1", T1, "ciao"))).toBe(true);
+  });
+
+  it("a tool result has a role of its own, so it never opens one", () => {
+    expect(pi.isOpener(piToolResult())).toBe(false);
+  });
+
+  it("an assistant message never opens one", () => {
+    expect(pi.isOpener(piAnswer({}))).toBe(false);
+  });
+
+  it("a record that is not a message never opens one", () => {
+    expect(pi.isOpener(piSession())).toBe(false);
+  });
+});
+
+describe("pi.lineText", () => {
+  it("reads the text parts", () => {
+    expect(pi.lineText(piPrompt("m1", T1, "ciao"))).toBe("ciao");
+  });
+
+  it("keeps a tool call with its arguments", () => {
+    const line: pi.Line = { type: "message", message: { role: "assistant", content: [{ type: "toolCall", name: "bash", arguments: { cmd: "ls" } }] } };
+    expect(pi.lineText(line)).toBe('[tool bash] {"cmd":"ls"}');
+  });
+
+  it("marks a tool result, which pi writes as plain text", () => {
+    expect(pi.lineText(piToolResult())).toBe("[result] 42");
+  });
+
+  it("drops the thinking parts", () => {
+    const line: pi.Line = { type: "message", message: { role: "assistant", content: [{ type: "thinking", text: "hmm" }] } };
+    expect(pi.lineText(line)).toBe("");
+  });
+});
+
+describe("pi.sumTokens", () => {
+  it("reads pi's own key names", () => {
+    const body = [piAnswer({ input: 10, output: 2, cacheRead: 100, cacheWrite: 7 })];
+    expect(pi.sumTokens(body)).toEqual({ tokens_in: 10, tokens_out: 2, tokens_cache_read: 100, tokens_cache_write: 7 });
+  });
+
+  it("counts a compaction: it is a model call the exchange paid for", () => {
+    const body: pi.Line[] = [{ type: "compaction", usage: { input: 5, output: 1 } }];
+    expect(pi.sumTokens(body).tokens_in).toBe(5);
+  });
+
+  it("does not count a tool result", () => {
+    expect(pi.sumTokens([piToolResult()]).tokens_in).toBe(0);
+  });
+});
+
+describe("pi.sumCost", () => {
+  it("adds up what pi says the span cost", () => {
+    const body = [piAnswer({ input: 1, cost: { total: 0.02 } }), piAnswer({ input: 1, cost: { total: 0.03 } })];
+    expect(pi.sumCost(body)).toBeCloseTo(0.05, 6);
+  });
+
+  it("is zero when nothing carries a cost", () => {
+    expect(pi.sumCost([piAnswer({ input: 1 })])).toBe(0);
+  });
+});
+
+describe("pi.parse", () => {
+  const lines = [piSession(), piPrompt("df9441cf", T1, "ciao"), piAnswer({ input: 10, output: 5, cost: { total: 0.01 } })];
+
+  it("reads the session from the session record", () => {
+    expect(pi.parse(lines, { host: "desktop" }).session)
+      .toEqual({ id: "01a0e953-81b2-776a-8497-a9dadd86438d", started: T1, host: "desktop", path: "/work" });
+  });
+
+  it("yields nothing without a session record: no row can name its session", () => {
+    expect(pi.parse([piPrompt("m1", T1, "ciao")]).exchanges).toEqual([]);
+  });
+
+  it("derives a UUID-shaped id from pi's short message id", () => {
+    const row = pi.parse(lines).exchanges[0].exchange;
+    expect(row.id).toBe(exchangeId("01a0e953-81b2-776a-8497-a9dadd86438d", "df9441cf"));
+    expect(validateExchange(row)).toBeNull();
+  });
+
+  it("keeps the original id in meta, so a row can be traced back", () => {
+    expect(pi.parse(lines).exchanges[0].exchange.meta).toMatchObject({ harness: "pi", source_id: "df9441cf" });
+  });
+
+  it("records the model, the provider and the cost", () => {
+    const row = pi.parse(lines).exchanges[0].exchange;
+    expect(row.model).toBe("glm-5.3-flash:cloud");
+    expect(row.meta).toMatchObject({ provider: "ollama", cost_usd: 0.01 });
+  });
+
+  it("sums the tokens onto the exchange", () => {
+    expect(pi.parse(lines).exchanges[0].exchange.tokens_out).toBe(5);
+  });
+});
+
+describe("exchangeId", () => {
+  it("is deterministic", () => {
+    expect(exchangeId("s", "m")).toBe(exchangeId("s", "m"));
+  });
+
+  it("separates the same message id in two sessions", () => {
+    expect(exchangeId("s1", "m")).not.toBe(exchangeId("s2", "m"));
+  });
+
+  it("produces the shape the archive validates", () => {
+    expect(validateExchange(exchange({ id: exchangeId("s", "m") }))).toBeNull();
+  });
+});
+
+describe("looksLikePi", () => {
+  it("a pi transcript opens with a session record", () => {
+    expect(looksLikePi('{"type":"session","id":"x"}\n{"type":"message"}')).toBe(true);
+  });
+
+  it("a Claude transcript does not", () => {
+    expect(looksLikePi('{"type":"user","uuid":"x"}')).toBe(false);
+  });
+
+  it("an empty file is not pi", () => {
+    expect(looksLikePi("")).toBe(false);
+  });
+
+  it("a first line that is not JSON is not pi", () => {
+    expect(looksLikePi("garbage")).toBe(false);
   });
 });
 

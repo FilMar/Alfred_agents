@@ -15,7 +15,9 @@ Transcripts rotate. Measured: 95 MB, 76 sessions, the oldest exactly one month b
 The store is SQLite on the Rasp, next to Qdrant, inside the Tailscale perimeter. SQLite is a file and not a server, so a small HTTP service sits in front of it and the file never leaves the node.
 
 ```
-your machine:   cli.ts → ingest.ts (parses transcripts) + client.ts (HTTP)
+your machine:   cli.ts → ingest.ts → claude.ts | pi.ts   (one reader per harness)
+                              ↘ transcript.ts (what the two have in common)
+                              ↘ client.ts (HTTP)
                                    ↘ types.ts (schema + validation) ↙
 the Rasp:       api.ts (CRUD per table, validates) → db.ts (bun:sqlite)
 ```
@@ -38,11 +40,26 @@ One exchange is written as it happens, by an end-of-turn hook. The hook does no 
 tl ingest --transcript <path>     # the hook, one exchange
 tl ingest --session <id>          # same, when only the id is known
 tl ingest --all                   # fills the gaps, and backfills what is on disk
+tl ingest --all --refresh         # sends every row again, when the parser improves
 ```
+
+Both roots are walked one directory deep, which is what excludes delegated runs by construction: a Claude subagent writes under `<session>/subagents/`, `pi` writes a sub-run under `<session>/<id>/run-N/`. Neither is a row, for the reason given below.
 
 An exchange id is derived from the transcript, not generated, so writing is idempotent: running the same ingest twice changes nothing. That makes a missed exchange late rather than lost — the hook can fail, the Rasp can be unreachable, and the next `--all` picks it up, because the transcript survives for 30 days.
 
-An exchange starts at a user message that carries an `origin`. Every row a transcript yields is `kind: chat`, written by `alfredo`.
+**Two harnesses, one schema.** Claude Code and `pi` both write JSONL and agree on nothing else, so there is a reader each and a shared span splitter. A file says which reader it needs: `pi` opens with a `session` record.
+
+| | Claude Code | pi |
+|---|---|---|
+| a question is | a `user` line carrying `origin` | a message with `role: "user"` |
+| a tool answer is | a `user` line holding `tool_result` | a message with `role: "toolResult"` |
+| tokens | `input_tokens`, `cache_read_input_tokens`, … | `input`, `cacheRead`, … plus a **cost in money** |
+| message ids | UUIDs, used as they are | eight hex characters, so the id is derived |
+| a compaction | assistant lines, counted like any answer | a record of its own, counted too |
+
+`pi`'s ids are derived with `exchangeId(session, id)` — SHA256 shaped as a UUID, the same trick as a note id in `tb`. One shape in the archive, still deterministic, so a second write is still a no-op. The original is kept in `meta.source_id`, and every row names its `meta.harness`.
+
+Every row a transcript yields is `kind: chat`, written by `alfredo`.
 
 `subtask` is reserved for a `th` run. A hat makes its own model calls in its own process, so it never appears in a transcript at all: `th` has to write that row itself, which is why it arrives with Fase 6. A native subagent is not a `subtask` either — its task call and its report are already inside the output of the exchange that asked for it. What is not counted is the tokens it spent internally: measured, 2.4% of all output tokens, across 8 sessions out of 43.
 

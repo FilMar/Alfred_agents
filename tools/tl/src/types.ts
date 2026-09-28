@@ -1,6 +1,8 @@
 // The one definition of a row and of what makes it valid. Shared by both sides:
 // the CLI checks before it sends, the API checks before it writes.
 
+import { createHash } from "node:crypto";
+
 import { assert } from "../../tb/src/types.js";
 
 // ─── Enum constants ───────────────────────────────────────────────────────────
@@ -18,6 +20,19 @@ export const ID_SHAPE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
  * and never raises an error, so the format is checked on write and on read.
  */
 export const TIMESTAMP_SHAPE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+/**
+ * A UUID-shaped id from a session and a message id, the same way `tb` builds a note
+ * id. One harness numbers its messages with UUIDs and another with eight hex
+ * characters: deriving keeps one shape in the archive, and keeps it deterministic,
+ * which is what makes writing the same exchange twice a no-op.
+ */
+export function exchangeId(session: string, message: string): string {
+  const hash = createHash("sha256").update(`${session}:${message}`).digest("hex");
+  const id = [hash.slice(0, 8), hash.slice(8, 12), hash.slice(12, 16), hash.slice(16, 20), hash.slice(20, 32)].join("-");
+  assert(ID_SHAPE.test(id), "exchangeId: derived id has the right shape");
+  return id;
+}
 
 // ─── Rows ─────────────────────────────────────────────────────────────────────
 
