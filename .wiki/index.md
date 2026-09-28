@@ -1,7 +1,7 @@
 ---
 tags: [pi, index]
 sources: []
-updated: 2026-09-23
+updated: 2026-09-28
 ---
 
 ## Pages
@@ -25,6 +25,13 @@ updated: 2026-09-23
 | [memory_tl_unified_event_log](memory_tl_unified_event_log) | tl: one REST event log, founded not built |
 | [memory_ti_context_action_rules](memory_ti_context_action_rules) | ti: dedicated if/do collection, dumb client |
 | [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) | tb + ti live on the Rasp, confirmed in use |
+| [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) | CoALA's four types mapped to pi; episodic is the hole |
+| [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) | The human OK limits growth; use judges, not reading |
+| [memory_refs_carry_non_semantic_reach](memory_refs_carry_non_semantic_reach) | 74% of refs are not redundant with the vectors |
+| [memory_related_results_need_scores](memory_related_results_need_scores) | Score related hits, count them, walk backrefs |
+| [memory_graph_engine_deferred_not_needed](memory_graph_engine_deferred_not_needed) | No graph DB; the threshold to revisit, written down |
+| [memory_keep_raw_source_for_reingest](memory_keep_raw_source_for_reingest) | Notes keep their raw source so a later pass can redo it |
+| [memory_alias_makes_migration_reversible](memory_alias_makes_migration_reversible) | Collection per model behind an alias; atomic swap |
 | [orchestrator_minimal_rest_surface](orchestrator_minimal_rest_surface) | Four REST endpoints, one entry point |
 | [orchestrator_run_task_matrix_only](orchestrator_run_task_matrix_only) | Ad-hoc execution only via Matrix |
 | [orchestrator_adversarial_audit_static](orchestrator_adversarial_audit_static) | Audit at ingestion; static parsing everywhere |

@@ -25,3 +25,4 @@ Without one event log spanning every tool, any fix to procedural-memory gaps 2, 
 - [memory_ti_context_action_rules](memory_ti_context_action_rules) — the downstream distillation layer
 - [th_http_api_scoped_no_db](th_http_api_scoped_no_db) — durable history the `th` API does not serve
 - [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) — the Rasp hosting and perimeter pattern `tl` follows
+- [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) — the outside frame that names this layer episodic

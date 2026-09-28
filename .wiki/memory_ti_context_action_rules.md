@@ -23,3 +23,4 @@ Pending work: a native `--min-score` parameter for `ti search` (and `tb search`)
 - [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) — the Qdrant instance `ti` shares with `tb`
 - [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) — how `ti` rules reach the agent before every prompt
 - [memory_tl_unified_event_log](memory_tl_unified_event_log) — the raw facts `tl` would feed `ti`'s distillation
+- [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) — `ti` as the procedural type, and the test that splits it from `tb`
