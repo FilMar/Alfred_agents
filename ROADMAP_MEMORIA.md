@@ -281,6 +281,7 @@ Venti righe previste, cinquanta scritte. Due punti del piano li hanno smentiti l
 - `hits_related` diverso da zero dopo una settimana d'uso: il criterio di chiusura del piano non è verificabile il giorno in cui si scrive il codice. La telemetria ha iniziato a contare.
 - `tb graph` disegna il grafo dai soli `refs` (`graph/graph.js:81`), mentre il traversal ora percorre anche i `backrefs`: il grafo disegnato e quello percorso divergono. Si chiude quando `third_os` copre la lettura.
 - `RELATED_LIMIT = 25` non morde quasi mai (la media è 23.1). È un limite di sicurezza, non una scelta di qualità: il numero giusto si vedrà da `hits_related`.
+- **Il rasp ha un checkout suo di `pi`.** Due copie del codice, un solo store: finché il branch non è su `master` e il rasp non ha fatto `git pull`, un `tb` lanciato là gira in versione pre-Fase 1. Non corrompe niente — i campi nuovi sono opzionali e il codice vecchio non li scrive — ma per quelle chiamate `hits_related` resta fermo e i correlati tornano con `score: null`. Vale per ogni chiamata automatica dal nodo: cron, task dell'orchestratore, `th`. Il `git pull` sul rasp fa parte del merge, non del deploy successivo.
 
 ### Fase 2 — `tl`
 
