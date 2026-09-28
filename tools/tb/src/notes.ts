@@ -1,8 +1,8 @@
-import { embed } from "./infra.js";
+import { embed, EMBED_MODEL } from "./infra.js";
 import { ensureCollection, upsert, setPayload, getByIds, search, scroll, scrollLinkedTo, deletePoints, randomNoteId, noteId, listTags } from "./qdrant.js";
 import type { ScrollOptions, TagFacet } from "./qdrant.js";
 import { REFS_LIMIT } from "./infra.js";
-import { noteToText, withoutLink, nextHit } from "./types.js";
+import { noteToText, withoutLink, nextHit, ABOUT_NOBODY } from "./types.js";
 import type { Note, NoteType, Link, SearchOptions, SearchResult } from "./types.js";
 
 // ─── Serendipity ──────────────────────────────────────────────────────────────
@@ -51,6 +51,11 @@ export async function createNote(params: CreateNoteParams): Promise<Note> {
     kind: params.kind ?? "dato",
     ...(params.source && { source: params.source }),
     refs: [],
+    embed_model: EMBED_MODEL,
+    status: "promossa",
+    about: ABOUT_NOBODY,
+    updated_at: when,
+    source_raw: "",
   };
 
   const vector = await embed(noteToText(note));

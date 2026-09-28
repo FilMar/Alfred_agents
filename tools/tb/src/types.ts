@@ -11,7 +11,14 @@ export const NOTE_TYPES = [
 
 // ─── Derived types ────────────────────────────────────────────────────────────
 
+export const NOTE_STATUSES = ["provvisoria", "promossa"] as const;
+
 export type NoteType = (typeof NOTE_TYPES)[number];
+
+export type NoteStatus = (typeof NOTE_STATUSES)[number];
+
+/** Subject a note describes. `mondo` means it describes no one in particular. */
+export const ABOUT_NOBODY = "mondo";
 
 /**
  * Semantic kind of a note — immutable after creation.
@@ -55,6 +62,8 @@ export interface Link {
   id: string;
   /** Explicit reason for the link */
   reason: string;
+  /** Who drew the edge: `umano`, or the name of what proposed it */
+  origin?: string;
 }
 
 // ─── Note ────────────────────────────────────────────────────────────────────
@@ -82,6 +91,16 @@ export interface Note {
   hits?: number;
   /** ISO 8601 — last time this note was a direct search hit */
   last_hit?: string;
+  /** Model that produced the dense vector — a vector is only comparable within one model */
+  embed_model?: string;
+  /** `promossa` passed a human, `provvisoria` was proposed and not yet read */
+  status?: NoteStatus;
+  /** Subject of the note: an entity name, or `mondo` */
+  about?: string;
+  /** ISO 8601 — last change to any mutable field */
+  updated_at?: string;
+  /** Raw text the note was extracted from, so it can be re-extracted */
+  source_raw?: string;
 }
 
 // ─── Search ──────────────────────────────────────────────────────────────────

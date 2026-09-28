@@ -4,6 +4,8 @@ export interface IdentityEntry {
   if: string;
   do: string[];
   tags: string[];
+  /** Model that produced the vector — a vector is only comparable within one model */
+  embed_model?: string;
 }
 
 export interface SearchOptions {

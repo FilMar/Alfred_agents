@@ -1,4 +1,4 @@
-import { ollamaClient, EMBED_MODEL } from "../../tb/src/infra.js";
+import { embed, EMBED_MODEL } from "../../tb/src/infra.js";
 import * as qdrant from "./qdrant.js";
 import type { IdentityEntry, SearchOptions } from "./types.js";
 
@@ -11,12 +11,11 @@ import type { IdentityEntry, SearchOptions } from "./types.js";
  */
 export async function addEntry(ifText: string, doText: string, tags: string[]): Promise<IdentityEntry> {
   await qdrant.ensureCollection();
-  const data = await ollamaClient.request<{ embeddings: number[][] }>("POST", "/api/embed", { model: EMBED_MODEL, input: ifText });
-  const vector = data.embeddings[0];
-  
+  const vector = await embed(ifText);
+
   const id = crypto.randomUUID();
-  await qdrant.upsertPoint(id, vector, { if: ifText, do: [doText], tags });
-  
+  await qdrant.upsertPoint(id, vector, { if: ifText, do: [doText], tags, embed_model: EMBED_MODEL });
+
   return {
     id,
     vector: [],
@@ -36,8 +35,8 @@ export async function addEntry(ifText: string, doText: string, tags: string[]): 
  */
 export async function searchEntries(query: string, options: SearchOptions): Promise<IdentityEntry[]> {
   await qdrant.ensureCollection();
-  const data = await ollamaClient.request<{ embeddings: number[][] }>("POST", "/api/embed", { model: EMBED_MODEL, input: query });
-  const vector = data.embeddings[0];
+  const vector = await embed(query);
+
   
   const filter = options.tags?.length ? { must: [{ key: "tags", match: { any: options.tags } }] } : undefined;
   const res = await qdrant.queryPoints(vector, {
@@ -108,10 +107,11 @@ export async function appendDo(id: string, doText: string): Promise<IdentityEntr
   const vector = point.vector;
   const updatedDo = [...existingEntry.do, doText];
   
-  await qdrant.upsertPoint(id, vector, { 
-    if: existingEntry.if, 
-    do: updatedDo, 
-    tags: existingEntry.tags 
+  await qdrant.upsertPoint(id, vector, {
+    if: existingEntry.if,
+    do: updatedDo,
+    tags: existingEntry.tags,
+    ...(existingEntry.embed_model && { embed_model: existingEntry.embed_model }),
   });
   
   return {

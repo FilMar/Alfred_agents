@@ -1,5 +1,5 @@
 import { describe, it, expect, spyOn, beforeEach } from "bun:test";
-import { qdrantClient, ollamaClient } from "../tools/tb/src/infra.js";
+import { qdrantClient, ollamaClient, VECTOR_SIZE } from "../tools/tb/src/infra.js";
 import type { IdentityEntry } from "../tools/ti/src/types.js";
 
 // Mock process.exit and argv to prevent CLI from running and exiting the test runner
@@ -7,6 +7,9 @@ const exitSpy = spyOn(process, "exit").mockImplementation((code?: string | numbe
   return undefined as never;
 });
 process.argv = ["bun", "ti", "test-dummy"];
+
+// embed() rejects a vector of the wrong width, so a mocked embedding is full width
+const EMBEDDING = Array.from({ length: VECTOR_SIZE }, (_, i) => (i % 10) / 10);
 
 // Dynamic import to ensure mocks are in place
 const { addEntry, searchEntries, listEntries, deleteEntry, appendDo } = await import("../tools/ti/src/identity.js");
@@ -25,7 +28,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
       const ifText = "when in a meeting";
       const doText = "mute notifications";
       const tags = ["work", "focus"];
-      const mockVector = [0.1, 0.2, 0.3];
+      const mockVector = EMBEDDING;
       const mockEntry: IdentityEntry = {
         id: "entry-1",
         vector: mockVector,
@@ -74,7 +77,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
       const ifText = "context";
       const doText = "action";
       
-      spyOn(ollamaClient, "request").mockResolvedValue({ embeddings: [[0.1]] } as any);
+      spyOn(ollamaClient, "request").mockResolvedValue({ embeddings: [EMBEDDING] } as any);
       spyOn(qdrantClient, "request").mockResolvedValue({ status: "ok" } as any);
 
       await addEntry(ifText, doText, []);
@@ -89,7 +92,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
     it("should embed query, return ranked candidates with score and do array, and respect tags", async () => {
       const query = "meeting";
       const tags = ["work"];
-      const mockVector = [0.1];
+      const mockVector = EMBEDDING;
       const mockResults = [
         { id: "1", score: 0.99, payload: { if: "in meeting", do: ["mute"], tags: ["work"] } },
         { id: "2", score: 0.85, payload: { if: "conference call", do: ["quiet"], tags: ["work"] } },
@@ -122,7 +125,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
     });
 
     it("should not call an LLM during search", async () => {
-      spyOn(ollamaClient, "request").mockResolvedValue({ embeddings: [[0.1]] } as any);
+      spyOn(ollamaClient, "request").mockResolvedValue({ embeddings: [EMBEDDING] } as any);
       spyOn(qdrantClient, "request").mockResolvedValue({ result: { points: [] } } as any);
 
       await searchEntries("test", {});
