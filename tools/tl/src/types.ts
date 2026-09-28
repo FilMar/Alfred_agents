@@ -12,10 +12,11 @@ export const EXCHANGE_KINDS = ["chat", "subtask"] as const;
 export type ExchangeKind = (typeof EXCHANGE_KINDS)[number];
 
 /**
- * The tools that write a transcript. A row with an unknown one is far more likely
- * a bug than a new tool, so the store refuses it: adding a third is one line here.
+ * The tools that produce rows. `claude` and `pi` write a transcript; `th` writes no
+ * transcript at all and files its own row when a delegated run ends. A name outside
+ * this list is far more likely a typo than a new tool, so the store refuses it.
  */
-export const HARNESSES = ["claude", "pi"] as const;
+export const HARNESSES = ["claude", "pi", "th"] as const;
 
 export type Harness = (typeof HARNESSES)[number];
 

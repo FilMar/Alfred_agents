@@ -63,7 +63,7 @@ Which tool ran a session is a column on `sessions`, not a field repeated on ever
 
 Every row a transcript yields is `kind: chat`, written by `alfredo`.
 
-`subtask` is reserved for a `th` run. A hat makes its own model calls in its own process, so it never appears in a transcript at all: `th` has to write that row itself, which is why it arrives with Fase 6. A native subagent is not a `subtask` either — its task call and its report are already inside the output of the exchange that asked for it. What is not counted is the tokens it spent internally: measured, 2.4% of all output tokens, across 8 sessions out of 43.
+`subtask` is a `th` run, and `th` files that row itself when the run ends — it builds its agent session in memory, so no transcript exists to read, and its output files live in `/tmp` and are wiped. A run is its own session, with `harness: "th"`. See [`memory_th_run_files_its_own_row`](../../.wiki/memory_th_run_files_its_own_row.md). A native subagent is not a `subtask` either — its task call and its report are already inside the output of the exchange that asked for it. What is not counted is the tokens it spent internally: measured, 2.4% of all output tokens, across 8 sessions out of 43.
 
 ## Commands
 

@@ -4,7 +4,8 @@ import { spawn, spawnSync } from "node:child_process";
 import { tmpdir, homedir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { insertRun, finishRun, type RunUsage } from "./db.js";
+import { insertRun, finishRun, getRun, type RunUsage } from "./db.js";
+import { archiveRun } from "./archive.js";
 import {
   AuthStorage,
   createAgentSession,
@@ -305,6 +306,8 @@ async function executeSession(
     throw err;
   } finally {
     finishRun(opts.runId, runStatus, sumUsage(session.messages));
+    const finished = getRun(opts.runId);
+    if (finished) await archiveRun(finished, session.messages);
   }
 }
 

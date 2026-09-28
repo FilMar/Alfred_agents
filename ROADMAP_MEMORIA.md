@@ -367,7 +367,9 @@ La rete di sicurezza. Ha bisogno dei contatori della Fase 1 e degli eventi della
 
 Nessuna delle fasi precedenti dipende da queste.
 
-- `th`: fuori `member create/list/get/delete/promote` e `--from`; `run` prende cappello, task, prompt extra, tools. `fury` perde il mestiere, `annibale` smette di passare nomi di membri. Poi gli eventi `th.run` in `tl`.
+- `th`: fuori `member create/list/get/delete/promote` e `--from`; `run` prende cappello, task, prompt extra, tools. `fury` perde il mestiere, `annibale` smette di passare nomi di membri.
+- ~~Poi gli eventi `th.run` in `tl`~~ — **fatto il 2026-09-28**, in anticipo: `th` scrive la sua riga quando il run finisce (`tools/th/src/archive.ts`). Il rinvio serviva a non nascere con l'`actor` sbagliato, e quel motivo e scaduto — il cappello si sa. Andava fatto adesso perche `th` costruisce la sessione con `SessionManager.inMemory()` e i suoi file stanno in `/tmp`: **il testo dell'output esiste solo in quel momento**. Su cinque `out_path` provati da `th.db`, zero esistevano ancora.
+- Resta solo il **`parent`**: collegare una delega all'exchange che l'ha chiesta richiede che chi chiama passi il proprio id, e nessuno lo da a `th` oggi.
 - Il gap 6 di `.wiki/memory_procedural_six_gaps` (promozione membro↔skill) si **chiude come obsoleto**: con nomi inventati a ogni run non esiste storico da promuovere. L'unità su cui si accumula esperienza diventa il cappello — 6, stabili, matrice densa.
 - **Critico** come secondo filtro: valuta con la rubrica, boccia o snellisce. Ogni bocciatura è un evento `tl`, perché la rubrica possa migliorare.
 - **Riscrittura delle query** nell'hook: un modello piccolo traduce il prompt conversazionale in una query. Da valutare con una misura, non da assumere.
@@ -446,6 +448,7 @@ Nessuna delle fasi precedenti dipende da queste.
 - ~~24 note con `refs` duplicati, 1 con self-ref, 1 payload senza campo `id`, 11 archi verso note inesistenti~~ — riparato in Fase 0.
 - ~~`ensureCollection()` cancella la collection quando la configurazione non combacia~~ — chiuso in Fase 0.
 - Il frontmatter dei membri `th` ha un campo `skills` che il tipo `Member` non contempla.
+- Il `tsconfig.json` di `th` non aveva i tipi di bun, quindi nessuno l'ha mai eseguito. Aggiunti il 2026-09-28, e fanno emergere due errori preesistenti: `tools/th/src/db.ts:89` passa `unknown[]` come binding SQL, e `tools/th/src/detached-runner.ts:17` usa **due tipi `JobPaths` diversi**, uno senza `pid`. Non toccati, e `th` non e ancora nello script `typecheck`.
 - ~~La suite `th` e quella dell'orchestratore interferiscono in parallelo: 7-8 test su 154~~ — chiuso il 2026-09-28 togliendo `tools/orchestrator/` e `tools/cockpit/`, che Filippo non usa più. La causa era quella: le due suite condividevano stato su filesystem, e 6 dei fallimenti erano in `th`, non nell'orchestratore. Ora **161 test su 161**, verdi su tre esecuzioni di fila.
 - ~~`tb` stampa id corti e accetta solo id lunghi~~ — chiuso in Fase 1: risolve per prefisso.
 - `tb graph` disegna dai soli `refs` mentre il traversal percorre anche i `backrefs` (vedi Fase 1).
