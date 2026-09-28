@@ -3,6 +3,19 @@
 # a SQLite file wants the host disk, not a mounted volume. The file holds the only
 # copy of a transcript once it rotates, so this unit is what the Clio backups
 # protect.
+#
+# Install as a USER unit, which is what this file is written for:
+#   cp tools/tl/deploy/tl.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now tl
+#   sudo loginctl enable-linger $USER     # or it dies when you log out
+#
+# A user unit runs as the calling user, so it carries no User= line: systemd
+# rejects that directive here and fails with 217/USER. Set WorkingDirectory to
+# wherever the repo is on that machine, and check the bun path with `which bun`
+# — the official installer puts it in ~/.bun/bin, not /usr/bin.
+#
+# As a SYSTEM unit instead (/etc/systemd/system/), add `User=<the account>`, make
+# WorkingDirectory absolute, and use WantedBy=multi-user.target.
 
 [Unit]
 Description=Third Log (tl)
@@ -10,14 +23,13 @@ After=network.target
 
 [Service]
 Type=simple
-User=filippo
-WorkingDirectory=/home/filippo/git_projects/pi
-# TL_DB defaults to ~/.tl/tl.db, TL_API_PORT to 8790.
-# Environment=TL_DB=/home/filippo/.tl/tl.db
-# Environment=TL_API_PORT=8790
-ExecStart=/usr/bin/bun run tools/tl/src/cli.ts serve
+WorkingDirectory=%h/Alfred_agents
+ExecStart=%h/.bun/bin/bun run tools/tl/src/cli.ts serve
 Restart=always
 RestartSec=5
+# TL_DB defaults to %h/.tl/tl.db, TL_API_PORT to 8790.
+# Environment=TL_DB=%h/.tl/tl.db
+# Environment=TL_API_PORT=8790
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
