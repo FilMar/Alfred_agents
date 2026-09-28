@@ -17,7 +17,7 @@ import {
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 import { getModel, getProviders } from "@earendil-works/pi-ai";
 import type { KnownProvider, Usage } from "@earendil-works/pi-ai";
-import { composeSystemPrompt, getHat, validateName } from "./hats.js";
+import { composeSystemPrompt, findSkill, getHat, skillBlock, validateName } from "./prompt.js";
 
 // ─── Sandbox (bwrap) ──────────────────────────────────────────────────────────
 
@@ -99,8 +99,10 @@ export type RunMemberOpts = {
   timeoutSec?: number;
   /** Extra instructions, in front of the hat. What a member file used to hold. */
   system?: string;
-  /** Tools the hat may use. Empty means every tool. */
+  /** Tools the run may use. Empty means every tool. */
   tools?: string[];
+  /** A skill the run must follow, injected whole instead of merely offered. */
+  skill?: string;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -188,7 +190,7 @@ async function resolveModel(modelStr: string) {
 }
 
 async function buildSession(
-  hat: string,
+  hat: string | undefined,
   opts: RunMemberOpts,
 ): Promise<{ session: AgentSession }> {
   if (opts.thinkingLevel && !THINKING_LEVELS.includes(opts.thinkingLevel as ThinkingLevel)) {
@@ -197,7 +199,8 @@ async function buildSession(
 
   const model = opts.modelStr ? await resolveModel(opts.modelStr) : undefined;
 
-  const systemPrompt = composeSystemPrompt(opts.system, getHat(hat));
+  const skill = opts.skill === undefined ? undefined : skillBlock(findSkill(opts.skill));
+  const systemPrompt = composeSystemPrompt(opts.system, hat === undefined ? "" : getHat(hat), skill);
 
   const loader = new DefaultResourceLoader({
     cwd: process.cwd(),
@@ -303,13 +306,23 @@ async function executeSession(
 /** What a run knows about itself before it ends. The archive fills in the rest. */
 type RunSeed = Omit<FinishedRun, "status" | "finished_at">;
 
+/**
+ * What the run is called, in its files and as the actor of its archived row: the
+ * hat, or the skill when a run is a skill and wears no hat.
+ */
+export function runLabel(hat: string | undefined, skill: string | undefined): string {
+  const label = hat ?? skill;
+  if (label === undefined) throw new Error("A run needs a hat, a skill, or both.");
+  return label;
+}
+
 /** The spool sits next to the run's own files, which are its state while it runs. */
 function spoolPathFor(statusPath: string): string {
   return statusPath.replace(/\.status$/, SPOOL_SUFFIX);
 }
 
 export async function runHat(
-  hat: string,
+  hat: string | undefined,
   task: string,
   paths: JobPaths,
   opts: RunMemberOpts = {},
@@ -318,7 +331,8 @@ export async function runHat(
 
   const run: RunSeed = {
     id: randomUUID(),
-    hat,
+    hat: runLabel(hat, opts.skill),
+    ...(opts.skill !== undefined && { skill: opts.skill }),
     task,
     started_at: new Date().toISOString(),
     ...(opts.timeoutSec !== undefined && { timeout_s: opts.timeoutSec }),

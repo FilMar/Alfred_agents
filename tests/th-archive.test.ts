@@ -82,6 +82,13 @@ describe("runRows", () => {
     expect(runRows(run(), [message()], "kokpit", "/work").exchange.meta).toMatchObject({ cost_usd: 0.004 });
   });
 
+  it("the run's own prompt is not part of its output: that is the input", () => {
+    const prompt = { role: "user", content: [{ type: "text", text: "audit the renderer" }] };
+    const rows = runRows(run(), [prompt, message()], "kokpit", "/work");
+    expect(rows.contents.output).toBe("done");
+    expect(rows.contents.output).not.toContain("audit the renderer");
+  });
+
   it("the task is the input and the answer is the output", () => {
     const rows = runRows(run(), [message()], "kokpit", "/work");
     expect(rows.contents.input).toBe("audit the renderer");

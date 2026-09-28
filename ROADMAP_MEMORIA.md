@@ -376,6 +376,7 @@ Nessuna delle fasi precedenti dipende da queste.
 - **Lo spool**, che nasce dal fatto che `tl` e ora l'unica casa: se la scrittura fallisce, le tre righe vanno in `/tmp/th-*.unarchived` accanto ai file del run, e `th archive-pending` le manda dopo. Provato spegnendo l'archivio: il run finisce in 0,1s con un avviso, la riga resta, e al giro dopo entra.
 - Resta solo il **`parent`**: collegare una delega all'exchange che l'ha chiesta richiede che chi chiama passi il proprio id, e nessuno lo da a `th` oggi.
 - ~~Il gap 6 di `.wiki/memory_procedural_six_gaps` (promozione membro↔skill) si chiude come obsoleto~~ — chiuso: non esistono più membri da promuovere. L'unità su cui si accumula esperienza è il cappello, e adesso `tl` puo contarla, perche l'`actor` di un subtask e uno dei sei e non uno dei quaranta nomi inventati.
+- **`--skill` su `th run`** — fatto il 2026-09-28, non era nel piano. Una skill si **forza** nel system prompt invece di essere chiesta nel testo del task: misurato, 6.380 token di input contro la riga di catalogo che `formatSkillsForPrompt` avrebbe aggiunto. La regola cambia forma: da un divieto da ricordare ("non passare una skill come cappello") a un posto dove la skill va. `--hat` e `--skill` sono entrambi opzionali e almeno uno serve.
 - **Critico** come secondo filtro: valuta con la rubrica, boccia o snellisce. Ogni bocciatura è un evento `tl`, perché la rubrica possa migliorare.
 - **Riscrittura delle query** nell'hook: un modello piccolo traduce il prompt conversazionale in una query. Da valutare con una misura, non da assumere.
 

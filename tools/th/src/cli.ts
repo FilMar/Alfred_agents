@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { Command } from "commander";
-import { getHat, listHats, parseTools } from "./hats.js";
-import { ensureSandboxed, listAvailableModels, makeJobPaths, runHat, sandboxExec, spawnDetached, waitForJobs, type RunMemberOpts } from "./runner.js";
+import { getHat, listHats, parseTools } from "./prompt.js";
+import { ensureSandboxed, listAvailableModels, makeJobPaths, runHat, runLabel, sandboxExec, spawnDetached, waitForJobs, type RunMemberOpts } from "./runner.js";
 import { archivePending, spooledFiles } from "./archive.js";
 import * as tl from "../../tl/src/client.js";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -64,11 +64,12 @@ program.addCommand(hats);
 
 program
     .command("run")
-    .description("Run a task under one hat")
-    .requiredOption("--hat <name>", "Hat to wear (th hats list)")
+    .description("Run a task under a hat, a skill, or both")
     .requiredOption("--task <task>", "Task to execute")
+    .option("--hat <name>", "Hat to wear (th hats list)")
+    .option("--skill <name>", "Skill the run must follow — injected whole, not merely offered")
     .option("--system <text>", "Extra instructions, placed in front of the hat")
-    .option("--tools <list>", "Tools the hat may use, comma separated (default: all)")
+    .option("--tools <list>", "Tools the run may use, comma separated (default: all)")
     .option("--thinking <level>", "Extended thinking level (off, minimal, low, medium, high, xhigh)")
     .option("--model <provider/id>", "Model to use (e.g. anthropic/claude-opus-4-7)")
     .option("--detach", "Run in background; returns out/log/status paths immediately")
@@ -78,20 +79,22 @@ program
         return n;
     })
     .action(async (opts) => {
+        if (!opts.hat && !opts.skill) die("Use --hat, --skill, or both: a run needs to be told how to think or what to follow.");
         if (!opts.detach) ensureSandboxed();
 
-        const paths = makeJobPaths(opts.hat);
+        const paths = makeJobPaths(runLabel(opts.hat, opts.skill));
         const runOpts: RunMemberOpts = {
             thinkingLevel: opts.thinking,
             modelStr: opts.model,
             timeoutSec: opts.timeout,
             ...(opts.system && { system: opts.system }),
             ...(opts.tools && { tools: parseTools(opts.tools) }),
+            ...(opts.skill && { skill: opts.skill }),
         };
         try {
             if (opts.detach) {
                 const runnerPath = join(dirname(process.argv[1]), "detached-runner.ts");
-                const pid = spawnDetached(opts.hat, opts.task, paths, runOpts, process.argv[0], runnerPath);
+                const pid = spawnDetached(opts.hat ?? "", opts.task, paths, runOpts, process.argv[0], runnerPath);
                 out({ pid, out: paths.out, log: paths.log, status: paths.status });
             } else {
                 await runHat(opts.hat, opts.task, paths, runOpts);
@@ -151,7 +154,7 @@ program
 program
     .command("history")
     .description("List recent runs")
-    .option("--hat <name>", "Filter by hat")
+    .option("--hat <name>", "Filter by hat or skill, whichever named the run")
     .option("--limit <n>", "Maximum number of results (default: 20)", (v) => {
         const n = parseInt(v, 10);
         if (isNaN(n) || n <= 0) throw new Error(`--limit must be a positive integer`);

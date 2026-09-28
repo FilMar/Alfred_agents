@@ -6,7 +6,8 @@ import { tmpdir } from "node:os";
 
 const TEST_BASE = join(tmpdir(), `th-test-${Date.now()}`);
 
-const { validateName, composeSystemPrompt, parseTools } = await import("../tools/th/src/hats.ts");
+const { validateName, composeSystemPrompt, parseTools, findSkill, skillBlock } = await import("../tools/th/src/prompt.ts");
+const { runLabel } = await import("../tools/th/src/runner.ts");
 const { waitForJobs, sanitize, checkStaleness, makeJobPaths, sandboxExec, OUT_STALE_MS } = await import("../tools/th/src/runner.ts");
 
 function statusFile(name: string, content: string): string {
@@ -88,6 +89,58 @@ describe("waitForJobs", () => {
 describe("composeSystemPrompt", () => {
   it("puts the caller's instructions in front of the hat, with the old separator", () => {
     expect(composeSystemPrompt("you audit renderers", "think in black")).toBe("you audit renderers\n\n---\n\nthink in black");
+  });
+
+  it("a skill goes last, closest to the task: a procedure outranks a way of thinking", () => {
+    expect(composeSystemPrompt("role", "hat", "<skill>procedure</skill>"))
+      .toBe("role\n\n---\n\nhat\n\n---\n\n<skill>procedure</skill>");
+  });
+
+  it("a run that is only a skill carries only the skill", () => {
+    expect(composeSystemPrompt(undefined, "", "<skill>procedure</skill>")).toBe("<skill>procedure</skill>");
+  });
+
+  it("no dangling separator when the middle block is empty", () => {
+    expect(composeSystemPrompt("role", "", "skill")).toBe("role\n\n---\n\nskill");
+  });
+});
+
+describe("runLabel", () => {
+  it("a hat names its run", () => {
+    expect(runLabel("black-core", undefined)).toBe("black-core");
+  });
+
+  it("with both, the hat names it: the skill is in meta", () => {
+    expect(runLabel("black-core", "christopher")).toBe("black-core");
+  });
+
+  it("a run that is only a skill is named after it", () => {
+    expect(runLabel(undefined, "christopher")).toBe("christopher");
+  });
+
+  it("neither is refused: a run has to be told something", () => {
+    expect(() => runLabel(undefined, undefined)).toThrow("A run needs a hat, a skill, or both.");
+  });
+});
+
+describe("findSkill and skillBlock", () => {
+  it("finds a real skill of this project", () => {
+    expect(findSkill("omero").name).toBe("omero");
+  });
+
+  it("says what is available when the name is wrong", () => {
+    expect(() => findSkill("nonesuch")).toThrow("Available:");
+  });
+
+  it("injects the skill whole, not a pointer to it", () => {
+    const block = skillBlock(findSkill("omero"));
+    expect(block).toContain("<skill name=\"omero\"");
+    expect(block).toContain("## Operations");
+    expect(block.length).toBeGreaterThan(1000);
+  });
+
+  it("tells the run where the skill's relative references resolve", () => {
+    expect(skillBlock(findSkill("omero"))).toContain("relative to");
   });
 
   it("with no instructions it is the hat alone, and no dangling separator", () => {

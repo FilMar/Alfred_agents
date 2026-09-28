@@ -42,6 +42,8 @@ export interface FinishedRun {
   timeout_s?: number;
   /** Extended thinking level, when one was asked for */
   thinking?: string;
+  /** The skill the run was forced to follow, when there was one */
+  skill?: string;
 }
 
 /**
@@ -50,7 +52,10 @@ export interface FinishedRun {
  * a machine, which is everything `sessions` holds. The hat is the actor.
  */
 export function runRows(run: FinishedRun, messages: unknown[], host: string, cwd: string): RunRows {
-  const lines = messages.map((message) => ({ type: "message", message }) as pi.Line);
+  // The task is already `input`: a run's own prompt is not part of what it produced.
+  const lines = messages
+    .map((message) => ({ type: "message", message }) as pi.Line)
+    .filter((line) => !pi.isOpener(line));
   const cost = pi.sumCost(lines);
   const model = pi.modelOf(lines);
   const id = exchangeId(run.id, "run");
@@ -71,6 +76,7 @@ export function runRows(run: FinishedRun, messages: unknown[], host: string, cwd
         duration_s: durationSeconds(run.started_at, run.finished_at),
         ...(run.timeout_s !== undefined && { timeout_s: run.timeout_s }),
         ...(run.thinking !== undefined && { thinking: run.thinking }),
+        ...(run.skill !== undefined && { skill: run.skill }),
         ...(cost > 0 && { cost_usd: cost }),
       },
     },

@@ -37,13 +37,15 @@ th run --hat black-core --task "<what to do>" --system "<who you are for this ru
 
 ## Skills are not hats
 
-`christopher`, `socrate`, `aristotele`, `omero`, `feynman` and the rest are system skills. They are never a value for `--hat`.
-
-To use a skill, name it in the task text:
+`christopher`, `socrate`, `aristotele`, `omero`, `feynman` and the rest are system skills. They are never a value for `--hat`. They have a flag of their own:
 
 ```bash
-th run --hat white-core --task "Use the christopher skill to retrieve what the Third Brain knows about: <topic>"
+th run --skill christopher --task "Retrieve what the Third Brain knows about: <topic>"
 ```
+
+`--skill` puts the skill's whole text in the run's system prompt, so the protocol is a constraint and not a request — a run asked to "use the christopher skill" may read it partially or not at all, and nothing downstream would show it. Wear a hat with it when the way of thinking matters too; the skill goes last and outranks it.
+
+A run with only `--skill` wears no hat, and the archive names it after the skill.
 
 Keep task text plain: no backticks, no `$()`, no double quotes. Anywhere this text reaches a shell line, those characters can break the command.
 
@@ -82,7 +84,7 @@ The script drives everything else: parallel fan-out, polling, validation, synthe
 ## 3. Understand the context
 
 ```bash
-th run --hat white-core --task "Use the christopher skill to retrieve what the Third Brain knows about: <work topic>"
+th run --skill christopher --task "Retrieve what the Third Brain knows about: <work topic>"
 ```
 
 If the TB has nothing on the topic, proceed without it. Do not invent context.
@@ -144,5 +146,6 @@ After Blue, read all outputs and present concrete decisions to the user. Do not 
 - **The same hat twice is allowed** when the two runs get different `--system` roles. It is one way of thinking applied to two subjects, and it is cheaper than reaching for a hat that does not fit.
 - **Blue always closes.** No open flows.
 - **Repeatable flows → script.** If a flow makes sense to repeat identically, propose formalising it.
+- **A writing skill is not forced into a detached run.** `mose`, `platone` and `clio` describe a human gate in their own text; a run has nobody to ask.
 - **Verification is never delegated.** A run produces output and stops. The check that decides pass/fail — tests, compiler, any deterministic gate — runs as: Annibale itself, a deterministic script, or the user. Never inside a `th run`, not even under a different hat.
 - **Every finished run is archived.** `th` files it in `tl` when it ends, so `th history` and `tl` are where a flow's cost and output live afterwards. You do not have to save anything yourself.

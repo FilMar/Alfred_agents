@@ -1,12 +1,16 @@
-// Hats, and nothing else. A hat is a file: a way of thinking, stable and reusable.
+// What a run is told before its task: a role, a hat, and a skill. Three blocks,
+// three arguments, one string.
 //
-// There used to be members here too — a file per delegate, holding a role, a hat
-// and a tool list. They are gone: those three things are arguments now, so nobody
-// creates a file to run one task, and the unit that accumulates experience is the
-// hat, of which there are few and they do not change.
+// There used to be members here — a file per delegate holding a role, a hat and a
+// tool list. They are gone: those are arguments now, so nobody creates a file to
+// run one task, and the unit experience accumulates on is the hat, of which there
+// are six and they do not change.
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+
+import { getAgentDir, loadSkills } from "@earendil-works/pi-coding-agent";
+import type { Skill } from "@earendil-works/pi-coding-agent";
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
@@ -58,19 +62,61 @@ export function getHat(hat: string): string {
   return readFileSync(hatPath, "utf-8");
 }
 
+// ─── Skills ───────────────────────────────────────────────────────────────────
+
+/** Every skill this machine and this project offer, by the loader pi itself uses. */
+function availableSkills(): Skill[] {
+  return loadSkills({
+    cwd: process.cwd(),
+    agentDir: getAgentDir(),
+    skillPaths: [],
+    includeDefaults: true,
+  }).skills;
+}
+
+export function findSkill(name: string): Skill {
+  const skills = availableSkills();
+  const found = skills.find((s) => s.name === name);
+  if (!found) {
+    const names = skills.map((s) => s.name).sort().join(", ");
+    throw new Error(`Skill "${name}" not found. Available: ${names}`);
+  }
+  return found;
+}
+
+/**
+ * A skill in the system prompt, content and all. Not the catalogue pi offers a
+ * model to choose from — that one only says a skill exists and hopes it is read.
+ * Forcing means the protocol is already there, and the base directory too, or a
+ * skill's own relative references cannot be resolved.
+ */
+export function skillBlock(skill: Skill): string {
+  const body = readFileSync(skill.filePath, "utf-8").trim();
+  return [
+    `<skill name="${skill.name}" location="${skill.filePath}">`,
+    `References inside this skill are relative to ${skill.baseDir} — resolve them against it.`,
+    "",
+    body,
+    "</skill>",
+  ].join("\n");
+}
+
 // ─── The system prompt of a run ───────────────────────────────────────────────
 
 /**
- * What the agent is told before the task: the caller's own instructions first,
- * then the hat. Same order and same separator a member file produced, so a run
- * behaves exactly as it did when this came from a file.
+ * What the agent is told before the task: the caller's role first, then the hat,
+ * then the skill it must follow. Role and hat keep the order and the separator a
+ * member file produced, so a run without a skill behaves exactly as it did when
+ * this came from a file. The skill goes last, closest to the task: it is the
+ * procedure, and a procedure outranks a way of thinking.
  */
-export function composeSystemPrompt(system: string | undefined, hatContent: string): string {
-  const role = (system ?? "").trim();
-  const hat = hatContent.trim();
-  if (role.length === 0) return hat;
-  if (hat.length === 0) return role;
-  return `${role}\n\n---\n\n${hat}`;
+export function composeSystemPrompt(
+  system: string | undefined,
+  hatContent: string,
+  skill?: string,
+): string {
+  const blocks = [(system ?? "").trim(), hatContent.trim(), (skill ?? "").trim()];
+  return blocks.filter((b) => b.length > 0).join("\n\n---\n\n");
 }
 
 /** Tools from the command line: `read,bash` or `[read, bash]`, empty means all. */
