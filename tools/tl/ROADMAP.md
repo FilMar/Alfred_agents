@@ -27,7 +27,7 @@ Design: [`memory_tl_work_archive_not_event_log`](../../.wiki/memory_tl_work_arch
 - [ ] `tests/tl.test.ts` — the parser on a committed transcript fixture, the validator, the id derivation, the sums. In-memory SQLite, no live server
 
 ## Deployment
-- [ ] `deploy/tl.service` systemd unit on the Rasp, native process like `tools/orchestrator/deploy/orchestrator.service`: a SQLite file wants the host disk
+- [ ] `deploy/tl.service` systemd unit on the Rasp, native process: a SQLite file wants the host disk
 - [ ] No auth: the same Tailscale-only perimeter as the rest of the node
 - [ ] Into the Clio backups
 

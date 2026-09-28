@@ -1,8 +1,8 @@
 # Third Log Service (Raspberry Pi)
 # Runs the CRUD API in front of the SQLite file. Native process, no container:
-# a SQLite file wants the host disk, not a mounted volume — same reason as the
-# orchestrator. The file holds the only copy of a transcript once it rotates,
-# so this unit is what the Clio backups protect.
+# a SQLite file wants the host disk, not a mounted volume. The file holds the only
+# copy of a transcript once it rotates, so this unit is what the Clio backups
+# protect.
 
 [Unit]
 Description=Third Log (tl)

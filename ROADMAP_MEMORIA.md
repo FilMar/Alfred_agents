@@ -442,7 +442,7 @@ Nessuna delle fasi precedenti dipende da queste.
 - ~~24 note con `refs` duplicati, 1 con self-ref, 1 payload senza campo `id`, 11 archi verso note inesistenti~~ — riparato in Fase 0.
 - ~~`ensureCollection()` cancella la collection quando la configurazione non combacia~~ — chiuso in Fase 0.
 - Il frontmatter dei membri `th` ha un campo `skills` che il tipo `Member` non contempla.
-- La suite `th` e quella dell'orchestratore condividono stato su filesystem (`.th/members/` del progetto e la directory globale dei membri), quindi **interferiscono quando `bun test tests/` le esegue in parallelo**: 7 test su 154. Misurato il 2026-09-28: ogni file passa da solo (`th` 41/41, `orchestrator` 35/35, `orchestrator.phase2` 24/24), e 6 dei 7 falliti sono in `member globals`, che scrive nella directory globale. La diagnosi precedente ("fallisce alla seconda esecuzione per la propria spazzatura") era sbagliata: una seconda esecuzione dello stesso file passa. Il fatto vero è che i test scrivono in una directory reale invece che in una temporanea, come fanno già i test dell'orchestratore.
+- ~~La suite `th` e quella dell'orchestratore interferiscono in parallelo: 7-8 test su 154~~ — chiuso il 2026-09-28 togliendo `tools/orchestrator/` e `tools/cockpit/`, che Filippo non usa più. La causa era quella: le due suite condividevano stato su filesystem, e 6 dei fallimenti erano in `th`, non nell'orchestratore. Ora **161 test su 161**, verdi su tre esecuzioni di fila.
 - ~~`tb` stampa id corti e accetta solo id lunghi~~ — chiuso in Fase 1: risolve per prefisso.
 - `tb graph` disegna dai soli `refs` mentre il traversal percorre anche i `backrefs` (vedi Fase 1).
 - `tb graph` si dismette quando `third_os` copre la lettura (già in `ROADMAP.md`).
