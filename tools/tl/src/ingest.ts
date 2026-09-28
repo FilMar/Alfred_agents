@@ -3,11 +3,10 @@
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { hostname } from "node:os";
-import { basename, join } from "node:path";
+import { join } from "node:path";
 import { homedir } from "node:os";
 
 import * as client from "./client.js";
-import type { Exchange } from "./types.js";
 import { parseLines, parseTranscript } from "./transcript.js";
 import type { ParsedExchange } from "./transcript.js";
 
@@ -24,26 +23,25 @@ export interface IngestSummary {
 
 const EMPTY: IngestSummary = { transcripts: 0, sessions: 0, exchanges: 0, known: 0, orphans: 0 };
 
-/** Reads one transcript file and everything its subagents produced. */
+/**
+ * Reads one transcript file. A subagent's own file is not read: its task call and
+ * its report are already inside the output of the exchange that asked for it.
+ */
 export async function ingestTranscript(path: string): Promise<IngestSummary> {
-  const main = parseTranscript(parseLines(readFileSync(path, "utf8")), false, { host: hostname() });
+  const main = parseTranscript(parseLines(readFileSync(path, "utf8")), { host: hostname() });
   if (main.session === null) return { ...EMPTY, transcripts: 1 };
 
   const known = new Set((await client.fetchExchanges({ session: main.session.id, limit: MAX_KNOWN })).map((e) => e.id));
-  const parents = main.exchanges.map((p) => p.exchange);
-  const sidechains = sidechainFiles(path).flatMap((file) =>
-    parseTranscript(parseLines(readFileSync(file, "utf8")), true, { host: hostname(), parents }).exchanges,
-  );
 
   await client.putSessions([main.session]);
-  const fresh = [...main.exchanges, ...sidechains].filter((p) => !known.has(p.exchange.id));
+  const fresh = main.exchanges.filter((p) => !known.has(p.exchange.id));
   await sendExchanges(fresh);
 
   return {
     transcripts: 1,
     sessions: 1,
     exchanges: fresh.length,
-    known: main.exchanges.length + sidechains.length - fresh.length,
+    known: main.exchanges.length - fresh.length,
     orphans: main.orphans,
   };
 }
@@ -56,29 +54,12 @@ const MAX_KNOWN = 5_000;
  */
 async function sendExchanges(parsed: ParsedExchange[]): Promise<void> {
   if (parsed.length === 0) return;
-  await client.putExchanges(parsed.map((p) => p.exchange).sort(byParentLast));
+  await client.putExchanges(parsed.map((p) => p.exchange));
   await client.putContents(parsed.map((p) => p.contents));
 }
 
-/** A subtask points at the exchange that asked for it, so that one goes in first. */
-function byParentLast(a: Exchange, b: Exchange): number {
-  if (a.parent === undefined && b.parent !== undefined) return -1;
-  if (a.parent !== undefined && b.parent === undefined) return 1;
-  return a.timestamp.localeCompare(b.timestamp);
-}
-
-/** The files a session's subagents wrote, next to the transcript. */
-function sidechainFiles(transcriptPath: string): string[] {
-  const dir = join(transcriptPath.replace(/\.jsonl$/, ""), "subagents");
-  try {
-    return readdirSync(dir).filter((f) => f.endsWith(".jsonl")).map((f) => join(dir, f));
-  } catch {
-    return [];
-  }
-}
-
 /** Finds the transcript of a session by its id, anywhere under the root. */
-export function findTranscript(sessionId: string): string | null {
+function findTranscript(sessionId: string): string | null {
   for (const project of projectDirs()) {
     const candidate = join(project, `${sessionId}.jsonl`);
     try {
@@ -107,7 +88,7 @@ export async function ingestAll(since?: string): Promise<IngestSummary> {
   return total;
 }
 
-export function allTranscripts(): string[] {
+function allTranscripts(): string[] {
   return projectDirs().flatMap((project) =>
     readdirSync(project)
       .filter((f) => f.endsWith(".jsonl"))
@@ -139,7 +120,3 @@ function add(a: IngestSummary, b: IngestSummary): IngestSummary {
   };
 }
 
-/** The session id a transcript file holds, from its name. */
-export function sessionIdOf(path: string): string {
-  return basename(path, ".jsonl");
-}

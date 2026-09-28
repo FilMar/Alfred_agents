@@ -4,7 +4,7 @@
 import { assert } from "../../tb/src/types.js";
 import type { Contents, Exchange, Session } from "./types.js";
 
-export const MAIN_ACTOR = "alfredo";
+const MAIN_ACTOR = "alfredo";
 
 // ─── What a transcript line looks like ────────────────────────────────────────
 
@@ -66,14 +66,12 @@ export function parseLines(text: string): Line[] {
 
 /**
  * True when this line is a question, and not an answer to a tool.
- * In a main transcript `origin` marks it: slash-command bookkeeping, interruption
- * notices and skill injections carry none, and their cost lands on the exchange
- * before them rather than being lost. In a sidechain file the task prompt is the
- * one line with no parent.
+ * `origin` marks it: slash-command bookkeeping, interruption notices and skill
+ * injections carry none, and their cost lands on the exchange before them rather
+ * than being lost.
  */
-export function isOpener(line: Line, sidechain: boolean): boolean {
+export function isOpener(line: Line): boolean {
   if (line.type !== "user") return false;
-  if (sidechain) return !line.parentUuid;
   return typeof line.origin?.kind === "string";
 }
 
@@ -83,12 +81,12 @@ export interface Span {
 }
 
 /** Splits the lines into one span per opener. Lines before the first are dropped. */
-export function spans(lines: Line[], sidechain: boolean): { spans: Span[]; orphans: number } {
+export function spans(lines: Line[]): { spans: Span[]; orphans: number } {
   const result: Span[] = [];
   let orphans = 0;
 
   for (const line of lines) {
-    if (isOpener(line, sidechain)) result.push({ opener: line, body: [] });
+    if (isOpener(line)) result.push({ opener: line, body: [] });
     else if (result.length === 0) orphans += line.type === "assistant" ? 1 : 0;
     else result[result.length - 1].body.push(line);
   }
@@ -152,46 +150,39 @@ export function modelOf(body: Line[]): string | undefined {
 
 // ─── Exchanges ────────────────────────────────────────────────────────────────
 
-/** The exchange that was running when `timestamp` happened, by time only. */
-export function parentOf(timestamp: string, candidates: Exchange[]): string | undefined {
-  const before = candidates.filter((e) => e.timestamp <= timestamp);
-  if (before.length === 0) return undefined;
-  return before.reduce((latest, e) => (e.timestamp > latest.timestamp ? e : latest)).id;
-}
-
 export interface ParseOptions {
   /** Machine the transcript was read on. The transcript does not carry it. */
   host?: string;
-  /** Exchanges of the parent session, to attach a subtask to the one that asked. */
-  parents?: Exchange[];
 }
 
-/** Turns the lines of one transcript file into a session and its exchanges. */
-export function parseTranscript(lines: Line[], sidechain: boolean, options: ParseOptions = {}): ParsedTranscript {
-  const split = spans(lines, sidechain);
+/**
+ * Turns the lines of one transcript file into a session and its exchanges.
+ * Every row is a `chat`: `subtask` belongs to a `th` run, which makes its own
+ * model calls in its own process and never appears in a transcript.
+ */
+export function parseTranscript(lines: Line[], options: ParseOptions = {}): ParsedTranscript {
+  const split = spans(lines);
   const exchanges = split.spans
-    .map((span) => toExchange(span, sidechain, options))
+    .map((span) => toExchange(span))
     .filter((parsed): parsed is ParsedExchange => parsed !== null);
 
   assert(exchanges.length <= split.spans.length, "parseTranscript: no exchange invented");
   return { session: sessionOf(lines, options.host), exchanges, orphans: split.orphans };
 }
 
-function toExchange(span: Span, sidechain: boolean, options: ParseOptions): ParsedExchange | null {
+function toExchange(span: Span): ParsedExchange | null {
   const { opener, body } = span;
   if (!opener.uuid || !opener.timestamp || !opener.sessionId) return null;
 
   const meta: Record<string, unknown> = {};
   if (opener.origin?.kind) meta.trigger = opener.origin.kind;
-  if (opener.agentId) meta.agent_id = opener.agentId;
 
   const exchange: Exchange = {
     id: opener.uuid,
     session: opener.sessionId,
     timestamp: opener.timestamp,
-    kind: sidechain ? "subtask" : "chat",
-    actor: sidechain ? `agent-${opener.agentId ?? "unknown"}` : MAIN_ACTOR,
-    ...(sidechain && { parent: parentOf(opener.timestamp, options.parents ?? []) }),
+    kind: "chat",
+    actor: MAIN_ACTOR,
     ...modelField(body),
     ...sumTokens(body),
     ...(Object.keys(meta).length > 0 && { meta }),

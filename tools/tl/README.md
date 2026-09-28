@@ -42,7 +42,9 @@ tl ingest --all                   # fills the gaps, and backfills what is on dis
 
 An exchange id is derived from the transcript, not generated, so writing is idempotent: running the same ingest twice changes nothing. That makes a missed exchange late rather than lost — the hook can fail, the Rasp can be unreachable, and the next `--all` picks it up, because the transcript survives for 30 days.
 
-An exchange starts at a user message that is not a tool result. A human prompt is `kind: chat`. A message inside a sidechain is `kind: subtask`, because a delegated agent costs tokens of its own and cost has to add up.
+An exchange starts at a user message that carries an `origin`. Every row a transcript yields is `kind: chat`, written by `alfredo`.
+
+`subtask` is reserved for a `th` run. A hat makes its own model calls in its own process, so it never appears in a transcript at all: `th` has to write that row itself, which is why it arrives with Fase 6. A native subagent is not a `subtask` either — its task call and its report are already inside the output of the exchange that asked for it. What is not counted is the tokens it spent internally: measured, 2.4% of all output tokens, across 8 sessions out of 43.
 
 ## Commands
 

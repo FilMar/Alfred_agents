@@ -32,7 +32,8 @@ Design: [`memory_tl_work_archive_not_event_log`](../../.wiki/memory_tl_work_arch
 - [ ] Into the Clio backups
 
 ## Deferred
-- `th` subtasks as rows — after Fase 6, so they are born with `actor = hat` and are never rewritten
+- `subtask` rows — a `th` run writes its own, after Fase 6, born with `actor = hat` and never rewritten. No transcript holds them: a hat runs in its own process
+- The tokens a native subagent spends inside itself (2.4% of output, measured). Its work is already in the parent exchange; only its internal cost is uncounted
 - Indexes, and any compression of `contents` — added when a query is slow, not before
 - Hindsight as the engine instead of writing the distiller — a Fase 3 decision, and it needs a spike first
 - Skill invocations as rows — first find out which hook fires on a skill

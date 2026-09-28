@@ -5,7 +5,7 @@ import {
 } from "../tools/tl/src/types.ts";
 import type { Exchange } from "../tools/tl/src/types.ts";
 import {
-  isOpener, lineText, modelOf, parentOf, parseLines, parseTranscript, spans, sumTokens,
+  isOpener, lineText, modelOf, parseLines, parseTranscript, spans, sumTokens,
 } from "../tools/tl/src/transcript.ts";
 import type { Line } from "../tools/tl/src/transcript.ts";
 import * as db from "../tools/tl/src/db.ts";
@@ -130,50 +130,42 @@ describe("sumBy", () => {
 
 describe("isOpener", () => {
   it("a human prompt opens an exchange", () => {
-    expect(isOpener(prompt(ID_A, T1, "ciao"), false)).toBe(true);
+    expect(isOpener(prompt(ID_A, T1, "ciao"))).toBe(true);
   });
 
   it("a tool result never opens one", () => {
-    expect(isOpener(toolResult(), false)).toBe(false);
+    expect(isOpener(toolResult())).toBe(false);
   });
 
   it("a user line without origin does not open one: it is command bookkeeping", () => {
-    expect(isOpener({ type: "user", uuid: ID_A, message: { content: "/compact" } }, false)).toBe(false);
+    expect(isOpener({ type: "user", uuid: ID_A, message: { content: "/compact" } })).toBe(false);
   });
 
   it("an assistant line never opens one", () => {
-    expect(isOpener(answer({}), false)).toBe(false);
-  });
-
-  it("in a sidechain the line with no parent opens it", () => {
-    expect(isOpener({ type: "user", uuid: ID_A, parentUuid: null }, true)).toBe(true);
-  });
-
-  it("in a sidechain a line with a parent does not", () => {
-    expect(isOpener({ type: "user", uuid: ID_B, parentUuid: ID_A }, true)).toBe(false);
+    expect(isOpener(answer({}))).toBe(false);
   });
 });
 
 describe("spans", () => {
   it("everything after an opener belongs to it", () => {
-    const result = spans([prompt(ID_A, T1, "a"), answer({}), toolResult()], false);
+    const result = spans([prompt(ID_A, T1, "a"), answer({}), toolResult()]);
     expect(result.spans).toHaveLength(1);
     expect(result.spans[0].body).toHaveLength(2);
   });
 
   it("a second opener starts a second span", () => {
-    const result = spans([prompt(ID_A, T1, "a"), answer({}), prompt(ID_B, T2, "b")], false);
+    const result = spans([prompt(ID_A, T1, "a"), answer({}), prompt(ID_B, T2, "b")]);
     expect(result.spans.map((s) => s.opener.uuid)).toEqual([ID_A, ID_B]);
   });
 
   it("answers before the first opener are counted, not attached", () => {
-    const result = spans([answer({}), prompt(ID_A, T1, "a")], false);
+    const result = spans([answer({}), prompt(ID_A, T1, "a")]);
     expect(result.orphans).toBe(1);
     expect(result.spans[0].body).toHaveLength(0);
   });
 
   it("no opener means no span", () => {
-    expect(spans([answer({}), toolResult()], false).spans).toEqual([]);
+    expect(spans([answer({}), toolResult()]).spans).toEqual([]);
   });
 });
 
@@ -231,22 +223,6 @@ describe("lineText", () => {
   });
 });
 
-describe("parentOf", () => {
-  const candidates = [exchange({ id: ID_A, timestamp: T1 }), exchange({ id: ID_B, timestamp: T2 })];
-
-  it("picks the exchange that was running", () => {
-    expect(parentOf("2026-09-01T10:30:00.000Z", candidates)).toBe(ID_A);
-  });
-
-  it("picks the latest one when several came before", () => {
-    expect(parentOf("2026-09-01T12:00:00.000Z", candidates)).toBe(ID_B);
-  });
-
-  it("returns nothing when nothing came before", () => {
-    expect(parentOf("2026-08-01T00:00:00.000Z", candidates)).toBeUndefined();
-  });
-});
-
 describe("parseLines", () => {
   it("skips a line that is not JSON", () => {
     expect(parseLines('{"type":"user"}\nnot json\n\n{"type":"assistant"}')).toHaveLength(2);
@@ -262,48 +238,41 @@ describe("parseTranscript", () => {
   ];
 
   it("reads the session from the first line that carries one", () => {
-    expect(parseTranscript(lines, false, { host: "desktop" }).session)
+    expect(parseTranscript(lines, { host: "desktop" }).session)
       .toEqual({ id: "s1", started: T1, host: "desktop", path: "/work" });
   });
 
   it("makes one exchange per prompt", () => {
-    expect(parseTranscript(lines, false).exchanges).toHaveLength(2);
+    expect(parseTranscript(lines).exchanges).toHaveLength(2);
   });
 
   it("gives every exchange a valid row", () => {
-    const rows = parseTranscript(lines, false).exchanges.map((p) => validateExchange(p.exchange));
+    const rows = parseTranscript(lines).exchanges.map((p) => validateExchange(p.exchange));
     expect(rows).toEqual([null, null]);
   });
 
   it("puts the prompt in input and the answer in output", () => {
-    const first = parseTranscript(lines, false).exchanges[0].contents;
+    const first = parseTranscript(lines).exchanges[0].contents;
     expect(first.input).toBe("prima domanda");
     expect(first.output).toBe("ok");
   });
 
   it("carries the trigger into meta", () => {
-    expect(parseTranscript(lines, false).exchanges[0].exchange.meta).toEqual({ trigger: "human" });
+    expect(parseTranscript(lines).exchanges[0].exchange.meta).toEqual({ trigger: "human" });
   });
 
-  it("a main transcript produces chat exchanges", () => {
-    expect(parseTranscript(lines, false).exchanges[0].exchange.kind).toBe("chat");
+  it("every row a transcript yields is a chat: subtask belongs to a th run", () => {
+    const kinds = parseTranscript(lines).exchanges.map((p) => p.exchange.kind);
+    expect(kinds).toEqual(["chat", "chat"]);
   });
 
-  it("a sidechain produces a subtask attached to the exchange that asked", () => {
-    const side: Line[] = [
-      { type: "user", uuid: ID_C, parentUuid: null, sessionId: "s1", timestamp: T2, agentId: "a99", message: { content: "vai" } },
-      answer({ input_tokens: 1, output_tokens: 1 }),
-    ];
-    const parents = parseTranscript(lines, false).exchanges.map((p) => p.exchange);
-    const parsed = parseTranscript(side, true, { parents }).exchanges[0].exchange;
-    expect(parsed.kind).toBe("subtask");
-    expect(parsed.actor).toBe("agent-a99");
-    expect(parsed.parent).toBe(ID_B);
+  it("the actor is always alfredo: a hat never writes a transcript", () => {
+    expect(parseTranscript(lines).exchanges[0].exchange.actor).toBe("alfredo");
   });
 
   it("drops a prompt with no id: an exchange without an id cannot be written twice", () => {
     const broken: Line[] = [{ type: "user", timestamp: T1, sessionId: "s1", origin: { kind: "human" }, message: { content: "x" } }];
-    expect(parseTranscript(broken, false).exchanges).toEqual([]);
+    expect(parseTranscript(broken).exchanges).toEqual([]);
   });
 });
 
