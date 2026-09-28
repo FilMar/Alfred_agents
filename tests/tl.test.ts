@@ -80,6 +80,15 @@ describe("validateSession and validateContents", () => {
     expect(validateSession({ id: "s1", started: "yesterday" })).toContain("started");
   });
 
+  it("accepts the two harnesses that write transcripts", () => {
+    expect(validateSession({ id: "s1", started: T1, harness: "pi" })).toBeNull();
+    expect(validateSession({ id: "s1", started: T1, harness: "claude" })).toBeNull();
+  });
+
+  it("rejects a harness nobody writes: more likely a typo than a new tool", () => {
+    expect(validateSession({ id: "s1", started: T1, harness: "codex" as "pi" })).toContain("harness");
+  });
+
   it("accepts an empty body: a prompt with no answer is still a row", () => {
     expect(validateContents({ exchange_id: ID_A, input: "", output: "" })).toBeNull();
   });
@@ -242,7 +251,7 @@ describe("claude.parse", () => {
 
   it("reads the session from the first line that carries one", () => {
     expect(claude.parse(lines, { host: "desktop" }).session)
-      .toEqual({ id: "s1", started: T1, host: "desktop", path: "/work" });
+      .toEqual({ id: "s1", started: T1, harness: "claude", host: "desktop", path: "/work" });
   });
 
   it("makes one exchange per prompt", () => {
@@ -260,8 +269,8 @@ describe("claude.parse", () => {
     expect(first.output).toBe("ok");
   });
 
-  it("names the harness and the trigger in meta", () => {
-    expect(claude.parse(lines).exchanges[0].exchange.meta).toEqual({ harness: "claude", trigger: "human" });
+  it("names the trigger in meta, and nothing else it does not have", () => {
+    expect(claude.parse(lines).exchanges[0].exchange.meta).toEqual({ trigger: "human" });
   });
 
   it("every row a transcript yields is a chat: subtask belongs to a th run", () => {
@@ -362,7 +371,7 @@ describe("pi.parse", () => {
 
   it("reads the session from the session record", () => {
     expect(pi.parse(lines, { host: "desktop" }).session)
-      .toEqual({ id: "01a0e953-81b2-776a-8497-a9dadd86438d", started: T1, host: "desktop", path: "/work" });
+      .toEqual({ id: "01a0e953-81b2-776a-8497-a9dadd86438d", started: T1, harness: "pi", host: "desktop", path: "/work" });
   });
 
   it("yields nothing without a session record: no row can name its session", () => {
@@ -376,7 +385,11 @@ describe("pi.parse", () => {
   });
 
   it("keeps the original id in meta, so a row can be traced back", () => {
-    expect(pi.parse(lines).exchanges[0].exchange.meta).toMatchObject({ harness: "pi", source_id: "df9441cf" });
+    expect(pi.parse(lines).exchanges[0].exchange.meta).toMatchObject({ source_id: "df9441cf" });
+  });
+
+  it("does not repeat the harness on every row: the session says it once", () => {
+    expect(pi.parse(lines).exchanges[0].exchange.meta).not.toHaveProperty("harness");
   });
 
   it("records the model, the provider and the cost", () => {
@@ -426,13 +439,39 @@ describe("looksLikePi", () => {
 
 function freshDb() {
   const handle = db.open(":memory:");
-  db.upsertSession(handle, { id: "s1", started: T1, host: "desktop" });
+  db.upsertSession(handle, { id: "s1", started: T1, harness: "claude", host: "desktop" });
   return handle;
 }
 
 describe("db", () => {
   it("writes a session and reads it back", () => {
-    expect(db.listSessions(freshDb())).toEqual([{ id: "s1", started: T1, host: "desktop" }]);
+    expect(db.listSessions(freshDb())).toEqual([{ id: "s1", started: T1, harness: "claude", host: "desktop" }]);
+  });
+
+  it("filters sessions by harness", () => {
+    const handle = freshDb();
+    db.upsertSession(handle, { id: "s2", started: T2, harness: "pi" });
+    expect(db.listSessions(handle, { harness: "pi" }).map((x) => x.id)).toEqual(["s2"]);
+  });
+
+  it("adds the harness column to an archive that predates it, keeping its rows", () => {
+    const handle = db.open(":memory:");
+    handle.exec("DROP TABLE sessions");
+    handle.exec("CREATE TABLE sessions (id TEXT PRIMARY KEY, started TEXT NOT NULL, host TEXT, path TEXT)");
+    handle.exec(`INSERT INTO sessions (id, started) VALUES ('old', '${T1}')`);
+
+    db.migrate(handle);
+
+    expect(db.listSessions(handle)).toEqual([{ id: "old", started: T1 }]);
+  });
+
+  it("a session that predates the column reads back without a harness, not with a null", () => {
+    const handle = db.open(":memory:");
+    handle.exec("DROP TABLE sessions");
+    handle.exec("CREATE TABLE sessions (id TEXT PRIMARY KEY, started TEXT NOT NULL, host TEXT, path TEXT)");
+    handle.exec(`INSERT INTO sessions (id, started) VALUES ('old', '${T1}')`);
+    db.migrate(handle);
+    expect(db.listSessions(handle)[0]).not.toHaveProperty("harness");
   });
 
   it("writing the same exchange twice leaves one row", () => {

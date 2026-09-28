@@ -4,7 +4,7 @@
 import { HttpClient } from "../../tb/src/infra.js";
 import { API_PORT } from "./api.js";
 import type { Contents, Exchange, Session } from "./types.js";
-import type { ExchangeFilters } from "./db.js";
+import type { ExchangeFilters, SessionFilters } from "./db.js";
 
 export const API_URL = process.env.TL_API_URL ?? `http://localhost:${API_PORT}`;
 
@@ -42,8 +42,8 @@ async function putBatched<T>(path: string, rows: T[], perRequest: number): Promi
   return written;
 }
 
-export async function fetchSessions(limit?: number): Promise<Session[]> {
-  return client.request("GET", `/sessions${query({ limit })}`);
+export async function fetchSessions(filters: SessionFilters = {}): Promise<Session[]> {
+  return client.request("GET", `/sessions${query(filters as Record<string, unknown>)}`);
 }
 
 export async function fetchExchanges(filters: ExchangeFilters = {}): Promise<Exchange[]> {

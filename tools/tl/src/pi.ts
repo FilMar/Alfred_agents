@@ -6,12 +6,12 @@
 // still deterministic, which is what keeps a second write a no-op.
 
 import { assert } from "../../tb/src/types.js";
-import type { Exchange, Session } from "./types.js";
+import type { Exchange, Harness, Session } from "./types.js";
 import { exchangeId } from "./types.js";
 import type { ParsedExchange, ParsedTranscript, ParseOptions, Span, Tokens } from "./transcript.js";
 import { joinBody, MAIN_ACTOR, NO_TOKENS, spans, stringify } from "./transcript.js";
 
-export const HARNESS = "pi";
+export const HARNESS: Harness = "pi";
 
 export interface Part {
   type?: string;
@@ -113,6 +113,7 @@ export function sessionOf(lines: Line[], host?: string): Session | null {
   return {
     id: record.id as string,
     started: record.timestamp as string,
+    harness: HARNESS,
     ...(host && { host }),
     ...(record.cwd && { path: record.cwd }),
   };
@@ -148,7 +149,6 @@ function toExchange(span: Span<Line>, session: string): ParsedExchange | null {
     ...modelField(body),
     ...sumTokens(body),
     meta: {
-      harness: HARNESS,
       source_id: opener.id,
       ...(provider && { provider }),
       ...(cost > 0 && { cost_usd: cost }),

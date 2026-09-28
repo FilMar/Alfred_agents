@@ -1,11 +1,11 @@
 // Reader for a Claude Code transcript. Pure: the caller reads the file.
 
 import { assert } from "../../tb/src/types.js";
-import type { Exchange, Session } from "./types.js";
+import type { Exchange, Harness, Session } from "./types.js";
 import type { ParsedExchange, ParsedTranscript, ParseOptions, Span, Tokens } from "./transcript.js";
 import { joinBody, MAIN_ACTOR, NO_TOKENS, spans, stringify } from "./transcript.js";
 
-export const HARNESS = "claude";
+export const HARNESS: Harness = "claude";
 
 export interface Part {
   type?: string;
@@ -103,7 +103,8 @@ function toExchange(span: Span<Line>): ParsedExchange | null {
   const { opener, body } = span;
   if (!opener.uuid || !opener.timestamp || !opener.sessionId) return null;
 
-  const meta: Record<string, unknown> = { harness: HARNESS };
+  // the harness is on the session, which is where a fact constant for its life belongs
+  const meta: Record<string, unknown> = {};
   if (opener.origin?.kind) meta.trigger = opener.origin.kind;
 
   const exchange: Exchange = {
@@ -114,7 +115,7 @@ function toExchange(span: Span<Line>): ParsedExchange | null {
     actor: MAIN_ACTOR,
     ...modelField(body),
     ...sumTokens(body),
-    meta,
+    ...(Object.keys(meta).length > 0 && { meta }),
   };
 
   return {
@@ -138,6 +139,7 @@ function sessionOf(lines: Line[], host?: string): Session | null {
   return {
     id: first.sessionId as string,
     started: first.timestamp as string,
+    harness: HARNESS,
     ...(host && { host }),
     ...(first.cwd && { path: first.cwd }),
   };

@@ -57,7 +57,9 @@ An exchange id is derived from the transcript, not generated, so writing is idem
 | message ids | UUIDs, used as they are | eight hex characters, so the id is derived |
 | a compaction | assistant lines, counted like any answer | a record of its own, counted too |
 
-`pi`'s ids are derived with `exchangeId(session, id)` — SHA256 shaped as a UUID, the same trick as a note id in `tb`. One shape in the archive, still deterministic, so a second write is still a no-op. The original is kept in `meta.source_id`, and every row names its `meta.harness`.
+`pi`'s ids are derived with `exchangeId(session, id)` — SHA256 shaped as a UUID, the same trick as a note id in `tb`. One shape in the archive, still deterministic, so a second write is still a no-op, and the original is kept in `meta.source_id`.
+
+Which tool ran a session is a column on `sessions`, not a field repeated on every row: `tl sessions --harness pi`. See [`memory_session_names_its_harness`](../../.wiki/memory_session_names_its_harness.md).
 
 Every row a transcript yields is `kind: chat`, written by `alfredo`.
 
@@ -68,7 +70,7 @@ Every row a transcript yields is `kind: chat`, written by `alfredo`.
 | command | what it does |
 |---|---|
 | `tl ingest` | reads transcripts, writes sessions, exchanges and contents |
-| `tl sessions` | lists sessions, newest first |
+| `tl sessions` | lists sessions, newest first, `--harness claude\|pi` to pick one |
 | `tl show <exchange>` | one exchange with its full input and output |
 | `tl cost` | sums tokens by session, day or model |
 | `tl pending` | exchanges with `distilled IS NULL`, the distiller's queue |

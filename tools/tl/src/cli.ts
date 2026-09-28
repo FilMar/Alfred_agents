@@ -6,7 +6,7 @@ import { ContractError, errorMessage } from "../../tb/src/types.js";
 import { API_PORT, serveApi } from "./api.js";
 import * as client from "./client.js";
 import { ingestAll, ingestSession, ingestTranscript } from "./ingest.js";
-import { dayOf, sumBy } from "./types.js";
+import { dayOf, HARNESSES, sumBy } from "./types.js";
 import type { Exchange } from "./types.js";
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
@@ -58,9 +58,13 @@ program
   .command("sessions")
   .description("List sessions, newest first")
   .option("--limit <n>", "How many", "20")
+  .option("--harness <name>", `Only one tool: ${HARNESSES.join(" or ")}`)
   .action(async (opts) => {
+    if (opts.harness !== undefined && !(HARNESSES as readonly string[]).includes(opts.harness)) {
+      die(`--harness must be ${HARNESSES.join(" or ")}.`);
+    }
     try {
-      out(await client.fetchSessions(parseInt(opts.limit, 10)));
+      out(await client.fetchSessions({ harness: opts.harness, limit: parseInt(opts.limit, 10) }));
     } catch (err) {
       die(errorMessage(err));
     }

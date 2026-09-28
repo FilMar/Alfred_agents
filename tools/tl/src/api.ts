@@ -6,8 +6,8 @@ import type { Context } from "hono";
 import type { Database } from "bun:sqlite";
 
 import * as db from "./db.js";
-import type { Contents, Exchange, ExchangeKind, Session } from "./types.js";
-import { EXCHANGE_KINDS, TIMESTAMP_SHAPE, validateContents, validateExchange, validateSession } from "./types.js";
+import type { Contents, Exchange, ExchangeKind, Harness, Session } from "./types.js";
+import { EXCHANGE_KINDS, HARNESSES, TIMESTAMP_SHAPE, validateContents, validateExchange, validateSession } from "./types.js";
 
 export const API_PORT = Number(process.env.TL_API_PORT ?? 8790);
 
@@ -15,7 +15,7 @@ const OPENAPI_SPEC = {
   openapi: "3.0.0",
   info: { title: "Third Log (tl)", version: "1.0.0", description: "Archive of work done. CRUD only." },
   paths: {
-    "/sessions": { post: { summary: "Upsert one session or an array of them" }, get: { summary: "List sessions, newest first" } },
+    "/sessions": { post: { summary: "Upsert one session or an array of them" }, get: { summary: "List sessions, newest first, filtered by harness" } },
     "/exchanges": { post: { summary: "Upsert one exchange or an array of them" }, get: { summary: "List exchanges by session, kind, time or distilled" } },
     "/exchanges/{id}": { get: { summary: "One exchange" }, patch: { summary: "Set or clear distilled" } },
     "/contents": { post: { summary: "Upsert one body or an array of them" } },
@@ -42,7 +42,16 @@ export function createApp(handle: Database): Hono {
   app.post("/exchanges", async (c) => write<Exchange>(c, validateExchange, (row) => db.upsertExchange(handle, row)));
   app.post("/contents", async (c) => write<Contents>(c, validateContents, (row) => db.upsertContents(handle, row)));
 
-  app.get("/sessions", (c) => c.json(db.listSessions(handle, intParam(c.req.query("limit")))));
+  app.get("/sessions", (c) => {
+    const harness = c.req.query("harness");
+    if (harness !== undefined && !(HARNESSES as readonly string[]).includes(harness)) {
+      return c.json({ error: `harness must be ${HARNESSES.join(" or ")}` }, 400);
+    }
+    return c.json(db.listSessions(handle, {
+      harness: harness as Harness | undefined,
+      limit: intParam(c.req.query("limit")),
+    }));
+  });
 
   app.get("/exchanges", (c) => {
     const kind = c.req.query("kind");

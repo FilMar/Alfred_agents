@@ -11,6 +11,14 @@ export const EXCHANGE_KINDS = ["chat", "subtask"] as const;
 
 export type ExchangeKind = (typeof EXCHANGE_KINDS)[number];
 
+/**
+ * The tools that write a transcript. A row with an unknown one is far more likely
+ * a bug than a new tool, so the store refuses it: adding a third is one line here.
+ */
+export const HARNESSES = ["claude", "pi"] as const;
+
+export type Harness = (typeof HARNESSES)[number];
+
 /** UUID-shaped, 8-4-4-4-12 lowercase hex. Both transcripts and `tb` ids match it. */
 export const ID_SHAPE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -41,6 +49,8 @@ export interface Session {
   id: string;
   /** ISO 8601 — first record of the session */
   started: string;
+  /** The tool that ran the session. Constant for its whole life, so it lives here */
+  harness?: Harness;
   /** Machine the work happened on */
   host?: string;
   /** Working directory */
@@ -84,6 +94,7 @@ export interface Contents {
 export function validateSession(session: Session): string | null {
   if (!isFilled(session.id)) return "session.id is required";
   if (!TIMESTAMP_SHAPE.test(session.started)) return `session.started is not ISO-8601 UTC: ${session.started}`;
+  if (session.harness !== undefined && !isHarness(session.harness)) return `session.harness is not ${HARNESSES.join(" or ")}: ${session.harness}`;
   return null;
 }
 
@@ -119,6 +130,10 @@ function isFilled(value: unknown): boolean {
 
 function isKind(value: string): value is ExchangeKind {
   return (EXCHANGE_KINDS as readonly string[]).includes(value);
+}
+
+function isHarness(value: string): value is Harness {
+  return (HARNESSES as readonly string[]).includes(value);
 }
 
 function isCount(value: number | undefined): boolean {

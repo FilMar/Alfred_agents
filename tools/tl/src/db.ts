@@ -6,7 +6,7 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
 import { assert } from "../../tb/src/types.js";
-import type { Contents, Exchange, ExchangeKind, Session } from "./types.js";
+import type { Contents, Exchange, ExchangeKind, Harness, Session } from "./types.js";
 import { validateContents, validateExchange, validateSession } from "./types.js";
 
 export const DB_PATH = process.env.TL_DB ?? join(homedir(), ".tl", "tl.db");
@@ -15,6 +15,7 @@ const SCHEMA = `
 CREATE TABLE IF NOT EXISTS sessions (
   id        TEXT PRIMARY KEY,
   started   TEXT NOT NULL,
+  harness   TEXT,
   host      TEXT,
   path      TEXT
 );
@@ -47,7 +48,25 @@ export function open(path: string = DB_PATH): Database {
   db.exec("PRAGMA journal_mode = WAL");
   db.exec("PRAGMA foreign_keys = ON");
   db.exec(SCHEMA);
+  migrate(db);
   return db;
+}
+
+/**
+ * Adds a column an older archive does not have yet. `CREATE TABLE IF NOT EXISTS`
+ * leaves an existing table alone, so a new column needs saying out loud.
+ */
+export function migrate(db: Database): void {
+  const columns = db.query("PRAGMA table_info(sessions)").all() as Array<{ name: string }>;
+  if (!columns.some((c) => c.name === "harness")) {
+    db.exec("ALTER TABLE sessions ADD COLUMN harness TEXT");
+  }
+  assert(hasColumn(db, "sessions", "harness"), "migrate: sessions carries harness");
+}
+
+function hasColumn(db: Database, table: string, column: string): boolean {
+  const columns = db.query(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  return columns.some((c) => c.name === column);
 }
 
 // ─── Write ────────────────────────────────────────────────────────────────────
@@ -56,11 +75,14 @@ export function open(path: string = DB_PATH): Database {
 export function upsertSession(db: Database, session: Session): void {
   assert(validateSession(session) === null, `upsertSession: ${validateSession(session)}`);
   db.query(
-    `INSERT INTO sessions (id, started, host, path) VALUES ($id, $started, $host, $path)
-     ON CONFLICT(id) DO UPDATE SET started = $started, host = $host, path = $path`,
+    `INSERT INTO sessions (id, started, harness, host, path)
+     VALUES ($id, $started, $harness, $host, $path)
+     ON CONFLICT(id) DO UPDATE SET
+       started = $started, harness = $harness, host = $host, path = $path`,
   ).run({
     $id: session.id,
     $started: session.started,
+    $harness: session.harness ?? null,
     $host: session.host ?? null,
     $path: session.path ?? null,
   });
@@ -126,9 +148,20 @@ export interface ExchangeFilters {
 
 const DEFAULT_LIMIT = 100;
 
-export function listSessions(db: Database, limit = DEFAULT_LIMIT): Session[] {
-  const rows = db.query(`SELECT * FROM sessions ORDER BY started DESC LIMIT $limit`)
-    .all({ $limit: limit }) as RawSession[];
+export interface SessionFilters {
+  harness?: Harness;
+  limit?: number;
+}
+
+export function listSessions(db: Database, filters: SessionFilters = {}): Session[] {
+  const params: Record<string, string | number> = { $limit: filters.limit ?? DEFAULT_LIMIT };
+  let clause = "";
+  if (filters.harness !== undefined) {
+    clause = "WHERE harness = $harness";
+    params.$harness = filters.harness;
+  }
+  const rows = db.query(`SELECT * FROM sessions ${clause} ORDER BY started DESC LIMIT $limit`)
+    .all(params) as RawSession[];
   return rows.map(toSession);
 }
 
@@ -168,7 +201,7 @@ export function knownExchangeIds(db: Database, session: string): Set<string> {
 
 // ─── Row mapping ──────────────────────────────────────────────────────────────
 
-type RawSession = { id: string; started: string; host: string | null; path: string | null };
+type RawSession = { id: string; started: string; harness: string | null; host: string | null; path: string | null };
 
 type RawExchange = {
   id: string; session: string; parent: string | null; timestamp: string; kind: string;
@@ -181,6 +214,7 @@ function toSession(row: RawSession): Session {
   return {
     id: row.id,
     started: row.started,
+    ...(row.harness !== null && { harness: row.harness as Harness }),
     ...(row.host !== null && { host: row.host }),
     ...(row.path !== null && { path: row.path }),
   };
