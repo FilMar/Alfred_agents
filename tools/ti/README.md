@@ -31,7 +31,7 @@ Reuses `tools/tb/src/infra.ts` as a library (`HttpClient`, `QDRANT_URL`, `OLLAMA
 
 - Bun + TypeScript, same as `tb`/`th`.
 - Qdrant (vector storage, collection `pi_identity`) — reuses the same instance as `tb`, remote on the Rasp.
-- Ollama (`nomic-embed-text` embedding) — same instance as `tb`.
+- Ollama (`nomic-embed-text-v2-moe` embedding, `search_document:` on write and `search_query:` on search) — same instance as `tb`.
 - `commander` for the CLI, same as `tb`/`th`.
 
 ## Development

@@ -21,9 +21,9 @@ Quattro tipi, un punto d'ingresso, un giudice, un log che basta a sé.
 
 L'identità sta in due metà che non si mescolano: descrittiva in `tb` col campo `about`, prescrittiva in `ti` come `if`→`do`. Vedi `.wiki/memory_identity_splits_descriptive_prescriptive`.
 
-## Diagnosi misurata (2026-09-28)
+## Diagnosi misurata (2026-09-28, prima della Fase 0)
 
-Corpus: **737 note** in `third-brain`, **54 regole** in `pi_identity`.
+Corpus: **737 note** in `third-brain`, **54 regole** in `pi_identity`. A fine giornata, dopo Platone e Mosè: 747 e 56. Ogni riga qui sotto si riproduce con `scripts/tb_corpus_report.py`.
 
 | Misura | Valore | Cosa dice |
 |---|---|---|
@@ -85,63 +85,128 @@ Due vincoli di onestà da non dimenticare in implementazione:
 
 ## Le fasi
 
-### Fase 0 — Indice e schema
+### Fase 0 — Indice e schema — **fatta** (2026-09-28)
 
-Quattro cose in una sola ricostruzione, perché ricostruire l'indice si paga una volta.
+Una sola ricostruzione, quattro cose dentro. Tutto reversibile: le collection v1.5
+sono ancora sul server e il ritorno è uno spostamento di alias.
 
-**Il modello.** Si passa a `nomic-embed-text-v2-moe` (768 dimensioni, Matryoshka fino a 256, ~100 lingue). Il corpus è interamente in italiano e l'attuale `nomic-embed-text:latest` (137M, v1.5) è addestrato in inglese: è la ragione del cambio. Il limite di 512 token non morde — misurato su `why+what`: mediana 505 caratteri, p99 1007, massimo 1312.
+**L'alias.** `third-brain` e `pi_identity` sono alias. Le collection reali portano
+modello e dimensione nel nome: `*__nomic-v1.5-768` (i vettori originali, intatti) e
+`*__v2moe-768` (quelli in uso). Verificato prima di toccare i dati: Qdrant risolve
+un alias su *ogni* endpoint che `tb` e `ti` usano — GET della collection, creazione
+degli indici di payload, upsert, query, scroll, e anche le snapshot di Clio, che
+tornano col nome della collection reale. Nessun chiamante è cambiato.
 
-**I prefissi.** `search_document:` in scrittura, `search_query:` in ricerca, in `tb` e in `ti` (che riusa `infra.ts`). Obbligatori per entrambi i modelli Nomic: senza, confronti vettori prodotti in un modo per cui il modello non è stato addestrato.
+Un dettaglio trovato con la sonda: `DELETE /collections/<nome-alias>` risponde 200 e
+**non cancella niente**. Un alias fa da scudo anche contro la cancellazione.
 
-**L'alias.** `COLLECTION` diventa un alias; la collection reale porta modello e dimensione nel nome. Ricetta verificata end-to-end, senza re-embed, in `.wiki/memory_alias_makes_migration_reversible`:
+**La pistola disinnescata.** `ensureCollection()` non cancella più la collection
+quando manca la configurazione sparse: solleva un errore che dice cosa fare.
 
-1. Snapshot con Clio.
-2. Crea `third-brain__nomic-v1.5-768` con la stessa configurazione (dense + sparse).
-3. Copia i 737 punti con `scroll(with_vector=true)` -> `upsert`: dense, sparse e payload sopravvivono identici.
-4. Verifica: stesso conteggio, cinque note a campione identiche all'originale.
-5. Cancella `third-brain` — un alias non può avere il nome di una collection esistente (HTTP 409).
-6. Crea l'alias `third-brain` -> `third-brain__nomic-v1.5-768`.
+**Il modello.** `nomic-embed-text-v2-moe`, con `search_document:` in scrittura e
+`search_query:` in ricerca. `embed()` è diventato `embedDocument()` e `embedQuery()`:
+un modello addestrato su due compiti che li distingue dal prefisso non può avere una
+sola funzione che li serve entrambi.
 
-Da qui la v1.5 resta viva come riferimento e come rollback: `third-brain__v2moe-768` si costruisce a parte e il passaggio è uno spostamento di alias.
+Confronto dense-only, 747 note, 120 parafrasi italiane a cui è vietato riusare le
+parole rare della nota (`scripts/data/paraphrases.json`, generate una volta e
+committate; 8 su 120 conservano una parola rara dopo un tentativo di riscrittura):
 
-**Prerequisito non negoziabile:** `ensureCollection()` (`tools/tb/src/qdrant.ts`, righe 69-92) *cancella* la collection se manca `sparse_vectors`. Va trasformato in un errore rumoroso **prima** di qualsiasi migrazione.
+| misura | v1.5 senza prefisso | v2-moe con prefisso |
+|---|---|---|
+| recall@1 | 0.233 | **0.650** |
+| MRR@10 | 0.301 | **0.727** |
+| nota fuori dai primi 10 | 64/120 | **16/120** |
+| ref-recall@10 | 0.246 | **0.345** |
+| distanza query vera / fuori tema | 0.085 | **0.293** |
 
-**I campi nuovi.** Chiavi in inglese come le esistenti, valori in italiano come `kind`:
+L'ultima riga è tutto il problema in un numero: v1.5 dava 0.662 a una query sulla
+carbonara contro 0.747 a una query vera. Tutti i punteggi stavano intorno a 0.7, e
+con quella compressione nessuna soglia poteva separare niente. Il ref-recall è
+sbilanciato **a favore** di v1.5 — quei link sono stati scritti guardando i suoi
+vicini — e v2 vince comunque.
 
-| Campo | Valore alla migrazione |
-|---|---|
-| `embed_model` | il modello che ha prodotto il vettore |
-| `status` | `promossa` per tutte le 737 esistenti; `provvisoria` sarà il default delle nuove |
-| `superseded_by` | `null` |
-| `about` | `mondo` per tutte le esistenti; si correggerà a mano dove è falso, non si indovina in massa |
-| `updated_at` | uguale a `when` alla migrazione |
-| `refs[].origin` | `umano` per tutti i ref esistenti: sono stati scritti a mano |
-| `source_raw` | vuoto sulle vecchie, obbligatorio sulle nuove |
-| `source_event` | `null` sulle vecchie; sulle nuove lo scambio `tl` da cui nascono |
+Costo: 747 embed in 9 minuti e 23 secondi, cioè 0.75 s per nota. È il prezzo di ogni
+futuro cambio di modello, ed è basso abbastanza da non essere un argomento.
 
-Nella stessa passata si normalizza il debito: 24 note con `refs` duplicati, 1 self-ref, 1 payload senza campo `id`, **11 archi che puntano a note inesistenti**. È riparazione, non cancellazione.
+**Le soglie, misurate invece che scelte.** Sotto v2 una risposta giusta sta a 0.43
+nel caso peggiore, una query fuori tema non supera 0.25, e la fascia tra le due è
+vuota. La curva completa è in `scripts/reports/fase0_threshold.json`: il ginocchio
+di precisione è a 0.65, dove la nota giusta è prima nel 95.5% dei casi ma passa solo
+il 18% delle query.
 
-`pi_identity` segue la stessa meccanica (alias, prefissi, `embed_model`). I campi di uso ed esito delle regole restano Fase 5.
+Lo stesso numero, 0.6, era sbagliato in due direzioni opposte: troppo alto per il
+recupero di christopher, troppo basso per il dedupe di mosè. Sotto v1.5 un unico
+valore faceva due lavori diversi perché tutti i punteggi erano indistinguibili.
 
-**La misura, senza giudizi umani.** Tutto in italiano: il cross-lingua non si misura perché non lo usi.
+| consumatore | prima | ora | perché |
+|---|---|---|---|
+| `skills/christopher` | 0.6 | 0.35 | il recupero deliberato vuole portata, a giudicare ci pensa l'agente |
+| `skills/mose` | 0.6 | 0.5 | il dedupe vuole candidati da valutare, non verdetti |
+| hook `extensions/tb_ti/claude.sh` | 0.8 | 0.5 | vedi sotto |
 
-- **Auto-recupero da parafrasi** — il discriminante. 120 note a campione, una riformulazione italiana del `what` generata una volta e committata, con divieto di riusare i nomi distintivi. Metriche `recall@1` e `MRR@10`: posizioni, non punteggi.
-- **Ref-recall@10** — gratis: i `refs` scritti a mano sono giudizi di pertinenza già pagati. Sbilanciato a favore di v1.5, quindi se v2 vince comunque il risultato è solido.
-- **Controllo** — una query volutamente irrilevante deve restare visibilmente sotto (regola `ti` esistente).
-- Confronto in **dense-only** sulle due collection: lo sparse è indipendente dal modello.
+**Il hook era muto.** A 0.8 non si accendeva su nessuno di otto prompt reali, e
+**nemmeno sotto v1.5**: è stato silenzioso da sempre. È la ragione principale per cui
+545 note su 747 non sono mai state colpite — non le note sono inutili, è
+l'iniezione automatica che non è mai partita. A 0.5 si accende sul prompt giusto
+(regola ritchie su "stai per scrivere codice di produzione", nota SQLite su "esiste
+il tipo datetime?") e tace sulla potatura delle rose.
 
-**Finita quando:** l'alias `third-brain` punta alla collection v2, la v1.5 esiste ancora, il confronto è committato con i numeri di entrambe, e `tb search` risponde come prima o meglio.
+**I campi nuovi.** Su tutte le 747: `embed_model`, `status: promossa`, `about: mondo`,
+`updated_at = when`, `source_raw` vuoto, e `origin: umano` su ogni ref. Le note nuove
+nascono uguali. Nessuno li legge ancora.
 
-**Fuori da questa fase:** altri modelli candidati (`bge-m3`, `qwen3-embedding`) — l'armatura di misura li accoglie quando vorrai. E nessun comportamento nuovo: i campi nascono, la logica che li legge viene dopo.
+`superseded_by` e `source_event` **non esistono**: Qdrant scarta una chiave di payload
+il cui valore è `null`, quindi su una nota vecchia non possono stare. Qui l'assenza è
+come si scrive `null`. Torneranno quando qualcosa scriverà un valore vero — e questo
+chiude metà della decisione aperta numero 3.
+
+**Il debito riparato, e una sorpresa.** Gli 11 archi che puntavano a note inesistenti
+**non puntavano a note cancellate**: tutti e undici si risolvono in modo univoco sui
+primi 8 caratteri esadecimali dell'id. Sono id troncati o imbottiti di zeri — qualcuno
+ha copiato l'id corto che la CLI mostra. Quindi sono stati riparati, non buttati: il
+grafo ci guadagna 11 archi invece di perderli. Resta un difetto d'uso da chiudere:
+**`tb` mostra id corti e accetta solo id lunghi.**
+
+Nella stessa passata: 26 ref duplicati collassati, 1 self-ref rimosso, 1 payload senza
+`id` riempito, e `backrefs` **ricalcolato da zero** — era dato derivato e non tornava in
+nessuna delle due direzioni (18 ref senza backref, 13 backref senza ref, di cui 7 verso
+note inesistenti). Ora 1134 archi in entrambi i sensi. Ogni singola modifica è in
+`scripts/reports/fase0_repair.json`.
+
+**Gli strumenti che restano.** `scripts/`, solo stdlib, nessuna dipendenza:
+`qdrant_clone.py` (copia una collection con vettori, payload e indici),
+`qdrant_alias_point.py` (sposta un alias, e cancella una collection che occupa quel
+nome solo dopo aver dimostrato che è già copiata), `tb_corpus_report.py` (riproduce
+ogni numero di questa roadmap con un comando), `tb_fase0_fields.py` (la migrazione),
+`tb_reembed.py` (re-embed in una collection nuova), `tb_paraphrase_set.py`,
+`tb_benchmark.py`, `tb_threshold.py`.
+
+**Fuori da questa fase:** altri modelli candidati (`bge-m3`, `qwen3-embedding`) —
+l'armatura di misura li accoglie quando vorrai, `tb_reembed.py` + `tb_benchmark.py` e
+sono due comandi.
+
+**Conseguenze da verificare, non toccate.**
+- Il modello passa da 137M a 475M parametri. `.wiki/memory_tb_ti_on_rasp` argomentava
+  la fattibilità su Pi 5 con la taglia vecchia: se Ollama gira sul Pi, il numero va
+  rimisurato.
+- Il hook chiama `tb search --depth 1`: i correlati arrivano con `score: null` e
+  `--min-score` **non li filtra**, perché la soglia agisce sulla ricerca e il traversal
+  aggiunge dopo. La soglia nuova taglia i diretti e lascia passare i correlati. È
+  esattamente la Fase 1, ora con un motivo in più.
+- La suite `th` scrive fixture in `.th/members/` del progetto e i suoi 8 test falliscono
+  alla seconda esecuzione per collisione con la propria spazzatura. Preesistente, non
+  toccato.
 
 ### Fase 1 — Ranking e telemetria dei correlati
 
 Venti righe, e sono il giudice di tutto il resto. Prima di `tl` per costo, non per importanza.
 
-- **Score sui correlati**: una nota raggiunta via `refs` è valutata col coseno contro la query, non lasciata a `score: null`. Diventa ordinabile e tagliabile con `min_score`.
+- **Score sui correlati**: una nota raggiunta via `refs` è valutata col coseno contro la query, non lasciata a `score: null`. Diventa ordinabile e tagliabile con `min_score`. La Fase 0 ha reso il problema più stretto: `--min-score` taglia i diretti e lascia passare i correlati, perché la soglia agisce sulla ricerca e il traversal aggiunge dopo. Oggi il hook inietta 2 note sopra soglia e una dozzina senza.
 - **`hits_related`**, campo separato: `recordHits` conta anche i correlati. Da qui in poi "l'agente usa i ref?" è una query, non un'analisi.
 - **Traversal dei `backrefs`** oltre ai `refs`: metà degli archi scritti oggi non viene percorsa.
 - `--min-score` nativo su `ti search` (debito già segnalato in `.wiki/memory_ti_context_action_rules`).
+- **`tb` accetta l'id corto che lui stesso stampa.** Gli 11 archi rotti trovati in Fase 0 erano id troncati a 8 caratteri: la CLI mostra la forma corta e la API ne pretende una lunga. Si risolve per prefisso, come fa `git`, e la classe di errore si chiude alla fonte invece di essere riparata a posteriori.
 
 **Finita quando:** una ricerca `depth 1` restituisce correlate ordinate e tagliate, e dopo una settimana `hits_related` ha numeri diversi da zero.
 
@@ -268,18 +333,22 @@ Nessuna delle fasi precedenti dipende da queste.
 
 1. **Togliere la conferma a Mosè è una modifica al `CLAUDE.md` globale**, non al codice. Decisione di Filippo.
 2. Soglia di duplicazione in scrittura (Fase 3): 0.9 è conservativo, 0.85 toccherebbe 54 note su 737. Da tarare su dati.
-3. Nome e forma del campo di stato in `tb`: `status` separato da `superseded_by`, oppure un unico campo di ciclo di vita. La Fase 0 scrive entrambi con i default; la forma definitiva si decide quando la Fase 4 li legge.
+3. Nome e forma del campo di stato in `tb`: `status` separato da `superseded_by`, oppure un unico campo di ciclo di vita. Mezza decisione l'ha chiusa Qdrant: un payload con valore `null` non esiste, quindi `superseded_by` non è scrivibile come default e la Fase 0 ha scritto solo `status`. Resta da decidere se la Fase 4 aggiunge un campo o cambia `status`.
 4. Se Hindsight diventi il motore di `tl` invece di scriverlo: decidibile solo con uno spike che misuri latenza e qualità di estrazione con modello locale.
 5. Quanti giorni prima che una `provvisoria` decada. Non si indovina: si guarda la distribuzione di `hits_related` dopo la Fase 1.
 
 ## Debito segnalato, non toccato
 
-- 24 note con `refs` duplicati, 1 con self-ref, 1 payload senza campo `id`, 11 archi verso note inesistenti.
+- ~~24 note con `refs` duplicati, 1 con self-ref, 1 payload senza campo `id`, 11 archi verso note inesistenti~~ — riparato in Fase 0.
+- ~~`ensureCollection()` cancella la collection quando la configurazione non combacia~~ — chiuso in Fase 0.
 - Il frontmatter dei membri `th` ha un campo `skills` che il tipo `Member` non contempla.
-- `ensureCollection()` cancella la collection quando la configurazione non combacia.
+- La suite `th` scrive fixture in `.th/members/` del progetto e fallisce alla seconda esecuzione per collisione con la propria spazzatura: 8 test su 125.
+- `tb` stampa id corti e accetta solo id lunghi (vedi Fase 1).
 - `tb graph` si dismette quando `third_os` copre la lettura (già in `ROADMAP.md`).
 
 ## Pagine `.wiki/` — stato
+
+Scritte a fine Fase 0: `memory_embedding_model_follows_the_corpus_language`, `memory_score_cutoffs_belong_to_the_model`, `memory_absence_is_how_qdrant_stores_null`, `wiki_decision_is_written_when_the_design_ends`.
 
 Scritte il 2026-09-28: `memory_human_gate_is_the_bottleneck`, `memory_refs_carry_non_semantic_reach`, `memory_related_results_need_scores`, `memory_graph_engine_deferred_not_needed`, `memory_keep_raw_source_for_reingest`, `memory_alias_makes_migration_reversible`, `memory_coala_four_types_map_to_pi`, `memory_tl_work_archive_not_event_log` (supera `memory_tl_unified_event_log`), `memory_wiki_is_the_project_notebook`, `memory_identity_splits_descriptive_prescriptive`.
 
