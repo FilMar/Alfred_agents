@@ -145,9 +145,27 @@ c'era modo di accorgersene: una ricerca che non trova niente non lascia errori.
 Le 6 che ancora sfuggono sono note di comunicazione e persuasione molto astratte,
 dove anche la parafrasi italiana è una domanda diversa.
 
-Resta una decisione tua: le 22 note vanno tradotte? `what` e `why` sono immutabili,
-quindi non è una riscrittura ma un supersede, cioè Fase 4. Con v2 sono raggiungibili
-per i due terzi, quindi non è urgente.
+**Tradotte, lo stesso giorno.** Non con un supersede: un ref punta per **id**, e l'id
+è `SHA256(what + ":" + when)`, quindi una nota nuova avrebbe un id nuovo e avrebbe
+orfanato ogni arco in entrata. Quindi riscrittura sul posto, id invariato — che con
+`upsert` è letteralmente la cancellazione e la ricreazione, in un'operazione sola.
+`when`, `kind`, `tags`, `refs`, `backrefs` e `hits` restano; l'inglese originale
+finisce in `source_raw`, che esiste esattamente per questo, e `updated_at` trova il
+suo primo scrittore vero.
+
+Le stesse 22 query italiane, sulla stessa collection, prima e dopo:
+
+| | v1.5 | v2, testo inglese | v2, testo tradotto |
+|---|---|---|---|
+| nei primi 10 | 0 / 22 | 16 / 22 | **20 / 22** |
+| al primo posto | 0 | 5 | **10** |
+
+Il corpus è ora italiano al 100%: 747 su 747. Tradotte a mano, non da un modello
+locale: 22 note sono poche e il testo resta nel Third Brain per sempre. Le traduzioni
+sono committate in `scripts/data/translations_it.json`, quindi rivedibili riga per
+riga in git, e `scripts/tb_retranslate.ts` passa dal vero percorso di scrittura di
+`tb` — così il vettore sparso lo ricostruisce il codice di produzione e non una
+reimplementazione dell'hash.
 
 Costo: 747 embed in 9 minuti e 23 secondi, cioè 0.75 s per nota. È il prezzo di ogni
 futuro cambio di modello, ed è basso abbastanza da non essere un argomento.
