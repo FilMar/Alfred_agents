@@ -283,20 +283,44 @@ Venti righe previste, cinquanta scritte. Due punti del piano li hanno smentiti l
 - `RELATED_LIMIT = 25` non morde quasi mai (la media è 23.1). È un limite di sicurezza, non una scelta di qualità: il numero giusto si vedrà da `hits_related`.
 - **Il rasp ha un checkout suo di `pi`.** Due copie del codice, un solo store: finché il branch non è su `master` e il rasp non ha fatto `git pull`, un `tb` lanciato là gira in versione pre-Fase 1. Non corrompe niente — i campi nuovi sono opzionali e il codice vecchio non li scrive — ma per quelle chiamate `hits_related` resta fermo e i correlati tornano con `score: null`. Vale per ogni chiamata automatica dal nodo: cron, task dell'orchestratore, `th`. Il `git pull` sul rasp fa parte del merge, non del deploy successivo.
 
-### Fase 2 — `tl`
+### Fase 2 — `tl` — **scritta** (2026-09-28), non ancora in produzione
 
 Lo strato episodico. Produce esperienze e archi senza far leggere niente a nessuno.
 
-- Schema come in `.wiki/memory_tl_work_archive_not_event_log`: tre tabelle, `sessions`, `exchanges`, `contents`. `kind` ha due soli valori, `chat` e `subtask`.
-- **Ingestione degli scambi** via hook di fine turno: una riga per scambio, `input` e `output` in `contents`, spediti insieme ai file di `tool-results/`. I token si leggono dal transcript stesso (`input_tokens`, `output_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens`, `model`): nessuna dipendenza dall'harness.
-- Niente compressione e niente indici, per ora. Un log che devi decomprimere non lo guardi, e a 6.000 righe al mese SQLite scansiona tutto senza che si noti.
-- `distilled` (timestamp, `NULL` se mai) è la coda del distillatore: `WHERE distilled IS NULL`. È l'unico campo mutabile, ed è contabilità sulla pipeline, non storia.
-- Timestamp in TEXT, ISO-8601 UTC, sempre con la `Z` e a larghezza fissa. SQLite non ha un tipo datetime e non valida niente: il formato è una regola di chi scrive, e una riga scritta in un altro modo si ordina nel posto sbagliato senza mai dare errore.
-- **`tl` entra nei backup di Clio.** Contiene l'unica copia dei transcript, che altrimenti sparirebbero in 30 giorni.
+**Fatto**
 
-Gli scambi `subtask` lanciati da `th` arrivano **dopo** la Fase 6, così nascono con `actor = cappello` e non si riscrivono. La Fase 2 non li aspetta: le chat sono il 95% e non dipendono da `th`.
+- **Tre tabelle** come in `.wiki/memory_tl_work_archive_not_event_log`, senza modifiche. Niente indici, niente compressione, `distilled` unico campo mutabile.
+- **Un servizio CRUD davanti al file**, perche SQLite e un file e non un server: il file non esce dal rasp, la logica sta nel CLI. L'API valida comunque ogni riga che scrive — `kind`, timestamp ISO-8601 a larghezza fissa, campi obbligatori, chiavi esterne — con **un solo validatore in `types.ts` usato dalle due parti**.
+- **Ingestione idempotente**: l'id di un exchange viene dal transcript, non da un generatore. Il hook di fine turno passa il path o il session id, gira staccato ed esce sempre 0. `tl ingest --all` riempie i buchi, quindi un exchange perso e in ritardo, e il backfill e lo stesso comando lanciato una volta.
+- **Aggregazioni nel CLI**: `tl cost --by day|session|model`, `tl pending`, `tl show`, `tl sessions`.
+- **Unita systemd** (`tools/tl/deploy/tl.service`), processo nativo come l'orchestratore: un file SQLite vuole il disco dell'host.
 
-**Finita quando:** una settimana di lavoro è interrogabile per sessione, macchina e costo con un `SELECT *` leggibile, e da uno scambio si risale al testo completo di cosa è stato chiesto e fatto.
+**Trovato guardando i transcript veri**
+
+- Un exchange si apre su un messaggio utente che porta `origin`. I 276 record che non ce l'hanno sono `/compact`, avvisi di interruzione e iniezioni di skill: **non e deriva di versione**, esistono in tutte. I loro token non si perdono, finiscono nell'exchange precedente.
+- **I sidechain stanno in file separati**, `<sessione>/subagents/agent-*.jsonl`, e il loro unico record senza `parentUuid` e il prompt del task. Quindi `kind: subtask` e il campo `parent` si riempiono **adesso**, non dopo la Fase 6: il parent e l'exchange che era in corso quando il subagente e partito. Il rinvio della Fase 6 riguarda i run di `th`, che sono un'altra sorgente.
+
+**Misure** (47 transcript, un mese di lavoro)
+
+| | valore |
+|---|---|
+| sessioni / exchange | 43 / 979 |
+| tempo del backfill completo | 1,26 s |
+| archivio contro transcript | 23 MB contro 102 MB |
+| secondo giro sugli stessi file | 0 scritture, 979 note |
+| testo recuperato da un exchange | 97.000 caratteri |
+
+**Verifica**: 71 test nuovi, sei mutazioni del codice provate una per una — **una e sopravvissuta** e ha smascherato un test che non provava niente (usava una riga senza `usage` per dimostrare che le righe non-risposta vengono ignorate). Corretto. `SELECT *` leggibile per giorno, sessione, macchina e costo. Typecheck ora copre `tb`, `ti` e `tl`: `ti` aveva un `tsconfig.json` che nessuno script eseguiva.
+
+**Resta da fare, ed e deploy, non codice**
+
+1. Merge del branch e `git pull` sul rasp.
+2. `systemctl enable --now tl` sul rasp, e il symlink `tl` sul PATH di ogni macchina che lavora (fatto sul desktop).
+3. Registrare il hook `Stop` in `~/.claude/settings.json` — **dopo** che il servizio risponde, altrimenti ogni turno lancia un `tl` che fallisce in silenzio.
+4. Backfill: `tl ingest --all` una volta, da ogni macchina.
+5. `tl` nei backup di Clio.
+
+**Finita quando:** una settimana di lavoro e interrogabile per sessione, macchina e costo con un `SELECT *` leggibile, e da un exchange si risale al testo completo. Provato in locale su un mese; vero in produzione quando i cinque punti sopra sono chiusi.
 
 ### Fase 3 — Il distillatore
 
