@@ -1,30 +1,38 @@
 # Roadmap
 
+Design: [`memory_tl_work_archive_not_event_log`](../../.wiki/memory_tl_work_archive_not_event_log.md). Plan: `ROADMAP_MEMORIA.md`, Fase 2.
+
 ## Foundation
-- [ ] Define `Event` type (`id`, `timestamp`, `source`, `actor`, `context`, `outcome`, `tags`, `metadata`)
-- [ ] SQLite schema + migration: single `events` table, `metadata` and `tags` stored as JSON text columns, queried via `json_extract`/`json_each`
-- [ ] `TL_PORT` / `TL_DB` env vars (defaults following `ORCH_PORT`/`ORCH_DIR` convention)
+- [ ] `types.ts` — the row types, the validator shared by both sides, the exchange id derived from the transcript
+- [ ] `db.ts` — `bun:sqlite`, three tables, foreign keys on, no indexes
+- [ ] `TL_DB` (the file on the Rasp), `TL_API_PORT` (8790), `TL_API_URL` (where the CLI looks)
 
-## REST API
-- [ ] `POST /event` — validate envelope, insert, return the generated `id`
-- [ ] `GET /events` — filters: `source`, `actor`, `tags` (any-match), `since`/`until`, `metadata` (json_extract-based filter expression)
-- [ ] Basic input validation (reject malformed envelope with 400, no crash on bad `metadata` JSON)
+## API (CRUD only)
+- [ ] `POST /sessions`, `POST /exchanges`, `POST /contents` — upsert by id, validate before write
+- [ ] `GET /sessions`, `GET /exchanges` — filters: `session`, `kind`, `since`, `until`, `distilled`, `limit`
+- [ ] `GET /contents/:id` — one body, never listed in bulk
+- [ ] `PATCH /exchanges/:id` — `distilled` only. Nothing else is mutable
+- [ ] `GET /openapi.json` — static, hand written, like `tb` and `ti`
 
-## Client integration
-- [ ] Remove `th.db` (SQLite) from `th` entirely — no local state left
-- [ ] `th` posts one event per `th run` (start/end or just completion — decide at implementation) to `tl`, fire-and-forget: short timeout (~1-2s), zero retry, failures logged to stderr and swallowed, never block or fail the run
-- [ ] `th history` / `th stats` — leave as empty/stub commands for now (not rewired to `tl` yet)
-- [ ] `tb`: post an event on `add`/`update` only, not on `search` (read volume is orders of magnitude higher and not a procedurally useful "event")
-- [ ] `ti`: post an event on `add`/`append-do` only, not on `search` — same reasoning as `tb`
+## CLI (all the logic)
+- [ ] `tl ingest --transcript | --session | --all` — parse, group into exchanges, upsert
+- [ ] `tl sessions`, `tl show <exchange>`, `tl cost`, `tl pending`
+- [ ] `tl serve` — runs the API, for the Rasp
+
+## Ingestion
+- [ ] End-of-turn hook: hands over the transcript path or the session id, fire-and-forget, never blocks a turn
+- [ ] Backfill of what is still on disk — the same `--all` run once
 
 ## Testing
-- [ ] `tests/tl.test.ts` — mocked SQLite or in-memory DB, no dependency on a live server for unit tests
-- [ ] Integration test: `POST /event` then `GET /events` round-trip with filters
+- [ ] `tests/tl.test.ts` — the parser on a committed transcript fixture, the validator, the id derivation, the sums. In-memory SQLite, no live server
 
 ## Deployment
-- [ ] `deploy/tl.service` systemd unit on the Rasp (native process, same rationale as `tools/orchestrator/deploy/orchestrator.service` — filesystem-backed SQLite wants the host disk directly)
-- [ ] No new auth: same Tailscale-only perimeter as the rest of the Rasp services
+- [ ] `deploy/tl.service` systemd unit on the Rasp, native process like `tools/orchestrator/deploy/orchestrator.service`: a SQLite file wants the host disk
+- [ ] No auth: the same Tailscale-only perimeter as the rest of the node
+- [ ] Into the Clio backups
 
-## Explicitly deferred
-- Skill invocation logging via a Claude Code hook — investigate what hook fires on Skill use, design later
-- Storing full dialogue/conversation content — separate concern, not this module's scope
+## Deferred
+- `th` subtasks as rows — after Fase 6, so they are born with `actor = hat` and are never rewritten
+- Indexes, and any compression of `contents` — added when a query is slow, not before
+- Hindsight as the engine instead of writing the distiller — a Fase 3 decision, and it needs a spike first
+- Skill invocations as rows — first find out which hook fires on a skill
