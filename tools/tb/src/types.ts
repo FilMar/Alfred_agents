@@ -99,8 +99,6 @@ export interface Note {
   about?: string;
   /** ISO 8601 — last change to any mutable field */
   updated_at?: string;
-  /** Raw text the note was extracted from, so it can be re-extracted */
-  source_raw?: string;
 }
 
 // ─── Search ──────────────────────────────────────────────────────────────────

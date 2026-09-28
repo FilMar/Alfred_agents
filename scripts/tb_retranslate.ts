@@ -1,6 +1,6 @@
 // One-off: replace the text of a note with its translation, same id.
 // A ref points by id, so rewriting the text in place keeps every edge. The English
-// original moves into source_raw, which exists so a note can be re-extracted.
+// original stays in the translation file, under git, not in the note.
 import { readFileSync } from "node:fs";
 import { embedDocument } from "../tools/tb/src/infra.js";
 import { getByIds, upsert } from "../tools/tb/src/qdrant.js";
@@ -18,7 +18,6 @@ function translated(note: Note, row: Row, now: string): Note {
     ...note,
     why: row.why,
     what: row.what,
-    source_raw: noteToText(note),
     updated_at: now,
   };
 }

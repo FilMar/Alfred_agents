@@ -12,7 +12,7 @@ Repairs, in one pass over every note:
 - a payload without `id` gets the point id.
 
 Then writes the fields the later phases read: `embed_model`, `status`,
-`superseded_by`, `about`, `updated_at`, `source_raw`, `source_event`, and
+`superseded_by`, `about`, `updated_at`, `session`, and
 `origin` on every ref.
 
 Every change lands in a JSON report next to this script. Dry run by default.
@@ -96,7 +96,6 @@ def new_fields(point, refs, backrefs):
         "superseded_by": None,
         "about": "mondo",
         "updated_at": note["when"],
-        "source_raw": "",
         "source_event": None,
     }
     if not note.get("id"):

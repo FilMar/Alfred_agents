@@ -80,7 +80,7 @@ def main(collection):
     print(f"source          {sum(1 for n in notes if n.get('source'))} / {len(notes)}")
 
     for field in ("embed_model", "status", "about", "updated_at", "superseded_by",
-                  "source_raw", "source_event"):
+                  "session"):
         present = sum(1 for n in notes if field in n)
         print(f"{field:<15} present on {present} / {len(notes)}")
 

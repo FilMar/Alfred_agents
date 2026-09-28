@@ -32,11 +32,11 @@ updated: 2026-09-28
 | [memory_refs_carry_non_semantic_reach](memory_refs_carry_non_semantic_reach) | 74% of refs are not redundant with the vectors |
 | [memory_related_results_need_scores](memory_related_results_need_scores) | Score related hits, count them, walk backrefs |
 | [memory_graph_engine_deferred_not_needed](memory_graph_engine_deferred_not_needed) | No graph DB; the threshold to revisit, written down |
-| [memory_keep_raw_source_for_reingest](memory_keep_raw_source_for_reingest) | Notes keep their raw source so a later pass can redo it |
 | [memory_alias_makes_migration_reversible](memory_alias_makes_migration_reversible) | Collection per model behind an alias; atomic swap |
 | [memory_embedding_model_follows_the_corpus_language](memory_embedding_model_follows_the_corpus_language) | An Italian corpus needs a multilingual model, with the task prefixes |
 | [memory_score_cutoffs_belong_to_the_model](memory_score_cutoffs_belong_to_the_model) | min-score is measured per model, and the hook was silent without it |
 | [memory_absence_is_how_qdrant_stores_null](memory_absence_is_how_qdrant_stores_null) | No field whose only value is null: Qdrant drops the key |
+| [memory_raw_text_lives_in_the_archive_not_the_note](memory_raw_text_lives_in_the_archive_not_the_note) | No source_raw on a note: the archive holds the text, the note holds a pointer |
 | [orchestrator_minimal_rest_surface](orchestrator_minimal_rest_surface) | Four REST endpoints, one entry point |
 | [orchestrator_run_task_matrix_only](orchestrator_run_task_matrix_only) | Ad-hoc execution only via Matrix |
 | [orchestrator_adversarial_audit_static](orchestrator_adversarial_audit_static) | Audit at ingestion; static parsing everywhere |

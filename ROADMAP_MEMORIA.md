@@ -149,9 +149,10 @@ dove anche la parafrasi italiana è una domanda diversa.
 è `SHA256(what + ":" + when)`, quindi una nota nuova avrebbe un id nuovo e avrebbe
 orfanato ogni arco in entrata. Quindi riscrittura sul posto, id invariato — che con
 `upsert` è letteralmente la cancellazione e la ricreazione, in un'operazione sola.
-`when`, `kind`, `tags`, `refs`, `backrefs` e `hits` restano; l'inglese originale
-finisce in `source_raw`, che esiste esattamente per questo, e `updated_at` trova il
-suo primo scrittore vero.
+`when`, `kind`, `tags`, `refs`, `backrefs` e `hits` restano, e `updated_at` trova il
+suo primo scrittore vero. L'inglese originale sta in
+`scripts/data/translations_it.json`, sotto git accanto alla traduzione: il posto dei
+record è il repository, non il payload.
 
 Le stesse 22 query italiane, sulla stessa collection, prima e dopo:
 
@@ -194,10 +195,10 @@ l'iniezione automatica che non è mai partita. A 0.5 si accende sul prompt giust
 il tipo datetime?") e tace sulla potatura delle rose.
 
 **I campi nuovi.** Su tutte le 747: `embed_model`, `status: promossa`, `about: mondo`,
-`updated_at = when`, `source_raw` vuoto, e `origin: umano` su ogni ref. Le note nuove
+`updated_at = when`, e `origin: umano` su ogni ref. Le note nuove
 nascono uguali. Nessuno li legge ancora.
 
-`superseded_by` e `source_event` **non esistono**: Qdrant scarta una chiave di payload
+`superseded_by` e `session` **non esistono**: Qdrant scarta una chiave di payload
 il cui valore è `null`, quindi su una nota vecchia non possono stare. Qui l'assenza è
 come si scrive `null`. Torneranno quando qualcosa scriverà un valore vero — e questo
 chiude metà della decisione aperta numero 3.
@@ -271,7 +272,9 @@ Gli scambi `subtask` lanciati da `th` arrivano **dopo** la Fase 6, così nascono
 Uno, non due. Legge una finestra temporale di eventi e propone note e regole `provvisorie`.
 
 - Gira periodico e senza chiedere. Modello piccolo e locale (1-12B basta per l'estrazione).
-- Ogni nota nasce `provvisoria`, con `source_raw` pieno e `source_event` che punta allo scambio da cui viene.
+- Ogni nota nasce `provvisoria`, con `session` che punta a dove è nata in `tl`.
+- **`source_raw` è stato rimosso** (2026-09-28, decisione di Filippo). Era un campo che tenevo io per "poter ri-estrarre quando il distillatore migliora", proposto durante il design e mai chiesto. Il grezzo è un record, e i record stanno in `tl` e in git: duplicarlo dentro ogni nota paga lo stesso testo due volte e lo mette nel posto che si legge più spesso.
+- **Il campo si chiama `session`, non `source_event`.** "Event" era un fossile del nome vecchio di `tl`, quando era un event log. Una cosa da decidere quando il campo avrà uno scrittore: `tl` ha tre tabelle, `sessions` ed `exchanges` fra loro, e una sessione contiene molti scambi. Se serve risalire allo scambio esatto, l'id da scrivere è quello dell'exchange e il nome dovrà dirlo; se basta sapere in quale sessione sei nato, `session` è giusto e più corto.
 - Controllo di duplicazione **in scrittura** — è il buco che ha prodotto i duplicati attuali: sopra soglia si fonde o si scarta, non si aggiunge.
 - **La regola di estrazione** è una domanda dentro il prompt, non un componente: *il perché sopravvive se cancello il progetto?* Sì → nota `tb` in italiano e in prima persona, con il path della pagina come `source`. No → resta nella wiki.
 - Ammissione per le note `about: filippo`: ogni affermazione cita gli eventi `tl` che la sostengono, o non entra.

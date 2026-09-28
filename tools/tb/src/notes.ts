@@ -55,7 +55,6 @@ export async function createNote(params: CreateNoteParams): Promise<Note> {
     status: "promossa",
     about: ABOUT_NOBODY,
     updated_at: when,
-    source_raw: "",
   };
 
   const vector = await embedDocument(noteToText(note));
