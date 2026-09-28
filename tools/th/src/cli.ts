@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { Command } from "commander";
-import { createMember, createMemberFrom, deleteMember, getHat, getMember, listHats, listMembers, promoteMember } from "./members.js";
-import { ensureSandboxed, listAvailableModels, makeJobPaths, runMember, sandboxExec, spawnDetached, waitForJobs, type RunMemberOpts } from "./runner.js";
+import { getHat, listHats, parseTools } from "./hats.js";
+import { ensureSandboxed, listAvailableModels, makeJobPaths, runHat, sandboxExec, spawnDetached, waitForJobs, type RunMemberOpts } from "./runner.js";
 import { archivePending, spooledFiles } from "./archive.js";
 import * as tl from "../../tl/src/client.js";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -37,91 +37,6 @@ program
     .version("0.1.0")
     .enablePositionalOptions();
 
-// ─── member ───────────────────────────────────────────────────────────────────
-
-const member = new Command("member").description("Member management");
-
-member
-    .command("create <name>")
-    .description("Create a new member")
-    .option("--hat <hat>", "de Bono hat (e.g. blue-core, black-core)")
-    .option("--role <role>", "Member role description")
-    .option("--tools <tools>", "Available tools, comma-separated", "read,bash")
-    .option("--tmp", "Create member in /tmp instead of the current project")
-    .option("--from <global>", "Create from a global member as base (ignores --hat, --role, --tools)")
-    .action((name: string, opts) => {
-        try {
-            if (opts.from) {
-                out(createMemberFrom(name, opts.from));
-            } else {
-                if (!opts.hat) die("--hat is required (or use --from <global>)");
-                if (!opts.role) die("--role is required (or use --from <global>)");
-                out(createMember(name, opts.hat, opts.role, splitCSV(opts.tools), opts.tmp));
-            }
-        } catch (err) {
-            die(errorMessage(err));
-        }
-    });
-
-member
-    .command("list")
-    .description("List members (local + global + tmp by default)")
-    .option("--local", "Local members only (.th/members/)")
-    .option("--global", "Global members only (~/.th/members/)")
-    .option("--tmp", "Temporary members only (/tmp/.th/members/)")
-    .action((opts) => {
-        const groups = listMembers({ local: opts.local, global: opts.global, tmp: opts.tmp });
-        const filtered = opts.local || opts.global || opts.tmp;
-        if (filtered) {
-            const key = opts.local ? "local" : opts.global ? "global" : "tmp";
-            const list = groups[key];
-            if (list.length === 0) die(`No ${key} members.`);
-            out(list);
-        } else {
-            if (!groups.local.length && !groups.global.length && !groups.tmp.length) {
-                die("No members found. Use: th member create <name>");
-            }
-            out(groups);
-        }
-    });
-
-member
-    .command("get <name>")
-    .description("Show member details")
-    .action((name: string) => {
-        try {
-            out(getMember(name));
-        } catch (err) {
-            die(errorMessage(err));
-        }
-    });
-
-member
-    .command("delete <name>")
-    .description("Delete a member")
-    .action((name: string) => {
-        try {
-            deleteMember(name);
-            out({ deleted: true, name });
-        } catch (err) {
-            die(errorMessage(err));
-        }
-    });
-
-member
-    .command("promote <name>")
-    .description("Promote a local or tmp member to global (~/.th/members/)")
-    .option("--force", "Overwrite the global member if it already exists")
-    .action((name: string, opts) => {
-        try {
-            out(promoteMember(name, opts.force));
-        } catch (err) {
-            die(errorMessage(err));
-        }
-    });
-
-program.addCommand(member);
-
 // ─── hats ─────────────────────────────────────────────────────────────────────
 
 const hats = new Command("hats").description("de Bono hat management");
@@ -149,9 +64,11 @@ program.addCommand(hats);
 
 program
     .command("run")
-    .description("Run a task with a single member")
-    .requiredOption("--member <name>", "Member name")
+    .description("Run a task under one hat")
+    .requiredOption("--hat <name>", "Hat to wear (th hats list)")
     .requiredOption("--task <task>", "Task to execute")
+    .option("--system <text>", "Extra instructions, placed in front of the hat")
+    .option("--tools <list>", "Tools the hat may use, comma separated (default: all)")
     .option("--thinking <level>", "Extended thinking level (off, minimal, low, medium, high, xhigh)")
     .option("--model <provider/id>", "Model to use (e.g. anthropic/claude-opus-4-7)")
     .option("--detach", "Run in background; returns out/log/status paths immediately")
@@ -163,19 +80,21 @@ program
     .action(async (opts) => {
         if (!opts.detach) ensureSandboxed();
 
-        const paths = makeJobPaths(opts.member);
+        const paths = makeJobPaths(opts.hat);
         const runOpts: RunMemberOpts = {
             thinkingLevel: opts.thinking,
             modelStr: opts.model,
             timeoutSec: opts.timeout,
+            ...(opts.system && { system: opts.system }),
+            ...(opts.tools && { tools: parseTools(opts.tools) }),
         };
         try {
             if (opts.detach) {
                 const runnerPath = join(dirname(process.argv[1]), "detached-runner.ts");
-                const pid = spawnDetached(opts.member, opts.task, paths, runOpts, process.argv[0], runnerPath);
+                const pid = spawnDetached(opts.hat, opts.task, paths, runOpts, process.argv[0], runnerPath);
                 out({ pid, out: paths.out, log: paths.log, status: paths.status });
             } else {
-                await runMember(opts.member, opts.task, paths, runOpts);
+                await runHat(opts.hat, opts.task, paths, runOpts);
             }
         } catch (err) {
             die(errorMessage(err));
@@ -232,22 +151,22 @@ program
 program
     .command("history")
     .description("List recent runs")
-    .option("--member <name>", "Filter by member")
+    .option("--hat <name>", "Filter by hat")
     .option("--limit <n>", "Maximum number of results (default: 20)", (v) => {
         const n = parseInt(v, 10);
         if (isNaN(n) || n <= 0) throw new Error(`--limit must be a positive integer`);
         return n;
     })
     .action(async (opts) => {
-        const running = inflightRuns().filter((r) => !opts.member || r.member === opts.member);
+        const running = inflightRuns().filter((r) => !opts.hat || r.hat === opts.hat);
         let finished: unknown[] = [];
         try {
             const rows = await tl.fetchExchanges({ kind: "subtask", limit: opts.limit ?? 20 });
             finished = rows
-                .filter((r) => !opts.member || r.actor === opts.member)
+                .filter((r) => !opts.hat || r.actor === opts.hat)
                 .map((r) => ({
                     run: r.session,
-                    member: r.actor,
+                    hat: r.actor,
                     started_at: r.timestamp,
                     model: r.model,
                     tokens_out: r.tokens_out,
@@ -262,7 +181,7 @@ program
     });
 
 /** A run in flight is its file set in /tmp — the archive only hears from it at the end. */
-function inflightRuns(): Array<{ member: string; started_at: string; status: string; out: string }> {
+function inflightRuns(): Array<{ hat: string; started_at: string; status: string; out: string }> {
     const dir = tmpdir();
     if (!existsSync(dir)) return [];
     return readdirSync(dir)
@@ -270,7 +189,7 @@ function inflightRuns(): Array<{ member: string; started_at: string; status: str
         .map((n) => ({ name: n, path: join(dir, n) }))
         .filter((f) => readStatus(f.path) === "running")
         .map((f) => ({
-            member: f.name.replace(/^th-/, "").replace(/-\d+\.status$/, ""),
+            hat: f.name.replace(/^th-/, "").replace(/-\d+\.status$/, ""),
             started_at: statSync(f.path).mtime.toISOString(),
             status: "running",
             out: f.path.replace(/\.status$/, ".out"),

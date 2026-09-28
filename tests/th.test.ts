@@ -1,19 +1,12 @@
 import { describe, it, expect, afterAll, beforeAll } from "bun:test";
-import { mkdirSync, rmSync, unlinkSync, writeFileSync, readFileSync, utimesSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync, readFileSync, utimesSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-const TEST_TH_DB = "/tmp/th-test.db";
-process.env.TH_DB_PATH = TEST_TH_DB;
-
 const TEST_BASE = join(tmpdir(), `th-test-${Date.now()}`);
-process.env.TH_MEMBERS_DIR = join(TEST_BASE, "local");
-process.env.TH_TMP_MEMBERS_DIR = join(TEST_BASE, "tmp");
-process.env.TH_GLOBAL_MEMBERS_DIR = join(TEST_BASE, "global");
 
-const { validateName, createMember, createMemberFrom, listMembers, promoteMember, ensureLocalMember, getMember, loadMember } =
-  await import("../tools/th/src/members.ts");
+const { validateName, composeSystemPrompt, parseTools } = await import("../tools/th/src/hats.ts");
 const { waitForJobs, sanitize, checkStaleness, makeJobPaths, sandboxExec, OUT_STALE_MS } = await import("../tools/th/src/runner.ts");
 
 function statusFile(name: string, content: string): string {
@@ -23,28 +16,12 @@ function statusFile(name: string, content: string): string {
 }
 
 beforeAll(() => {
-  mkdirSync(join(TEST_BASE, "local"), { recursive: true });
-  mkdirSync(join(TEST_BASE, "tmp"), { recursive: true });
-  mkdirSync(join(TEST_BASE, "global"), { recursive: true });
+  mkdirSync(TEST_BASE, { recursive: true });
 });
 
 afterAll(() => {
-  for (const f of [TEST_TH_DB, `${TEST_TH_DB}-wal`, `${TEST_TH_DB}-shm`]) {
-    try { unlinkSync(f); } catch {}
-  }
   try { rmSync(TEST_BASE, { recursive: true, force: true }); } catch {}
 });
-
-function makeRun(overrides: Record<string, unknown> = {}) {
-  return {
-    id: crypto.randomUUID(),
-    member: "test-member",
-    task: "test task",
-    started_at: new Date().toISOString(),
-    status: "running" as const,
-    ...overrides,
-  };
-}
 
 describe("validateName", () => {
   it("accepts letters, digits, dash, underscore", () => {
@@ -108,104 +85,39 @@ describe("waitForJobs", () => {
   });
 });
 
-describe("hat by reference", () => {
-  it("resolves the hat at runtime: changing it updates the member, no snapshot", () => {
-    const hatsDir = join(TEST_BASE, "hats-ref");
-    mkdirSync(hatsDir, { recursive: true });
-    const prev = process.env.TH_HATS_DIR;
-    process.env.TH_HATS_DIR = hatsDir;
-    try {
-      const hatPath = join(hatsDir, "ref-core.md");
-      writeFileSync(hatPath, "HAT V1");
-      createMember("ref-test", "ref-core", "test role", ["read"]);
+describe("composeSystemPrompt", () => {
+  it("puts the caller's instructions in front of the hat, with the old separator", () => {
+    expect(composeSystemPrompt("you audit renderers", "think in black")).toBe("you audit renderers\n\n---\n\nthink in black");
+  });
 
-      // the member file does NOT contain the hat text: only the reference
-      const fileContent = readFileSync(join(process.env.TH_MEMBERS_DIR!, "ref-test.md"), "utf8");
-      expect(fileContent).toContain("hat: ref-core");
-      expect(fileContent).not.toContain("HAT V1");
+  it("with no instructions it is the hat alone, and no dangling separator", () => {
+    expect(composeSystemPrompt(undefined, "think in black")).toBe("think in black");
+  });
 
-      const v1 = loadMember("ref-test").systemPrompt;
-      expect(v1).toContain("test role");
-      expect(v1).toContain("HAT V1");
+  it("an empty string counts as no instructions", () => {
+    expect(composeSystemPrompt("   ", "think in black")).toBe("think in black");
+  });
 
-      // the hat changes; the member is not recreated → loadMember reflects the new version
-      writeFileSync(hatPath, "HAT V2");
-      const v2 = loadMember("ref-test").systemPrompt;
-      expect(v2).toContain("HAT V2");
-      expect(v2).not.toContain("HAT V1");
-    } finally {
-      if (prev === undefined) delete process.env.TH_HATS_DIR;
-      else process.env.TH_HATS_DIR = prev;
-    }
+  it("with an empty hat it is the instructions alone", () => {
+    expect(composeSystemPrompt("you audit renderers", "")).toBe("you audit renderers");
   });
 });
 
-describe("member globals", () => {
-  it("promote moves local → global", () => {
-    createMember("promo-test", "blue-core", "test role", ["read"]);
-    promoteMember("promo-test");
-    const groups = listMembers({ global: true });
-    expect(groups.global.some(m => m.name === "promo-test")).toBe(true);
+describe("parseTools", () => {
+  it("reads a comma separated list", () => {
+    expect(parseTools("read,bash")).toEqual(["read", "bash"]);
   });
 
-  it("promote fails when global already exists without --force", () => {
-    createMember("promo-force", "blue-core", "ruolo", ["read"]);
-    promoteMember("promo-force");
-    expect(() => promoteMember("promo-force")).toThrow(/already exists/);
+  it("reads the bracketed form too", () => {
+    expect(parseTools("[read, bash]")).toEqual(["read", "bash"]);
   });
 
-  it("promote with --force overwrites", () => {
-    createMember("promo-overwrite", "blue-core", "original", ["read"]);
-    promoteMember("promo-overwrite");
-    // create a new local member with a different role and promote with force
-    const localPath = join(process.env.TH_MEMBERS_DIR!, "promo-overwrite.md");
-    rmSync(localPath);
-    createMember("promo-overwrite", "black-core", "updated", ["read"]);
-    expect(() => promoteMember("promo-overwrite", true)).not.toThrow();
-    expect(getMember("promo-overwrite").hat).toBe("black-core");
+  it("nothing means every tool, which is an empty list", () => {
+    expect(parseTools(undefined)).toEqual([]);
   });
 
-  it("createMemberFrom creates a local member from a global one", () => {
-    createMember("base-global", "yellow-core", "base role", ["read"]);
-    promoteMember("base-global");
-    createMemberFrom("local-from-global", "base-global");
-    const groups = listMembers({ local: true });
-    expect(groups.local.some(m => m.name === "local-from-global")).toBe(true);
-  });
-
-  it("createMemberFrom fails when global does not exist", () => {
-    expect(() => createMemberFrom("nobody", "nonexistent")).toThrow(/not found/);
-  });
-
-  it("ensureLocalMember does nothing when it already exists locally", () => {
-    createMember("already-local", "blue-core", "ruolo", ["read"]);
-    expect(ensureLocalMember("already-local")).toBe(false);
-  });
-
-  it("ensureLocalMember auto-instantiates from global when missing in local/tmp", () => {
-    createMember("only-global", "blue-core", "ruolo", ["read"]);
-    promoteMember("only-global");
-    rmSync(join(process.env.TH_MEMBERS_DIR!, "only-global.md"));
-    expect(ensureLocalMember("only-global")).toBe(true);
-    // now it exists locally
-    expect(ensureLocalMember("only-global")).toBe(false);
-  });
-
-  it("ensureLocalMember throws when found nowhere", () => {
-    expect(() => ensureLocalMember("does-not-exist-at-all")).toThrow(/not found/);
-  });
-
-  it("listMembers without filters returns 3 groups", () => {
-    const groups = listMembers();
-    expect(groups).toHaveProperty("local");
-    expect(groups).toHaveProperty("global");
-    expect(groups).toHaveProperty("tmp");
-  });
-
-  it("listMembers --local does not include global or tmp", () => {
-    const groups = listMembers({ local: true });
-    expect(groups.global).toHaveLength(0);
-    expect(groups.tmp).toHaveLength(0);
+  it("drops the empty pieces a trailing comma leaves", () => {
+    expect(parseTools("read,,bash,")).toEqual(["read", "bash"]);
   });
 });
 

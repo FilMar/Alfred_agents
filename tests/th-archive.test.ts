@@ -13,7 +13,7 @@ const T2 = "2026-09-28T10:04:00.000Z";
 const RUN_ID = "c3a43d84-bdad-49db-a7f7-352bf088bc1b";
 
 const run = (over: Partial<FinishedRun> = {}): FinishedRun => ({
-  id: RUN_ID, member: "carmack-white", task: "audit the renderer",
+  id: RUN_ID, hat: "black-core", task: "audit the renderer",
   status: "done", started_at: T1, finished_at: T2, ...over,
 });
 
@@ -41,7 +41,7 @@ describe("runRows", () => {
   it("the hat is the actor and the row is a subtask", () => {
     const { exchange } = runRows(run(), [message()], "kokpit", "/work");
     expect(exchange.kind).toBe("subtask");
-    expect(exchange.actor).toBe("carmack-white");
+    expect(exchange.actor).toBe("black-core");
   });
 
   it("the exchange id is derived, so it is not the session id", () => {

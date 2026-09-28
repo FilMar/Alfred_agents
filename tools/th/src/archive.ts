@@ -31,8 +31,8 @@ export interface RunRows {
 
 export interface FinishedRun {
   id: string;
-  /** The hat */
-  member: string;
+  /** The way of thinking the run wore */
+  hat: string;
   task: string;
   /** done | error | timeout */
   status: string;
@@ -62,7 +62,7 @@ export function runRows(run: FinishedRun, messages: unknown[], host: string, cwd
       session: run.id,
       timestamp: run.started_at,
       kind: "subtask",
-      actor: run.member,
+      actor: run.hat,
       ...(model !== undefined && { model }),
       ...pi.sumTokens(lines),
       meta: {

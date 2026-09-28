@@ -17,7 +17,7 @@ import {
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 import { getModel, getProviders } from "@earendil-works/pi-ai";
 import type { KnownProvider, Usage } from "@earendil-works/pi-ai";
-import { ensureLocalMember, loadMember, validateName } from "./members.js";
+import { composeSystemPrompt, getHat, validateName } from "./hats.js";
 
 // ─── Sandbox (bwrap) ──────────────────────────────────────────────────────────
 
@@ -89,7 +89,7 @@ export function sandboxExec(bin: string, args: string[]): Promise<number> {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type JobPaths = { out: string; log: string; status: string; pid: string };
+export type JobPaths = { out: string; log: string; status: string; pid: string };
 type AgentSession = Awaited<ReturnType<typeof createAgentSession>>["session"];
 type IOHandles = { emit: (text: string) => void; close: () => void };
 
@@ -97,6 +97,10 @@ export type RunMemberOpts = {
   thinkingLevel?: string;
   modelStr?: string;
   timeoutSec?: number;
+  /** Extra instructions, in front of the hat. What a member file used to hold. */
+  system?: string;
+  /** Tools the hat may use. Empty means every tool. */
+  tools?: string[];
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -129,14 +133,14 @@ export async function listAvailableModels(): Promise<Array<{ provider: string; i
   return available.map((m) => ({ provider: m.provider, id: m.id, name: m.name }));
 }
 
-export function makeJobPaths(memberName: string): JobPaths {
-  validateName(memberName);
-  const base = join(tmpdir(), `th-${memberName}-${Date.now()}`);
+export function makeJobPaths(hat: string): JobPaths {
+  validateName(hat);
+  const base = join(tmpdir(), `th-${hat}-${Date.now()}`);
   return { out: `${base}.out`, log: `${base}.log`, status: `${base}.status`, pid: `${base}.pid` };
 }
 
 export function spawnDetached(
-  memberName: string,
+  hat: string,
   task: string,
   paths: JobPaths,
   opts: RunMemberOpts,
@@ -146,7 +150,7 @@ export function spawnDetached(
   writeFileSync(paths.status, "running");
   const child = spawnSandboxed(execPath, [
     runnerPath,
-    memberName,
+    hat,
     task,
     JSON.stringify(paths),
     JSON.stringify(opts),
@@ -184,7 +188,7 @@ async function resolveModel(modelStr: string) {
 }
 
 async function buildSession(
-  memberName: string,
+  hat: string,
   opts: RunMemberOpts,
 ): Promise<{ session: AgentSession }> {
   if (opts.thinkingLevel && !THINKING_LEVELS.includes(opts.thinkingLevel as ThinkingLevel)) {
@@ -193,9 +197,7 @@ async function buildSession(
 
   const model = opts.modelStr ? await resolveModel(opts.modelStr) : undefined;
 
-  const autoInstantiated = ensureLocalMember(memberName);
-  if (autoInstantiated) process.stderr.write(`info: instantiated "${memberName}" from global into .th/members/\n`);
-  const { member, systemPrompt } = loadMember(memberName);
+  const systemPrompt = composeSystemPrompt(opts.system, getHat(hat));
 
   const loader = new DefaultResourceLoader({
     cwd: process.cwd(),
@@ -207,7 +209,7 @@ async function buildSession(
 
   const { authStorage, modelRegistry } = createRegistry();
   const { session } = await createAgentSession({
-    tools: member.tools,
+    tools: opts.tools ?? [],
     resourceLoader: loader,
     sessionManager: SessionManager.inMemory(),
     authStorage,
@@ -306,17 +308,17 @@ function spoolPathFor(statusPath: string): string {
   return statusPath.replace(/\.status$/, SPOOL_SUFFIX);
 }
 
-export async function runMember(
-  memberName: string,
+export async function runHat(
+  hat: string,
   task: string,
   paths: JobPaths,
   opts: RunMemberOpts = {},
 ): Promise<void> {
-  const { session } = await buildSession(memberName, opts);
+  const { session } = await buildSession(hat, opts);
 
   const run: RunSeed = {
     id: randomUUID(),
-    member: memberName,
+    hat,
     task,
     started_at: new Date().toISOString(),
     ...(opts.timeoutSec !== undefined && { timeout_s: opts.timeoutSec }),
