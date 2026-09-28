@@ -45,7 +45,7 @@ export const QDRANT_URL = process.env.QDRANT_URL ?? "http://localhost:6333";
 export const OLLAMA_URL = process.env.OLLAMA_URL ?? "http://localhost:11434";
 
 export const COLLECTION = "third-brain";
-export const EMBED_MODEL = "nomic-embed-text";
+export const EMBED_MODEL = "nomic-embed-text-v2-moe";
 export const VECTOR_SIZE = 768;
 export const DENSE_VECTOR_NAME = "dense";
 export const SPARSE_VECTOR_NAME = "sparse";
@@ -62,12 +62,25 @@ export const ollamaClient = new HttpClient({ baseUrl: OLLAMA_URL, timeout: OLLAM
 
 // ─── Embed ───────────────────────────────────────────────────────────────────
 
+// A Nomic model is trained on two tasks and told them apart by a prefix on the
+// input. Without it, a query vector and a document vector are not comparable.
+export const DOCUMENT_PREFIX = "search_document: ";
+export const QUERY_PREFIX = "search_query: ";
+
 // Input atteso: `why + "\n\n" + what`
-export async function embed(text: string): Promise<number[]> {
+export async function embedDocument(text: string): Promise<number[]> {
+  return embedWithPrefix(DOCUMENT_PREFIX, text);
+}
+
+export async function embedQuery(text: string): Promise<number[]> {
+  return embedWithPrefix(QUERY_PREFIX, text);
+}
+
+async function embedWithPrefix(prefix: string, text: string): Promise<number[]> {
   const data = await ollamaClient.request<{ embeddings: number[][] }>(
     "POST",
     "/api/embed",
-    { model: EMBED_MODEL, input: text },
+    { model: EMBED_MODEL, input: prefix + text },
   );
   const vector = data.embeddings[0];
   if (!vector || vector.length !== VECTOR_SIZE) {

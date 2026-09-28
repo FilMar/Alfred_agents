@@ -1,5 +1,5 @@
 import { describe, it, expect, spyOn, beforeEach } from "bun:test";
-import { qdrantClient, ollamaClient, VECTOR_SIZE } from "../tools/tb/src/infra.js";
+import { qdrantClient, ollamaClient, VECTOR_SIZE, DOCUMENT_PREFIX, QUERY_PREFIX } from "../tools/tb/src/infra.js";
 import type { IdentityEntry } from "../tools/ti/src/types.js";
 
 // Mock process.exit and argv to prevent CLI from running and exiting the test runner
@@ -45,7 +45,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
       expect(ollamaClient.request).toHaveBeenCalledWith(
         "POST",
         "/api/embed",
-        expect.objectContaining({ input: ifText })
+        expect.objectContaining({ input: DOCUMENT_PREFIX + ifText })
       );
       expect(qdrantClient.request).toHaveBeenCalledWith(
         "PUT",
@@ -103,7 +103,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
 
       const results = await searchEntries(query, { tags });
 
-      expect(ollamaClient.request).toHaveBeenCalledWith("POST", "/api/embed", expect.objectContaining({ input: query }));
+      expect(ollamaClient.request).toHaveBeenCalledWith("POST", "/api/embed", expect.objectContaining({ input: QUERY_PREFIX + query }));
       expect(qdrantClient.request).toHaveBeenCalledWith(
         "POST",
         expect.stringContaining("/collections/pi_identity/points/query"),

@@ -58,7 +58,7 @@ The test: **can you phrase it so that doing it and not doing it look different?*
 Call the `ti` and `tb` CLIs directly. Never wrap them in another layer.
 
 ```bash
-ti search "<draft context>" --limit 5 --min-score 0.6
+ti search "<draft context>" --limit 5 --min-score 0.5
 ti add --if "<context>" --do "<action>" --tags "<tag1>" --tags "<tag2>"
 ti append-do <id> --do "<new action>"
 ti list --tags "<tag1>" --tags "<tag2>"            # omit --tags for all rules
@@ -77,7 +77,7 @@ and pass one `--tags` per tag.
 2. **Draft** the rule applying the anatomy above. Splitting into multiple rules is normal — say so.
 3. **Dedupe** (mandatory, before proposing):
    ```bash
-   ti search "<draft context>" --limit 5 --min-score 0.6
+   ti search "<draft context>" --limit 5 --min-score 0.5
    ```
    - Same context, same action → nothing to do; tell the user.
    - Same context, new action → propose `ti append-do <id> --do "<action>"` instead of a new rule.

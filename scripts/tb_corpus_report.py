@@ -17,10 +17,10 @@ MAX_PAGES = 1000
 PAGE_SIZE = 250
 
 
-def read_all(collection):
+def read_all(collection, with_vector=False):
     points, offset = [], None
     for _ in range(MAX_PAGES):
-        body = {"limit": PAGE_SIZE, "with_payload": True, "with_vector": False}
+        body = {"limit": PAGE_SIZE, "with_payload": True, "with_vector": with_vector}
         if offset is not None:
             body["offset"] = offset
         status, res = call("POST", f"/collections/{collection}/points/scroll", body)

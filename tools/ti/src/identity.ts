@@ -1,4 +1,4 @@
-import { embed, EMBED_MODEL } from "../../tb/src/infra.js";
+import { embedDocument, embedQuery, EMBED_MODEL } from "../../tb/src/infra.js";
 import * as qdrant from "./qdrant.js";
 import type { IdentityEntry, SearchOptions } from "./types.js";
 
@@ -11,7 +11,7 @@ import type { IdentityEntry, SearchOptions } from "./types.js";
  */
 export async function addEntry(ifText: string, doText: string, tags: string[]): Promise<IdentityEntry> {
   await qdrant.ensureCollection();
-  const vector = await embed(ifText);
+  const vector = await embedDocument(ifText);
 
   const id = crypto.randomUUID();
   await qdrant.upsertPoint(id, vector, { if: ifText, do: [doText], tags, embed_model: EMBED_MODEL });
@@ -35,7 +35,7 @@ export async function addEntry(ifText: string, doText: string, tags: string[]): 
  */
 export async function searchEntries(query: string, options: SearchOptions): Promise<IdentityEntry[]> {
   await qdrant.ensureCollection();
-  const vector = await embed(query);
+  const vector = await embedQuery(query);
 
   
   const filter = options.tags?.length ? { must: [{ key: "tags", match: { any: options.tags } }] } : undefined;

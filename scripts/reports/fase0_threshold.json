@@ -1,0 +1,75 @@
+{
+ "alias": "third-brain",
+ "model": "nomic-embed-text-v2-moe",
+ "queries": 120,
+ "correct_found": 104,
+ "correct_min": 0.42930156,
+ "correct_p10": 0.4927948300000001,
+ "correct_p50": 0.5973506000000001,
+ "correct_max": 0.81857157,
+ "top1_min": 0.4682909,
+ "top1_p50": 0.59791357,
+ "off_topic_top": [
+  0.25076726,
+  0.18205982,
+  0.21487093
+ ],
+ "off_topic_max": 0.25076726,
+ "curve": [
+  {
+   "min_score": 0.3,
+   "queries_with_a_hit": 1.0,
+   "top1_is_the_right_note": 0.65
+  },
+  {
+   "min_score": 0.35,
+   "queries_with_a_hit": 1.0,
+   "top1_is_the_right_note": 0.65
+  },
+  {
+   "min_score": 0.4,
+   "queries_with_a_hit": 1.0,
+   "top1_is_the_right_note": 0.65
+  },
+  {
+   "min_score": 0.45,
+   "queries_with_a_hit": 1.0,
+   "top1_is_the_right_note": 0.65
+  },
+  {
+   "min_score": 0.5,
+   "queries_with_a_hit": 0.925,
+   "top1_is_the_right_note": 0.6756756756756757
+  },
+  {
+   "min_score": 0.55,
+   "queries_with_a_hit": 0.7416666666666667,
+   "top1_is_the_right_note": 0.7303370786516854
+  },
+  {
+   "min_score": 0.6,
+   "queries_with_a_hit": 0.5,
+   "top1_is_the_right_note": 0.8
+  },
+  {
+   "min_score": 0.65,
+   "queries_with_a_hit": 0.18333333333333332,
+   "top1_is_the_right_note": 0.9545454545454546
+  },
+  {
+   "min_score": 0.7,
+   "queries_with_a_hit": 0.058333333333333334,
+   "top1_is_the_right_note": 0.8571428571428571
+  },
+  {
+   "min_score": 0.75,
+   "queries_with_a_hit": 0.025,
+   "top1_is_the_right_note": 0.6666666666666666
+  },
+  {
+   "min_score": 0.8,
+   "queries_with_a_hit": 0.016666666666666666,
+   "top1_is_the_right_note": 0.5
+  }
+ ]
+}

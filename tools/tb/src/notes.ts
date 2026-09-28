@@ -1,4 +1,4 @@
-import { embed, EMBED_MODEL } from "./infra.js";
+import { embedDocument, embedQuery, EMBED_MODEL } from "./infra.js";
 import { ensureCollection, upsert, setPayload, getByIds, search, scroll, scrollLinkedTo, deletePoints, randomNoteId, noteId, listTags } from "./qdrant.js";
 import type { ScrollOptions, TagFacet } from "./qdrant.js";
 import { REFS_LIMIT } from "./infra.js";
@@ -58,7 +58,7 @@ export async function createNote(params: CreateNoteParams): Promise<Note> {
     source_raw: "",
   };
 
-  const vector = await embed(noteToText(note));
+  const vector = await embedDocument(noteToText(note));
   await upsert(note, vector);
 
   return note;
@@ -107,7 +107,7 @@ export async function changeTags(id: string, tags: string[]): Promise<void> {
 
 export async function searchNotes(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
   await ensureCollection();
-  const vector = await embed(query);
+  const vector = await embedQuery(query);
   const results = await search(vector, { ...options, query_text: query });
   if (options.record_hits !== false) await recordHits(results);
   return results;

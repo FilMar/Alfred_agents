@@ -1,0 +1,864 @@
+{
+ "model": "gemma4:12b",
+ "seed": 20260928,
+ "rare_at_most": 3,
+ "rows": [
+  {
+   "id": "f0d3f780-c424-0ad6-daa5-709ed11a4c93",
+   "what": "La notifica di un loop va sull'eccezione, non sulla norma: se non trova nulla tace, e il silenzio è un segnale. Un messaggio per giro di triage, non per errore — il batch è la compressione che arriva fino all'umano. Notificare ogni errore produce alert fatigue e il loop diventa rumore.",
+   "paraphrase": "Il sistema deve segnalare solo i casi critici invece di ogni singolo passaggio per evitare di sovraccaricare l'operatore con troppi avvisi inutili.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "c539f9ce-80d2-0b81-795e-7a3d44da9831",
+   "what": "Se un gruppo di particelle si attrae (ogni particella tira le vicine), qualsiasi forza esterna applicata a una di esse si propaga attraverso il gruppo come un'onda — senza nessun codice che gestisca le onde. Il blob coeso è una rete di molle implicite: disturba un punto, la perturbazione viaggia. Vento che soffia su acqua genera onde gratis.",
+   "paraphrase": "Se ogni elemento del gruppo è legato agli altri, ogni movimento su un punto si trasmette spontaneamente a tutto il resto del corpo.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "5bdd6afd-16f2-60d4-146e-727c2abf0d96",
+   "what": "L'intuizione va usata solo DOPO aver raccolto dati oggettivi in modo disciplinato, non PRIMA. Esperimento: intervistatrici militari valutavano 6 tratti separatamente con punteggio 1-5, poi 'chiudevano gli occhi' per il giudizio intuitivo finale. Risultato: l'intuizione funzionava bene solo dopo la raccolta strutturata - da sola era inutile",
+   "paraphrase": "L'intuizione è efficace solo se applicata dopo aver analizzato dati precisi e organizzati invece di affidarsi esclusivamente alla sensibilità immediata.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "f212a0b7-c683-f0e6-36f8-7b3c081016dd",
+   "what": "Tenere la storia di un task solo nei commenti (niente campi separati per dipendenze, note, decisioni) rende il sistema più semplice da mantenere e capire a colpo d'occhio. Il prezzo è che tutto ciò che serve a ricostruire cosa è successo deve essere stato scritto per davvero, nel momento giusto, da qualcuno — non c'è una rete che lo cattura in automatico se qualcuno se lo dimentica.",
+   "paraphrase": "Registrare ogni dettaglio solo nelle note semplifica la gestione immediata ma richiede una precisione assoluta perché non esiste un sistema automatico che recuperi informazioni non annotate correttamente.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "0cf4b51c-f0d2-86cf-0bb7-97c5486b19d2",
+   "what": "Regola dei 2 minuti: riduci qualsiasi nuova abitudine a una versione da 2 minuti. 'Correre una maratona' diventa 'mettere le scarpe e fare stretching'. 'Leggere un libro' diventa 'leggere una pagina'. L'obiettivo è mostrare, non perfezionare - una volta iniziato, è più facile continuare",
+   "paraphrase": "Dovresti semplificare ogni nuova abitudine in un'azione brevissima che richieda solo due minuti per rendere l'inizio molto più facile.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "438488a4-1077-c351-fbe1-c0d9c2b6c24d",
+   "what": "In Hack (1984) il livello dove morivi veniva salvato con il nome della creatura che ti aveva ucciso. Non la mappa intera — solo ciò che era rilevante per il ciclo successivo: la minaccia specifica che potevi ritrovare e vendicare. Questo 'bones file' ha ispirato il legend mode di Dwarf Fortress.",
+   "paraphrase": "Nel gioco Hack il salvataggio avveniva solo sulla zona del fallimento per identificare l'avversario da affrontare nuovamente, meccanica che ha dato origine alla modalità leggendaria di Dwarf Fortress.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "1ec6a2c0-3603-9a9c-06b0-6a209ef6362c",
+   "what": "Separare il web layer dall'application layer permette di scalare i due livelli in modo indipendente. Il web layer gestisce HTTP, statici e SSL; l'application layer gestisce la logica, le API, i worker e i dati.",
+   "paraphrase": "Dividere la parte dedicata alla rete da quella dedicata alla logica permette di gestire la crescita di ciascun settore in modo autonomo.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "9b370749-04a1-9f5a-a068-037ef9d46631",
+   "what": "Quando smonti un wrapper, i default che imponeva non appartengono allo strumento sottostante: senza il wrapper spariscono. Vanno documentati come flag esplicite da passare sempre (\"passa sempre --min-score 0.6\"), mai promossi a default del CLI — a meno che l'help dello strumento non li confermi davvero.",
+   "paraphrase": "Bisogna indicare come parametri fissi le opzioni che diventano predefinite solo a causa dell'interfaccia esterna e che non sono native del comando originale.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "764447eb-909f-7cb8-b4d6-bd81a6c0bd6d",
+   "what": "Le persone provano più rammarico quando deviano dalla loro norma personale o dal default contestuale, non per l'azione in sé: se la tua abitudine è non fare X e un giorno la fai con esito negativo, il dolore è molto più intenso che se avessi seguito la tua routine normale",
+   "paraphrase": "Il senso è che il senso di colpa è più forte quando rompiamo le nostre abitudini personali o le regole comuni piuttosto che quando compiamo semplicemente un'azione sbagliata.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "db33a1c6-1c6a-2c78-48b6-d9806fc517dd",
+   "what": "In un archivio di note con ricerca semantica, una nota senza link non è orfana: gli embedding la rendono raggiungibile da ogni query affine, e il costo dell'isolamento è quasi zero. Un link forzato invece costa attivo: i ref vengono attraversati in fase di retrieval, quindi una connessione falsa inietta rumore in ogni ricerca futura che la tocca, senza produrre sintomi. Nel dubbio tra collegare e lasciare isolata: isolata. I ponti tra note davvero imparentate li trova la curatela periodica, con criterio.",
+   "paraphrase": "Se non sei sicuro della pertinenza di un collegamento, è meglio non creare un link manuale perché la ricerca semantica troverà comunque le note correlate mentre un collegamento errato comprometterebbe la qualità dei risultati futuri.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "3ec754ec-87af-7a26-b9af-8c6489a30cd4",
+   "what": "I grandi autori (King, Murakami, Lynch) usano orari fissi non per disciplina, ma per eliminare la scelta su quando e quanto lavorare. Una volta deciso il sistema — 'scrivo dalle 4 alle 8, ogni giorno' — quella decisione non va presa mai più. L'energia cognitiva rimane intera per il lavoro creativo.",
+   "paraphrase": "I grandi creativi adottano routine rigide per evitare di sprecare energia mentale nel decidere quando iniziare a produrre.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "faafbf61-52ca-8aa4-c22b-d9be7d0a00cd",
+   "what": "Le illusioni cognitive (come il fascino di uno psicopatico) funzionano come le illusioni visive: le senti comunque, anche se sai che sono false. La difesa non è eliminarle ma imparare a riconoscerle e non agirle",
+   "paraphrase": "Bisogna imparare a identificare queste distorsioni mentali per non lasciarsi ingannare da esse nonostante la loro persistenza.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "6e701304-7f53-1ea7-6fb0-7bfaac3718c7",
+   "what": "Il Third Brain non è conoscenza ma strumento di elaborazione: la conoscenza risiede nell'antinet cartaceo, il TB processa materiale già pensato. Il controllo del flusso (io scelgo il problema → uso l'antinet → il sistema estrae → io integro nel tempo) preserva l'autonomia cognitiva. L'AI è subordinata, non decisoria — estrae conoscenza rispettando regole di qualità come farebbe una persona esterna, ma la direzione e il giudizio finale restano umani.",
+   "paraphrase": "L'intelligenza artificiale funge da motore di elaborazione dei dati mentre la direzione e il giudizio finale rimangono nelle mani dell'uomo.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "b4562d47-b546-5d02-96f4-513a260ee456",
+   "what": "Il tema/premessa di un mondo narrativo funziona come filtro automatico: fissato il tono ('barbari in pelliccia su cani da guerra'), ogni elemento incompatibile si scarta da solo senza dover ragionare caso per caso.",
+   "paraphrase": "L'ambientazione stabilisce un'atmosfera coerente che elimina automaticamente ogni elemento estraneo alla visione d'insieme.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "fe2cc9b0-8fb4-1ade-5075-22b1ba2f6a7b",
+   "what": "Un automa cellulare è agnostico alla dimensione: la dimensionalità del sistema è codificata SOLO nella forma del vicinato (3 celle per 1D, 9 per 2D, 27 per 3D). La stessa logica di aggiornamento, lo stesso sleeping dei chunk, le stesse regole funzionano in qualsiasi dimensione se il vicinato è un parametro.",
+   "paraphrase": "Il sistema funziona in ogni spazio perché la dimensione è definita unicamente dalla configurazione dei vicini.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "a0cc09b1-2610-835f-8a60-0f9e4d08b977",
+   "what": "La dopamina sale quando anticipi una ricompensa, non quando la ricevi. I giocatori d'azzardo hanno il picco prima di scommettere, i tossicodipendenti quando vedono la droga. Il craving (desiderio) guida l'azione, non il piacere",
+   "paraphrase": "L'eccitazione scaturisce dall'attesa di un beneficio futuro piuttosto che dal possesso effettivo dell'oggetto del desiderio.",
+   "leaked": [
+    "desiderio"
+   ],
+   "retried": true
+  },
+  {
+   "id": "0c996876-fa67-cf74-94ee-6ed2fc4bcd14",
+   "what": "In una regola di diffusione su griglia, sommare (invece di mediare) la differenza con tutti i vicini rende la costante di diffusione non interpretabile come frazione per tick: con 8 vicini e costante 0.2 si cede fino al 160% del gradiente in un tick, il sistema esplode. Fix: dividere la somma dei flussi per il numero di vicini prima di applicare la costante.",
+   "paraphrase": "Bisogna normalizzare il valore totale dei vicini sul numero totale dei contatti prima di applicare la costante per evitare che il sistema superi il limite del cento per cento e diventi instabile.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "567b6a35-46c0-4355-b1bb-5ce1060abf2b",
+   "what": "Prima di costruire una funzione, scrivi solo i suoi paletti: cosa deve valere all'ingresso, cosa all'uscita, e in mezzo un segnaposto che fa esplodere tutto se qualcuno la chiama. Chi scrive i test non ha ancora visto la macchina: conosce solo i paletti, quindi i test non possono adattarsi a un codice che ancora non esiste. Ogni test si controlla da solo: se un test passa su una funzione vuota è un test finto, deve esplodere; se uno che si aspetta l'esplosione non la ottiene, i paletti sono al posto sbagliato.",
+   "paraphrase": "Bisogna definire prima la struttura della funzione con input e output corretti e un errore intenzionale per garantire che i test verifichino solo la firma e non il codice ancora da scrivere.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "eb5eae88-5e95-77a6-0a50-26f595682908",
+   "what": "Un pensiero ha quattro stati diagnosticabili: GREZZO (solo reazione, nessun dominio), OPINIONE (dominio senza ragionamenti), POSIZIONE (ragionamenti che reggono la versione più forte dell'opposto, con condizione di smentita esplicita), DOGMA (conclusione che nessun ragionamento smuoverebbe). Diagnosi: 'cosa mi farebbe cambiare idea?' — se la risposta è 'niente', il pensiero è DOGMA.",
+   "paraphrase": "Qual era quella classificazione dei pensieri che distingueva tra reazioni grezze, opinioni, posizioni logiche e dogmi basati sull'impossibilità di essere smentiti?",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "f1f240f3-ce56-7df5-6c8d-0b5013d78327",
+   "what": "Prima di scrivere una nuova astrazione per condividere codice tra varianti, verifica se le interfacce che hai gia isolano tutto cio che cambia tra le varianti. Se lo fanno, la versione generica e quasi gratis: non introduci nessun concetto nuovo, rendi solo il codice generico sui trait che esistono di gia.",
+   "paraphrase": "Controlla se le definizioni esistenti separano già le differenze tra le versioni prima di creare nuove strutture per unificare il codice.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "8dfbc194-1c94-b707-40b7-e29df05f7de8",
+   "what": "Il metodo di design di Zach Adams: scrivi prima una storia interessante ambientata nel mondo che vuoi simulare. Poi isola gli elementi che rendono quella storia possibile — le regole, le entità, le interazioni. Poi programmali. La narrativa precede il sistema, non viceversa.",
+   "paraphrase": "Come si chiamava quella tecnica di design che prevede di creare prima una narrazione coerente per definire le regole e le meccaniche del gioco invece di partire dalla programmazione?",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "e5f1a68b-cbe5-6709-9816-bfefe2ceec28",
+   "what": "La fiducia che provi nelle tue intuizioni non dice se sono corrette: ti senti sicuro quando la storia che ti racconti fila liscia, non quando è vera",
+   "paraphrase": "Sentirsi sicuri di un'idea dipende dalla coerenza interna della narrazione e non dalla sua reale corrispondenza con i fatti.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "cdda0aa4-1251-cccf-7195-9eff62150267",
+   "what": "Quando difetti di categorie diverse (duplicazione, leggibilità, allocazioni nel percorso caldo) puntano tutti sullo stesso file, non sono tre lavori: sono un solo intervento di ristrutturazione. Pianificarli come passate separate significa riaprire lo stesso codice tre volte, ripagando ogni volta il costo di ricomprenderlo e il rischio di romperlo.",
+   "paraphrase": "Se più problemi diversi riguardano lo stesso file, è più efficiente risolverli tutti insieme in un'unica modifica invece di dividerli in più sessioni che obbligherebbero a modificare più volte lo stesso codice.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "eea3118e-bb09-0101-acb7-948420c4b2e4",
+   "what": "Evitare il nesting profondo nel codice si ottiene con le guard clause: invertire le condizioni e uscire subito (early return) invece di annidare il caso positivo dentro un if. Chi legge può scartare ogni condizione superata invece di tenerla in testa mentre legge il resto.",
+   "paraphrase": "Bisogna semplificare la struttura del codice invertendo le condizioni per interrompere subito l'esecuzione invece di inserire blocchi di istruzioni uno dentro l'altro.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "ba8317ff-54f7-e94e-fdf4-4c35b59fd998",
+   "what": "Le literature notes restano permanenti nel tuo zettelkasten anche dopo aver estratto gli zettels: diventano un indice personale del testo che hai letto, utile per ritrovare passaggi e come riferimento bibliografico",
+   "paraphrase": "Le note di lettura rimangono nel sistema come un indice utile per rintracciare i contenuti e citare le fonti originali.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "20350887-bc33-3780-9de5-7a413fd76dc6",
+   "what": "Comunicare non e trasferire un contenuto da una mente a un'altra — e costruire insieme una relazione e una percezione: ogni messaggio porta sempre due livelli (cosa dico, come definisco la relazione con chi ascolto), e le tecniche efficaci funzionano tutte spostando il focus dal contenuto trasmesso al modo in cui il ricevente costruisce senso — con domande invece di risposte, riconoscimento invece di soluzioni, parole che cambiano l'esperienza percepita.",
+   "paraphrase": "La comunicazione non è un semplice scambio di informazioni ma un processo relazionale in cui il modo in cui si trasmette il messaggio definisce la connessione con l'interlocutore e la sua interpretazione della realtà.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "1680ca43-1daf-b2eb-786d-fa3e9a0baea0",
+   "what": "Per gli Stoici classici non c'e spettro tra virtu e vizio: o sei interamente virtuoso o sei caduto del tutto nel vizio, un solo compromesso consapevole fa crollare l'edificio. Da qui il corollario drastico: se un tiranno ti costringe a un atto davvero vizioso e non c'e scampo, e meglio morire (Zenone, Seneca e molti Stoici si suicidarono) che agire male - perche la morte e solo una breve pausa prima di ricorrere, mentre una vita viziosa perde l'unica cosa che conta. 60 anni di virtu vissuti infinite volte battono 80 che finiscono nella corruzione.",
+   "paraphrase": "Secondo la filosofia antica, poiché la moralità non ammette sfumature, preferire la fine della vita rispetto a un'azione immorale è l'unica via per preservare la propria integrità.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "3bb67f55-a578-1ba6-bef8-4b26e1a23519",
+   "what": "In Rain World, le creature hanno vita propria indipendente dal giocatore: cacciano, hanno paura, cercano cibo anche quando il giocatore non è presente. Il giocatore non è il centro del mondo — è un partecipante in un ecosistema già in corso. Questo produce incontri emergenti imprevedibili che nessun designer ha programmato esplicitamente.",
+   "paraphrase": "Le creature agiscono secondo i propri istinti e dinamiche naturali anche senza la presenza del protagonista, creando situazioni impreviste che non sono state scritte direttamente dagli sviluppatori.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "597cad74-e7bf-40f7-e1e9-4fbff4eebbb3",
+   "what": "Il feedback non va chiesto a fine lavoro per validazione — va chiesto all'inizio, mentre è ancora possibile cambiare direzione. Il ciclo è: crea → condividi → raffina → ricomincia. Più veloce è il ciclo, più veloce migliori.",
+   "paraphrase": "Bisogna chiedere feedback subito per poter intervenire in tempo e accelerare il miglioramento attraverso cicli rapidi di creazione e perfezionamento.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "c66a3f3b-861b-bfff-5996-eac0b4a591bc",
+   "what": "Il rifiuto strutturato — bloccarsi ed emettere un errore quando manca contesto invece di inventare — è compito di un validatore deterministico, non di un modello addestrato. Insegnare a una rete neurale a 'comportarsi come un parser' via fine-tuning produce un imitatore probabilistico di un programma che si può scrivere in cinquanta righe con affidabilità del 100% e costo di training zero. Constrained decoding per il formato in uscita, parser per la completezza in entrata: il modello genera, il codice giudica.",
+   "paraphrase": "È meglio usare un programma informatico per controllare la correttezza della struttura invece di cercare di istruire un modello a non sbagliare il formato.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "0ab60e99-9326-bfbe-7471-cbbb5f059083",
+   "what": "Chiedere troppi esempi indebolisce la convinzione: elencare 12 casi di un proprio tratto richiede sforzo, e la mente interpreta la difficoltà come 'questo tratto non mi appartiene' - così chi elenca 12 comportamenti assertivi si giudica meno assertivo di chi ne elenca 6",
+   "paraphrase": "Chiedere troppe prove per dimostrare una caratteristica personale finisce per far sembrare quel tratto meno autentico.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "4cbb00cf-cad2-c56e-0dcd-001bf399c8c9",
+   "what": "Un sistema pilotabile a metà è peggio di uno non pilotabile, perché sembra funzionare. Se una parte dei comandi si può inviare dall'esterno e un'altra parte legge ancora lo stato fisico del dispositivo, il difetto non produce un errore: produce comportamento assente. Chi automatizza vede metà degli effetti e attribuisce la differenza al proprio script, non al sistema.",
+   "paraphrase": "Un sistema parzialmente controllabile è più pericoloso di uno totalmente bloccato perché la mancanza di feedback coerente maschera il guasto come un errore di programmazione.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "a818722c-d7b2-2c7b-8bd7-8051e077e2c6",
+   "what": "Il minimo comportamento che distingue creazione da consumo è mettere del proprio sul pensiero altrui: aggiungere un'elaborazione, un giudizio, una connessione, una critica — qualsiasi contributo che non esisteva prima della propria elaborazione. Non è una soglia alta: anche una domanda genuina che nasce dalla lettura è creazione, se viene dal proprio pensiero e non è rimbalzo passivo.",
+   "paraphrase": "Creare significa aggiungere un elemento nuovo e personale a un'idea altrui attraverso un'elaborazione propria.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "dc86e1e7-184d-5dba-52bd-52d59a076916",
+   "what": "Un modello di accesso a perimetro (es. una rete privata con ACL) protegge tutto ciò che sta dentro il perimetro, ma la garanzia vale solo finché ogni componente del sistema resta dentro. Aggiungere un componente di controllo ospitato su infrastruttura di terzi (es. un bot su una piattaforma di messaggistica pubblica) riapre esattamente l'esposizione che il perimetro doveva chiudere: quel componente è raggiungibile da fuori la rete privata da chiunque ne conosca le credenziali, aggirando ogni ACL. Auto-ospitare lo stesso componente dentro il perimetro esistente preserva la garanzia; usare un servizio di terze parti per lo stesso ruolo la vanifica silenziosamente.",
+   "paraphrase": "Inserire un elemento esterno gestito da altri rompe la protezione della rete perché quel pezzo diventa accessibile dall'esterno, mentre tenerlo internamente mantiene la sicurezza.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "d188876c-8626-0038-477d-2958b7bcce6f",
+   "what": "Non tutti i lavori si dividono linearmente tra più persone. Nel lavoro cognitivo complesso, il numero di canali di comunicazione cresce al quadrato del numero di persone: 2 persone = 1 canale, 5 persone = 10 canali, 10 persone = 45 canali. Aggiungere persone a un progetto in ritardo lo rallenta ulteriormente — il tempo di allineamento supera il contributo.",
+   "paraphrase": "Aggiungere troppe persone a un compito complesso rallenta il lavoro perché la complessità della comunicazione aumenta esponenzialmente rispetto al numero dei partecipanti.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "5d2846f5-783d-1d11-f5d8-5d9dc31dcf9d",
+   "what": "Gli stereotipi sono norme di categoria che il cervello usa per pensare veloce: non sono pregiudizi morali ma rappresentazioni mentali di membri tipici di un gruppo. Il paradosso: nel problema del taxi lo stereotipo migliora l'accuratezza, ma nella vita reale lo rifiutiamo per etica - paghiamo un costo cognitivo per una società più giusta",
+   "paraphrase": "Le scorciatoie mentali aiutano a decidere rapidamente ma vengono evitate nella realtà per promuovere un convivenza più equa.",
+   "leaked": [
+    "mentali"
+   ],
+   "retried": true
+  },
+  {
+   "id": "fc4829ad-2d13-87c6-290c-a8b2554714ea",
+   "what": "Il cibo è il vettore di esposizione meno resistito nella narrativa: i personaggi mangiano sempre, hanno opinioni e memorie legate al cibo, le scene si ambientano naturalmente a tavola. Cultura, geopolitica, storia, economia e potere passano attraverso il piatto senza sembrare un info-dump.",
+   "paraphrase": "Il cibo è un espediente narrativo perfetto perché permette di inserire temi complessi come storia e politica in modo naturale attraverso le abitudini quotidiane dei personaggi.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "38799104-017b-c895-4555-a5699e074a8c",
+   "what": "Il confronto sociale è un criterio esterno di validazione: usare principi e ragionamenti nella vita sociale, assorbire il pensiero altrui e usarlo per attaccare il proprio. Non è dibattito per vincere, ma esposizione strutturata a prospettive esterne che il sistema non ha generato internamente.",
+   "paraphrase": "Si tratta di confrontarsi con idee diverse per integrare punti di vista esterni che non sono nati dal proprio pensiero individuale.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "db8479fb-40b9-e12a-5a77-b49f384a6cf4",
+   "what": "Esistono due stili opposti di gestire la creatività: il Minatore lavora con disciplina costante — ore fisse al giorno, estrae lentamente ma con continuità. Il Domatore non controlla il ritmo ma impara a riconoscerlo: cavalca i picchi di energia creativa intensa (anche a scapito del resto), poi usa le fasi discendenti per il lavoro meccanico che non richiede invenzione. Non sono stili migliorabili — sono natura da conoscere.",
+   "paraphrase": "Si tratta di due modi diversi di gestire la produzione, uno basato su una disciplina regolare e l'altro che segue i picchi di ispirazione alternandoli a compiti ripetitivi.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "42426089-32ea-ccd1-08cc-7770ef889464",
+   "what": "Con alta contesa su pochi dati condivisi, eseguire quella logica single-thread può battere il multithreading: i thread aggiunti portano sincronizzazione e traffico di cache senza aumentare il lavoro utile, perché quelle operazioni vanno comunque ordinate.",
+   "paraphrase": "In situazioni di forte competizione su pochi dati comuni, un unico flusso di esecuzione risulta più efficiente di più processi paralleli perché il coordinamento e i movimenti di memoria annullano i benefici della suddivisione del carico.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "3922625c-c7c6-9131-91ea-7b77d06cdcff",
+   "what": "Control the ideas, not the code (antirez) e il maker/checker split dei loop sono la stessa architettura a due livelli: l'umano possiede la definizione di corretto, la macchina fa il lavoro meccanico. Il contract-first è quella massima resa eseguibile — l'assert è l'idea di Sanfilippo scritta come pre/post, più verificabile dell'idea in testa.",
+   "paraphrase": "L'architettura a due livelli separa la logica umana dall'esecuzione automatica trasformando le intenzioni in vincoli tecnici eseguibili.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "45a7f7ca-ad9b-20b7-0f83-468abdd158e6",
+   "what": "Abbassare la baseline della dopamina rende il lavoro profondo più facile: quando la dopamina è bassa, il focus diventa normale e le abitudini produttive smettono di sembrare faticose",
+   "paraphrase": "Ridurre la stimolazione costante rende la concentrazione profonda più naturale e le abitudini quotidiane meno gravose.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "21873fc6-26b4-065f-5086-4a1abdc088fe",
+   "what": "Uno spike di dopamina da stimoli digitali al mattino abbassa il baseline per tutto il resto della giornata: tutto ciò che segue sembra grigio per confronto, non perché sia meno importante, ma perché l'asticella è stata alzata artificialmente",
+   "paraphrase": "L'eccessiva gratificazione immediata ricevuta all'inizio della giornata rende ogni altra attività successiva meno interessante perché il livello di eccitazione iniziale è stato troppo elevato.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "4e3acfa5-f297-6262-043a-e8567fa1815d",
+   "what": "Il debito tecnico non è visibile nel codice — è misurabile nel comportamento del sistema: un file con 10x le modifiche degli altri, un campo mancante che produce un falso cache hit, un bug che vive solo al punto di composizione. La firma non mente, ma tace.",
+   "paraphrase": "Il problema strutturale del software non salta agli occhi ma si manifesta attraverso anomalie nel funzionamento pratico del programma.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "36e876b1-c1ad-9d42-6435-b64a60512615",
+   "what": "I roguelike tengono le persone incollate per 100+ ore non grazie ai contenuti, ma perché amplificano la sensazione di migliorare nel tempo. La variabilità procedurale e il permadeath sono meccanismi di design che rendono la mastery misurabile a ogni run — non è quanto dura il gioco, è quanto chiaramente senti di stare migliorando.",
+   "paraphrase": "Questi giochi mantengono l'interesse per così tanto tempo perché permettono di percepire il proprio progresso personale attraverso ogni partita.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "775fb27d-775c-74d7-0ef0-9c63fec7b2cc",
+   "what": "Il cervello costruisce percorsi neurali come sentieri in una giungla: ogni azione ripetuta approfondisce il tracciato, rendendolo più facile da percorrere. Dopo anni, i sentieri diventano autostrade cognitive - comode ma difficili da abbandonare",
+   "paraphrase": "Le abitudini consolidate creano connessioni mentali così consolidate da diventare quasi impossibili da modificare.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "52a5066c-7439-e289-9675-8eff0a6fc39d",
+   "what": "Hub note e structure note lavorano in sequenza: prima usi la hub note per trovare un treno di pensiero che ti interessa, poi crei una structure note per estrarre le idee da quel treno, riorganizzarle in modo coerente e svilupparle in un argomento scritto",
+   "paraphrase": "Devi prima usare la hub note per individuare un filone di pensiero e poi passare alla structure note per organizzare e sviluppare quelle idee in un testo coerente.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "95c60ae3-4980-106b-99f5-f87e973d8aed",
+   "what": "Causare dolore a qualcuno e poi salvarlo crea un legame emotivo: la vittima si lega al salvatore perché lo vede come unica fonte di sicurezza",
+   "paraphrase": "Ferire una persona per poi aiutarla genera un'intimità profonda poiché chi soffre vede in chi interviene l'unica protezione possibile.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "00eb1df7-8c97-c580-fa92-c13971ab978e",
+   "what": "Lo stesso modello fisico — repulsione a distanza corta, attrazione a distanza media, nessuna forza oltre — produce gas, liquido o solido a seconda dei parametri: friction alta e forza forte = solido; attrazione media e friction bassa = liquido che scorre; forze deboli e friction nulla = gas che diffonde. Non servono tre motori fisici diversi. Servono tre set di numeri nello stesso motore.",
+   "paraphrase": "Le tre fasi della materia derivano da un unico meccanismo fisico che cambia stato solo variando i valori numerici delle interazioni e della resistenza.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "04e87dfa-4989-c865-605b-70dba7625113",
+   "what": "Se un parametro fissa già quanto lavoro il sistema può fare al massimo (es. il raggio di celle che disegni a schermo), usa lo STESSO numero anche come limite a ciò che l'utente può chiedere (es. quanto può rimpicciolire la vista). Così non serve un controllo a runtime del tipo 'troppo lavoro, mi fermo': la richiesta eccessiva diventa impossibile da esprimere. Un solo numero governa insieme il costo e il permesso, e i due non possono divergere.",
+   "paraphrase": "Bisogna usare lo stesso valore per definire sia la capacità massima del sistema che il limite delle azioni consentite all'utente per evitare controlli aggiuntivi.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "eac00a37-03f6-d323-5b86-1aa141a8a6bd",
+   "what": "Quando il change detection è implementato come concatenazione manuale di campi in una stringa, ogni refactoring del dato richiede aggiornare la stringa a mano. La rottura è silenziosa: un campo mancante non produce errore, produce un falso cache hit — il sistema pensa che nulla sia cambiato quando invece è cambiato tutto.",
+   "paraphrase": "Se il rilevamento dei cambiamenti avviene concatenando manualmente i campi in una stringa, ogni modifica ai dati richiede un aggiornamento manuale e un eventuale errore di omissione causa un falso positivo nel sistema che non rileva le modifiche effettuate.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "eb0bd826-faa8-888e-7cbc-a83d6d4416e5",
+   "what": "Il 90% delle aziende lavora su dati tabulari, ma la ricerca su embedding e vector search si concentra quasi tutta su testo, immagini e audio: rappresentare bene una tabella come vettore (es. per trovare righe anomale cercando i punti lontani dai simili) è un territorio quasi vuoto perché \"meno cool\", non perché meno utile.",
+   "paraphrase": "Molte realtà utilizzano dati strutturati ma le ricerche sulle ricerche vettoriali si limitano a contenuti multimediali trascurando la mappatura di tabelle per individuare errori.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "74137dd4-eb4e-ac24-3088-f96bf044b905",
+   "what": "Un personaggio 'grigio' non è un eroe addolcito né un villain addolcito — è una persona che può sorprendere credibilmente il lettore. Deve tenere qualità contraddittorie in contemporanea: capace di gesti che generano simpatia e di gesti che generano condanna, senza preavviso.",
+   "paraphrase": "Un personaggio complesso non è né un eroe né un cattivo ma una figura reale capace di mostrare tratti opposti in modo inaspettato.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "b2fdd773-3240-ee44-ca75-18408295021f",
+   "what": "La respirazione consapevole (5 minuti al giorno) allena la corteccia prefrontale: ogni volta che la mente vaga e la riporti al respiro, stai rafforzando il muscolo del controllo emotivo",
+   "paraphrase": "Praticare la meditazione quotidiana aiuta a migliorare la capacità di gestire le proprie emozioni attraverso la concentrazione costante.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "d3571380-408e-bdb1-caf9-c73b4b8e80f6",
+   "what": "In ogni sistema combinabile il numero di combinazioni cresce molto più in fretta del numero di pezzi (100 bit → 1 nonilione di stringhe). È il motore dell'emergenza: ottieni esponenzialmente più di quanto metti dentro. Quasi ogni frase che dici è la prima volta che viene detta nella storia, non perché sei geniale ma per l'esplosione combinatoria.",
+   "paraphrase": "Il numero di modi possibili per unire i singoli elementi cresce così rapidamente che quasi ogni frase nuova è un'invenzione statistica piuttosto che un atto di creatività individuale.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "ee3833e8-c15a-b1b4-d66e-3c6e6dd4fd34",
+   "what": "Misurare l'efficienza delle auto in miglia per gallone confonde le persone: passare da 12 a 14 MPG fa risparmiare più benzina che passare da 30 a 40 MPG, anche se il secondo sembra un miglioramento maggiore. La misura giusta è galloni per miglio, non miglia per gallone",
+   "paraphrase": "Il calcolo dei chilometri per unità di carburante risulta poco chiaro perché un piccolo incremento numerico può nascondere un vantaggio reale molto diverso rispetto a un salto più ampio.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "11b380a4-24a0-ebef-6fa2-f33987e11fae",
+   "what": "Il confine tra sistema di azione (GTD/bundle) e sistema di pensiero (Zettelkasten) va reso fisico, non solo concettuale: due oggetti distinti nello spazio. Se è da fare → bundle. Se è da pensare → Zettel.",
+   "paraphrase": "Bisogna separare fisicamente le attività da svolgere dalle idee da elaborare organizzandole in due contenitori diversi.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "4aa56222-8a18-c163-8cd5-bdefcb6546e8",
+   "what": "Commitment is not a binary trait but varies by the stakes of identity: domains with low identity-risk (e.g., improv, dating) allow for fluid action, while domains where the outcome defines the self (e.g., career, creative dreams) trigger paralysis to protect the self-image from potential failure.",
+   "paraphrase": "L'impegno non è un valore fisso ma dipende dal rischio che corri per la tua identità, diventando più fluido quando il fallimento non ti definisce e più paralizzante quando invece mette in gioco chi sei veramente.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "cae3cb25-bb48-9d2b-8e16-b33a35cda85c",
+   "what": "Aumentare le entrate ha impatto esponenziale, tagliare spese ha impatto lineare: ottimizzare tutte le spese ha un limite minimo, il reddito non ha tetto reale. Tre leve: chiedere aumento, cambiare lavoro, side hustle online",
+   "paraphrase": "Cercare di guadagnare di più è molto più efficace che cercare di risparmiare perché le economie hanno un limite mentre le guadagni non hanno tetti.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "4fe4923b-21e5-05f8-ae19-4fd478e39ae5",
+   "what": "Le structure notes servono a sviluppare e organizzare i treni di pensiero trovati nello zettelkasten, funzionando sia come mappe di come il pensiero si è evoluto sia come spazio per sviluppare argomenti specifici. Sono permanenti perché vengono engage, referenziate e sviluppate su lunghi periodi",
+   "paraphrase": "Le structure notes servono a organizzare e approfondire i pensieri del metodo zettelkasten tracciando l'evoluzione delle idee e creando contenuti permanenti attraverso collegamenti e sviluppi continui.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "00093466-1464-989b-bf6e-d4426796fe9a",
+   "what": "Quando una scelta ha un'opzione predefinita, la maggior parte delle persone la accetta senza pensarci: nei paesi dove sei donatore di organi se non fai nulla, il tasso di donazione è 100%; dove devi fare una spunta per esserlo, è 4%",
+   "paraphrase": "Le persone tendono a seguire la scelta automatica senza riflettere, motivo per cui il consenso è totale quando il sistema è impostato di default e minimo quando richiede un'azione attiva.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "d7293f8f-2408-238a-8561-9dc129531aad",
+   "what": "L'ASCII di Dwarf Fortress non è un limite estetico — è un moltiplicatore di velocità. Senza pipeline grafica, ogni idea di Tarn va da pensiero a implementazione in ore invece che mesi. Il collo di bottiglia classico dello sviluppo (arte, animazioni, modelli 3D) semplicemente non esiste. Questo è il motivo per cui DF ha potuto accumulare 20 anni di feature.",
+   "paraphrase": "L'assenza di elementi visivi complessi permette di trasformare le idee in funzioni concrete in tempi brevissimi eliminando ogni ostacolo tecnico alla produzione.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "a716cbe0-1095-819f-3468-2f9de1af0c63",
+   "what": "L'emergenza interessante nasce da poche primitive che interagiscono, non dal numero di regole. Noita: circa 40 materiali visibili ma solo circa 5 proprietà fisiche sottostanti — sono le interazioni tra le 5 a generare i 40 comportamenti.",
+   "paraphrase": "Il gioco crea varietà attraverso poche dinamiche di base che si combinano tra loro invece di basarsi su molteplici regole complesse.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "cb6c755d-0093-081d-e11c-2db9ef128990",
+   "what": "Aumentare quante operazioni riesci a fare al secondo (throughput) e ridurre il tempo per completare una singola operazione (latency) sono obiettivi spesso in conflitto. Raggruppare molte richieste in un unico batch aumenta il throughput — processi più cose per unità di tempo — ma ogni singola richiesta deve aspettare che il batch sia pieno prima di partire, alzando la sua latenza individuale. Non si può ottimizzare entrambi insieme senza un compromesso esplicito.",
+   "paraphrase": "Migliorare la quantità di azioni eseguite in un dato arco di tempo e velocizzare ogni singola operazione sono obiettivi difficili da conciliare contemporaneamente.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "9599a203-f405-694a-3494-f32c28dd7775",
+   "what": "Una singola esperienza basta a rendere normale un evento anormale: la mente non chiede ripetizioni, crea subito un'associazione che trasforma la sorpresa in aspettativa",
+   "paraphrase": "Una sola volta basta a far percepire un evento insolito come qualcosa di comune perché la mente lo interiorizza immediatamente.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "9626f9cd-2072-d89f-ad10-cbf8196bebe3",
+   "what": "La frammentazione di memoria ha due forme: esterna (memoria libera spezzata in pezzi troppo piccoli) e interna (l'allocatore dà un blocco più grande del richiesto per rispettare classi di dimensione o allineamento).",
+   "paraphrase": "La memoria può essere divisa in piccoli frammenti inutilizzabili o essere assegnata in blocchi eccessivamente grandi rispetto alle necessità effettive.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "072fd203-32b6-f662-3ba2-ea3163fe3758",
+   "what": "I blocchi senza input (attività quotidiane senza musica, telefono o stimoli) creano chiarezza mentale: eliminare il rumore permette di vedere con precisione cosa si vuole realizzare e riduce la procrastinazione",
+   "paraphrase": "I momenti di vuoto senza distrazioni aiutano a focalizzarsi sugli obiettivi reali e a smettere di rimandare le cose.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "df36b201-c2f4-8ced-0989-defdbfef6065",
+   "what": "Per far controllare due azioni allo stesso input, subordina la seconda a un tasto modificatore tenuto premuto, non a una modalita on/off. Una modalita e uno stato salvato in cui puoi restare bloccato (e che devi mostrare e ricordarti di uscire); un modificatore e senza stato — sei sempre nell'azione di default a meno che il tasto non sia premuto ora.",
+   "paraphrase": "La seconda funzione deve attivarsi solo durante la pressione fisica di un tasto invece di dipendere da uno stato attivo o disattivo.",
+   "leaked": [
+    "tasto"
+   ],
+   "retried": true
+  },
+  {
+   "id": "1e20108c-53b4-edd3-b93e-a088535b5aa5",
+   "what": "La maggior parte delle fleeting notes non diventerà permanente. Questo non è un fallimento: le idee catturate sono pensieri al volo, non tutti meritano di entrare nel sistema di conoscenza. Dopo la revisione, si eliminano o si trasformano - senza attaccamento emotivo",
+   "paraphrase": "Non è un problema se molte note veloci vengono scartate o modificate dopo la revisione perché servono solo a catturare pensieri momentanei che non devono necessariamente restare nel sistema.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "7b2d3b48-4234-af35-52f8-bcd6f054f369",
+   "what": "La somma in virgola mobile non è associativa: se un calcolo parallelo fonde i contributi nell'ordine in cui i thread finiscono, due esecuzioni identiche possono divergere. Con gli interi la somma è associativa, e due esecuzioni identiche restano identiche bit per bit. Se hai costruito strumenti per confrontare esecuzioni, la scelta del tipo numerico decide se quegli strumenti confrontano qualcosa di reale.",
+   "paraphrase": "L'uso di numeri decimali può causare risultati diversi per operazioni uguali a causa dell'ordine di calcolo, mentre i numeri interi garantiscono sempre la stessa precisione.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "6a724089-69a3-ec6c-f474-e540cfa61d46",
+   "what": "Un sistema di recupero ha due facoltà distinte: la portata, cioè quante e quali cose riesce a raggiungere, e il ranking, cioè in che ordine le presenta. Allungare la portata senza estendere anche il ranking non aggiunge informazione, aggiunge rumore: ciò che è stato raggiunto per un buon motivo arriva indistinguibile da ciò che è stato raggiunto per caso.",
+   "paraphrase": "Il sistema distingue tra la quantità di risultati trovati e la loro gerarchia, poiché aumentare il numero di elementi senza una corretta prioritizzazione mescola i risultati rilevanti con quelli casuali.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "3736ec35-4aeb-e66d-6372-b638da47bac4",
+   "what": "Il digitale è effimero: le app cambiano modello di business, perdono supporto, cancellano i dati (un budget tracciato per anni sparisce nel passaggio da un telefono all'altro). Ciò che conta davvero va distillato in una metrica e trascritto a mano su un supporto che ti sopravvive",
+   "paraphrase": "Dovresti salvare le informazioni essenziali su carta perché i dati digitali sono troppo fragili e soggetti a cancellazioni o cambiamenti tecnologici.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "dacdd979-88a5-b852-6a93-bb41f4191621",
+   "what": "La narrazione non si scrive — si costruisce il sistema che la genera. Quando le regole sono uniformi e la fisica è coerente, il conflitto emerge senza script: il designer non crea storie, crea le condizioni perché accadano. Lato ricezione, la mente non registra la storia — la costruisce: razionalizza causalità a posteriori, produce coerenza da frammenti tematici, valuta le vite come narrative. Il paradosso produttivo del cluster: più un'opera è specifica e personale, più arriva lontano — il 'broadening' per accontentare tutti produce genericità, non portata.",
+   "paraphrase": "Il narratore non deve inventare la trama ma progettare un sistema coerente che permetta alla storia di emergere spontaneamente, mentre il pubblico ricostruisce la narrazione unendo i pezzi e trova più valore in un'opera specifica che in una generica.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "2a4248f5-abce-7623-9c3e-6b358bc3c672",
+   "what": "Le hub note sono note-indice che puntano all'inizio di sequenze di idee collegate nel tuo archivio personale: non contengono idee stesse, ma indicano dove trovare i 'treni di pensiero' che ti interessano esplorare",
+   "paraphrase": "Le hub note sono come dei punti di riferimento che non contengono informazioni dirette ma servono a rintracciare i percorsi di pensiero collegati all'interno del proprio archivio.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "e9eb7a43-080c-3f37-f621-e59db548e17c",
+   "what": "Quando stai valutando un impegno — socio, progetto, cliente — e la risposta non è un sì entusiasta e immediato, la risposta è no. Se devi convincerti, aspetta un giorno. Se l'entusiasmo non cresce, è un no. Il segnale interno di 'forse sì' maschera quasi sempre un no che non hai il coraggio di dire.",
+   "paraphrase": "Se non senti una certezza chiara e istantanea riguardo a una scelta, significa che la tua esitazione nasconde in realtà un rifiuto che non vuoi ammettere.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "16ed991d-cf98-ffa0-2483-002d7d49aeaa",
+   "what": "Progettazione per emergenza: progetti i mattoni e le regole, NON le conseguenze. Inventi le regole e SCOPRI cosa producono — 'costruisci i mattoncini Lego, non il set'. Gli inventori degli scacchi non hanno dovuto inventare anche tutte le strategie: sono emerse dalle regole. Così ottieni più di quanto metti: progetti un po' e l'emergenza fa il resto. Il metodo per trovare le regole buone è uno solo: provare, iterare, piccole varianti del migliore — più coltivare una pianta che costruire una casa.",
+   "paraphrase": "Bisogna concentrarsi sulla creazione di regole e componenti di base lasciando che le dinamiche complesse e le strategie emergano spontaneamente dal sistema stesso.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "e606961e-6b84-cf58-9391-c592dfe4c1e1",
+   "what": "Un team nuovo attraversa fasi prevedibili: formazione (educati ma incerti), conflitto (scontro su ruoli e metodi), normalizzazione (norme condivise emergono), performance (vera efficacia). Il conflitto non è un guasto — è una fase obbligata. Saltarla non è possibile, solo ritardarla.",
+   "paraphrase": "Un gruppo che inizia a lavorare insieme deve necessariamente superare momenti di tensione e confusione per arrivare a stabilire regole comuni e raggiungere i risultati desiderati.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "b5cf625c-b81a-bbbf-5f8e-1e19ec6cfb76",
+   "what": "Un load balancer distribuisce le richieste tra più server che fanno lo stesso lavoro. Se uno si rompe, il traffico va agli altri; se il carico cresce, se ne aggiungono.",
+   "paraphrase": "È quel sistema che smista le richieste su più server identici per garantire la continuità del servizio e scalare la capacità in base al traffico.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "c81cc74e-3739-1521-b8c5-699fa446b85c",
+   "what": "Forzare gli utenti a usare strumenti sub-ottimali (perché quelli ideali non sono disponibili) non peggiora l'esperienza — la migliora: li spinge a esplorare più contenuto, a padroneggiare più sistemi, e a sentirsi creativi quando trovano soluzioni improvvisate. La chiave è che la limitazione sembri naturale, non arbitraria.",
+   "paraphrase": "Le limitazioni tecniche possono arricchire l'esperienza dell'utente stimolando la creatività e la padronanza degli strumenti se queste appaiono come sfide naturali anziché come ostacoli forzati.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "f00daeb7-5354-94cc-2ad4-57543770e353",
+   "what": "Far credere agli altri che il successo sia merito loro crea gratitudine e dipendenza: quando pensi di aver vinto da solo, non ti chiedi chi ti ha aiutato",
+   "paraphrase": "Attribuire il traguardo agli altri genera un legame di dipendenza, mentre l'illusione di una vittoria solitaria cancella la memoria del sostegno ricevuto.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "7ec68412-1baa-3e19-3ae6-ed725560372e",
+   "what": "Lo stoicismo manageriale appiattisce 'accetta cio che non controlli' in 'accetta ogni sofferenza', cancellando la distinzione cruciale tra il dolore da accettare (un lutto, fuori dal tuo controllo) e l'ingiustizia che puoi e devi combattere (un capo abusante, lo sfruttamento). I veri Stoici, come Seneca, passarono la vita a combattere l'ingiustizia. Senza questo discernimento, la 'resilienza' addestra a essere servili - 'soffro ma pazienza, devo accettare' - il terreno perfetto per dipendenza e anestesia, perche soffri credendo di non poter cambiare nulla.",
+   "paraphrase": "L'idea era che confondere la rassegnazione davanti a eventi inevitabili con la sottomissione a soprusi ingiusti trasformi la resilienza in una scusa per non reagire alle ingiustizie.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "2372b3e7-8acb-1227-91bf-9fa0923bfb44",
+   "what": "Un team resiliente ha membri con una specialità profonda (la barra verticale della T) ma capaci di contribuire su fronti adiacenti (la barra orizzontale). Un team di soli specialisti rigidi è una bomba ad orologeria: basta che una persona sia assente o sovraccarica per bloccare l'intero flusso.",
+   "paraphrase": "Un team efficace deve unire competenze specialistiche a una flessibilità operativa per evitare che la mancanza di un singolo membro blocchi l'intero lavoro.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "1e340129-d457-8446-467e-2c8aaa58956c",
+   "what": "Le formiche del deserto (Cataglyphis) tornano al nido per integrazione di percorso (dead reckoning: bussola su luce polarizzata + contapassi interno), non per feromone — il feromone marca la via al cibo per le altre, non il ritorno per chi lo deposita. Spostate a mano durante il tragitto, tornano dove il nido dovrebbe essere secondo il loro vettore interno, non dove è realmente: prova che integrano un vettore, non seguono una mappa.",
+   "paraphrase": "Questi insetti rintracciano la base calcolando la direzione e la distanza percorsa invece di seguire tracce chimiche.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "b2afdfff-3262-8956-7dbc-8fb21e935531",
+   "what": "Il supporto analogico e un laboratorio, non un archivio. Non lo tieni perfetto per conservare risultati: ci fai esperimenti sporchi — la maggior parte falliranno — per scoprire come andare da dove sei a dove vuoi. La carta vince sul digitale non perche piu efficiente (non lo e), ma perche la sua frizione filtra il rumore e ti costringe all'intenzione.",
+   "paraphrase": "La carta serve a testare idee e definire un percorso chiaro perché la sua resistenza fisica aiuta a concentrarsi sulle azioni concrete.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "bd640734-aea3-96ce-2316-c84c846d279f",
+   "what": "Tiger Style ordina i valori come safety > performance > developer experience, esplicitamente, invertendo la prassi comune di partire dalla developer experience.",
+   "paraphrase": "La logica di Tiger Style mette la protezione e le prestazioni prima della facilità d'uso per chi scrive il codice.",
+   "leaked": [
+    "style",
+    "tiger"
+   ],
+   "retried": true
+  },
+  {
+   "id": "42237184-d263-8a87-69a9-f2c4f6a6b895",
+   "what": "Il pensiero strategico si allena pensando a strati: non solo 'cosa faccio ora', ma 'perché hanno fatto quella mossa', 'cosa faranno dopo', 'come si evolve lo scenario tra 2-3-4 mosse'",
+   "paraphrase": "Bisogna guardare oltre l'azione immediata per comprendere le motivazioni altrui e prevedere le conseguenze future.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "bf14b879-161b-24d8-2143-baee0eabbcd1",
+   "what": "Every communication has two levels: the Content (the explicit information transmitted) and the Relationship (how the message is to be taken, defined by the relationship between the parties).",
+   "paraphrase": "Ogni comunicazione si divide tra il contenuto esplicito del messaggio e la sfumatura relazionale che ne determina l'interpretazione.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "eae03171-d0d6-5d8e-8d4a-e1b644b4d1f0",
+   "what": "I bug più famosi di Dwarf Fortress — gatti ubriachi, carpe carnivore — non nascono da errori di logica ma dall'interazione tra sistemi indipendenti e coerenti: eyelids + cat cleaning + alcohol on floor + ingestion syndrome = gatto alcolizzato. Nessun designer l'ha progettato. È una storia, non un difetto.",
+   "paraphrase": "Questi comportamenti insoliti non sono errori di programmazione ma il risultato logico della combinazione di diverse meccaniche indipendenti che creano situazioni inaspettate.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "5af47705-67b3-38c3-ace6-1e38e8e9e308",
+   "what": "In Rust un registro a runtime di handler per una superficie di comandi si autodistrugge: ogni handler deve modificare più oggetti, ma una closure salvata in una mappa non può tenerli in prestito, quindi vanno passati come parametro — e serve un oggetto contesto che li impacchetta tutti. Il risultato è che ogni handler riceve il permesso di toccare tutto, in cambio di aver perso un match esaustivo verificato dal compilatore. Il match è già il dispatch.",
+   "paraphrase": "In Rust la gestione dei comandi richiede un oggetto contenitore per i dati perché le funzioni memorizzate in una mappa non possono trattenere riferimenti diretti, sostituendo la verifica del compilatore con un accesso diretto a tutto il contesto.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "2cb608bf-21ea-da3a-684a-b2d1ce831b88",
+   "what": "Costruire il sistema che costruisce il sistema invece di costruire le feature direttamente: chi sposta il lavoro al livello meta (factory di agenti + codice) ottiene risultati riproducibili su spec, e l'output per unità di tempo cresce in modo non lineare",
+   "paraphrase": "Invece di aggiungere funzioni singole, bisogna creare un'infrastruttura automatizzata che generi il software in modo scalabile e ripetibile.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "f865cb82-5847-16a8-6446-b1b5c6793d6a",
+   "what": "La prima riga efficace fa due cose insieme: rompe un'assunzione familiare (segnala che siamo in un mondo strano) E mette il protagonista in tensione immediata. Abercrombie: 'Era il 15 di Lealtà e fratello Diaz era in ritardo per la sua udienza con Sua Santità il Papa.' — l'impossibilità segnala il mondo, il ritardo segnala il pericolo.",
+   "paraphrase": "L'incipit ideale deve stabilire un contesto insolito e creare subito un conflitto per il personaggio principale.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "cfa9d74e-5867-846d-76ba-ebe8a6014f9e",
+   "what": "Una simulazione deterministica (stesso stato iniziale produce sempre lo stesso risultato) si puo sfruttare creativamente: esegui una volta, registri dove atterra ogni oggetto, assegni a ciascuno il colore del pixel sottostante, riesegui - gli oggetti ricompongono un'immagine. Stessa proprieta che da riproducibilita e debugging.",
+   "paraphrase": "Se il sistema produce sempre lo stesso risultato partendo dagli stessi dati, si può far scorrere gli elementi più volte per farli sovrapporre e formare una figura coerente.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "bd3799cd-852a-06d4-435b-4442a7b4c40c",
+   "what": "I casi individuali sorprendenti cambiano il modo di pensare, le statistiche no: la gente accetta dati scioccanti sul gruppo ma non li applica ai singoli che conosce. Per insegnare davvero, mostra un caso che rompe le aspettative - non una percentuale",
+   "paraphrase": "Le storie personali e gli esempi concreti hanno un impatto educativo molto più forte rispetto ai dati statistici perché le persone tendono a ignorare le percentuali quando si tratta di individui reali.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "9e4560a6-5980-911b-87b9-a80d87739e26",
+   "what": "La società digitale è calibrata sull'assunzione che gli umani siano limitati in numero e attenzione: i sistemi di ticketing, i siti di acquisto, le code di attesa, le mail — tutto presuppone attori singoli che agiscono uno alla volta. Gli agenti AI rompono questo assunto: un singolo individuo può disporre di centinaia di agenti che agiscono in parallelo, simultaneamente, senza pausa.",
+   "paraphrase": "Il mondo digitale è stato progettato per persone che operano una sola cosa alla volta, ma l'intelligenza artificiale permette a una persona di gestire centinaia di processi contemporaneamente.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "11a8a547-8604-0dfd-30ad-624bf3612929",
+   "what": "Un assert codifica un'invariante che il type system non può esprimere; se smette di essere vera, il programma si ferma subito invece di continuare con stato corrotto.",
+   "paraphrase": "Un assert serve a bloccare il programma non appena viene violata una condizione logica che il compilatore non è in grado di controllare automaticamente.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "ca1ec2fa-0232-12a5-ddda-18ec7769e7bd",
+   "what": "Un LLM che scrive storie da solo bara: inventa coincidenze, dimentica ferite, resuscita personaggi — nel mondo generato al volo niente è vero finché non conviene alla frase successiva. Separare la generazione degli eventi (motore di regole con dadi e stato) dalla resa in prosa toglie all'LLM la possibilità di barare: può solo raccontare fatti già accaduti, non piegarli.",
+   "paraphrase": "Dovresti separare la logica di gioco dalla narrazione per evitare che l'intelligenza artificiale manipoli i fatti della trama per favorire la coerenza immediata del testo.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "34ed983e-1118-64ea-7fcf-83b2f073b9ac",
+   "what": "Successo = talento + fortuna, grande successo = poco talento in più + molta fortuna - quando vedi risultati estremi, la fortuna ha pesato più del talento perché il talento è stabile ma la fortuna oscilla",
+   "paraphrase": "Il trionfo straordinario deriva da una componente casuale predominante rispetto alla capacità personale poiché la fortuna varia mentre le abilità restano costanti.",
+   "leaked": [
+    "fortuna"
+   ],
+   "retried": true
+  },
+  {
+   "id": "70cfe0b8-c8c4-f6b1-4b42-35a695c1ce1c",
+   "what": "Per introdurre un personaggio, entra direttamente nella sua esperienza percettiva — cosa sta sentendo adesso, non com'è fatto l'ambiente. I personaggi non descrivono a se stessi le cose familiari. Ogni frase deve aprire una domanda, non chiuderla.",
+   "paraphrase": "Dovresti focalizzarti sulle sensazioni immediate del personaggio invece che sulla descrizione oggettiva, evitando dettagli scontati e usando frasi che lascino il lettore curioso.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "d3147c02-51fc-c0e0-fdfe-f2d27fb23b93",
+   "what": "I goal danno la direzione ma non dicono come arrivarci: è come voler andare a Parigi senza sapere come prenotare un volo o fare il passaporto",
+   "paraphrase": "Gli obiettivi definiscono la meta finale ma non forniscono le istruzioni pratiche per percorrerne il tragitto.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "2185da4a-58e0-c1f6-23cb-5b8748d86ecf",
+   "what": "Il corpo e la mente segnalano il disagio prima che la narrazione identitaria abbia tempo di razionalizzarlo: nausea, stanchezza cronica, irritabilità, perdita di energia sono output somatici che precedono la loro interpretazione. Questo canale è parzialmente esterno al loop valori→identità→routine perché opera prima del filtro narrativo, non dopo — è uno dei pochi punti in cui il sistema si può osservare dall'esterno di se stesso.",
+   "paraphrase": "Le reazioni fisiche appaiono prima che la mente riesca a dare un senso logico ai sintomi perché queste manifestazioni avvengono fuori dal circuito dei pensieri e delle abitudini.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "33f2435d-f2b6-6b29-7202-f91037cdef32",
+   "what": "Il cervello è un pessimo simulatore di giochi: quasi ogni idea sembra divertente in testa. Solo il prototipo rivela se l'idea funziona — perché porta a galla la noia, la complessità nascosta, e i problemi di design imprevedibili.",
+   "paraphrase": "La mente crea illusioni di coinvolgimento che svaniscono solo quando la realizzazione pratica mette in luce i difetti strutturali e la monotonia del progetto.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "c5f60f8e-88dd-3080-4d8f-1f943c902792",
+   "what": "I LLM dichiarano context window di 1M+ token, ma il limite reale è circa 30-50k token (25-50% di quanto dichiarato). Oltre quella soglia compaiono tre failure mode: poisoning (l'AI si fissa su un errore e non lo lascia andare), distraction (troppo contesto irrilevante distrae dalla richiesta), confusion (informazioni contraddittorie paralizzano l'output).",
+   "paraphrase": "Anche se i modelli dichiarano capacità elevate, la capacità effettiva è molto più bassa e oltre una certa soglia il sistema inizia a sbagliare perché si concentra su errori, si perde in dettagli inutili o non riesce a gestire dati contrastanti.",
+   "leaked": [
+    "dichiarano"
+   ],
+   "retried": true
+  },
+  {
+   "id": "ed7090e8-053a-806a-2a2a-c8ff663e53be",
+   "what": "Le persone combinano due distorsioni quando decidono con rischi: valutano guadagni e perdite in modo asimmetrico (le perdite fanno più male) e assegnano pesi distorti alle probabilità (sovraponderano eventi rari, sottoponderano quasi-certezze). Questa combinazione produce quattro pattern prevedibili: avversione al rischio sui guadagni probabili, propensione al rischio sulle perdite probabili, propensione al rischio sui guadagni improbabili (lotterie), avversione al rischio sulle perdite improbabili (assicurazioni)",
+   "paraphrase": "Le persone reagiscono in modo incoerente davanti al rischio perché percepiscono le perdite come più gravi e danno troppa importanza a eventi rari o troppo poca a quelli quasi certi.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "202984ad-9782-9003-d83a-071dd53a259b",
+   "what": "Passare dal 95% al 100% di probabilità colpisce molto più che passare dal 90% al 95%: la certezza completa vale psicologicamente molto più della sua probabilità reale",
+   "paraphrase": "Il salto verso la certezza assoluta ha un impatto psicologico molto più forte rispetto a un piccolo incremento di probabilità.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "352810d3-5551-ff5f-6d5c-6941e81a4e43",
+   "what": "La creatività obbedisce a condizioni necessarie, non al talento: richiede un substrato profondo in almeno un dominio (senza niente da ricombinare, produce solo remix), l'esposizione deliberata a domini distanti (la collisione tra pattern invisibili genera novità), e la consapevolezza del proprio ciclo energetico (Minatore vs Domatore). La tensione interna del cluster è sul vincolo: il vincolo non soffoca la creatività — la rende operativa filtrando verso l'essenziale invece di ottimizzare tutto.",
+   "paraphrase": "La creatività nasce dalla padronanza di una materia, dall'unione di ambiti diversi e dalla gestione delle proprie forze, dove i limiti non bloccano l'ispirazione ma la guidano verso ciò che conta davvero.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "ceacf5c8-7eec-4594-a2a8-02507a5b6963",
+   "what": "Per imparare a costruire qualcosa, il progetto deve stare interamente dentro ciò che già capisci — non fuori. Se non sai spiegare ogni riga, non stai imparando: stai copiando. La distanza tra skill attuale e complessità del progetto deve essere zero o quasi zero.",
+   "paraphrase": "Devo restare entro i confini delle mie competenze attuali per evitare di limitarmi a una mera imitazione senza reale acquisizione.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "f38f0f3d-ee09-10d1-28ba-458fe7268edd",
+   "what": "La consistenza batte l'intensità: il successo arriva mostrandosi ogni giorno per anni, non con picchi di lavoro intenso seguiti da pause",
+   "paraphrase": "La costanza quotidiana nel tempo è più efficace di sforzi intensi ma sporadici per raggiungere il successo.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "e5bb8872-8d64-bc7e-fbba-c9c9fb491c85",
+   "what": "Gli errori di giudizio non sono casuali: sono la conseguenza prevedibile di euristiche che funzionano bene nella media ma falliscono sistematicamente in condizioni specifiche. Conoscere il catalogo dei bias non disattiva l'errore — ma permette di costruire protocolli di correzione mirati invece di affidarsi alla forza di volontà.",
+   "paraphrase": "Capisco che i nostri errori non siano a caso ma derivino da scorciatoie mentali che falliscono in certi contesti, e che studiare i pregiudizi serva a creare metodi di controllo pratici invece di contare solo sulla propria autocontrollo.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "3af5d783-97e5-90a8-16e2-42faa624959b",
+   "what": "L'LLM non esegue i tool direttamente. C'è uno strato software intermedio — l'harness (imbracatura) — che legge continuamente l'output del modello, intercetta le richieste di tool nel testo, le esegue, e restituisce il risultato al modello nel contesto. L'LLM non 'chiama' nulla: produce testo strutturato che l'harness interpreta e aziona.",
+   "paraphrase": "Il modello genera solo testo strutturato che un modulo software esterno legge e trasforma in azioni concrete per restituire i risultati al sistema.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "7fca4fce-c570-7f46-c00f-2165897e37ab",
+   "what": "Quando un indice mappa chiavi riusabili (una posizione, un nome, uno slot) a entità che nascono e muoiono, la deregistrazione per sola chiave è sbagliata: se una nuova entità prende la chiave prima che la vecchia sparisca, la partenza tardiva della vecchia cancella la registrazione della nuova. La deregistrazione corretta è per coppia (chiave, proprietario): rimuovi solo se la entry punta ancora a chi se ne sta andando. Costa un confronto.",
+   "paraphrase": "Bisogna eliminare l'elemento solo se l'identificativo univoco corrisponde esattamente all'entità che sta terminando la sessione per evitare sovrascritture accidentali.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "75ef2f72-b2d7-b8e7-696a-bf18d7a76a9d",
+   "what": "Meditatori esperti mostrano onde gamma (onde cerebrali ad alta frequenza legate a stati alterati di coscienza e flow) sempre presenti, non solo per mezzo secondo come nei comuni mortali. Durante la meditazione, picchi di oltre 700% in un istante",
+   "paraphrase": "Le persone esperte di pratica spirituale mantengono costantemente frequenze elevate nel cervello mentre i neofiti le percepiscono solo per brevissimi momenti.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "577d93af-52f5-93f4-0051-90d464d64e14",
+   "what": "Per generare storia procedurale non serve simulare la causalità vera tra eventi. Si sceglie l'evento a caso, poi si guarda lo stato corrente dell'entità (alleanze, domini, proprietà) e si costruisce a posteriori una causa plausibile. Il risultato è indistinguibile dalla causalità reale per il lettore.",
+   "paraphrase": "Basta scegliere un evento casuale e giustificarlo con i dati attuali del personaggio per creare una narrazione coerente per chi legge.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "543cb413-859b-010b-af9a-cf3c163345f4",
+   "what": "Prima di scrivere i contratti di una funzione, chi la delega viene interrogato, una firma per volta, con domande a cui si risponde solo tenendo in testa l'invariante: se cancello questa postcondizione, quale corpo sbagliato passa comunque i test? qual è l'input più piccolo che la fa fallire? chi a monte lo garantisce già? questo numero è una soglia o uno stato non modellato? Se le risposte mostrano che non ha capito, l'interrogante spiega e richiede: non cede.",
+   "paraphrase": "Bisogna verificare se ogni condizione finale sia indispensabile e identificare i casi limite prima di redigere i contratti della funzione.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "429f103d-352c-5c95-8a67-ac351d58f46b",
+   "what": "Lo Stoicismo classico poggia su una 'Volonta maggiore' - non un Dio antropomorfo ma una forza preesistente (la natura, il cosmo) che ti assegna un ruolo: carattere, epoca e luogo di nascita, natura essenziale sono dati, da scoprire come una statua nel marmo, non scelti. Lo stoicismo manageriale cancella tutto questo e dice 'puoi diventare cio che decidi'. Ma e incoerente: se devi essere puro 'resiliente' e accettare tutto, non puoi anche costruirti all'infinito. Senza l'elemento dato diventi preda di mode e identita adottate finche comode - disperso - e per giunta obbligato ad accettare cio che ti capita.",
+   "paraphrase": "La filosofia antica vede il destino come un dato di fatto da svelare mentre la versione moderna propone una libertà di scelta che crea contraddizioni logiche.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "4730ae69-c908-013d-f685-0cf6c6d175af",
+   "what": "Un commento nel body descrive il *come* e marcisce a ogni refactoring senza che nessuno se ne accorga. Un contratto sulla firma descrive il *cosa* osservabile: diventa falso solo se cambia il comportamento — e quel cambio rompe i test derivati dal contratto stesso. Contratto e test si tengono onesti a vicenda; il commento nel body non ha nessun guardiano. I doctest eseguibili chiudono il cerchio: il contratto che diventa falso fa fallire la CI.",
+   "paraphrase": "Il commento nel corpo del codice diventa obsoleto durante le modifiche mentre la firma definisce il comportamento esterno garantito dai test automatici.",
+   "leaked": [
+    "commento"
+   ],
+   "retried": true
+  },
+  {
+   "id": "ef6c91c9-1ed5-0c29-9ac7-9a92e055c900",
+   "what": "Gli esperti con una teoria unica e coerente del mondo (ricci) fanno previsioni peggiori di chi pensa per intersezioni di molti fattori (volpi) - i ricci sono più sicuri ma più spesso sbagliano, le volpi ammettono l'incertezza e sbagliano meno",
+   "paraphrase": "Chi segue un unico modello rigido sbaglia più spesso rispetto a chi considera diverse variabili e accetta l'incertezza.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "412da90b-05a5-dcaf-b8d2-b3f4a703cd39",
+   "what": "In Lenia, ogni punto della griglia cresce solo se la densità media del suo vicinato cade in un intervallo ottimale [μ ± σ]. Troppo poco → il punto decresce. Troppo → il punto decresce. Solo nel range giusto la crescita è positiva. Questo singolo vincolo — ottimo di densità locale — è sufficiente a generare strutture autonome stabili che si auto-regolano.",
+   "paraphrase": "In Lenia un punto si sviluppa solo quando la quantità di vicini è bilanciata, permettendo alla struttura di mantenersi stabile e organizzata da sola.",
+   "leaked": [],
+   "retried": true
+  },
+  {
+   "id": "c8e9a5ae-45f0-30b9-4806-432f0f02d2e1",
+   "what": "Una macro procedurale Rust è una funzione che gira a compile time, non a runtime. Riceve codice sorgente (come albero di token), lo trasforma, e restituisce codice sorgente nuovo che il compilatore poi compila. Non lavora su valori — lavora su struttura sintattica.",
+   "paraphrase": "Una macro procedurale in Rust è una funzione che trasforma il codice sorgente durante la fase di compilazione invece di elaborare dati durante l'esecuzione.",
+   "leaked": [
+    "macro"
+   ],
+   "retried": true
+  },
+  {
+   "id": "986095e0-9328-4b1c-a666-acecf0a3a1cf",
+   "what": "Regola per le docstring: dichiara solo ciò che firma e tipi non possono esprimere — unità di misura, assunzioni sull'input, semantica dei casi limite e degli errori. Se una riga è deducibile da nomi e tipi, cancellala. Ciò che resta è denso e cambia raramente, quindi resta vero. 'parse_date(s) -> Date' non ha bisogno di 'parsa una data'; ha bisogno di 'assume ISO 8601, errore su timezone mancante'.",
+   "paraphrase": "Le docstring devono contenere solo le informazioni non deducibili dai tipi e dai nomi, come unità di misura, assunzioni e gestione degli errori, per risultare dense e poco soggette a modifiche.",
+   "leaked": [],
+   "retried": false
+  },
+  {
+   "id": "552b52cb-b56c-8644-e529-c650a80696bb",
+   "what": "Dopo che l'AI spiega o produce qualcosa, chiudi la risposta e riformula con parole tue senza rileggere. Se non riesci, non hai capito. Consumare output AI senza questo passaggio è maintenance rehearsal: la conoscenza non si trasferisce perché manca l'elaborazione cognitiva attiva.",
+   "paraphrase": "Devi rielaborare mentalmente il contenuto dell'intelligenza artificiale con parole tue subito dopo la lettura per trasformare l'informazione in una vera conoscenza invece di limitarti a una semplice ripetizione passiva.",
+   "leaked": [],
+   "retried": false
+  }
+ ]
+}

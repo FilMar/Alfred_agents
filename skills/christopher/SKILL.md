@@ -21,7 +21,7 @@ tb random                        # random note — for unguided lateral explorat
 tb tags                          # list tags by frequency — maps the conceptual territory
 ```
 
-Always pass `--min-score 0.6` — the CLI applies no cutoff when the flag
+Always pass `--min-score 0.35` — the CLI applies no cutoff when the flag
 is omitted.
 
 ### Output format
@@ -36,7 +36,7 @@ is omitted.
 
 Do not limit yourself to a single search. Vary the parameters if the first attempt returns little. Use `tb tags` to understand what tags exist before filtering. Use `tb random` for lateral exploration if the query finds nothing relevant.
 
-- **`--min-score`**: drops results with score below this value. Use `0.6` as the working default. Lower it (or pass `0`) when a query is broad and returns too little.
+- **`--min-score`**: drops results with score below this value. Use `0.35` as the working default: measured on `nomic-embed-text-v2-moe`, a right answer scores 0.43 at worst and an off-topic query never passes 0.25, so 0.35 sits in an empty band. The number belongs to the model — it changes when the model changes. Lower it (or pass `0`) when a query is broad and returns too little.
 - **`--depth 1` or `--depth 2`**: expands results to concepts connected via refs. Always use at least `--depth 1` — connected knowledge is often more valuable than the direct match.
 - **`--hybrid`**: improves search on queries with specific technical terms, proper nouns, or identifiers.
 - **`--evidence-only`**: restricts to facts only (`dato`) — useful if you want only what is verified, not intuitions or tensions.
