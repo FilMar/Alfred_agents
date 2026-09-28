@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
 import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
-import { NOTE_TYPES, isValidKind, normalizeTags, errorMessage } from "./types.js";
+import { NOTE_TYPES, isValidKind, normalizeTags, errorMessage, validateSearchOptions } from "./types.js";
 import type { NoteType, SearchOptions } from "./types.js";
 import type { ScrollOptions } from "./qdrant.js";
 
@@ -32,6 +32,8 @@ const OPENAPI_SPEC = {
                   limit: { type: "integer", default: 10 },
                   depth: { type: "integer", default: 1 },
                   hybrid: { type: "boolean", default: false },
+                  min_score: { type: "number" },
+                  related_limit: { type: "integer" },
                   tags: { type: "array", items: { type: "string" } },
                   kind: { type: "array", items: { type: "string", enum: NOTE_TYPES } },
                   evidence_only: { type: "boolean", default: false },
@@ -141,8 +143,13 @@ app.post("/search", async (c) => {
     kind: body.kind as NoteType[] | undefined,
     evidence_only: body.evidence_only ?? false,
     include_hubs: body.include_hubs ?? false,
+    min_score: body.min_score,
+    related_limit: body.related_limit,
     record_hits: body.record_hits ?? true,
   };
+
+  const invalid = validateSearchOptions(options);
+  if (invalid) return c.json({ error: invalid }, 400);
 
   const results = await searchNotes(body.query, options);
   return c.json(results);

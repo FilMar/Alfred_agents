@@ -6,8 +6,8 @@ export default function (pi: ExtensionAPI): void {
     if (!event.prompt?.trim()) return;
 
     const [tiResult, tbResult] = await Promise.allSettled([
-      execSearch("ti", event.prompt, { limit: 2, minScore: 0.8 }),
-      execSearch("tb", event.prompt, { depth: 1, limit: 2, minScore: 0.8 }),
+      execSearch("ti", event.prompt, { limit: 2, minScore: HOOK_MIN_SCORE }),
+      execSearch("tb", event.prompt, { depth: 1, limit: 2, minScore: HOOK_MIN_SCORE, relatedLimit: 3 }),
     ]);
 
     let context = "";
@@ -37,12 +37,13 @@ export default function (pi: ExtensionAPI): void {
         const tbData = JSON.parse(tbResult.value);
         const tbFormatted = tbData
           .slice(0, 2)
-          .map((r: { note?: { what?: string; why?: string; tags?: string[]; kind?: string }; what?: string; why?: string; kind?: string }) => {
+          .map((r: { note?: { what?: string; why?: string; tags?: string[]; kind?: string }; what?: string; why?: string; kind?: string; via?: string }) => {
             const what = r.note?.what || r.what || "—";
             const why = r.note?.why || r.why || "—";
             const tags = r.note?.tags?.length ? `\nTags: ${r.note.tags.join(", ")}` : "";
             const kind = r.note?.kind || r.kind ? `\nKind: ${r.note?.kind || r.kind}` : "";
-            return `**What**: ${what}\n**Why**: ${why}${tags}${kind}`;
+            const via = r.via === "related" ? "\nReached through an edge, not matched by the prompt" : "";
+            return `**What**: ${what}\n**Why**: ${why}${tags}${kind}${via}`;
           })
           .join("\n\n");
         context += `## Third Brain (tb) matches\n\n${tbFormatted}`;
@@ -65,13 +66,18 @@ export default function (pi: ExtensionAPI): void {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
+// The cutoff belongs to the model: on nomic-embed-text-v2-moe a real prompt tops out
+// near 0.53 and an off-topic one never passes 0.25. The old 0.8 fired on no prompt at all.
+const HOOK_MIN_SCORE = 0.5;
+
 async function execSearch(
   cmd: string,
   query: string,
-  opts: { limit?: number; minScore?: number; depth?: number } = {},
+  opts: { limit?: number; minScore?: number; depth?: number; relatedLimit?: number } = {},
 ): Promise<string> {
-  const args = ["search", query, "--limit", String(opts.limit ?? 5), "--min-score", String(opts.minScore ?? 0.6)];
+  const args = ["search", query, "--limit", String(opts.limit ?? 5), "--min-score", String(opts.minScore ?? HOOK_MIN_SCORE)];
   if (opts.depth) args.push("--depth", String(opts.depth));
+  if (opts.relatedLimit !== undefined) args.push("--related-limit", String(opts.relatedLimit));
 
   try {
     const { stdout } = await runCommand(cmd, args);

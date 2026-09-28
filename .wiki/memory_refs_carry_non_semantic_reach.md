@@ -32,6 +32,6 @@ Debt found and not fixed: 11 edges point to notes that no longer exist. `deleteN
 
 ## Cross-references
 
-- [memory_related_results_need_scores](memory_related_results_need_scores) — the fix to how these edges are used at search time
+- [memory_related_notes_ranked_not_cut](memory_related_notes_ranked_not_cut) — the fix to how these edges are used at search time
 - [memory_graph_engine_deferred_not_needed](memory_graph_engine_deferred_not_needed) — why a sparse valuable graph still needs no graph engine
 - [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) — who writes these edges today, and the cost

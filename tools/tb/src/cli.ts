@@ -8,10 +8,10 @@ import { fileURLToPath } from "node:url";
 import { checkHealth, EMBED_MODEL } from "./infra.js";
 import { serveGraph, GRAPH_PORT } from "./graph/server.js";
 import { serveApi, API_PORT } from "./api.js";
-import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
+import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId } from "./notes.js";
 import { getByIds } from "./qdrant.js";
-import type { NoteType, SearchOptions } from "./types.js";
-import { NOTE_TYPES, isValidKind, normalizeTags, errorMessage } from "./types.js";
+import type { NoteType, SearchOptions, Link } from "./types.js";
+import { NOTE_TYPES, isValidKind, normalizeTags, errorMessage, ContractError } from "./types.js";
 
 // ─── Compose path ─────────────────────────────────────────────────────────────
 
@@ -30,6 +30,15 @@ function out(data: unknown): void {
 function die(message: string): never {
   process.stderr.write(`Error: ${message}\n`);
   process.exit(1);
+}
+
+/** Accepts a full id or a unique prefix, the way the graph view prints it. */
+async function resolveOrDie(idOrPrefix: string): Promise<string> {
+  try {
+    return await resolveNoteId(idOrPrefix);
+  } catch (err) {
+    die(errorMessage(err));
+  }
 }
 
 // ─── Health guard ─────────────────────────────────────────────────────────────
@@ -181,7 +190,8 @@ program
   .option("--kind <kind>", "Filter by semantic type (repeatable)", collect, [] as string[])
   .option("--evidence-only", "Restringe ai tipi evidence-oriented")
   .option("--include-hubs", "Includi note di tipo indice nella ricerca")
-  .option("--min-score <n>", "Minimum similarity score (0-1) to keep a result")
+  .option("--min-score <n>", "Minimum score to keep a direct hit (never cuts related notes)")
+  .option("--related-limit <n>", "Maximum related notes kept, best score first")
   .option("--no-hits", "Do not count this search as a hit on the returned notes")
   .action(async (query: string, opts) => {
     await requireServices({ needsEmbedding: true });
@@ -195,6 +205,7 @@ program
       evidence_only: opts.evidenceOnly ?? false,
       include_hubs: opts.includeHubs ?? false,
       min_score: opts.minScore !== undefined ? parseFloat(opts.minScore) : undefined,
+      related_limit: opts.relatedLimit !== undefined ? parseInt(opts.relatedLimit, 10) : undefined,
       record_hits: opts.hits,
     };
 
@@ -213,12 +224,13 @@ program
   .action(async (id: string, opts) => {
     await requireServices({ needsEmbedding: false });
 
+    const target = await resolveOrDie(id);
     let updated = false;
 
     if (opts.kind) {
       validateKind(opts.kind);
       try {
-        await changeKind(id, opts.kind);
+        await changeKind(target, opts.kind);
         updated = true;
       } catch (err) {
         die(errorMessage(err));
@@ -227,7 +239,7 @@ program
 
     if (opts.tags.length > 0) {
       try {
-        await changeTags(id, normalizeTags(opts.tags));
+        await changeTags(target, normalizeTags(opts.tags));
         updated = true;
       } catch (err) {
         die(errorMessage(err));
@@ -235,14 +247,15 @@ program
     }
 
     if (opts.addRef.length > 0) {
-      const newRefs = opts.addRef.map((raw: string) => {
+      const newRefs: Link[] = [];
+      for (const raw of opts.addRef as string[]) {
         const colonIdx = raw.indexOf(":");
         if (colonIdx === -1) die(`Invalid --add-ref format: "${raw}". Expected: <id:reason>`);
-        return { id: raw.slice(0, colonIdx), reason: raw.slice(colonIdx + 1) };
-      });
+        newRefs.push({ id: await resolveOrDie(raw.slice(0, colonIdx)), reason: raw.slice(colonIdx + 1) });
+      }
 
       try {
-        await addRefs(id, newRefs);
+        await addRefs(target, newRefs);
         updated = true;
       } catch (err) {
         die(errorMessage(err));
@@ -251,7 +264,7 @@ program
 
     if (!updated) die("Nothing to update. Use --kind, --tags or --add-ref.");
 
-    out({ id, updated: true });
+    out({ id: target, updated: true });
   });
 
 // ─── delete ───────────────────────────────────────────────────────────────────
@@ -263,15 +276,17 @@ program
   .action(async (id: string, opts) => {
     await requireServices({ needsEmbedding: false });
 
+    const target = await resolveOrDie(id);
+
     if (!opts.yes) {
-      const found = await getByIds([id]);
-      if (found.length === 0) die(`Note not found: ${id}`);
+      const found = await getByIds([target]);
+      if (found.length === 0) die(`Note not found: ${target}`);
       out(found[0]);
       die("Re-run with --yes to delete this note.");
     }
 
     try {
-      out(await deleteNote(id));
+      out(await deleteNote(target));
     } catch (err) {
       die(errorMessage(err));
     }
@@ -328,5 +343,6 @@ program
 // ─── Parse ───────────────────────────────────────────────────────────────────
 
 program.parseAsync(process.argv).catch((err) => {
+  if (err instanceof ContractError) die(`tb bug, please report: ${err.message}\n${err.stack ?? ""}`);
   die(errorMessage(err));
 });

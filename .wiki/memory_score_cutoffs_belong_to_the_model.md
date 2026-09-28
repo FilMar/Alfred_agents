@@ -48,5 +48,5 @@ unchanged in the sense that it stays broken.
 
 - [The embedding model follows the corpus language](memory_embedding_model_follows_the_corpus_language)
 - [tb and ti inject automatically through a hook](hook_tb_ti_auto_injection)
-- [Related results need scores](memory_related_results_need_scores) — a cutoff cannot
+- [Related notes are ranked, not cut](memory_related_notes_ranked_not_cut) — a cutoff cannot
   filter what arrives with no score. The hook still injects unscored related notes.

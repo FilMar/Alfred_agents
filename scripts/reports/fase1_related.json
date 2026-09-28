@@ -1,0 +1,176 @@
+{
+  "collection": "third-brain",
+  "model": "nomic-embed-text-v2-moe",
+  "queries": 8,
+  "limit": 10,
+  "avg_related_refs_only": 14.62,
+  "avg_related_with_backrefs": 23.12,
+  "backref_gain": 1.58,
+  "kept_by_cutoff_total": {
+    "0.35": 44,
+    "0.5": 0
+  },
+  "related_total": 161,
+  "rows": [
+    {
+      "query": "come si sceglie la soglia di uno score semantico",
+      "direct": 10,
+      "direct_score_min": 0.3743,
+      "related_refs_only": 15,
+      "related_with_backrefs": 20,
+      "related_scored": 17,
+      "related_dropped_by_filter": 3,
+      "related_score_max": 0.3738,
+      "related_score_min": 0.2252,
+      "kept_by_cutoff": {
+        "0.35": 3,
+        "0.5": 0
+      },
+      "top3": [
+        0.3738,
+        0.3565,
+        0.3548
+      ]
+    },
+    {
+      "query": "quando conviene separare chi scrive codice da chi lo verifica",
+      "direct": 10,
+      "direct_score_min": 0.4504,
+      "related_refs_only": 13,
+      "related_with_backrefs": 20,
+      "related_scored": 19,
+      "related_dropped_by_filter": 1,
+      "related_score_max": 0.4467,
+      "related_score_min": 0.2351,
+      "kept_by_cutoff": {
+        "0.35": 11,
+        "0.5": 0
+      },
+      "top3": [
+        0.4467,
+        0.4166,
+        0.4139
+      ]
+    },
+    {
+      "query": "perche un test che passa non prova che il codice sia giusto",
+      "direct": 10,
+      "direct_score_min": 0.4798,
+      "related_refs_only": 21,
+      "related_with_backrefs": 31,
+      "related_scored": 27,
+      "related_dropped_by_filter": 4,
+      "related_score_max": 0.46,
+      "related_score_min": 0.2701,
+      "kept_by_cutoff": {
+        "0.35": 21,
+        "0.5": 0
+      },
+      "top3": [
+        0.46,
+        0.4565,
+        0.4475
+      ]
+    },
+    {
+      "query": "come si decide il confine di un tipo di dato",
+      "direct": 10,
+      "direct_score_min": 0.4133,
+      "related_refs_only": 14,
+      "related_with_backrefs": 19,
+      "related_scored": 17,
+      "related_dropped_by_filter": 2,
+      "related_score_max": 0.3937,
+      "related_score_min": 0.212,
+      "kept_by_cutoff": {
+        "0.35": 6,
+        "0.5": 0
+      },
+      "top3": [
+        0.3937,
+        0.3915,
+        0.389
+      ]
+    },
+    {
+      "query": "cosa rende un backup affidabile",
+      "direct": 10,
+      "direct_score_min": 0.3242,
+      "related_refs_only": 8,
+      "related_with_backrefs": 20,
+      "related_scored": 16,
+      "related_dropped_by_filter": 4,
+      "related_score_max": 0.3062,
+      "related_score_min": 0.1405,
+      "kept_by_cutoff": {
+        "0.35": 0,
+        "0.5": 0
+      },
+      "top3": [
+        0.3062,
+        0.2972,
+        0.2853
+      ]
+    },
+    {
+      "query": "quando un agente deve fermarsi e chiedere",
+      "direct": 10,
+      "direct_score_min": 0.3047,
+      "related_refs_only": 15,
+      "related_with_backrefs": 24,
+      "related_scored": 21,
+      "related_dropped_by_filter": 3,
+      "related_score_max": 0.2891,
+      "related_score_min": 0.1359,
+      "kept_by_cutoff": {
+        "0.35": 0,
+        "0.5": 0
+      },
+      "top3": [
+        0.2891,
+        0.2694,
+        0.2586
+      ]
+    },
+    {
+      "query": "come si misura il debito tecnico di un repository",
+      "direct": 10,
+      "direct_score_min": 0.3475,
+      "related_refs_only": 17,
+      "related_with_backrefs": 21,
+      "related_scored": 18,
+      "related_dropped_by_filter": 3,
+      "related_score_max": 0.3357,
+      "related_score_min": 0.1281,
+      "kept_by_cutoff": {
+        "0.35": 0,
+        "0.5": 0
+      },
+      "top3": [
+        0.3357,
+        0.2956,
+        0.2811
+      ]
+    },
+    {
+      "query": "perche la memoria di un agente deve dimenticare",
+      "direct": 10,
+      "direct_score_min": 0.3639,
+      "related_refs_only": 14,
+      "related_with_backrefs": 30,
+      "related_scored": 26,
+      "related_dropped_by_filter": 4,
+      "related_score_max": 0.3614,
+      "related_score_min": 0.1765,
+      "kept_by_cutoff": {
+        "0.35": 3,
+        "0.5": 0
+      },
+      "top3": [
+        0.3614,
+        0.3541,
+        0.3514
+      ]
+    }
+  ]
+}

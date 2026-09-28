@@ -240,17 +240,47 @@ sono due comandi.
   alla seconda esecuzione per collisione con la propria spazzatura. Preesistente, non
   toccato.
 
-### Fase 1 — Ranking e telemetria dei correlati
+### Fase 1 — Ranking e telemetria dei correlati — **fatta** (2026-09-28)
 
-Venti righe, e sono il giudice di tutto il resto. Prima di `tl` per costo, non per importanza.
+Venti righe previste, cinquanta scritte. Due punti del piano li hanno smentiti le misure del corpus.
 
-- **Score sui correlati**: una nota raggiunta via `refs` è valutata col coseno contro la query, non lasciata a `score: null`. Diventa ordinabile e tagliabile con `min_score`. La Fase 0 ha reso il problema più stretto: `--min-score` taglia i diretti e lascia passare i correlati, perché la soglia agisce sulla ricerca e il traversal aggiunge dopo. Oggi il hook inietta 2 note sopra soglia e una dozzina senza.
-- **`hits_related`**, campo separato: `recordHits` conta anche i correlati. Da qui in poi "l'agente usa i ref?" è una query, non un'analisi.
-- **Traversal dei `backrefs`** oltre ai `refs`: metà degli archi scritti oggi non viene percorsa.
-- `--min-score` nativo su `ti search` (debito già segnalato in `.wiki/memory_ti_context_action_rules`).
-- **`tb` accetta l'id corto che lui stesso stampa.** Gli 11 archi rotti trovati in Fase 0 erano id troncati a 8 caratteri: la CLI mostra la forma corta e la API ne pretende una lunga. Si risolve per prefisso, come fa `git`, e la classe di errore si chiude alla fonte invece di essere riparata a posteriori.
+**Fatto**
 
-**Finita quando:** una ricerca `depth 1` restituisce correlate ordinate e tagliate, e dopo una settimana `hits_related` ha numeri diversi da zero.
+- **Score sui correlati.** Una nota raggiunta da un arco porta il coseno che il motore calcola contro la query, non `score: null`. Lo calcola Qdrant, con una `/points/query` e `filter: has_id` sulla frontiera: nessun vettore attraversa la rete e lo score di un correlato e quello di un diretto sono la stessa quantita per costruzione.
+- **Il filtro della ricerca entra nel traversal.** Non era nel piano: `--kind`, `--evidence-only` e l'esclusione degli hub valevano solo per i diretti, perche il traversal usava `getByIds`, che non porta filtri. Uno score su una nota non filtrata la fa sembrare vagliata, quindi il difetto andava chiuso qui.
+- **`hits_related` e `last_hit_related`**, campi separati. Le scritture si raggruppano per payload: una ricerca che tocca 25 correlati mai contati fa **una** richiesta, non 25.
+- **Traversal dei `backrefs`** oltre ai `refs`. Gli id di ogni salto sono ordinati prima di essere troncati, quindi due ricerche sugli stessi dati restituiscono le stesse note.
+- **`tb` accetta l'id corto.** Per prefisso, come `git`; un id completo non costa nessuna chiamata in piu. Ambiguo e inesistente sono errori con un messaggio, non crash. Il colpevole della classe di errore era `tools/tb/src/graph/graph.js:171`, che stampa `ref.id.slice(0, 8)`.
+- **`--min-score` e `--depth` validati in un solo posto**, usato dalla CLI e dalla API. Prima `{"depth": 1.5}` faceva 2 salti e `--min-score abc` mandava `score_threshold: null` sul filo.
+- **`min_score` e `related_limit` esposti sulla API HTTP.** Senza, la stessa funzione aveva due semantiche a seconda della porta.
+- **`pi.ts` ricalibrato.** La Fase 0 aveva portato `claude.sh` da 0.8 a 0.5 e dimenticato il gemello TypeScript: stesso hook, altro runtime, soglia che non sparava mai.
+
+**Non fatto, perche le misure lo smentiscono**
+
+- ~~Tagliare i correlati con `min_score`~~. Misurato su 8 query, `limit 10` (`scripts/reports/fase1_related.json`): **0 correlati su 161 passano 0.5**, la soglia del hook; 44 su 161 passano 0.35. Il taglio non riduce il blocco, lo cancella — e cancella prima la metà utile, perche `.wiki/memory_refs_carry_non_semantic_reach` misura che il 23% degli archi punta oltre il 200° vicino denso della sorgente. Un arco esiste per una ragione che la query non porta: il suo score è basso per costruzione, non per irrilevanza. I correlati si ordinano e si tagliano **per rango** (`--related-limit`, 25 di default, 3 nel hook).
+- ~~`--min-score` nativo su `ti search`~~. Esisteva già, wired end-to-end (`tools/ti/src/cli.ts:70` → `identity.ts:45` → `score_threshold`). Il debito era chiuso e la roadmap non lo sapeva.
+
+**Trovato mentre si scriveva**
+
+`--hybrid` e `--min-score` insieme erano rotti, e `skills/christopher/SKILL.md` li documentava come combinazione valida. La fusione RRF di Qdrant produce `1/(k + rank)` con `k = 2`: 0.5 per un primo posto, 0.29 per un quinto in entrambe le liste. Numeri che sembrano similarità e non lo sono, tagliati da una soglia in unità di coseno. Ora la fusione scelge i candidati e il coseno li valuta e li ordina: un solo significato in `score` su tutti i percorsi.
+
+**Misure** (747 note, 8 query, `limit 10`)
+
+| | valore |
+|---|---|
+| correlati per ricerca, solo `refs` | 14.6 |
+| correlati per ricerca, con `backrefs` | 23.1 (×1.58) |
+| correlati che passano `min_score 0.35` | 44 / 161 |
+| correlati che passano `min_score 0.5` | 0 / 161 |
+| `hits_related` scritti in una ricerca a 3 correlati | 1 richiesta HTTP |
+
+**Verifica**: 54 test verdi (25 nuovi, 4 mutazioni del codice provate una per una per controllare che i test mordano), typecheck pulito, `contract_report.py` senza segnalazioni sul codice nuovo, e il percorso completo provato sul corpus vero — denso, ibrido, prefisso corto, contatori.
+
+**Resta aperto**
+
+- `hits_related` diverso da zero dopo una settimana d'uso: il criterio di chiusura del piano non è verificabile il giorno in cui si scrive il codice. La telemetria ha iniziato a contare.
+- `tb graph` disegna il grafo dai soli `refs` (`graph/graph.js:81`), mentre il traversal ora percorre anche i `backrefs`: il grafo disegnato e quello percorso divergono. Si chiude quando `third_os` copre la lettura.
+- `RELATED_LIMIT = 25` non morde quasi mai (la media è 23.1). È un limite di sicurezza, non una scelta di qualità: il numero giusto si vedrà da `hits_related`.
 
 ### Fase 2 — `tl`
 
@@ -386,13 +416,16 @@ Nessuna delle fasi precedenti dipende da queste.
 - ~~24 note con `refs` duplicati, 1 con self-ref, 1 payload senza campo `id`, 11 archi verso note inesistenti~~ — riparato in Fase 0.
 - ~~`ensureCollection()` cancella la collection quando la configurazione non combacia~~ — chiuso in Fase 0.
 - Il frontmatter dei membri `th` ha un campo `skills` che il tipo `Member` non contempla.
-- La suite `th` scrive fixture in `.th/members/` del progetto e fallisce alla seconda esecuzione per collisione con la propria spazzatura: 8 test su 125.
-- `tb` stampa id corti e accetta solo id lunghi (vedi Fase 1).
+- La suite `th` e quella dell'orchestratore condividono stato su filesystem (`.th/members/` del progetto e la directory globale dei membri), quindi **interferiscono quando `bun test tests/` le esegue in parallelo**: 7 test su 154. Misurato il 2026-09-28: ogni file passa da solo (`th` 41/41, `orchestrator` 35/35, `orchestrator.phase2` 24/24), e 6 dei 7 falliti sono in `member globals`, che scrive nella directory globale. La diagnosi precedente ("fallisce alla seconda esecuzione per la propria spazzatura") era sbagliata: una seconda esecuzione dello stesso file passa. Il fatto vero è che i test scrivono in una directory reale invece che in una temporanea, come fanno già i test dell'orchestratore.
+- ~~`tb` stampa id corti e accetta solo id lunghi~~ — chiuso in Fase 1: risolve per prefisso.
+- `tb graph` disegna dai soli `refs` mentre il traversal percorre anche i `backrefs` (vedi Fase 1).
 - `tb graph` si dismette quando `third_os` copre la lettura (già in `ROADMAP.md`).
 
 ## Pagine `.wiki/` — stato
 
 Scritte a fine Fase 0: `memory_embedding_model_follows_the_corpus_language`, `memory_score_cutoffs_belong_to_the_model`, `memory_absence_is_how_qdrant_stores_null`, `wiki_decision_is_written_when_the_design_ends`.
+
+Scritte a fine Fase 1: `memory_related_notes_ranked_not_cut` (supera `memory_related_results_need_scores`), `memory_score_is_always_the_engine_cosine`.
 
 Scritte il 2026-09-28: `memory_human_gate_is_the_bottleneck`, `memory_refs_carry_non_semantic_reach`, `memory_related_results_need_scores`, `memory_graph_engine_deferred_not_needed`, `memory_keep_raw_source_for_reingest`, `memory_alias_makes_migration_reversible`, `memory_coala_four_types_map_to_pi`, `memory_tl_work_archive_not_event_log` (supera `memory_tl_unified_event_log`), `memory_wiki_is_the_project_notebook`, `memory_identity_splits_descriptive_prescriptive`.
 

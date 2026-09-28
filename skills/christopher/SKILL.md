@@ -15,7 +15,7 @@ Call the `tb` CLI directly. Never wrap it in another layer.
 ## Available commands
 
 ```bash
-tb search "<query>" --min-score <n> [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--evidence-only] [--include-hubs]
+tb search "<query>" --min-score <n> [--limit <n>] [--depth <n>] [--related-limit <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--evidence-only] [--include-hubs]
 tb browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
 tb random                        # random note — for unguided lateral exploration
 tb tags                          # list tags by frequency — maps the conceptual territory
@@ -26,7 +26,7 @@ is omitted.
 
 ### Output format
 
-- **`tb search`** → array of objects `{ note, score, via, citation }`. The note fields (`what`, `why`, `tags`, `kind`, `refs`, `backrefs`) are **nested under `.note`**, not at the top level.
+- **`tb search`** → array of objects `{ note, score, via, citation }`. `via` is `search` for a note the query matched and `related` for one reached through an edge; only a match carries a `citation`. Both scores are the same quantity, the cosine against the query. The note fields (`what`, `why`, `tags`, `kind`, `refs`, `backrefs`) are **nested under `.note`**, not at the top level.
 - **`tb browse`** and **`tb random`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
 - **`tb tags`** → array of `{ value, count }` ordered by frequency.
 
@@ -36,8 +36,9 @@ is omitted.
 
 Do not limit yourself to a single search. Vary the parameters if the first attempt returns little. Use `tb tags` to understand what tags exist before filtering. Use `tb random` for lateral exploration if the query finds nothing relevant.
 
-- **`--min-score`**: drops results with score below this value. Use `0.35` as the working default: measured on `nomic-embed-text-v2-moe`, a right answer scores 0.43 at worst and an off-topic query never passes 0.25, so 0.35 sits in an empty band. The number belongs to the model — it changes when the model changes. Lower it (or pass `0`) when a query is broad and returns too little.
-- **`--depth 1` or `--depth 2`**: expands results to concepts connected via refs. Always use at least `--depth 1` — connected knowledge is often more valuable than the direct match.
+- **`--min-score`**: drops **matched** results with score below this value. It never cuts the related block: an edge is drawn for a reason the query does not carry, so a related note scores low by construction — measured, no related result on this corpus passes 0.5, and only 27% pass 0.35. Use `0.35` as the working default: measured on `nomic-embed-text-v2-moe`, a right answer scores 0.43 at worst and an off-topic query never passes 0.25, so 0.35 sits in an empty band. The number belongs to the model — it changes when the model changes. Lower it (or pass `0`) when a query is broad and returns too little.
+- **`--related-limit`**: how many related notes to keep, best score first. Default 25. Lower it when the injected context matters more than reach.
+- **`--depth 1` or `--depth 2`**: expands results to concepts connected through refs and backrefs. Always use at least `--depth 1` — connected knowledge is often more valuable than the direct match.
 - **`--hybrid`**: improves search on queries with specific technical terms, proper nouns, or identifiers.
 - **`--evidence-only`**: restricts to facts only (`dato`) — useful if you want only what is verified, not intuitions or tensions.
 - **`--kind <type>`**: filter by semantic type (`dato`, `protocollo`, `sintesi`, `attrito`, `configurazione`).
