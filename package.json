@@ -6,14 +6,17 @@
   "bin": {
     "tb": "./tools/tb/src/cli.ts",
     "th": "./tools/th/src/cli.ts",
-    "ti": "./tools/ti/src/cli.ts"
+    "ti": "./tools/ti/src/cli.ts",
+    "tl": "./tools/tl/src/cli.ts"
   },
   "scripts": {
     "test": "bun test tests/",
-    "typecheck": "tsc --project tools/tb/tsconfig.json --noEmit"
+    "typecheck": "tsc --project tools/tb/tsconfig.json --noEmit && tsc --project tools/ti/tsconfig.json --noEmit && tsc --project tools/tl/tsconfig.json --noEmit"
   },
   "pi": {
-    "skills": ["./skills"]
+    "skills": [
+      "./skills"
+    ]
   },
   "dependencies": {
     "@earendil-works/pi-coding-agent": "^0.75.5",

@@ -1,0 +1,23 @@
+# Third Log Service (Raspberry Pi)
+# Runs the CRUD API in front of the SQLite file. Native process, no container:
+# a SQLite file wants the host disk, not a mounted volume — same reason as the
+# orchestrator. The file holds the only copy of a transcript once it rotates,
+# so this unit is what the Clio backups protect.
+
+[Unit]
+Description=Third Log (tl)
+After=network.target
+
+[Service]
+Type=simple
+User=filippo
+WorkingDirectory=/home/filippo/git_projects/pi
+# TL_DB defaults to ~/.tl/tl.db, TL_API_PORT to 8790.
+# Environment=TL_DB=/home/filippo/.tl/tl.db
+# Environment=TL_API_PORT=8790
+ExecStart=/usr/bin/bun run tools/tl/src/cli.ts serve
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
