@@ -86,7 +86,7 @@ Ogni nota aperta è modificabile, e si creano note nuove.
 
 L'agente entra tramite `th`. Tre pezzi, in ordine.
 
-**La Fase 3 è asincrona per progetto, non per pigrizia.** `runner.ts` esporta `runMember`, ma dentro fa `spawnSandboxed`/`spawnDetached`: il turno dell'agente gira in un processo figlio sotto `bwrap`, quindi paga fork + bwrap + boot di `pi`. Usare `th` come libreria dà l'API in-process, **non toglie lo spawn**: è lo stesso costo che ha fermato il cockpit (vedi `.wiki/cockpit_pivot_pi_extension_rpc.md`). Quindi si lancia, si guarda lo stream, non si aspetta un ping-pong da chat.
+**La Fase 3 è asincrona per progetto, non per pigrizia.** `runner.ts` esporta `runMember`, ma dentro fa `spawnSandboxed`/`spawnDetached`: il turno dell'agente gira in un processo figlio sotto `bwrap`, quindi paga fork + bwrap + boot di `pi`. Usare `th` come libreria dà l'API in-process, **non toglie lo spawn**: è lo stesso costo che ha fermato il cockpit (vedi `.wiki/.cockpit_pivot_pi_extension_rpc.md`, superata da `.wiki/orchestrator_and_cockpit_removed.md`). Quindi si lancia, si guarda lo stream, non si aspetta un ping-pong da chat.
 
 Trappola concreta: `runner.ts` esporta anche `ensureSandboxed()`, che **rilancia il processo corrente sotto bwrap**. Se finisse nel percorso di avvio di `third_os`, il server web si re-exec da solo. `th` si importa a mano, funzione per funzione.
 
