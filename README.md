@@ -18,7 +18,6 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 |-------|------|
 | `annibale` | Orchestrator: decomposes complex work into multi-hat flows |
 | `piano` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md |
-| `fury` | Designs and builds the th member team for a project |
 | `platone` | Sediments ideas in the TB atomically and connectedly |
 | `feynman` | Teaches the TB corpus with the Feynman technique |
 | `socrate` | Generates cognitive friction: finds contradictions and gaps, never closes |

@@ -29,5 +29,5 @@ The code is not gone: git holds it, and the nine superseded pages are on disk wi
 ## Cross-references
 
 - [orchestrator_tailscale_perimeter_matrix_bot](orchestrator_tailscale_perimeter_matrix_bot) — the decision that outlived the tool
-- [agents_skills_inline_members_via_th](agents_skills_inline_members_via_th) — where delegated execution lives now
+- [agents_hats_replace_members](agents_hats_replace_members) — where delegated execution lives now
 - [wiki_superseded_hidden_with_dot](wiki_superseded_hidden_with_dot) — why the nine pages are hidden rather than deleted

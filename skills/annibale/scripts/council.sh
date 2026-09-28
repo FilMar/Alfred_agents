@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# desc: Flow harness for the Council of Experts: parallel member fan-out, polling, validation, synthesis.
-# usage: council.sh --task "<problem>" --members "<m1,m2,m3>" [flags — see references/council.md]
+# desc: Flow harness for the Council of Experts: parallel hat fan-out, polling, validation, synthesis.
+# usage: council.sh --task "<problem>" --hats "<hat1,hat2,hat3>" [flags — see references/council.md]
 #
-# Code drives the phases; the AI reasons only inside member runs.
+# Code drives the phases; the AI reasons only inside the runs.
 # Annibale picks the roster and launches this script — it cannot skip
 # a phase, forget an output, or synthesise before every expert answered.
 #
 # Usage:
-#   council.sh --task "<problem>" --members "a,b,c" \
-#              [--rounds N] [--synth <member>] [--run-id ID] [--timeout SEC]
+#   council.sh --task "<problem>" --hats "white-core,black-core,green-core" \
+#              [--rounds N] [--synth <hat>] [--run-id ID] [--timeout SEC]
 #
 # Resume: re-run with the same --run-id — completed steps are skipped,
 # failed or missing ones are re-executed.
@@ -20,13 +20,13 @@ set -euo pipefail
 # ─── Defaults ─────────────────────────────────────────────────────────────────
 
 TASK=""
-MEMBERS_CSV=""
+HATS_CSV=""
 ROUNDS=1
 SYNTH="von-neumann-blue"
 RUN_ID=""
 TIMEOUT=600
 DRY_RUN=0
-MAX_MEMBERS="${COUNCIL_MAX_MEMBERS:-5}"
+MAX_HATS="${COUNCIL_MAX_HATS:-5}"
 FLOW_BASE="${TH_FLOW_DIR:-/tmp/th-flow}"
 
 usage() {
@@ -41,7 +41,7 @@ die() { echo "error: $*" >&2; exit 1; }
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --task)    TASK="${2:?--task needs a value}"; shift 2 ;;
-    --members) MEMBERS_CSV="${2:?--members needs a value}"; shift 2 ;;
+    --hats) HATS_CSV="${2:?--hats needs a value}"; shift 2 ;;
     --rounds)  ROUNDS="${2:?--rounds needs a value}"; shift 2 ;;
     --synth)   SYNTH="${2:?--synth needs a value}"; shift 2 ;;
     --run-id)  RUN_ID="${2:?--run-id needs a value}"; shift 2 ;;
@@ -53,24 +53,24 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "$TASK" ]]        || { echo "missing --task" >&2; usage; }
-[[ -n "$MEMBERS_CSV" ]] || { echo "missing --members" >&2; usage; }
+[[ -n "$HATS_CSV" ]] || { echo "missing --hats" >&2; usage; }
 [[ "$ROUNDS" =~ ^[1-9][0-9]*$ ]]  || die "--rounds must be a positive integer (got: $ROUNDS)"
 [[ "$TIMEOUT" =~ ^[1-9][0-9]*$ ]] || die "--timeout must be a positive integer (got: $TIMEOUT)"
 
-IFS=',' read -ra MEMBERS <<< "$MEMBERS_CSV"
-(( ${#MEMBERS[@]} >= 2 ))            || die "a council needs at least 2 members"
-(( ${#MEMBERS[@]} <= MAX_MEMBERS ))  || die "${#MEMBERS[@]} members > max $MAX_MEMBERS (override with COUNCIL_MAX_MEMBERS)"
+IFS=',' read -ra HATS <<< "$HATS_CSV"
+(( ${#HATS[@]} >= 2 ))            || die "a council needs at least 2 hats"
+(( ${#HATS[@]} <= MAX_HATS ))  || die "${#HATS[@]} hats > max $MAX_HATS (override with COUNCIL_MAX_HATS)"
 
 command -v jq >/dev/null || die "jq is required"
 command -v th >/dev/null || die "th not found in PATH"
 
-# ─── Pre-flight: every member must exist (fail fast, not mid-run) ─────────────
+# ─── Pre-flight: every hat must exist (fail fast, not mid-run) ────────────────
 
-# th resolves members relative to the cwd (local vs global scope).
+# a hat is a file in th's own hats directory, the same from every cwd.
 # Launch this script from the project root.
-for m in "${MEMBERS[@]}" "$SYNTH"; do
-  th member get "$m" >/dev/null 2>&1 \
-    || die "member not found: '$m'. Project members are resolved from the cwd — are you in the project root? (or create it via the fury skill)"
+for m in "${HATS[@]}" "$SYNTH"; do
+  th hats get "$m" >/dev/null 2>&1 \
+    || die "hat not found: '$m'. Run th hats list to see the six."
 done
 
 # ─── Run dir (deterministic names → resume) ───────────────────────────────────
@@ -78,7 +78,7 @@ done
 [[ -n "$RUN_ID" ]] || RUN_ID="council-$(date +%Y%m%d-%H%M%S)"
 RUN_DIR="$FLOW_BASE/$RUN_ID"
 
-echo "council: ${#MEMBERS[@]} members, $ROUNDS round(s), synth=$SYNTH" >&2
+echo "council: ${#HATS[@]} hats, $ROUNDS round(s), synth=$SYNTH" >&2
 echo "run dir: $RUN_DIR  (resume with --run-id $RUN_ID)" >&2
 
 if (( DRY_RUN )); then
@@ -89,7 +89,7 @@ fi
 mkdir -p "$RUN_DIR"
 {
   echo "task: $TASK"
-  echo "members: ${MEMBERS[*]}"
+  echo "hats: ${HATS[*]}"
   echo "rounds: $ROUNDS  synth: $SYNTH  timeout: ${TIMEOUT}s"
 } > "$RUN_DIR/meta.txt"
 
@@ -119,8 +119,8 @@ for round in $(seq 1 "$ROUNDS"); do
 
   # Phase 1 — LAUNCH: parallel fan-out, one detached job per missing output
   pending_status=()
-  pending_members=()
-  for m in "${MEMBERS[@]}"; do
+  pending_hats=()
+  for m in "${HATS[@]}"; do
     md="$RUN_DIR/r${round}-${m}.md"
     job="$RUN_DIR/r${round}-${m}.job"
 
@@ -148,9 +148,9 @@ ${CONTEXT}
     prompt+="
 Analyse from your point of view only. Be specific, not generic. Bring what only you can bring."
 
-    th run --member "$m" --task "$prompt" --detach --timeout "$TIMEOUT" > "$job"
+    th run --hat "$m" --task "$prompt" --detach --timeout "$TIMEOUT" > "$job"
     pending_status+=("$(jq -r .status "$job")")
-    pending_members+=("$m")
+    pending_hats+=("$m")
     echo "  [launch] $m" >&2
   done
 
@@ -161,7 +161,7 @@ Analyse from your point of view only. Be specific, not generic. Bring what only 
 
   # Phase 3 — VALIDATE + COLLECT: every expert must have produced output
   failed=()
-  for m in "${pending_members[@]}"; do
+  for m in "${pending_hats[@]}"; do
     if ! harvest "$RUN_DIR/r${round}-${m}.job" "$RUN_DIR/r${round}-${m}.md"; then
       failed+=("$m: $(cat "$(jq -r .status "$RUN_DIR/r${round}-${m}.job")" 2>/dev/null || echo 'no status')")
     fi
@@ -178,7 +178,7 @@ Analyse from your point of view only. Be specific, not generic. Bring what only 
     echo "  [skip] synthesis (already done)" >&2
   else
     perspectives=""
-    for m in "${MEMBERS[@]}"; do
+    for m in "${HATS[@]}"; do
       perspectives+="
 ## Perspective: ${m}
 $(cat "$RUN_DIR/r${round}-${m}.md")
@@ -194,7 +194,7 @@ Independent perspectives collected:
 ${perspectives}
 
 Synthesise into ONE concrete recommendation: points of agreement, real tensions, decision. Do not flatten disagreements — surface them."
-    th run --member "$SYNTH" --task "$synth_prompt" --timeout "$TIMEOUT" > "$synth_md"
+    th run --hat "$SYNTH" --task "$synth_prompt" --timeout "$TIMEOUT" > "$synth_md"
     step_done "$synth_md" || die "synthesis produced no output — resume with: --run-id $RUN_ID"
   fi
 

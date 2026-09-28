@@ -16,7 +16,7 @@ updated: 2026-09-28
 | [th_detached_runs_state_in_tmp](th_detached_runs_state_in_tmp) | Detached runs keep state in /tmp files |
 | [th_http_api_scoped_no_db](th_http_api_scoped_no_db) | Planned th HTTP API; glob over /tmp, no DB |
 | [th_verification_outside_members](th_verification_outside_members) | Verification never inside a member's run |
-| [agents_skills_inline_members_via_th](agents_skills_inline_members_via_th) | Skills run inline; members only via th |
+| [agents_hats_replace_members](agents_hats_replace_members) | A delegated run is a hat plus instructions; skills stay inline |
 | [agents_roster_lives_on_filesystem](agents_roster_lives_on_filesystem) | Roster derived from the filesystem, never tabled |
 | [agents_named_after_famous_figures](agents_named_after_famous_figures) | Naming rule: famous figure with matching trait |
 | [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) | tb/ti search injected on every prompt |

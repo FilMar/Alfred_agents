@@ -8,20 +8,16 @@
 
 ## Phase 0 — Annibale chooses the roster (the only cognitive step)
 
-Pick members that cover different angles of the problem:
+Pick hats that cover different angles of the problem:
 
 - **Domain coverage**: who brings a perspective the others cannot?
 - **Hat divergence**: cognitive variety, not redundancy — a black and a yellow on the same domain beat two blacks
-- **Size**: 2–5 members (hard cap; override with `COUNCIL_MAX_MEMBERS` env var)
-- **Synth**: default `von-neumann-blue`; swap if a domain-specific synthesiser fits better
+- **Size**: 2–5 hats (hard cap; override with `COUNCIL_MAX_HATS` env var)
+- **Synth**: default `blue-core`; swap only if another hat closes better
 
-If a needed profile does not exist, create a temporary member first:
+A role that no hat carries by itself is not a missing file: pass it as `--system` on that run, in front of the hat.
 
-```bash
-th member create <name> --hat <hat-core> --role "<role>" --tmp
-```
-
-Propose the roster to the user before launching:
+Propose the table to the user before launching:
 
 ```
 Problem: <description>
@@ -46,23 +42,23 @@ Once the user confirms, run from the **project root**:
 ```bash
 skills/annibale/scripts/council.sh \
   --task "<problem verbatim or refined>" \
-  --members "knuth-black,jobs-yellow,turing-green" \
+  --hats "black-core,yellow-core,green-core" \
   [--rounds N]       # default 1; add rounds when first synthesis opens new tensions
-  [--synth <member>] # default von-neumann-blue
+  [--synth <hat>]    # default blue-core
   [--run-id ID]      # omit on first run; reuse to resume a crashed run
-  [--timeout SEC]    # default 600 per member
+  [--timeout SEC]    # default 600 per run
   [--dry-run]        # validate roster without spending any API calls
 ```
 
 The harness:
-1. Validates that every member exists (fail fast — no half-started runs)
+1. Validates that every hat exists (fail fast — no half-started runs)
 2. Launches all experts in parallel with `th run --detach`
 3. Blocks on `th wait` with crash detection until every expert is terminal
 4. Validates that every output is non-empty before synthesising
-5. Runs the synth member sequentially with all perspectives
+5. Runs the synth hat sequentially with all perspectives
 6. Accumulates the synthesis as context for round N+1
 
-Final synthesis goes to stdout. Per-member logs and outputs are in `/tmp/th-flow/<run-id>/`.
+Final synthesis goes to stdout. Per-run logs and outputs are in `/tmp/th-flow/<run-id>/`.
 
 ---
 
@@ -73,7 +69,7 @@ If a round fails or the process crashes, relaunch with the same `--run-id`. Comp
 ```bash
 skills/annibale/scripts/council.sh \
   --task "<same problem>" \
-  --members "<same members>" \
+  --hats "<same hats>" \
   --run-id council-20260702-143021   # printed by the first run
 ```
 

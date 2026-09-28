@@ -24,7 +24,7 @@
 ## Phase 1 — Christopher: context
 
 ```bash
-th run --member <member> --task "Use the christopher skill to retrieve everything the Third Brain knows about: <topic>"
+th run --hat <hat> --task "Use the christopher skill to retrieve everything the Third Brain knows about: <topic>"
 ```
 
 Present the result. If the TB has nothing on the topic, say so — the void is information.
@@ -32,7 +32,7 @@ Present the result. If the TB has nothing on the topic, say so — the void is i
 ## Phase 2 — Socrate: tension
 
 ```bash
-th run --member <member> --task "Use the socrate skill.
+th run --hat <hat> --task "Use the socrate skill.
 
 Topic: <topic>
 
@@ -54,7 +54,7 @@ When the user is done, go to phase 4.
 ## Phase 4 — Aristotele: integrate
 
 ```bash
-th run --member <member> --task "Use the aristotele skill.
+th run --hat <hat> --task "Use the aristotele skill.
 
 Topic: <topic>
 
@@ -70,7 +70,7 @@ Integrate what is new into the Third Brain. If nothing is new, say so."
 ## Phase 5 — Christopher: re-verify
 
 ```bash
-th run --member <member> --task "Use the christopher skill to re-verify the Third Brain graph on: <topic> — show what has changed since the start of the cycle."
+th run --hat <hat> --task "Use the christopher skill to re-verify the Third Brain graph on: <topic> — show what has changed since the start of the cycle."
 ```
 
 Then ask: **Do you want to continue the cycle on this tension, or bring a different idea?**
