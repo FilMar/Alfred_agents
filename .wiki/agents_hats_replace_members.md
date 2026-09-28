@@ -34,7 +34,7 @@ Two consequences recorded here rather than by editing pages that describe them:
 
 ## Cross-references
 
-- [memory_th_run_files_its_own_row](memory_delegated_run_is_a_pi_subtask) — what a finished run leaves behind, with the hat as its actor
+- [memory_delegated_run_is_a_pi_subtask](memory_delegated_run_is_a_pi_subtask) — what a finished run leaves behind, with the hat as its actor
 - [agents_roster_lives_on_filesystem](agents_roster_lives_on_filesystem) — the skill roster, a different roster
 - [skill_convention_direct_cli](skill_convention_direct_cli) — why a skill calls the CLI directly instead of wrapping it
 - [th_detached_runs_state_in_tmp](th_detached_runs_state_in_tmp) — the state a run keeps while it runs

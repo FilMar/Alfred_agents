@@ -29,4 +29,4 @@ One hazard stays, and is not solved by code: a skill that writes — `mose` need
 
 - [agents_hats_replace_members](agents_hats_replace_members) — the run this flag is added to, and why a skill is not a hat
 - [skill_convention_direct_cli](skill_convention_direct_cli) — the router shape that makes a skill's text worth injecting whole
-- [memory_th_run_files_its_own_row](memory_delegated_run_is_a_pi_subtask) — where `meta.skill` ends up
+- [memory_delegated_run_is_a_pi_subtask](memory_delegated_run_is_a_pi_subtask) — where `meta.skill` ends up
