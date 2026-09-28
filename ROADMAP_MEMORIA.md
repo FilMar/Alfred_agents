@@ -126,6 +126,29 @@ con quella compressione nessuna soglia poteva separare niente. Il ref-recall è
 sbilanciato **a favore** di v1.5 — quei link sono stati scritti guardando i suoi
 vicini — e v2 vince comunque.
 
+**Il cross-lingua, che credevamo di non usare.** La premessa "il corpus è
+interamente in italiano" era vera al 97%: **22 note su 747 sono in inglese** (tutte
+di giugno e luglio, sparse su tutti i `kind`, `ti` invece è italiano puro). Quindi
+il cross-lingua non era un caso ipotetico da non misurare: era il 3% del corpus,
+ed era il 3% peggio servito.
+
+Misurato con una parafrasi italiana del `what` di ognuna delle 22
+(`scripts/reports/fase0_crosslingual.json`):
+
+| | v1.5 | v2-moe |
+|---|---|---|
+| trovate nei primi 10 da query italiana | **0 / 22** | **16 / 22** |
+| al primo posto | 0 | 5 |
+
+Zero. Nessuna nota inglese era raggiungibile da una domanda in italiano, e non
+c'era modo di accorgersene: una ricerca che non trova niente non lascia errori.
+Le 6 che ancora sfuggono sono note di comunicazione e persuasione molto astratte,
+dove anche la parafrasi italiana è una domanda diversa.
+
+Resta una decisione tua: le 22 note vanno tradotte? `what` e `why` sono immutabili,
+quindi non è una riscrittura ma un supersede, cioè Fase 4. Con v2 sono raggiungibili
+per i due terzi, quindi non è urgente.
+
 Costo: 747 embed in 9 minuti e 23 secondi, cioè 0.75 s per nota. È il prezzo di ogni
 futuro cambio di modello, ed è basso abbastanza da non essere un argomento.
 
