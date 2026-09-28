@@ -13,7 +13,7 @@ One trap to avoid: `runner.ts` also exports `ensureSandboxed()`, which **re-exec
 
 ## Why
 
-The cockpit died of exactly this cost. Its first end-to-end test was slow because `runAgent` spawned a fresh `bun` process every turn, and the fix was to stop spawning at all by becoming a `pi` extension in RPC mode ([cockpit_pivot_pi_extension_rpc](cockpit_pivot_pi_extension_rpc)).
+The cockpit died of exactly this cost. Its first end-to-end test was slow because `runAgent` spawned a fresh `bun` process every turn, and the fix was to stop spawning at all by becoming a `pi` extension in RPC mode ([cockpit_pivot_pi_extension_rpc](.cockpit_pivot_pi_extension_rpc)).
 
 `third_os` cannot take that route: it is a web app for the graph, not a chat client for `pi`, and it needs a browser. So it does not fight the spawn — it designs around it. A synchronous chat would make the cost feel like a bug. A launched run with a live stream makes the same seconds read as work happening.
 
@@ -23,7 +23,7 @@ The known silent-death failure carries over: a run can end with a short `.out` a
 
 ## Cross-references
 
-- [cockpit_pivot_pi_extension_rpc](cockpit_pivot_pi_extension_rpc) — the project this cost already stopped once
+- [cockpit_pivot_pi_extension_rpc](.cockpit_pivot_pi_extension_rpc) — the project this cost already stopped once
 - [graph_curation_via_th_agent](graph_curation_via_th_agent) — the same subprocess-plus-stream shape
 - [th_detached_runs_state_in_tmp](th_detached_runs_state_in_tmp) — the silent-death risk to handle
 - [graph_third_os_webapp_wider_than_workbench](graph_third_os_webapp_wider_than_workbench) — the phase 3 this governs

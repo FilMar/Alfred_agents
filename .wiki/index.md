@@ -38,17 +38,9 @@ updated: 2026-09-28
 | [memory_score_cutoffs_belong_to_the_model](memory_score_cutoffs_belong_to_the_model) | min-score is measured per model, and the hook was silent without it |
 | [memory_absence_is_how_qdrant_stores_null](memory_absence_is_how_qdrant_stores_null) | No field whose only value is null: Qdrant drops the key |
 | [memory_raw_text_lives_in_the_archive_not_the_note](memory_raw_text_lives_in_the_archive_not_the_note) | No source_raw on a note: the archive holds the text, the note holds a pointer |
-| [orchestrator_minimal_rest_surface](orchestrator_minimal_rest_surface) | Four REST endpoints, one entry point |
-| [orchestrator_run_task_matrix_only](orchestrator_run_task_matrix_only) | Ad-hoc execution only via Matrix |
-| [orchestrator_adversarial_audit_static](orchestrator_adversarial_audit_static) | Audit at ingestion; static parsing everywhere |
-| [orchestrator_filesystem_state_no_db](orchestrator_filesystem_state_no_db) | Catalog + queue as filesystem; directory is state |
-| [orchestrator_boot_callback_wake_window](orchestrator_boot_callback_wake_window) | WoL + i_wake + batching + ping reconciliation |
-| [orchestrator_bwrap_task_execution](orchestrator_bwrap_task_execution) | Audited tasks run under th's sandbox |
+| [orchestrator_and_cockpit_removed](orchestrator_and_cockpit_removed) | Both tools removed; unused code was breaking the test suite |
 | [orchestrator_tailscale_perimeter_matrix_bot](orchestrator_tailscale_perimeter_matrix_bot) | One network perimeter; Matrix bot, not Telegram |
-| [orchestrator_metadata_exported_constants](orchestrator_metadata_exported_constants) | Script metadata as exported constants |
-| [orchestrator_remaining_work](orchestrator_remaining_work) | Phases 3-4, known bugs, future ideas |
 | [rasp_services_provisioning_order](rasp_services_provisioning_order) | What runs on the Rasp and in which order |
-| [cockpit_pivot_pi_extension_rpc](cockpit_pivot_pi_extension_rpc) | Cockpit as a pi extension in RPC mode |
 | [graph_third_os_webapp_wider_than_workbench](graph_third_os_webapp_wider_than_workbench) | third_os: read, write and AI over tb's graph; ti out for now |
 | [graph_third_os_imports_tb_as_library](graph_third_os_imports_tb_as_library) | Runs on the Rasp, imports tb's modules, keeps vectors in RAM |
 | [graph_third_os_canvas_physics_dom_text](graph_third_os_canvas_physics_dom_text) | canvas = physics, DOM = text; fake depth, no framework |

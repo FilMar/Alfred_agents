@@ -30,5 +30,5 @@ which is different from a note nobody has looked at.
 
 ## Cross-references
 
-- [Keep the raw source for re-ingestion](memory_keep_raw_source_for_reingest)
+- [Keep the raw source for re-ingestion](.memory_keep_raw_source_for_reingest)
 - [Identity splits into descriptive and prescriptive](memory_identity_splits_descriptive_prescriptive) — `about` is the descriptive half.

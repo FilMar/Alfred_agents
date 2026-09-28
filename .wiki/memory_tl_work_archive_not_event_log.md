@@ -75,6 +75,6 @@ Rejected: a fourth table for token costs (a 1:1 join on four always-present inte
 
 - [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) — why this is the episodic layer
 - [memory_wiki_is_the_project_notebook](memory_wiki_is_the_project_notebook) — why the wiki needs no producer of its own
-- [memory_keep_raw_source_for_reingest](memory_keep_raw_source_for_reingest) — the same lesson at the note level
+- [memory_keep_raw_source_for_reingest](.memory_keep_raw_source_for_reingest) — the same lesson at the note level
 - [memory_refs_carry_non_semantic_reach](memory_refs_carry_non_semantic_reach) — the links `parent` would generate for free
 - [th_http_api_scoped_no_db](th_http_api_scoped_no_db) — the durable history `th` does not serve

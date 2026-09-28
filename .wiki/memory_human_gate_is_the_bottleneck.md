@@ -26,5 +26,5 @@ Widening the gate was rejected for the same reason. The cost is the reading, so 
 ## Cross-references
 
 - [memory_refs_carry_non_semantic_reach](memory_refs_carry_non_semantic_reach) — what the hand-written part of the graph is worth
-- [memory_keep_raw_source_for_reingest](memory_keep_raw_source_for_reingest) — what a note must carry so a later pass can redo the work
+- [memory_keep_raw_source_for_reingest](.memory_keep_raw_source_for_reingest) — what a note must carry so a later pass can redo the work
 - [memory_related_notes_ranked_not_cut](memory_related_notes_ranked_not_cut) — the missing telemetry that would let use act as judge

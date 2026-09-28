@@ -18,6 +18,6 @@ The endpoint is never exposed publicly; an attacker must first breach the tailne
 
 ## Cross-references
 
-- [orchestrator_run_task_matrix_only](orchestrator_run_task_matrix_only) — the second-channel argument for ad-hoc execution
+- [orchestrator_run_task_matrix_only](.orchestrator_run_task_matrix_only) — the second-channel argument for ad-hoc execution
 - [rasp_services_provisioning_order](rasp_services_provisioning_order) — the perimeter comes up first on the node
 - [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) — the same perimeter reasoning for the TB bot

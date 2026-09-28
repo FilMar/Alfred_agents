@@ -26,13 +26,13 @@ Paused since 2026-07-21. The memory stack came first.
 
 - [ ] Personal server: provision the always-on node. [detail](rasp_services_provisioning_order)
 - [x] Move the Third Brain and Third Identity to the Rasp — both live and confirmed working. [detail](memory_tb_ti_on_rasp)
-- [ ] Finish the orchestrator: audit gate, chat bridge, hardening. [detail](orchestrator_remaining_work)
+- ~~Finish the orchestrator~~ — removed 2026-09-28. [why](orchestrator_and_cockpit_removed)
 
 ### cockpit
 
 Paused 2026-08-09. Pivoted to a pi extension 2026-08-10, not started.
 
-- [ ] Resume the cockpit as a pi extension. [detail](cockpit_pivot_pi_extension_rpc)
+- ~~Resume the cockpit as a pi extension~~ — removed 2026-09-28. [why](orchestrator_and_cockpit_removed)
 
 ### graph
 

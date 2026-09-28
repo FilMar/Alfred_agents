@@ -23,4 +23,4 @@ A member grading its own output can be wrong in the same way it was wrong when p
 ## Cross-references
 
 - [agents_skills_inline_members_via_th](agents_skills_inline_members_via_th) — what a member is and is not
-- [orchestrator_adversarial_audit_static](orchestrator_adversarial_audit_static) — the same external-verification instinct applied to the orchestrator's audit gate
+- [orchestrator_adversarial_audit_static](.orchestrator_adversarial_audit_static) — the same external-verification instinct applied to the orchestrator's audit gate
