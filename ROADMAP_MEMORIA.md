@@ -298,16 +298,17 @@ Lo strato episodico. Produce esperienze e archi senza far leggere niente a nessu
 **Trovato guardando i transcript veri**
 
 - Un exchange si apre su un messaggio utente che porta `origin`. I 276 record che non ce l'hanno sono `/compact`, avvisi di interruzione e iniezioni di skill: **non e deriva di versione**, esistono in tutte. I loro token non si perdono, finiscono nell'exchange precedente.
-- **I sidechain stanno in file separati**, `<sessione>/subagents/agent-*.jsonl`, e il loro unico record senza `parentUuid` e il prompt del task. Quindi `kind: subtask` e il campo `parent` si riempiono **adesso**, non dopo la Fase 6: il parent e l'exchange che era in corso quando il subagente e partito. Il rinvio della Fase 6 riguarda i run di `th`, che sono un'altra sorgente.
+- **`subtask` vuol dire `th`, non il subagente nativo di Claude.** Sono tre cose: tu chiedi (`chat`), io delego a un subagente nativo, io delego a un cappello via `th`. La terza non sta nel transcript per niente — `th` fa le sue chiamate in un processo suo — quindi la riga la scrive `th`, dopo la Fase 6. La seconda **non e una riga**: la chiamata al Task e la relazione finale del subagente stanno gia dentro l'output dell'exchange che le ha chieste. Non si conta solo quello che il subagente ha speso dentro di se: misurato, **2,4% dei token di output**, su 8 sessioni di 43.
+- I sidechain stanno in file separati (`<sessione>/subagents/agent-*.jsonl`), quindi escluderli e gratis: `tl` legge solo i transcript di primo livello.
 
 **Misure** (47 transcript, un mese di lavoro)
 
 | | valore |
 |---|---|
-| sessioni / exchange | 43 / 979 |
+| sessioni / exchange | 43 / 961 |
 | tempo del backfill completo | 1,26 s |
 | archivio contro transcript | 23 MB contro 102 MB |
-| secondo giro sugli stessi file | 0 scritture, 979 note |
+| secondo giro sugli stessi file | 0 scritture, 961 note |
 | testo recuperato da un exchange | 97.000 caratteri |
 
 **Verifica**: 71 test nuovi, sei mutazioni del codice provate una per una — **una e sopravvissuta** e ha smascherato un test che non provava niente (usava una riga senza `usage` per dimostrare che le righe non-risposta vengono ignorate). Corretto. `SELECT *` leggibile per giorno, sessione, macchina e costo. Typecheck ora copre `tb`, `ti` e `tl`: `ti` aveva un `tsconfig.json` che nessuno script eseguiva.
