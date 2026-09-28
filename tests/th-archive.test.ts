@@ -33,9 +33,15 @@ describe("runRows", () => {
     expect(validateContents(rows.contents)).toBeNull();
   });
 
-  it("a run is its own session, named th", () => {
+  it("a run is its own session, and pi is the harness that ran it", () => {
     const rows = runRows(run(), [message()], "kokpit", "/work");
-    expect(rows.session).toEqual({ id: RUN_ID, started: T1, harness: "th", host: "kokpit", path: "/work" });
+    expect(rows.session).toEqual({ id: RUN_ID, started: T1, harness: "pi", host: "kokpit", path: "/work" });
+  });
+
+  it("what marks a delegation is the kind, not a harness of its own", () => {
+    const rows = runRows(run(), [message()], "kokpit", "/work");
+    expect(rows.session.harness).toBe("pi");
+    expect(rows.exchange.kind).toBe("subtask");
   });
 
   it("the hat is the actor and the row is a subtask", () => {

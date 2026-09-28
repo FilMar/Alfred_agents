@@ -12,11 +12,13 @@ export const EXCHANGE_KINDS = ["chat", "subtask"] as const;
 export type ExchangeKind = (typeof EXCHANGE_KINDS)[number];
 
 /**
- * The tools that produce rows. `claude` and `pi` write a transcript; `th` writes no
- * transcript at all and files its own row when a delegated run ends. A name outside
- * this list is far more likely a typo than a new tool, so the store refuses it.
+ * The harness is the loop that runs the model: it reads the output, executes the
+ * tool calls and feeds the results back. `th` is not one of these — it configures
+ * pi's loop and calls it, so a delegated run is a `pi` row that `kind` marks as a
+ * subtask. A name outside this list is far more likely a typo than a new tool, so
+ * the store refuses it.
  */
-export const HARNESSES = ["claude", "pi", "th"] as const;
+export const HARNESSES = ["claude", "pi"] as const;
 
 export type Harness = (typeof HARNESSES)[number];
 

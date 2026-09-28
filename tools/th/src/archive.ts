@@ -61,7 +61,8 @@ export function runRows(run: FinishedRun, messages: unknown[], host: string, cwd
   const id = exchangeId(run.id, "run");
 
   return {
-    session: { id: run.id, started: run.started_at, harness: "th", host, path: cwd },
+    // pi runs the loop; th only configures it. `kind: subtask` is what marks a delegation.
+    session: { id: run.id, started: run.started_at, harness: "pi", host, path: cwd },
     exchange: {
       id,
       session: run.id,
