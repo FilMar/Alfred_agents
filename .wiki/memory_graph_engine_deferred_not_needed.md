@@ -29,5 +29,5 @@ Rejected alternative, worth keeping in mind: a second Qdrant collection where ev
 
 - [memory_refs_carry_non_semantic_reach](memory_refs_carry_non_semantic_reach) — the graph is valuable and still small
 - [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) — where the missing layer actually is
-- [memory_tl_unified_event_log](memory_tl_unified_event_log) — the component that produces edges without a human
+- [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the component that produces edges without a human
 - [graph_third_os_imports_tb_as_library](graph_third_os_imports_tb_as_library) — the in-RAM corpus this decision leans on

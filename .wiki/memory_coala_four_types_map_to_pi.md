@@ -10,13 +10,15 @@ Use CoALA (Cognitive Architectures for Language Agents, Princeton) as the map of
 | CoALA type | What it holds | Where it lives in pi | State |
 |---|---|---|---|
 | Working | what the model sees right now | context window, `CLAUDE.md`, the `tb`/`ti` injection hook | built |
-| Semantic | facts, concepts, conventions | `tb` cross-project, `.wiki/` per project | built |
+| Semantic | facts, concepts, conventions | `tb`, cross-project | built |
 | Procedural | how to do things | skills (`SKILL.md`) and `ti` rules (`if` to `do`) | built |
 | Episodic | what happened, and what was learned from it | `tl` | founded, not built |
 
+`.wiki/` is not one of the four. It is the project's notebook — see [memory_wiki_is_the_project_notebook](memory_wiki_is_the_project_notebook).
+
 So the hole in the stack is episodic memory, and it already has a name. Every memory product surveyed — Hindsight, Mnemosyne, Mem0 — sits in that slot. Any of them is a candidate engine for `tl`. None of them is a replacement for `tb` or `ti`.
 
-The survey also gives a clean test for the `tb` / `ti` split, from the Hermes stack: knowledge you want to keep and organise across everything you do is world knowledge, so it is `tb` or `.wiki/`. A fact about how you like to work, or about what you are doing right now, is operational memory, so it is `ti`.
+The survey also gives a clean test for the `tb` / `ti` split, from the Hermes stack: knowledge you want to keep and organise across everything you do is world knowledge, so it is `tb`. A fact about how you like to work, or about what you are doing right now, is operational memory, so it is `ti`.
 
 ## Why
 
@@ -28,7 +30,7 @@ The surveyed systems agree on one more point, and it is the hard one: forgetting
 
 ## Cross-references
 
-- [memory_tl_unified_event_log](memory_tl_unified_event_log) — the episodic layer, founded and specified
+- [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the episodic layer, specified
 - [memory_log_first_three_moves](memory_log_first_three_moves) — the same ordering reached from inside the project
 - [core_orthogonal_layers_no_overlap](core_orthogonal_layers_no_overlap) — the layer boundary this map confirms
 - [memory_graph_engine_deferred_not_needed](memory_graph_engine_deferred_not_needed) — why the gap is not a storage-engine problem

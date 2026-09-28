@@ -18,4 +18,4 @@ Silent death mid-run, observed twice on 2026-07-21, root cause unconfirmed: a `-
 ## Cross-references
 
 - [th_http_api_scoped_no_db](th_http_api_scoped_no_db) — the HTTP API reads these same files
-- [memory_tl_unified_event_log](memory_tl_unified_event_log) — durable run history moves to `tl`, not these files
+- [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — durable run history moves to `tl`, not these files

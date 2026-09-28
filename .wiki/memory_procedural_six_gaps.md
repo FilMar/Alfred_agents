@@ -24,4 +24,4 @@ Gap 1 is the hard prerequisite (without skill data, gaps 2-6 have nothing to ope
 
 - [memory_log_first_three_moves](memory_log_first_three_moves) — the adopted strategy on top of this diagnosis
 - [memory_ti_context_action_rules](memory_ti_context_action_rules) — the partial resolution of gaps 3-4
-- [memory_tl_unified_event_log](memory_tl_unified_event_log) — move 1, the store that unblocks gaps 1 and 5
+- [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — move 1, the store that unblocks gaps 1 and 5

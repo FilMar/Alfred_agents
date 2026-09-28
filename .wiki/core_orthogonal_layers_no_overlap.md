@@ -24,5 +24,5 @@ A fact with two homes drifts: one copy is updated, the other lies. Each layer an
 ## Cross-references
 
 - [core_tb_stateless_single_source](core_tb_stateless_single_source) — how the CLIs stay stateless
-- [memory_tl_unified_event_log](memory_tl_unified_event_log) — the layer that replaces `th`'s local tracking
+- [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the layer that replaces `th`'s local tracking
 - [memory_ti_context_action_rules](memory_ti_context_action_rules) — the `ti` layer in detail

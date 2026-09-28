@@ -22,7 +22,9 @@ updated: 2026-09-28
 | [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) | tb/ti search injected on every prompt |
 | [memory_procedural_six_gaps](memory_procedural_six_gaps) | The six gaps to procedural memory |
 | [memory_log_first_three_moves](memory_log_first_three_moves) | Grow on data, not hypotheses; log first |
-| [memory_tl_unified_event_log](memory_tl_unified_event_log) | tl: one REST event log, founded not built |
+| [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) | tl: an archive of work; chat and subtask, three tables |
+| [memory_wiki_is_the_project_notebook](memory_wiki_is_the_project_notebook) | The wiki is not a memory tier; the extraction test |
+| [memory_identity_splits_descriptive_prescriptive](memory_identity_splits_descriptive_prescriptive) | about on tb notes; ti holds the executable half |
 | [memory_ti_context_action_rules](memory_ti_context_action_rules) | ti: dedicated if/do collection, dumb client |
 | [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) | tb + ti live on the Rasp, confirmed in use |
 | [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) | CoALA's four types mapped to pi; episodic is the hole |
