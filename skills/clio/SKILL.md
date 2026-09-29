@@ -1,16 +1,17 @@
 ---
 name: clio
-description: "Backs up Qdrant to MEGA cloud storage. Use this skill for Qdrant collection snapshots, restoring a collection from a MEGA backup, checking MEGA storage space, and managing the automatic backup timer. Triggers: 'clio', 'backup qdrant', 'qdrant backup', 'snapshot qdrant', 'restore qdrant', 'restore collection', 'backup status', 'backup timer', 'restore from backup'."
+description: "Backs up Qdrant and the tl archive to MEGA cloud storage. Use this skill for Qdrant collection snapshots, tl database backups, restoring a collection or the tl database from a MEGA backup, checking MEGA storage space, and managing the automatic backup timer. Triggers: 'clio', 'backup tl', 'restore tl', 'backup qdrant', 'qdrant backup', 'snapshot qdrant', 'restore qdrant', 'restore collection', 'backup status', 'backup timer', 'restore from backup'."
 ---
 
 # Clio Backup Skill
 
-Backs up **Qdrant** to MEGA cloud storage, with an optional systemd timer.
+Backs up **Qdrant** and the **tl** SQLite archive to MEGA cloud storage, with an optional systemd timer.
 
 ## When to use this skill
 
 - Backing up a Qdrant collection to MEGA (snapshot API -> download -> gzip -> upload)
-- Restoring a Qdrant collection from a MEGA backup
+- Backing up the tl archive (the only copy of a transcript once it rotates)
+- Restoring a Qdrant collection or the tl database from a MEGA backup
 - Checking MEGA storage space and login status
 - Managing automatic backups (weekly systemd timer)
 
@@ -28,7 +29,8 @@ mega-df -h           # Space used
 ```bash
 scripts/backup_qdrant.sh <collection>          # One collection, retain=5
 scripts/backup_qdrant.sh <collection> 10        # Custom retention
-scripts/backup_all.sh                           # All collections in QDRANT_COLLECTIONS
+scripts/backup_tl.sh                            # The tl database, retain=5
+scripts/backup_all.sh                           # All collections in QDRANT_COLLECTIONS, then tl
 ```
 
 ### Restore
@@ -36,6 +38,10 @@ scripts/backup_all.sh                           # All collections in QDRANT_COLL
 ```bash
 scripts/restore_qdrant.sh <collection> <backup.tar.gz>
 # Example: scripts/restore_qdrant.sh supertest qdrant-supertest-20260728-184022.tar.gz
+
+systemctl --user stop tl                        # The service holds the file open
+scripts/restore_tl.sh <backup.db.gz>            # Keeps the old file as tl.db.before-restore-<date>
+systemctl --user start tl
 ```
 
 ### Timer (automatic backup)
@@ -55,12 +61,16 @@ tail -n 50 "$HOME/.local/log/clio-backup.log"   # Last 50 backup log lines
 
 ## Architecture
 
+Run these on the machine that holds the data: the Rasp, where Qdrant and `~/.tl/tl.db` live.
+
 Three-level pattern:
 1. **`scripts/backup_qdrant.sh`**: backs up one collection with configurable
    retention (default 5). Usage: `backup_qdrant.sh <collection> [retain]`.
 2. **`scripts/backup_all.sh`**: loops over a list of collections and calls
-   `backup_qdrant.sh` for each. Edit the `QDRANT_COLLECTIONS` array inside
-   the script to customize it.
+   `backup_qdrant.sh` for each, then `backup_tl.sh`. Edit the
+   `QDRANT_COLLECTIONS` array inside the script to customize it.
+   `backup_tl.sh` copies with `sqlite3 .backup` (a plain `cp` of a WAL file can
+   miss data) and checks the copy with `integrity_check` before uploading.
 3. **`scripts/enable_timer.sh`**: installs a systemd user unit that runs
    `scripts/backup_all.sh` every Monday at 04:00. The unit's `ExecStart`
    line must point at this script's absolute path, not at a justfile.
@@ -73,6 +83,8 @@ All backups write to `~/.local/log/clio-backup.log`.
 /backup/qdrant/
   qdrant-third-brain-20260728-175500.tar.gz
   qdrant-pi_identity-20260728-175500.tar.gz
+/backup/tl/
+  tl-20260929-040000.db.gz
 ```
 
 ## Extending it
@@ -92,12 +104,14 @@ To add other backup types (PostgreSQL, files, Git, etc.), follow this convention
 | Variable | Default | Use |
 |-----------|---------|-----|
 | `CLIO_HOME` | `$HOME/.pi/agent/skills/clio` | Skill path (for `scripts/enable_timer.sh`) |
+| `TL_DB` | `$HOME/.tl/tl.db` | The tl database to back up or restore |
 
 ## Requirements
 
 - **MEGAcmd** installed: `apt install megacmd` (Debian/Ubuntu)
 - **Login** done: `mega-login <email>`
 - **jq**: `apt install jq` (to parse the Qdrant API response)
+- **sqlite3**: `apt install sqlite3` (for the tl backup)
 - **curl**: standard on Linux
 - **Systemd --user**: for the automatic timer
 
