@@ -6,3 +6,6 @@ pi-docs/
 # Python bytecode cache
 __pycache__/
 *.pyc
+
+# Synced by Claude Code through the ~/.claude/skills link
+skills/synced/
