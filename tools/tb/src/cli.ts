@@ -11,7 +11,7 @@ import { serveApi, API_PORT } from "./api.js";
 import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId } from "./notes.js";
 import { getByIds } from "./qdrant.js";
 import type { NoteType, SearchOptions, Link } from "./types.js";
-import { NOTE_TYPES, isValidKind, normalizeTags, errorMessage, ContractError } from "./types.js";
+import { NOTE_TYPES, NOTE_STATUSES, isValidKind, normalizeTags, errorMessage, ContractError } from "./types.js";
 
 // ─── Compose path ─────────────────────────────────────────────────────────────
 
@@ -140,8 +140,11 @@ program
   .option("--kind <kind>", "Semantic type (dato|protocollo|sintesi|attrito|configurazione|indice)", "dato")
   .option("--tags <tag>", "Tag (repeatable)", collect, [] as string[])
   .option("--source <uri>", "URI or reference to the original source")
+  .option("--exchange <id>", "Id of the tl exchange the note comes from")
+  .option("--status <status>", "provvisoria | promossa", "promossa")
   .action(async (opts) => {
     validateKind(opts.kind);
+    if (!NOTE_STATUSES.includes(opts.status)) die(`invalid status: "${opts.status}". Allowed: ${NOTE_STATUSES.join(", ")}`);
     await requireServices({ needsEmbedding: true });
 
     const note = await createNote({
@@ -150,6 +153,8 @@ program
       kind: opts.kind,
       tags: normalizeTags(opts.tags),
       source: opts.source,
+      exchange: opts.exchange,
+      status: opts.status,
     });
 
     out({ id: note.id });

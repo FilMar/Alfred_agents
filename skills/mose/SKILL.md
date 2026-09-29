@@ -1,6 +1,6 @@
 ---
 name: mose
-description: "Mosè is the Rule Legislator. Writes atomic context→action rules for Third Identity (`ti`) — the store of what to DO given a situation, distinct from Third Brain which stores what is KNOWN. Use it whenever the user wants to add a behavioural rule, turn a lesson or mistake into a rule, extract rules from Third Brain notes or session output, or clean up / deduplicate the ti store. Strong triggers: 'add a rule', 'ti add', 'make this a rule', 'ricordati di fare X quando Y', 'populate ti', 'extract rules from tb', any 'when X happens, do Y' the user wants persisted."
+description: "Mosè is the Rule Legislator. Writes atomic context→action rules for Third Identity (`ti`) — the store of what to DO given a situation, distinct from Third Brain which stores what is KNOWN. Use it whenever the user wants to add a behavioural rule, turn a lesson or mistake into a rule, extract rules from Third Brain notes, session output or `tl` exchanges, or clean up / deduplicate the ti store. Strong triggers: 'add a rule', 'ti add', 'make this a rule', 'ricordati di fare X quando Y', 'populate ti', 'extract rules from tb', any 'when X happens, do Y' the user wants persisted."
 allowed-tools: Bash
 ---
 
@@ -33,7 +33,7 @@ The `if` must describe a **situation an agent can notice itself being in mid-tas
 - **Verifiable.** A reviewer looking at the executor's output must be able to say *followed / not followed*. "Fai attenzione alla sicurezza" is unfollowable — attention leaves no trace. "Mai permettere scrittura diretta senza checkpoint umano" is checkable.
 - **A dry order — no rationale.** The `do` is only the action. No "perché…", no why-clause, no justification. Rationale is knowledge and lives in `tb`; the rule is an order. "Implementa osservabilità totale: ogni tool call visibile in tempo reale" — not "…perché senza osservabilità il debug è impossibile". If an order seems to need its reason to be followed, the `if` is not sharp enough. Fix the context, don't pad the action.
 - **Self-contained.** No "come detto sopra", no reference to a conversation, a person, a team member, a session. The rule will be read alone, years from now.
-- **Tool routing is prime material.** Orders about the agent's own toolchain — when to call `tb`, `ti`, `th`, a specific skill, a bash pattern — are among the most valuable rules. They fire on every session. "Stai per rispondere su un tema concettuale → Esegui `tb search` prima di rispondere". Whenever a session settles which tool or skill handles which situation, propose that as a rule.
+- **Tool routing is prime material.** Orders about the agent's own toolchain — when to call `tb`, `ti`, `th`, a specific skill, a bash pattern — are among the most valuable rules. They fire on every session. "Stai per rispondere su un tema concettuale → Esegui `tb search` prima di rispondere". Whenever a session settles which tool or skill handles which situation, save that as a rule.
 
 ### What is NOT a rule
 
@@ -59,7 +59,7 @@ Call the `ti` and `tb` CLIs directly. Never wrap them in another layer.
 
 ```bash
 ti search "<draft context>" --limit 5 --min-score 0.5
-ti add --if "<context>" --do "<action>" --tags "<tag1>" --tags "<tag2>"
+ti add --if "<context>" --do "<action>" --tags "<tag1>" --tags "<tag2>" [--exchange "<tl exchange id>"]
 ti append-do <id> --do "<new action>"
 ti list --tags "<tag1>" --tags "<tag2>"            # omit --tags for all rules
 tb browse --kind <kind> --limit 50
@@ -73,27 +73,20 @@ and pass one `--tags` per tag.
 
 ## Workflow A — Creating a rule from user input
 
-1. **Extract the pair.** From what the user says, identify context and action. If the context is missing ("ricordati di usare staging areas"), ask: *in which situation?* A `do` without a sharp `if` is a rule that never fires.
+1. **Extract the pair.** From what the user says, identify context and action. If the context is missing ("ricordati di usare staging areas"), ask *in which situation?* — or drop the rule when nobody can answer. A `do` without a sharp `if` is a rule that never fires.
 2. **Draft** the rule applying the anatomy above. Splitting into multiple rules is normal — say so.
-3. **Dedupe** (mandatory, before proposing):
+3. **Dedupe** (mandatory, before saving):
    ```bash
    ti search "<draft context>" --limit 5 --min-score 0.5
    ```
    - Same context, same action → nothing to do; tell the user.
-   - Same context, new action → propose `ti append-do <id> --do "<action>"` instead of a new rule.
+   - Same context, new action → run `ti append-do <id> --do "<action>"` instead of adding a new rule.
    - Overlapping context → sharpen the draft `if` until the two situations are distinguishable, or merge.
-4. **Propose and wait.** Show the rule in this format and do not save until confirmed:
-   ```
-   Proposed rule [N/TOT]:
-     if:   <context>
-     do:   <action>
-     tags: <tag1, tag2>
-   (overlap check: none | append to <id> | ...)
-   ```
-5. **Save** after confirmation:
+4. **Save.** No confirmation. The anatomy and the dedupe are the gate:
    ```bash
-   ti add --if "<context>" --do "<action>" --tags "tag1" --tags "tag2"
+   ti add --if "<context>" --do "<action>" --tags "tag1" --tags "tag2" [--exchange "<id>"]
    ```
+5. **Report** in one line what was saved, appended or dropped, with the rule id.
 
 **Tags**: lowercase singular nouns, max 3, reuse the vocabulary already in `ti list` before inventing. Tags are a filter (`ti list --tags "tag1"`), not a taxonomy — choose the ones someone would actually filter by.
 
@@ -107,8 +100,19 @@ Source can be Third Brain notes, a work session, a post-mortem, a document.
    ```
 2. **Convert** each candidate through the anatomy. Find the situation in which the protocol applies — that is the `if`. Compress the instruction into a dry imperative `do`, and drop the note's `why` entirely: it stays in `tb`. Cross-project only — project-specific protocols stay out.
 3. **Dedupe against `ti` and within the batch**, same as Workflow A step 3. When several notes yield the same context, that is one rule with multiple `do` entries, not several rules.
-4. **Propose in batch.** Present the full list of proposed rules (same format as above, numbered) and let the user confirm, edit, or discard per item. For large batches, confirm in groups of ~10 rather than one by one. **Never save without this review**, not even in autonomous sessions. Write the proposed batch to a file, show it, and stop until the user responds. A wrong rule in `ti` silently steers every future retrieval. The review is the only checkpoint against that.
-5. **Save** the confirmed ones. Report the tally: proposed / saved / appended / discarded, and which tb notes were judged knowledge-only.
+4. **Save** what passes. No confirmation: a rule that fails the anatomy or the dedupe is dropped, never saved "to be reviewed". A wrong rule in `ti` steers every future retrieval, so when in doubt, drop.
+5. **Report the tally**: saved / appended / dropped, and which tb notes were judged knowledge-only.
+
+## Workflow C — Distilling rules from `tl`
+
+Source: exchanges of the archive. Read a window, for example the last week: `tl` lists sessions and exchanges, and `tl show` prints one.
+
+1. **Find the corrections.** An exchange where the user rejects what the agent did and says what to do instead ("no, fai così", "non farlo più", "sempre X quando Y") is the only entry path. One clear correction is enough.
+2. **Do not infer rules from silence or from repetition of plain work.** A pattern with no correction stays in `tl`. `ti` has no usage counter yet, so a rule saved on a guess cannot fade by itself.
+3. **Convert** through the anatomy. The `if` is the situation the agent was in when it was corrected. The `do` is the correct action. Cross-project only.
+4. **Dedupe**, same as Workflow A step 3. A repeated correction of an existing rule is not a new rule: `append-do` when the action is new, nothing when it is the same.
+5. **Save** with `--exchange <id of the correcting exchange>`. The id is the way back to the evidence.
+6. **Report** the tally in one line. Nothing to save is the normal result of a window.
 
 ---
 

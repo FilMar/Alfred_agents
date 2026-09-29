@@ -334,7 +334,7 @@ Uno, non due. Legge una finestra temporale di eventi e propone note e regole `pr
 - Gira periodico e senza chiedere. Modello piccolo e locale (1-12B basta per l'estrazione).
 - Ogni nota nasce `provvisoria`, con `session` che punta a dove è nata in `tl`.
 - **`source_raw` è stato rimosso** (2026-09-28, decisione di Filippo). Era un campo che tenevo io per "poter ri-estrarre quando il distillatore migliora", proposto durante il design e mai chiesto. Il grezzo è un record, e i record stanno in `tl` e in git: duplicarlo dentro ogni nota paga lo stesso testo due volte e lo mette nel posto che si legge più spesso.
-- **Il campo si chiama `session`, non `source_event`.** "Event" era un fossile del nome vecchio di `tl`, quando era un event log. Una cosa da decidere quando il campo avrà uno scrittore: `tl` ha tre tabelle, `sessions` ed `exchanges` fra loro, e una sessione contiene molti scambi. Se serve risalire allo scambio esatto, l'id da scrivere è quello dell'exchange e il nome dovrà dirlo; se basta sapere in quale sessione sei nato, `session` è giusto e più corto.
+- **Il campo si chiama `session`, non `source_event`.** "Event" era un fossile del nome vecchio di `tl`, quando era un event log. **Deciso il 2026-09-29: il campo è `exchange`**, l'id dello scambio in `tl`. La sessione si ricava dallo scambio, non il contrario. Esiste in `tb` (`tb save --exchange`) e in `ti` (`ti add --exchange`); `tb save` prende anche `--status provvisoria`.
 - Controllo di duplicazione **in scrittura** — è il buco che ha prodotto i duplicati attuali: sopra soglia si fonde o si scarta, non si aggiunge.
 - **La regola di estrazione** è una domanda dentro il prompt, non un componente: *il perché sopravvive se cancello il progetto?* Sì → nota `tb` in italiano e in prima persona, con il path della pagina come `source`. No → resta nella wiki.
 - Ammissione per le note `about: filippo`: ogni affermazione cita gli eventi `tl` che la sostengono, o non entra.
@@ -399,12 +399,11 @@ Nessuna delle fasi precedenti dipende da queste.
 **Fermati e chiedi.** Non decidere da solo su:
 
 - soglia di duplicazione in scrittura e forma del campo di stato — dichiarate aperte qui sotto;
-- qualsiasi modifica al `CLAUDE.md` globale (la conferma di Mosè);
 - cancellare o riscrivere una skill (`fury`) o una pagina `.wiki/`;
 - cancellare note, regole o collection **non** create da te in questa sessione;
 - `git push`, force-push, riscrittura di storia.
 
-**Governance.** Codice che resta -> **Ritchie**. Prova usa-e-getta -> **Edison**. Pagine `.wiki/` -> **Omero**. Regole `ti` -> **Mosè**, che non scrive senza conferma. Design con più prospettive -> **Annibale**. Estrazione verso `tb` -> **Platone**. Prima di un'azione ricorrente o non ovvia: `ti search "<contesto>"`.
+**Governance.** Codice che resta -> **Ritchie**. Prova usa-e-getta -> **Edison**. Pagine `.wiki/` -> **Omero**. Regole `ti` -> **Mosè**, che salva da solo (conferma tolta il 2026-09-29). Design con più prospettive -> **Annibale**. Estrazione verso `tb` -> **Platone**. Prima di un'azione ricorrente o non ovvia: `ti search "<contesto>"`.
 
 **Dove sta cosa.**
 

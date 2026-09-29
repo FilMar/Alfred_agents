@@ -9,19 +9,26 @@ import type { IdentityEntry, SearchOptions } from "./types.js";
  * - Must never overwrite an existing entry; always create a new point.
  * - Side effect: writes to Qdrant.
  */
-export async function addEntry(ifText: string, doText: string, tags: string[]): Promise<IdentityEntry> {
+export async function addEntry(ifText: string, doText: string, tags: string[], exchange?: string): Promise<IdentityEntry> {
   await qdrant.ensureCollection();
   const vector = await embedDocument(ifText);
 
   const id = crypto.randomUUID();
-  await qdrant.upsertPoint(id, vector, { if: ifText, do: [doText], tags, embed_model: EMBED_MODEL });
+  await qdrant.upsertPoint(id, vector, {
+    if: ifText,
+    do: [doText],
+    tags,
+    ...(exchange && { exchange }),
+    embed_model: EMBED_MODEL,
+  });
 
   return {
     id,
     vector: [],
     if: ifText,
     do: [doText],
-    tags
+    tags,
+    ...(exchange && { exchange }),
   };
 }
 
@@ -111,6 +118,7 @@ export async function appendDo(id: string, doText: string): Promise<IdentityEntr
     if: existingEntry.if,
     do: updatedDo,
     tags: existingEntry.tags,
+    ...(existingEntry.exchange && { exchange: existingEntry.exchange }),
     ...(existingEntry.embed_model && { embed_model: existingEntry.embed_model }),
   });
   

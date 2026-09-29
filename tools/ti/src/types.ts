@@ -4,6 +4,8 @@ export interface IdentityEntry {
   if: string;
   do: string[];
   tags: string[];
+  /** Id of the tl exchange this rule was distilled from — optional */
+  exchange?: string;
   /** Model that produced the vector — a vector is only comparable within one model */
   embed_model?: string;
 }

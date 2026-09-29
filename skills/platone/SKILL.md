@@ -1,6 +1,6 @@
 ---
 name: platone
-description: "Platone is the Memory Cultivator. Use it at the end of every session or task. It pulls value out of the work you did. It reads the output and distils atomic concepts. It saves them in the Third Brain, using the Feynman method. After each save, it runs a serendipity challenge: it picks a random note and builds an explicit bridge, if a real connection exists."
+description: "Platone is the Memory Cultivator. Use it at the end of a session or task, or on a window of the `tl` archive. It pulls value out of the work you did. It reads the output and distils atomic concepts. It saves them in the Third Brain, using the Feynman method, with no confirmation. After each save, it runs a serendipity challenge: it picks a random note and builds an explicit bridge, if a real connection exists."
 allowed-tools: Bash
 ---
 
@@ -29,55 +29,29 @@ Before saving, use Richard Feynman's method to strip away fake complexity:
 - **The Twelve-Year-Old Test**: rewrite the concept as if you had to explain it to a 12-year-old. Use plain and direct language.
 - **Mechanism > Label**: do not just name something (e.g. "Adversarial Synergy"). Describe *how the mechanism works*. Understanding lives in the process, not the term.
 - **No jargon**: if you must use a technical term, explain it right away in simple words. If a word only makes you sound smart, drop it.
+- **A note is a puzzle piece.** It must fit in more than one place. Say the idea with a plain everyday image (a queue, a kitchen, a bridge, a suitcase), then say the mechanism in one sentence, in words that belong to no single project. Keep the real technical term once, inside the mechanism, so a search by that term still finds the note.
+- **The two-context test**: name two unrelated situations where the note would help. If you can name only one, the note is still a project detail: widen it, or drop it.
 
-### 3. Store (Batch proposal)
+### 3. Store (Automatic)
 
-**Do not save immediately.** Propose the notes to the user in batches of at most 5 and wait for one confirmation per batch. Ten concepts means two batches; twelve means three.
+**No confirmation.** The filters above and the duplicate check are the gate. A note that does not pass is dropped, not held for review.
 
 **Step 3a — Check for duplicates:**
 ```bash
 tb tags                                                 # tag vocabulary — consult first
 tb search "<key concept>" --limit 5 --no-hits           # similar ideas; --no-hits keeps the usage counter clean
 ```
+- Top score 0.9 or more: same idea. Drop it. If it adds a real angle, add a ref to the existing note instead of a new note.
+- Below 0.9: a different idea. Save it, and add a ref to any close note that shares a real mechanism.
 
-**Step 3b — Propose one batch:**
-
-Present all the notes of the batch together, numbered, in this format:
-
-```
-Batch [B/TOTAL_BATCHES] — notes N..M of TOTAL
-
-[N]
-  what: <atomic idea>
-  why:  <reason for relevance>
-  kind: <type>
-  tags: <tag1, tag2, tag3>
-  [source: <source, if applicable>]
-  connections: [<id>] <why it is connected> | (none)
-
-[N+1]
-  ...
-
-Confirm the batch? Answer per number to modify, add refs or skip.
-```
-
-**Step 3c — Wait for response:**
-
-One answer covers the whole batch. The user can:
-- Confirm all ("ok", "yes", "go ahead") → save every note as is
-- Modify a field of one note ("2: kind attrito", "3: tags psychology,bias") → apply and save
-- Add refs to one note ("1: ref <id>: <reason>") → include in the save
-- Skip one or more ("skip 2 and 4") → save the others
-- Discard the batch ("skip all") → move to the next batch
-
-Only after confirmation execute, for each confirmed note:
+**Step 3b — Save:**
 ```bash
-tb save --what "<atomic idea>" --why "<reason>" --kind <type> --tags tag1 --tags tag2 [--source "<uri>"]
-tb update <new-id> --tags tag1 --tags tag2             # if the user modified tags
-tb update <new-id> --add-ref "<id>:<reason>"           # for each confirmed ref
+tb save --what "<atomic idea>" --why "<reason>" --kind <type> --tags tag1 --tags tag2 --status provvisoria [--exchange "<tl exchange id>"] [--source "<uri>"]
+tb update <new-id> --add-ref "<id>:<reason>"           # for each real connection
 ```
+A note written by this skill is always `provvisoria`. It becomes `promossa` only through use, never through this skill.
 
-Then move to the next batch. Never propose a new batch before the previous one is answered.
+**Step 3c — Report** one line: saved / dropped as duplicate / dropped as project detail. Nothing to save is a normal result: most sessions and most windows hold no lasting concept.
 
 **Absolute Constraints (Zero Tolerance):**
 - **No Name References**: forbidden to cite team member names.
@@ -87,7 +61,7 @@ Then move to the next batch. Never propose a new batch before the previous one i
 
 **Field Configuration:**
 - **Language**: write `what` and `why` in Italian. The Third Brain is an Italian store — mixing languages weakens semantic search.
-- **`what`**: the atomic idea, described simply and clearly. Someone must understand it in ten years, without reading the session logs.
+- **`what`**: the atomic idea, as a puzzle piece: an everyday image, then the mechanism (see Simplify). Someone must understand it in ten years, without reading the session logs.
 - **`why`**: why the idea matters, apart from the current debate.
 - **`tags`**: before choosing tags, run `tb tags` to see the existing vocabulary. Rules:
     - **Reuse before inventing**: if a similar tag exists, use it. Convergence matters more than precision.
@@ -95,10 +69,11 @@ Then move to the next batch. Never propose a new batch before the previous one i
     - **Domain level**: not too specific (`fear-of-judgment`), not too generic (`mind`).
     - **Max 3 tags per note**: this forces you to prioritize. Choose the tags that discriminate best.
     - **Syntax**: the tags argument is one string. Use a comma as separator: `"bias,mind,decisions"`. Never use spaces as separators (`"bias mind"`).
-- **`source`**: where the concept comes from. **Always** fill this in if the concept has a clear source. Rules:
+- **`exchange`**: when the concept comes from `tl`, the id of the exchange that holds the evidence. Always fill it in for notes born from `tl`. It is the way back to the raw text.
+- **`source`**: where the concept comes from outside the archive. **Always** fill this in if the concept has a clear source. Rules:
     - Book or essay: `"Author — Title"` (e.g. `"Taleb — Antifragile"`)
     - URL: the direct URL
-    - Conversation or work session: omit it. Context is not a citable source.
+    - Conversation or work session: omit it. Use `exchange` when the session is in `tl`.
     - If the source is vague, or you reconstruct it from memory: omit it. Do not invent one.
 - **`kind`**: the type of the asset. You must choose exactly ONE of these types:
     - `dato`: an empirical finding, an observed mechanism, a fact from research or a book. It does not have to be numeric. It can be narrative. Ask: *"Does this come from an experiment, a study, a systematic observation?"* If yes → `dato`. (E.g: "Small samples produce more extreme results by pure chance", "Organ donation rate is 100% in opt-out countries and 4% in opt-in ones").
@@ -115,7 +90,7 @@ After each save, run `tb random`. It extracts a random note from the Third Brain
 
 Ask yourself: **is there a real connection between the note you just saved and this one?** Do not just look for an answer that fits. Look for the truth.
 
-- If the connection exists: write it in one precise sentence. Then add the ref:
+- If the connection exists: write it in one precise sentence. Then add the ref, with no confirmation:
   ```bash
   tb update <new-note-id> --add-ref "<random-id>:<explicit reason>"
   ```
@@ -124,6 +99,8 @@ Ask yourself: **is there a real connection between the note you just saved and t
 The content of both notes must support the bridge. Free association is not enough.
 
 ### 4. Present (The Pearl)
+Only when the user invoked you inline in a chat. In a background run, print nothing beyond the one-line report.
+
 Pick **1 or 2 of the saved concepts**. Choose the most fertile or the most counterintuitive ones. Present them to the user.
 **Golden rule**: only present concepts you actually saved to the Third Brain.
 
@@ -140,19 +117,13 @@ Pick **1 or 2 of the saved concepts**. Choose the most fertile or the most count
 
 When activated:
 
-1. **Analyse the entire thread** and the final output.
-2. **Distil the concepts**: apply the Feynman Filter and the Purity Constraints to each concept you find. Keep the list in mind. Do not save anything yet.
+1. **Read the source**: the whole thread when run inline, or a window of `tl` (exchanges with their ids) when run in the background.
+2. **Distil the concepts**: apply the Feynman Filter, the puzzle-piece rules and the Purity Constraints. Keep the list in mind.
 3. **Consult the tags**: run `tb tags`. Do this only once.
-4. **For each concept**, run `tb search "<key concept>" --limit 5 --no-hits`. This finds duplicates and connections.
-   If it is a semantic duplicate: drop it. If it is a partial variation: propose adding a ref to the existing note instead.
-5. **Split the surviving concepts into batches of at most 5**, in order. For each batch:
-   a. **Propose** the whole batch to the user (use the format from Step 3b) with the connections you found.
-   b. **Wait for one confirmation**. Do not move to the next batch until the user answers.
-   c. Apply the changes the user asks for (fields, extra refs, skips).
-   d. Run `tb save`, and any `tb update --add-ref`, for each confirmed note.
-   e. For each saved note, run `tb random`. If a real bridge exists, propose adding it as a ref.
-6. **Check for procedural knowledge**. The session may produce a non-obvious context→action decision. This is not a semantic concept — it is a recurring rule: "in situation X, do Y." If you find one, propose it via `ti add --if "<context>" --do "<action>" --tags tag1 --tags tag2` instead of saving to the Third Brain. `tb` stores knowledge. `ti` stores procedure. Keep the two stores separate.
-7. **At the end**, present the pearls in chat: the most fertile concepts among the ones you saved.
+4. **For each concept**, run `tb search "<key concept>" --limit 5 --no-hits` and apply the duplicate rule of Step 3a.
+5. **Save** each survivor (Step 3b), then run `tb random` and add the bridge if a real one exists.
+6. **Check for procedural knowledge**. A source may hold a non-obvious context→action decision: "in situation X, do Y." This is not a concept. Hand it to the **mose** skill and stop there. Do not write to `ti` from here. `tb` stores knowledge. `ti` stores procedure. Keep the two stores separate.
+7. **Report** in one line. Present the pearls only when run inline (Step 4).
 
 ---
 

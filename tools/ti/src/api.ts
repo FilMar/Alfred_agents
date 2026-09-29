@@ -29,6 +29,7 @@ const OPENAPI_SPEC = {
                   if: { type: "string" },
                   do: { type: "string" },
                   tags: { type: "array", items: { type: "string" } },
+                  exchange: { type: "string" },
                 },
               },
             },
@@ -103,7 +104,7 @@ app.post("/add", async (c) => {
   const body = await c.req.json();
   if (typeof body.if !== "string" || typeof body.do !== "string") return c.json({ error: "if and do are required" }, 400);
 
-  const entry = await identity.addEntry(body.if, body.do, normalizeTags(body.tags ?? []));
+  const entry = await identity.addEntry(body.if, body.do, normalizeTags(body.tags ?? []), body.exchange);
   return c.json(entry);
 });
 

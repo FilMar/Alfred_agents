@@ -3,7 +3,7 @@ import { ensureCollection, upsert, setPayload, setPayloadMany, getByIds, search,
 import type { ScrollOptions, TagFacet } from "./qdrant.js";
 import { REFS_LIMIT } from "./infra.js";
 import { noteToText, withoutLink, nextHit, nextRelatedHit, matchPrefix, groupByPayload, validateSearchOptions, assert, ABOUT_NOBODY } from "./types.js";
-import type { Note, NoteType, Link, SearchOptions, SearchResult, DirectResult, RelatedResult, PayloadWrite } from "./types.js";
+import type { Note, NoteType, NoteStatus, Link, SearchOptions, SearchResult, DirectResult, RelatedResult, PayloadWrite } from "./types.js";
 
 // ─── Serendipity ──────────────────────────────────────────────────────────────
 
@@ -34,6 +34,8 @@ export interface CreateNoteParams {
   kind?: NoteType;
   tags?: string[];
   source?: string;
+  exchange?: string;
+  status?: NoteStatus;
 }
 
 export async function createNote(params: CreateNoteParams): Promise<Note> {
@@ -50,9 +52,10 @@ export async function createNote(params: CreateNoteParams): Promise<Note> {
     tags: params.tags ?? [],
     kind: params.kind ?? "dato",
     ...(params.source && { source: params.source }),
+    ...(params.exchange && { exchange: params.exchange }),
     refs: [],
     embed_model: EMBED_MODEL,
-    status: "promossa",
+    status: params.status ?? "promossa",
     about: ABOUT_NOBODY,
     updated_at: when,
   };

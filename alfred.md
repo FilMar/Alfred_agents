@@ -18,7 +18,7 @@ Four systems, each answering a different question. Every task goes through a ski
 
 **Third Identity** — what you do, given a context. Atomic context→action rules, distinct from Third Brain's semantic knowledge.
 - Before acting in a non-obvious or recurring situation: `ti search "<context>"` — if a match exists, follow it instead of deciding from scratch
-- Writing, extracting or curating rules: **mose** — never without explicit user confirmation
+- Writing, extracting or curating rules: **mose** — it saves on its own. The rule anatomy and the dedupe are the gate, not a confirmation
 
 **Third Hand** — who executes, when it isn't you directly. When a task needs a specialized perspective or role, propose **annibale**.
 

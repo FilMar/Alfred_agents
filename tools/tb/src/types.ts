@@ -97,6 +97,8 @@ export interface Note {
   kind: NoteType;
   /** URI of the original source — optional */
   source?: string;
+  /** Id of the tl exchange this note was distilled from — optional */
+  exchange?: string;
   /** Connection network — mutable, append-only, capped by REFS_LIMIT */
   refs: Link[];
   /** IDs of notes referencing this one — managed automatically, append-only */

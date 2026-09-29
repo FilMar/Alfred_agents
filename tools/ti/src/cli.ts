@@ -56,9 +56,10 @@ program
   .requiredOption("--if <string>", "Context/trigger")
   .requiredOption("--do <string>", "Action to perform")
   .option("--tags <tag>", "Tags (repeatable)", collect, [] as string[])
+  .option("--exchange <id>", "Id of the tl exchange the rule comes from")
   .action(async (opts) => {
     await requireServices({ needsEmbedding: true });
-    const entry = await identity.addEntry(opts.if, opts.do, normalizeTags(opts.tags));
+    const entry = await identity.addEntry(opts.if, opts.do, normalizeTags(opts.tags), opts.exchange);
     out(entry);
   });
 
