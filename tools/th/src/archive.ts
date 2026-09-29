@@ -2,15 +2,16 @@
 // the output text exists anywhere: the run's files live in /tmp and are wiped.
 //
 // The archive is the only home a run's history has — th keeps no database. So a
-// failed write is not swallowed and forgotten: the rows are spooled next to the
-// run's own files, and `th archive-pending` sends them later. A run still never
-// fails because of this, and never waits long: the deadline is two seconds.
+// failed write is not swallowed and forgotten: the rows are spooled in a state
+// directory that survives a reboot, and every `th run` and `th wait` sends what is
+// waiting. A run still never fails because of this: the deadline is two seconds.
 
-import { existsSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
-import { hostname } from "node:os";
+import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { homedir, hostname } from "node:os";
 import { join } from "node:path";
 
 import { HttpClient } from "../../tb/src/infra.js";
+import { assert } from "../../tb/src/types.js";
 import { API_URL } from "../../tl/src/client.js";
 import * as pi from "../../tl/src/pi.js";
 import { joinBody } from "../../tl/src/transcript.js";
@@ -20,6 +21,14 @@ import type { Contents, Exchange, Session } from "../../tl/src/types.js";
 const DEADLINE_MS = 2_000;
 
 export const SPOOL_SUFFIX = ".unarchived";
+
+export function spoolDir(): string {
+  const state = process.env.XDG_STATE_HOME ?? join(homedir(), ".local", "state");
+  const dir = join(state, "th", "spool");
+  mkdirSync(dir, { recursive: true });
+  assert(existsSync(dir), "spoolDir: the directory exists");
+  return dir;
+}
 
 const client = new HttpClient({ baseUrl: API_URL, timeout: DEADLINE_MS });
 
@@ -131,7 +140,7 @@ export interface PendingResult {
 }
 
 /** Sends every spooled run the archive never got. Safe to run twice: rows upsert. */
-export async function archivePending(dir: string): Promise<PendingResult> {
+export async function archivePending(dir: string = spoolDir()): Promise<PendingResult> {
   const result: PendingResult = { sent: 0, failed: 0 };
 
   for (const path of spooledFiles(dir)) {
@@ -156,4 +165,15 @@ export function spooledFiles(dir: string): string[] {
 
 function message(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+/** Sends what is spooled before a run starts or a wait begins. Never throws, never waits past the deadline. */
+export async function drainSpool(): Promise<void> {
+  try {
+    if (spooledFiles(spoolDir()).length === 0) return;
+    const deadline = new Promise((resolve) => setTimeout(resolve, DEADLINE_MS).unref());
+    await Promise.race([archivePending(), deadline]);
+  } catch (err) {
+    process.stderr.write(`warn: spool not drained: ${message(err)}\n`);
+  }
 }

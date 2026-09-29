@@ -14,7 +14,7 @@ A `th` run writes its own row in the archive, at the moment it ends, from inside
 - `harness: "pi"`. **Not `th`.**
 - `meta` — status, `finished_at`, `duration_s`, the timeout that was set, the thinking level, the forced skill, and the cost when the model charged for it.
 
-The call sits in one place: the `finally` of `executeSession`, right after the run is finished. The write never fails a run — errors go to stderr, the deadline is two seconds — and when the archive cannot be reached the rows are spooled to `/tmp/th-<run>.unarchived`, next to the run's own files, for `th archive-pending` to send later. Writing the same run twice changes nothing: the exchange id is derived from the run id.
+The call sits in one place: the `finally` of `executeSession`, right after the run is finished. The write never fails a run — errors go to stderr, the deadline is two seconds — and when the archive cannot be reached the rows are spooled for the next `th run` or `th wait` to send (the spool has since left `/tmp`: [memory_run_spool_survives_reboot](memory_run_spool_survives_reboot)). Writing the same run twice changes nothing: the exchange id is derived from the run id.
 
 ## Why
 

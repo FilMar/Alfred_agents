@@ -2,7 +2,7 @@
 import { Command } from "commander";
 import { getHat, listHats, parseTools } from "./prompt.js";
 import { ensureSandboxed, listAvailableModels, makeJobPaths, runHat, runLabel, sandboxExec, spawnDetached, waitForJobs, type RunMemberOpts } from "./runner.js";
-import { archivePending, spooledFiles } from "./archive.js";
+import { archivePending, drainSpool, spoolDir, spooledFiles } from "./archive.js";
 import * as tl from "../../tl/src/client.js";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -81,6 +81,7 @@ program
     .action(async (opts) => {
         if (!opts.hat && !opts.skill) die("Use --hat, --skill, or both: a run needs to be told how to think or what to follow.");
         if (!opts.detach) ensureSandboxed();
+        await drainSpool();
 
         const paths = makeJobPaths(runLabel(opts.hat, opts.skill));
         const runOpts: RunMemberOpts = {
@@ -115,6 +116,7 @@ program
         return n;
     })
     .action(async (statusPaths: string[], opts) => {
+        await drainSpool();
         const outcomes = await waitForJobs(statusPaths, opts.timeout ?? 600);
         out(outcomes);
         if (outcomes.some((o) => !o.ok)) process.exit(1);
@@ -178,7 +180,7 @@ program
         } catch (err) {
             process.stderr.write(`warn: archive unreachable, only running jobs shown: ${errorMessage(err)}\n`);
         }
-        const pending = spooledFiles(tmpdir()).length;
+        const pending = spooledFiles(spoolDir()).length;
         if (!running.length && !finished.length) die("No runs found.");
         out({ running, finished, ...(pending > 0 && { spooled_not_archived: pending }) });
     });
@@ -192,7 +194,7 @@ function inflightRuns(): Array<{ hat: string; started_at: string; status: string
         .map((n) => ({ name: n, path: join(dir, n) }))
         .filter((f) => readStatus(f.path) === "running")
         .map((f) => ({
-            hat: f.name.replace(/^th-/, "").replace(/-\d+\.status$/, ""),
+            hat: f.name.replace(/^th-/, "").replace(/-\d+-[0-9a-f]{4}\.status$/, ""),
             started_at: statSync(f.path).mtime.toISOString(),
             status: "running",
             out: f.path.replace(/\.status$/, ".out"),
@@ -223,9 +225,9 @@ program
 
 program
     .command("archive-pending")
-    .description("Send the runs the archive never got, spooled next to their files in /tmp")
+    .description("Send the runs the archive never got")
     .action(async () => {
-        out(await archivePending(tmpdir()));
+        out(await archivePending());
     });
 
 // ─── Parse ────────────────────────────────────────────────────────────────────

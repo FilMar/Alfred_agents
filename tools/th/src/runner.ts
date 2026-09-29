@@ -2,9 +2,10 @@ import { openSync, writeSync, closeSync, writeFileSync, readFileSync, statSync }
 import { setTimeout as sleep } from "node:timers/promises";
 import { spawn, spawnSync } from "node:child_process";
 import { tmpdir, homedir } from "node:os";
-import { join } from "node:path";
-import { randomUUID } from "node:crypto";
-import { archiveRun, SPOOL_SUFFIX } from "./archive.js";
+import { basename, join } from "node:path";
+import { randomBytes, randomUUID } from "node:crypto";
+import { assert } from "../../tb/src/types.js";
+import { archiveRun, spoolDir, SPOOL_SUFFIX } from "./archive.js";
 import type { FinishedRun } from "./archive.js";
 import {
   AuthStorage,
@@ -137,8 +138,10 @@ export async function listAvailableModels(): Promise<Array<{ provider: string; i
 
 export function makeJobPaths(hat: string): JobPaths {
   validateName(hat);
-  const base = join(tmpdir(), `th-${hat}-${Date.now()}`);
-  return { out: `${base}.out`, log: `${base}.log`, status: `${base}.status`, pid: `${base}.pid` };
+  const base = join(tmpdir(), `th-${hat}-${Date.now()}-${randomBytes(2).toString("hex")}`);
+  const paths = { out: `${base}.out`, log: `${base}.log`, status: `${base}.status`, pid: `${base}.pid` };
+  assert(new Set(Object.values(paths)).size === 4, "makeJobPaths: four distinct paths");
+  return paths;
 }
 
 export function spawnDetached(
@@ -316,9 +319,12 @@ export function runLabel(hat: string | undefined, skill: string | undefined): st
   return label;
 }
 
-/** The spool sits next to the run's own files, which are its state while it runs. */
-function spoolPathFor(statusPath: string): string {
-  return statusPath.replace(/\.status$/, SPOOL_SUFFIX);
+/** The spool leaves /tmp: tmpfs is wiped by the very reboot that an unreachable archive invites. */
+export function spoolPathFor(statusPath: string): string {
+  assert(statusPath.endsWith(".status"), "spoolPathFor: takes a status path");
+  const path = join(spoolDir(), basename(statusPath).replace(/\.status$/, SPOOL_SUFFIX));
+  assert(path.endsWith(SPOOL_SUFFIX), "spoolPathFor: names an unarchived file");
+  return path;
 }
 
 export async function runHat(
