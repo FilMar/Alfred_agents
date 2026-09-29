@@ -323,7 +323,7 @@ Lo strato episodico. Produce esperienze e archi senza far leggere niente a nessu
 2. `systemctl enable --now tl` sul rasp, e il symlink `tl` sul PATH di ogni macchina che lavora (fatto sul desktop).
 3. Registrare il hook `Stop` in `~/.claude/settings.json` — **dopo** che il servizio risponde, altrimenti ogni turno lancia un `tl` che fallisce in silenzio.
 4. Backfill: `tl ingest --all` una volta, da ogni macchina.
-5. `tl` nei backup di Clio.
+5. ~~`tl` nei backup di Clio~~ — **fatto il 2026-09-29**: `skills/clio/scripts/backup_tl.sh` (`sqlite3 .backup`, `integrity_check`, retention 5) chiamato da `backup_all.sh`, e `restore_tl.sh`. Provato sul rasp: `/backup/tl/tl-20260929-150306.db.gz` su MEGA. Il restore non e stato ancora provato.
 
 **Finita quando:** una settimana di lavoro e interrogabile per sessione, macchina e costo con un `SELECT *` leggibile, e da un exchange si risale al testo completo. Provato in locale su un mese; vero in produzione quando i cinque punti sopra sono chiusi.
 
