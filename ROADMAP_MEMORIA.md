@@ -321,7 +321,7 @@ Lo strato episodico. Produce esperienze e archi senza far leggere niente a nessu
 
 1. Merge del branch e `git pull` sul rasp.
 2. `systemctl enable --now tl` sul rasp, e il symlink `tl` sul PATH di ogni macchina che lavora (fatto sul desktop).
-3. Registrare il hook `Stop` in `~/.claude/settings.json` — **dopo** che il servizio risponde, altrimenti ogni turno lancia un `tl` che fallisce in silenzio.
+3. ~~Registrare il hook di fine turno~~ — **fatto il 2026-09-29**. Claude: `Stop` in `~/.claude/settings.json` verso `extensions/tl/claude.sh`. pi: l'evento e `agent_end` (una volta per prompt), `extensions/tl/pi.ts` legge `ctx.sessionManager.getSessionFile()` e lancia `tl ingest --transcript` staccato. Un run di `th` non ha file di sessione (`inMemory`), quindi l'estensione non lo vede: la sua riga la scrive `th`. Sul desktop provato per Claude; per pi, provato solo che compila.
 4. Backfill: `tl ingest --all` una volta, da ogni macchina.
 5. ~~`tl` nei backup di Clio~~ — **fatto il 2026-09-29**: `skills/clio/scripts/backup_tl.sh` (`sqlite3 .backup`, `integrity_check`, retention 5) chiamato da `backup_all.sh`, e `restore_tl.sh`. Provato sul rasp: `/backup/tl/tl-20260929-150306.db.gz` su MEGA. Il restore non e stato ancora provato.
 
