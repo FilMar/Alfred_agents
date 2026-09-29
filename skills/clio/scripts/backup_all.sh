@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# desc: Back up every configured Qdrant collection to MEGA.
+# desc: Back up every configured Qdrant collection and the tl archive to MEGA.
 # usage: backup_all.sh
 set -euo pipefail
 
@@ -12,7 +12,7 @@ QDRANT_COLLECTIONS=(
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "========================================"
-echo "  QDRANT BACKUP - $(date)"
+echo "  CLIO BACKUP - $(date)"
 echo "========================================"
 echo ""
 
@@ -27,6 +27,15 @@ for COL in "${QDRANT_COLLECTIONS[@]}"; do
     fi
     echo ""
 done
+
+echo ">>> tl"
+if "$SCRIPT_DIR/backup_tl.sh"; then
+    echo "OK: tl"
+else
+    echo "WARN: tl failed"
+    FAILED+=("tl")
+fi
+echo ""
 
 echo "========================================"
 if [ ${#FAILED[@]} -eq 0 ]; then
