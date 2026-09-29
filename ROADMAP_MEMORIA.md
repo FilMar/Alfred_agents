@@ -363,7 +363,7 @@ La rete di sicurezza. Ha bisogno dei contatori della Fase 1 e degli eventi della
 
 **Finita quando:** `ti` sa dire quali regole non ha mai usato, e le 54 vivono nel nuovo schema.
 
-### Fase 6 — `th` senza membri, critico, riscrittura delle query
+### Fase 6 — `th` senza membri, critico, riscrittura delle query — **chiusa** (2026-09-29)
 
 Nessuna delle fasi precedenti dipende da queste.
 
