@@ -72,6 +72,7 @@ program
     .option("--tools <list>", "Tools the run may use, comma separated (default: all)")
     .option("--thinking <level>", "Extended thinking level (off, minimal, low, medium, high, xhigh)")
     .option("--model <provider/id>", "Model to use (e.g. anthropic/claude-opus-4-7)")
+    .option("--no-archive", "Do not file the run in tl, so it never re-enters tl pending")
     .option("--detach", "Run in background; returns out/log/status paths immediately")
     .option("--timeout <seconds>", "Timeout in seconds — aborts the session if exceeded", (v) => {
         const n = parseInt(v, 10);
@@ -88,6 +89,7 @@ program
             thinkingLevel: opts.thinking,
             modelStr: opts.model,
             timeoutSec: opts.timeout,
+            archive: opts.archive,
             ...(opts.system && { system: opts.system }),
             ...(opts.tools && { tools: parseTools(opts.tools) }),
             ...(opts.skill && { skill: opts.skill }),

@@ -104,6 +104,8 @@ export type RunMemberOpts = {
   tools?: string[];
   /** A skill the run must follow, injected whole instead of merely offered. */
   skill?: string;
+  /** False keeps the run out of the archive. Default true. */
+  archive?: boolean;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -278,7 +280,7 @@ async function promptWithTimeout(session: AgentSession, task: string, timeoutSec
 async function executeSession(
   session: AgentSession,
   task: string,
-  opts: { timeoutSec?: number; statusPath: string; run: RunSeed; emit: (t: string) => void },
+  opts: { timeoutSec?: number; statusPath: string; run: RunSeed; archive: boolean; emit: (t: string) => void },
 ): Promise<void> {
   let runStatus: "done" | "error" | "timeout" = "error";
   try {
@@ -300,7 +302,7 @@ async function executeSession(
     throw err;
   } finally {
     const run: FinishedRun = { ...opts.run, status: runStatus, finished_at: new Date().toISOString() };
-    await archiveRun(run, session.messages, spoolPathFor(opts.statusPath));
+    if (opts.archive) await archiveRun(run, session.messages, spoolPathFor(opts.statusPath));
   }
 }
 
@@ -347,7 +349,13 @@ export async function runHat(
 
   const { emit, close } = attachIO(session, paths);
   try {
-    await executeSession(session, task, { timeoutSec: opts.timeoutSec, statusPath: paths.status, run, emit });
+    await executeSession(session, task, {
+      timeoutSec: opts.timeoutSec,
+      statusPath: paths.status,
+      run,
+      archive: opts.archive !== false,
+      emit,
+    });
   } finally {
     close();
   }
