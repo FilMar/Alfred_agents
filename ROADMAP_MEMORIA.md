@@ -321,7 +321,7 @@ Lo strato episodico. Produce esperienze e archi senza far leggere niente a nessu
 
 1. Merge del branch e `git pull` sul rasp.
 2. `systemctl enable --now tl` sul rasp, e il symlink `tl` sul PATH di ogni macchina che lavora (fatto sul desktop).
-3. ~~Registrare il hook di fine turno~~ — **fatto il 2026-09-29**. Claude: `Stop` in `~/.claude/settings.json` verso `extensions/tl/claude.sh`. pi: l'evento e `agent_end` (una volta per prompt), `extensions/tl/pi.ts` legge `ctx.sessionManager.getSessionFile()` e lancia `tl ingest --transcript` staccato. Un run di `th` non ha file di sessione (`inMemory`), quindi l'estensione non lo vede: la sua riga la scrive `th`. Sul desktop provato per Claude; per pi, provato solo che compila.
+3. ~~Registrare il hook di fine turno~~ — **fatto il 2026-09-29**. Claude: `Stop` in `~/.claude/settings.json` verso `extensions/tl/claude.sh`. pi: l'evento e `agent_end` (una volta per prompt), `extensions/tl/pi.ts` legge `ctx.sessionManager.getSessionFile()` e lancia `tl ingest --transcript` staccato. Un run di `th` non ha file di sessione (`inMemory`), quindi l'estensione non lo vede: la sua riga la scrive `th`. Provato sul desktop, per Claude e per pi.
 4. Backfill: `tl ingest --all` una volta, da ogni macchina.
 5. ~~`tl` nei backup di Clio~~ — **fatto il 2026-09-29**: `skills/clio/scripts/backup_tl.sh` (`sqlite3 .backup`, `integrity_check`, retention 5) chiamato da `backup_all.sh`, e `restore_tl.sh`. Provato sul rasp: `/backup/tl/tl-20260929-150306.db.gz` su MEGA. Il restore non e stato ancora provato.
 
@@ -330,6 +330,8 @@ Lo strato episodico. Produce esperienze e archi senza far leggere niente a nessu
 ### Fase 3 — Il distillatore
 
 Uno, non due. Legge una finestra temporale di eventi e propone note e regole `provvisorie`.
+
+**Stato (2026-09-30): manuale, per ora.** Il servizio automatico è rimandato. Si distilla a mano con platone su `tl pending`, e platone chiude con `tl distilled <id...>` (nuovo comando di `tl`) anche per gli scambi senza note. Manca il promemoria a inizio sessione con la dimensione della coda. Se il distillatore girerà come run `th`, il modello è gemma4:31b-cloud (costo, non qualità: `.wiki/memory_distiller_th_run_would_use_gemma4`). Problemi aperti prima di automatizzare, in `.wiki/memory_distillation_stays_manual_for_now`: le righe `subtask` di `th` rientrano in `tl pending` (serve `kind: distill` senza input e output, con `parent`), la conoscenza dei task run non va scartata, ~9k token fissi per ogni `th run`, bug del timer in `runner.ts` (`--timeout` tiene il processo vivo).
 
 - Gira periodico e senza chiedere. Modello piccolo e locale (1-12B basta per l'estrazione).
 - Ogni nota nasce `provvisoria`, con `session` che punta a dove è nata in `tl`.
