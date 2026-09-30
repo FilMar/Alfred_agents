@@ -2,11 +2,11 @@
 
 import { Command } from "commander";
 
-import { ContractError, errorMessage } from "../../tb/src/types.js";
+import { assert, ContractError, errorMessage } from "../../tb/src/types.js";
 import { API_PORT, serveApi } from "./api.js";
 import * as client from "./client.js";
 import { ingestAll, ingestSession, ingestTranscript } from "./ingest.js";
-import { dayOf, HARNESSES, sumBy } from "./types.js";
+import { dayOf, HARNESSES, sumBy, TIMESTAMP_SHAPE } from "./types.js";
 import type { Exchange } from "./types.js";
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
@@ -125,6 +125,22 @@ program
   .action(async (opts) => {
     try {
       out(await client.fetchExchanges({ distilled: false, limit: parseInt(opts.limit, 10) }));
+    } catch (err) {
+      die(errorMessage(err));
+    }
+  });
+
+// ─── distilled ────────────────────────────────────────────────────────────────
+
+program
+  .command("distilled <ids...>")
+  .description("Mark exchanges as distilled, so they leave the queue. Do it for every one read, notes or not")
+  .action(async (ids: string[]) => {
+    try {
+      const at = new Date().toISOString();
+      assert(TIMESTAMP_SHAPE.test(at), "tl distilled: timestamp is ISO-8601 UTC");
+      for (const id of ids) await client.markDistilled(id, at);
+      out({ distilled: ids.length, at });
     } catch (err) {
       die(errorMessage(err));
     }

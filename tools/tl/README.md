@@ -74,6 +74,7 @@ Every row a transcript yields is `kind: chat`, written by `alfredo`.
 | `tl show <exchange>` | one exchange with its full input and output |
 | `tl cost` | sums tokens by session, day or model |
 | `tl pending` | exchanges with `distilled IS NULL`, the distiller's queue |
+| `tl distilled <id...>` | sets `distilled` to now, so the exchanges leave the queue |
 | `tl serve` | runs the HTTP service (on the Rasp) |
 
 `TL_API_PORT` defaults to 8790 (`tb` uses 8788, `ti` 8789). `TL_API_URL` tells the CLI where the service is.

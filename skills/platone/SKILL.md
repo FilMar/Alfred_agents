@@ -53,6 +53,11 @@ A note written by this skill is always `provvisoria`. It becomes `promossa` only
 
 **Step 3c — Report** one line: saved / dropped as duplicate / dropped as project detail. Nothing to save is a normal result: most sessions and most windows hold no lasting concept.
 
+**Step 3d — Close the exchanges.** When the material came from `tl`, mark every exchange you read as distilled, also the ones that gave no note. Without this they return in `tl pending` forever.
+```bash
+tl distilled <exchange-id> [<exchange-id> ...]
+```
+
 **Absolute Constraints (Zero Tolerance):**
 - **No Name References**: forbidden to cite team member names.
 - **No Cognitive References**: forbidden to cite hats, colours or roles.
