@@ -215,7 +215,7 @@ async function buildSession(
 
   const { authStorage, modelRegistry } = createRegistry();
   const { session } = await createAgentSession({
-    tools: opts.tools ?? [],
+    ...(opts.tools?.length ? { tools: opts.tools } : {}),
     resourceLoader: loader,
     sessionManager: SessionManager.inMemory(),
     authStorage,
