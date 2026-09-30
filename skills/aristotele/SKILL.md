@@ -87,16 +87,11 @@ After scanning, classify opportunities in priority order:
 
 ### 3. Distil before saving
 
-Before executing any `tb save`, isolate the concept from its origin. Ask yourself: **if I had found this idea in a book, how would I formulate it?**
+A new synthesis follows [../references/note_quality.md](../references/note_quality.md): the `why` test, the Italian text, the duplicate and contradiction checks, the fields and the purity of the text. Read it before any `tb save`.
 
-The `why` test: it must answer "why does this concept deserve to exist in the graph" — not "how it emerged". If your answer is "it came from a discussion about X" or "in response to Y", stop. Dig deeper until you find the real foundation. If you can't, the concept is not mature yet.
+If you cannot write a `why` that holds without mentioning the conversation, do not save. The concept is not mature yet.
 
-**Language**: write `what` and `why` in Italian. The Third Brain is an Italian store — mixing languages weakens semantic search.
-
-**`what`**: the idea formulated as an autonomous statement, without references to the context in which it appeared.
-**`why`**: the reason why this concept has independent value — what it clarifies, what it enables, what it is in productive tension with in the graph.
-
-If you cannot write a `why` that holds without mentioning the conversation, do not save.
+Hubs (`kind: indice`) are the one exception to the bar: it forbids `indice` for extraction, and you are the curation pass that creates it. A Hub still needs a `why` that states the foundation, not the origin.
 
 ### 4. Execute in order of impact
 
