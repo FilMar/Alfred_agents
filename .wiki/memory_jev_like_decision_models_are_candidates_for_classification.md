@@ -39,5 +39,5 @@ The test that would adopt one, not run yet: label about 60 candidates from the e
 
 ## Cross-references
 
-- [memory_distiller_asks_closed_questions_never_worth](memory_distiller_asks_closed_questions_never_worth) — the closed questions these models would answer
+- [memory_critic_is_one_guard_with_probabilities](memory_critic_is_one_guard_with_probabilities) — the closed questions these models would answer
 - [memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](memory_distiller_is_a_pipeline_of_small_calls_with_no_tools) — the steps listed above
