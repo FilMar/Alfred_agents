@@ -42,10 +42,40 @@ Keep both tag vocabularies in mind.
 tl show <exchange-id>
 ```
 
-1. **Knowledge?** Apply the note bar. Save with `--exchange <id>`.
-2. **Correction?** Apply the rule bar, section 8. Save with `--exchange <id>`.
+1. **Knowledge?** Apply the note bar. Search first (`tb search "<the idea in your words>" --limit 5 --no-hits`), then save.
+2. **Correction?** Apply the rule bar, section 8. Search first (`ti search "<the if>" --limit 5 --min-score 0.5`), then save.
 
 Most exchanges give nothing. That is a normal result. Do not force a note or a rule.
+
+#### Save a note
+
+Every flag below is required, except `--source`. The `--exchange` flag is not optional: without it the note has no way back to its proof.
+
+```bash
+tb save --what "<idea>" --why "<reason>" --kind <kind> --tags <tag> --tags <tag> \
+  --status provvisoria --exchange "<exchange-id>" [--source "<url or author - title>"]
+```
+
+Check before you run it:
+
+- `--exchange` holds the id you just read with `tl show`.
+- `--source` is a URL or a title that you can copy from the text of that exchange. If you cannot copy it, leave `--source` out. Never write a source from memory.
+- `--kind` is one of the definitions in the note bar, section 4. A web page, a video or a study is a `dato`, not a `sintesi`.
+- `what` explains a mechanism. A label alone fails.
+
+#### Save a rule
+
+Every flag below is required. A rule has no `--source`.
+
+```bash
+ti add --if "<situation>" --do "<order>" --tags <tag> --tags <tag> --exchange "<exchange-id>"
+```
+
+Check before you run it:
+
+- You can quote the sentence where the user rejected what the agent did. If you cannot quote one, there is no rule: drop it.
+- The `do` is a dry order. It holds no "perché" and no "per evitare".
+- The `if` holds no "o" and no "e anche".
 
 ### 4. Bridge, once per window
 
