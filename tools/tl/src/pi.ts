@@ -6,10 +6,10 @@
 // still deterministic, which is what keeps a second write a no-op.
 
 import { assert } from "../../tb/src/types.js";
-import type { Exchange, Harness, Session } from "./types.js";
-import { exchangeId } from "./types.js";
+import type { Contents, Exchange, Harness, Session } from "./types.js";
+import { exchangeId, validateContents } from "./types.js";
 import type { ParsedExchange, ParsedTranscript, ParseOptions, Span, Tokens } from "./transcript.js";
-import { joinBody, MAIN_ACTOR, NO_TOKENS, spans, stringify } from "./transcript.js";
+import { joinBody, joinTools, MAIN_ACTOR, NO_TOKENS, spans, stringify } from "./transcript.js";
 
 export const HARNESS: Harness = "pi";
 
@@ -63,13 +63,28 @@ function spentTokens(line: Line): boolean {
 export function lineText(line: Line): string {
   const content = line.message?.content;
   if (typeof content === "string") return content;
+  return joinParts(line, partText);
+}
+
+export function lineTools(line: Line): string {
+  assert(line !== null, "pi.lineTools: line is an object");
+  assert(typeof line === "object", "pi.lineTools: line is an object");
+  return joinParts(line, partTool);
+}
+
+function joinParts(line: Line, read: (part: Part, role?: string) => string): string {
+  const content = line.message?.content;
   if (!Array.isArray(content)) return "";
-  return content.map((part) => partText(part, line.message?.role)).filter((t) => t.length > 0).join("\n");
+  return content.map((part) => read(part, line.message?.role)).filter((t) => t.length > 0).join("\n");
 }
 
 function partText(part: Part, role?: string): string {
-  if (part.type === "text") return role === "toolResult" ? `[result] ${part.text ?? ""}` : part.text ?? "";
+  return part.type === "text" && role !== "toolResult" ? part.text ?? "" : "";
+}
+
+function partTool(part: Part, role?: string): string {
   if (part.type === "toolCall") return `[tool ${part.name ?? "?"}] ${stringify(part.arguments ?? part.input)}`;
+  if (part.type === "text" && role === "toolResult") return `[result] ${part.text ?? ""}`;
   return "";
 }
 
@@ -155,10 +170,20 @@ function toExchange(span: Span<Line>, session: string): ParsedExchange | null {
     },
   };
 
-  return {
-    exchange,
-    contents: { exchange_id: id, input: lineText(opener), output: joinBody(body.map(lineText)) },
+  const contents: Contents = {
+    exchange_id: id,
+    input: lineText(opener),
+    output: joinBody(body.map(lineText)),
+    ...toolsField(body),
   };
+  assert(validateContents(contents) === null, "pi.toExchange: body is valid");
+
+  return { exchange, contents };
+}
+
+function toolsField(body: Line[]): { tools?: string } {
+  const tools = joinTools(body.map(lineTools));
+  return tools === undefined ? {} : { tools };
 }
 
 function modelField(body: Line[]): { model?: string } {

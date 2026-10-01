@@ -54,8 +54,8 @@ export async function fetchExchange(id: string): Promise<Exchange> {
   return client.request("GET", `/exchanges/${id}`);
 }
 
-export async function fetchContents(id: string): Promise<Contents> {
-  return client.request("GET", `/contents/${id}`);
+export async function fetchContents(id: string, withTools: boolean): Promise<Contents> {
+  return client.request("GET", `/contents/${id}${withTools ? "?tools=true" : ""}`);
 }
 
 export async function markDistilled(id: string, distilled: string | null): Promise<void> {

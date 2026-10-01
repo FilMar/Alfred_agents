@@ -75,10 +75,11 @@ program
 program
   .command("show <id>")
   .description("One exchange with its full input and output")
-  .action(async (id: string) => {
+  .option("--tools", "Also the tool calls and their results, which are left out otherwise")
+  .action(async (id: string, opts) => {
     try {
-      const [exchange, contents] = await Promise.all([client.fetchExchange(id), client.fetchContents(id)]);
-      out({ ...exchange, input: contents.input, output: contents.output });
+      const [exchange, contents] = await Promise.all([client.fetchExchange(id), client.fetchContents(id, opts.tools === true)]);
+      out({ ...exchange, input: contents.input, output: contents.output, ...(contents.tools !== undefined && { tools: contents.tools }) });
     } catch (err) {
       die(errorMessage(err));
     }

@@ -78,6 +78,14 @@ export function joinBody(parts: string[]): string {
   return parts.filter((t) => t.length > 0).join("\n\n");
 }
 
+export function joinTools(parts: string[]): string | undefined {
+  assert(Array.isArray(parts), "joinTools: parts is a list");
+  const joined = joinBody(parts);
+  const result = joined.length > 0 ? joined : undefined;
+  assert(result !== "", "joinTools: never an empty string");
+  return result;
+}
+
 /** JSON for a value that may not be a string, and nothing for an absent one. */
 export function stringify(value: unknown): string {
   if (value === undefined || value === null) return "";

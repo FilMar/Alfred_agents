@@ -1,9 +1,10 @@
 // Reader for a Claude Code transcript. Pure: the caller reads the file.
 
 import { assert } from "../../tb/src/types.js";
-import type { Exchange, Harness, Session } from "./types.js";
+import type { Contents, Exchange, Harness, Session } from "./types.js";
+import { validateContents } from "./types.js";
 import type { ParsedExchange, ParsedTranscript, ParseOptions, Span, Tokens } from "./transcript.js";
-import { joinBody, MAIN_ACTOR, NO_TOKENS, spans, stringify } from "./transcript.js";
+import { joinBody, joinTools, MAIN_ACTOR, NO_TOKENS, spans, stringify } from "./transcript.js";
 
 export const HARNESS: Harness = "claude";
 
@@ -48,16 +49,29 @@ export function isAnswer(line: Line): boolean {
   return line.type === "assistant";
 }
 
-/** The text a line carries, tool calls and tool results included, in order. */
+/** What a line says: its text, with no tool call and no tool result. */
 export function lineText(line: Line): string {
   const content = line.message?.content;
   if (typeof content === "string") return content;
+  return joinParts(content, partText);
+}
+
+export function lineTools(line: Line): string {
+  assert(line !== null, "claude.lineTools: line is an object");
+  assert(typeof line === "object", "claude.lineTools: line is an object");
+  return joinParts(line.message?.content, partTool);
+}
+
+function joinParts(content: string | Part[] | undefined, read: (part: Part) => string): string {
   if (!Array.isArray(content)) return "";
-  return content.map(partText).filter((t) => t.length > 0).join("\n");
+  return content.map(read).filter((t) => t.length > 0).join("\n");
 }
 
 function partText(part: Part): string {
-  if (part.type === "text") return part.text ?? "";
+  return part.type === "text" ? part.text ?? "" : "";
+}
+
+function partTool(part: Part): string {
   if (part.type === "tool_use") return `[tool ${part.name ?? "?"}] ${stringify(part.input)}`;
   if (part.type === "tool_result") return `[result] ${stringify(part.content)}`;
   return "";
@@ -118,14 +132,20 @@ function toExchange(span: Span<Line>): ParsedExchange | null {
     ...(Object.keys(meta).length > 0 && { meta }),
   };
 
-  return {
-    exchange,
-    contents: {
-      exchange_id: opener.uuid,
-      input: lineText(opener),
-      output: joinBody(body.map(lineText)),
-    },
+  const contents: Contents = {
+    exchange_id: opener.uuid,
+    input: lineText(opener),
+    output: joinBody(body.map(lineText)),
+    ...toolsField(body),
   };
+  assert(validateContents(contents) === null, "claude.toExchange: body is valid");
+
+  return { exchange, contents };
+}
+
+function toolsField(body: Line[]): { tools?: string } {
+  const tools = joinTools(body.map(lineTools));
+  return tools === undefined ? {} : { tools };
 }
 
 function modelField(body: Line[]): { model?: string } {

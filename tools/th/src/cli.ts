@@ -218,7 +218,7 @@ program
         try {
             const rows = await tl.fetchExchanges({ session: id, limit: 1 });
             if (!rows.length) die(`Run not found in the archive: "${id}". A run still going lives in its files: th history`);
-            const body = await tl.fetchContents(rows[0].id);
+            const body = await tl.fetchContents(rows[0].id, false);
             out({ ...rows[0], input: body.input, output: body.output });
         } catch (err) {
             die(errorMessage(err));

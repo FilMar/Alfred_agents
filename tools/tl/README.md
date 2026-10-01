@@ -28,7 +28,7 @@ The API still validates what it writes, because a store is a boundary and `tl` h
 
 ## Schema
 
-Three tables: `sessions`, `exchanges`, `contents`. Bodies live in `contents` so that `SELECT *` on `exchanges` stays readable. Nothing is compressed. `distilled` is a timestamp, `NULL` until the row is distilled, and it is the only mutable field.
+Three tables: `sessions`, `exchanges`, `contents`. Bodies live in `contents` so that `SELECT *` on `exchanges` stays readable. A body has `input`, `output` (what the assistant said, text only) and `tools` (the tool calls and their results, in order; `NULL` when there were none). Nothing is compressed. `distilled` is a timestamp, `NULL` until the row is distilled, and it is the only mutable field.
 
 The full schema and the reasoning behind every column are in the decision page.
 
@@ -71,7 +71,7 @@ Every row a transcript yields is `kind: chat`, written by `alfredo`.
 |---|---|
 | `tl ingest` | reads transcripts, writes sessions, exchanges and contents |
 | `tl sessions` | lists sessions, newest first, `--harness claude\|pi` to pick one |
-| `tl show <exchange>` | one exchange with its full input and output |
+| `tl show <exchange>` | one exchange with its full input and output. `--tools` adds the tool calls and results |
 | `tl cost` | sums tokens by session, day or model |
 | `tl pending` | exchanges with `distilled IS NULL`, the distiller's queue |
 | `tl distilled <id...>` | sets `distilled` to now, so the exchanges leave the queue |

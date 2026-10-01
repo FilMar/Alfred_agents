@@ -14,7 +14,7 @@ import { HttpClient } from "../../tb/src/infra.js";
 import { assert } from "../../tb/src/types.js";
 import { API_URL } from "../../tl/src/client.js";
 import * as pi from "../../tl/src/pi.js";
-import { joinBody } from "../../tl/src/transcript.js";
+import { joinBody, joinTools } from "../../tl/src/transcript.js";
 import { exchangeId } from "../../tl/src/types.js";
 import type { Contents, Exchange, Session } from "../../tl/src/types.js";
 
@@ -90,8 +90,13 @@ export function runRows(run: FinishedRun, messages: unknown[], host: string, cwd
         ...(cost > 0 && { cost_usd: cost }),
       },
     },
-    contents: { exchange_id: id, input: run.task, output: joinBody(lines.map(pi.lineText)) },
+    contents: { exchange_id: id, input: run.task, output: joinBody(lines.map(pi.lineText)), ...toolsField(lines) },
   };
+}
+
+function toolsField(lines: pi.Line[]): { tools?: string } {
+  const tools = joinTools(lines.map(pi.lineTools));
+  return tools === undefined ? {} : { tools };
 }
 
 function durationSeconds(from: string, to: string): number {

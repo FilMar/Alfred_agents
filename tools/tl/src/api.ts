@@ -19,7 +19,7 @@ const OPENAPI_SPEC = {
     "/exchanges": { post: { summary: "Upsert one exchange or an array of them" }, get: { summary: "List exchanges by session, kind, time or distilled" } },
     "/exchanges/{id}": { get: { summary: "One exchange" }, patch: { summary: "Set or clear distilled" } },
     "/contents": { post: { summary: "Upsert one body or an array of them" } },
-    "/contents/{id}": { get: { summary: "The body of one exchange" } },
+    "/contents/{id}": { get: { summary: "The body of one exchange. Tool calls and results only with ?tools=true" } },
     "/health": { get: { summary: "Row counts, to prove the archive answers" } },
   },
 };
@@ -74,7 +74,7 @@ export function createApp(handle: Database): Hono {
   });
 
   app.get("/contents/:id", (c) => {
-    const found = db.getContents(handle, c.req.param("id"));
+    const found = db.getContents(handle, c.req.param("id"), boolParam(c.req.query("tools")) === true);
     return found ? c.json(found) : c.json({ error: "contents not found" }, 404);
   });
 

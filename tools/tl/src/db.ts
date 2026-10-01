@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS exchanges (
 CREATE TABLE IF NOT EXISTS contents (
   exchange_id TEXT PRIMARY KEY REFERENCES exchanges(id),
   input       TEXT NOT NULL,
-  output      TEXT NOT NULL
+  output      TEXT NOT NULL,
+  tools       TEXT
 );
 `;
 
@@ -62,6 +63,11 @@ export function migrate(db: Database): void {
     db.exec("ALTER TABLE sessions ADD COLUMN harness TEXT");
   }
   assert(hasColumn(db, "sessions", "harness"), "migrate: sessions carries harness");
+
+  if (!hasColumn(db, "contents", "tools")) {
+    db.exec("ALTER TABLE contents ADD COLUMN tools TEXT");
+  }
+  assert(hasColumn(db, "contents", "tools"), "migrate: contents carries tools");
 }
 
 function hasColumn(db: Database, table: string, column: string): boolean {
@@ -122,9 +128,9 @@ export function upsertExchange(db: Database, exchange: Exchange): void {
 export function upsertContents(db: Database, contents: Contents): void {
   assert(validateContents(contents) === null, `upsertContents: ${validateContents(contents)}`);
   db.query(
-    `INSERT INTO contents (exchange_id, input, output) VALUES ($id, $input, $output)
-     ON CONFLICT(exchange_id) DO UPDATE SET input = $input, output = $output`,
-  ).run({ $id: contents.exchange_id, $input: contents.input, $output: contents.output });
+    `INSERT INTO contents (exchange_id, input, output, tools) VALUES ($id, $input, $output, $tools)
+     ON CONFLICT(exchange_id) DO UPDATE SET input = $input, output = $output, tools = $tools`,
+  ).run({ $id: contents.exchange_id, $input: contents.input, $output: contents.output, $tools: contents.tools ?? null });
 }
 
 /** Marks an exchange as distilled. The one mutable field in the archive. */
@@ -187,9 +193,30 @@ export function getExchange(db: Database, id: string): Exchange | null {
   return row ? toExchange(row) : null;
 }
 
-export function getContents(db: Database, id: string): Contents | null {
-  const row = db.query(`SELECT * FROM contents WHERE exchange_id = $id`).get({ $id: id }) as Contents | null;
-  return row ?? null;
+export function getContents(db: Database, id: string, withTools: boolean): Contents | null {
+  assert(typeof withTools === "boolean", "getContents: withTools is a boolean");
+  const toolsColumn = withTools ? "tools" : "NULL AS tools";
+  const row = db.query(`SELECT exchange_id, input, output, ${toolsColumn} FROM contents WHERE exchange_id = $id`)
+    .get({ $id: id }) as RawContents | null;
+  if (row === null) return null;
+
+  const contents = toContents(row);
+  assert(withTools || !("tools" in contents), "getContents: tools stay out unless asked");
+  return contents;
+}
+
+type RawContents = { exchange_id: string; input: string; output: string; tools: string | null };
+
+function toContents(row: RawContents): Contents {
+  assert(typeof row.exchange_id === "string", "toContents: row carries its exchange id");
+  const contents: Contents = {
+    exchange_id: row.exchange_id,
+    input: row.input,
+    output: row.output,
+    ...(row.tools !== null && { tools: row.tools }),
+  };
+  assert(validateContents(contents) === null, `toContents: ${validateContents(contents)}`);
+  return contents;
 }
 
 /** Ids already in the archive, so the ingester knows what it can skip. */

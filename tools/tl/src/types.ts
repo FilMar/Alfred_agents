@@ -87,8 +87,9 @@ export interface Contents {
   exchange_id: string;
   /** The prompt, or the task a subtask was given */
   input: string;
-  /** The whole answer, tool calls included */
+  /** What the assistant said, text only */
   output: string;
+  tools?: string;
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────
@@ -122,6 +123,7 @@ export function validateContents(contents: Contents): string | null {
   if (!ID_SHAPE.test(contents.exchange_id)) return `contents.exchange_id is not an id: ${contents.exchange_id}`;
   if (typeof contents.input !== "string") return "contents.input is required";
   if (typeof contents.output !== "string") return "contents.output is required";
+  if (contents.tools !== undefined && !isFilled(contents.tools)) return "contents.tools is not a non-empty string";
   return null;
 }
 

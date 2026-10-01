@@ -103,7 +103,13 @@ describe("runRows", () => {
 
   it("keeps the tool calls a hat made, which is most of what it did", () => {
     const withTool = message({ content: [{ type: "toolCall", name: "bash", arguments: { cmd: "ls" } }] });
-    expect(runRows(run(), [withTool], "kokpit", "/work").contents.output).toBe('[tool bash] {"cmd":"ls"}');
+    const body = runRows(run(), [withTool], "kokpit", "/work").contents;
+    expect(body.tools).toBe('[tool bash] {"cmd":"ls"}');
+    expect(body.output).toBe("");
+  });
+
+  it("a run that called no tool has no tools at all", () => {
+    expect(runRows(run(), [message()], "kokpit", "/work").contents).not.toHaveProperty("tools");
   });
 
   it("a run that produced nothing still yields a row: the cost is real", () => {
