@@ -1,7 +1,7 @@
 ---
 tags: [pi, index]
 sources: []
-updated: 2026-09-28
+updated: 2026-10-01
 ---
 
 ## Pages
@@ -43,8 +43,14 @@ updated: 2026-09-28
 | [memory_delegated_run_is_a_pi_subtask](memory_delegated_run_is_a_pi_subtask) | A th run archives itself: a pi session that kind marks as a subtask |
 | [memory_run_spool_survives_reboot](memory_run_spool_survives_reboot) | A run the archive cannot take is spooled outside /tmp and drained by every run and wait |
 | [memory_hook_query_not_rewritten](memory_hook_query_not_rewritten) | The hook sends the prompt as it is: a 9B rewrite lowered recall in the spike |
-| [memory_distiller_th_run_would_use_gemma4](memory_distiller_th_run_would_use_gemma4) | A distiller run uses gemma4: 4x fewer input tokens, valid JSON 20/20; quality unjudged |
 | [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) | Manual distillation with platone; the automatic service waits on five open problems |
+| [memory_episode_summaries_are_a_derived_index_over_tl](memory_episode_summaries_are_a_derived_index_over_tl) | Phase 0 episode summaries become a derived, rebuildable search index over tl |
+| [memory_hindsight_not_adopted_its_shape_is_copied](memory_hindsight_not_adopted_its_shape_is_copied) | No Hindsight; copy its shape: one structured call, code for the rest |
+| [memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](memory_distiller_is_a_pipeline_of_small_calls_with_no_tools) | Distiller as a script: episodes, extract, critic, novelty, bridges; one hat per call, no tools |
+| [memory_distiller_asks_closed_questions_never_worth](memory_distiller_asks_closed_questions_never_worth) | No "worth keeping" question; a critic answers closed questions, use judges value |
+| [memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading) | Phase 3 bridges by shape; 0/20 ref recovery, so judge by reading the yes answers |
+| [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) | GLM ignores format schemas; JSON from the prompt, checked by code, one retry |
+| [memory_jev_like_decision_models_are_candidates_for_classification](memory_jev_like_decision_models_are_candidates_for_classification) | tev1 and nimble: local decision models for the classification steps; not adopted until tested |
 | [orchestrator_and_cockpit_removed](orchestrator_and_cockpit_removed) | Both tools removed; unused code was breaking the test suite |
 | [orchestrator_tailscale_perimeter_matrix_bot](orchestrator_tailscale_perimeter_matrix_bot) | One network perimeter; Matrix bot, not Telegram |
 | [rasp_services_provisioning_order](rasp_services_provisioning_order) | What runs on the Rasp and in which order |

@@ -23,7 +23,7 @@ Open with the roadmap and not decided here: Hindsight as the engine, the dedup t
 
 ## Cross-references
 
-- [memory_distiller_th_run_would_use_gemma4](memory_distiller_th_run_would_use_gemma4) — the model to use when it does run
+- [memory_distiller_th_run_would_use_gemma4](.memory_distiller_th_run_would_use_gemma4) — the model to use when it does run
 - [memory_delegated_run_is_a_pi_subtask](memory_delegated_run_is_a_pi_subtask) — why `th` rows enter `tl`
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the schema, and `distilled` as the only mutable field
 - [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) — why the human step is worth removing later
