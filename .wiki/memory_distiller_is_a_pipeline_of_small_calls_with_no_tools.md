@@ -18,7 +18,7 @@ Each call wears one de Bono hat. Blue is the code.
 | 0b | LLM, 1 per session | blue | the list of exchanges | episodes `{from, to, summary}`; the summary says how it ended |
 | 1 | LLM, 1 per episode | white | the episode, the whole session map, the tag vocabulary | notes `{what, why, kind, tags, contexts[2], quote}`, rules `{if, do, tags, quote}` |
 | 1 | code | blue | the candidates | drops: quote not in the text, rule quote not from the user, kind, Italian, project identifiers, purity; bad tags removed |
-| 1b | LLM, 1 per episode | black | the candidates, the episode, the session map | closed questions, see [memory_critic_is_one_guard_with_probabilities](memory_critic_is_one_guard_with_probabilities) |
+| 1b | LLM, 1 per episode | black | the candidates, the episode, the session map | closed questions, see [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question) |
 | 2 | code | blue | each candidate | the 5 nearest in `tb` or `ti`; cosine 0.95 or more is dropped |
 | 2 | LLM, 1 per episode | black | candidates, neighbours, items saved earlier in the session, integer ids | per candidate: `new`, `duplicate(of)`, `extends(of, reason)`, `contradicts(of, reason)`; for rules `new`, `duplicate`, `append(of, do)` |
 | 2 | code | blue | the verdicts | `tb save` or `ti add` with `--exchange` set by code; a ref for extends and contradicts; `append-do` |

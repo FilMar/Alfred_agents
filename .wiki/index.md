@@ -1,7 +1,7 @@
 ---
 tags: [pi, index]
 sources: []
-updated: 2026-10-01
+updated: 2026-10-02
 ---
 
 ## Pages
@@ -47,7 +47,8 @@ updated: 2026-10-01
 | [memory_episode_summaries_are_a_derived_index_over_tl](memory_episode_summaries_are_a_derived_index_over_tl) | Phase 0 episode summaries become a derived, rebuildable search index over tl |
 | [memory_hindsight_not_adopted_its_shape_is_copied](memory_hindsight_not_adopted_its_shape_is_copied) | No Hindsight; copy its shape: one structured call, code for the rest |
 | [memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](memory_distiller_is_a_pipeline_of_small_calls_with_no_tools) | Distiller as a script: episodes, extract, critic, novelty, bridges; one hat per call, no tools |
-| [memory_critic_is_one_guard_with_probabilities](memory_critic_is_one_guard_with_probabilities) | The critic: one guard role, probabilities, threshold 0.4, one signal drops; councils and hats add nothing |
+| [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question) | The critic F: guard role, probabilities, textbook as a test at 0.6, no record question; cost counts a lost good note 3 times |
+| [memory_extractor_is_data_immutable_config_rows_in_tl](memory_extractor_is_data_immutable_config_rows_in_tl) | The extractor is an immutable JSON config row in tl; every candidate, kept or dropped, goes to extractions |
 | [memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading) | Phase 3 bridges by shape; 0/20 ref recovery, so judge by reading the yes answers |
 | [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) | GLM ignores format schemas; JSON from the prompt, checked by code, one retry |
 | [memory_jev_like_decision_models_are_candidates_for_classification](memory_jev_like_decision_models_are_candidates_for_classification) | tev1 and nimble: local decision models for the classification steps; not adopted until tested |

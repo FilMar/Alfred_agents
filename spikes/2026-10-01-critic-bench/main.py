@@ -15,6 +15,16 @@
 #   details and all 4 notes about the agent. It still misses 11 of 16 textbook and 13 of 15 "what was
 #   done". explains_mechanism says yes to almost everything (17 false alarms): useless as a filter.
 #   Dropping at 1/3 of the signals is worse (42/75): a bad note usually has one defect, not several.
+# round 2 (2026-10-02), cost = bad kept + 3 * good dropped (decay removes bad notes later; a lost good
+#   note is gone), on stored probabilities with `tune`:
+#   E with one threshold per question: 53/75, the same as E. The knob is the wording, not the threshold.
+#   F (textbook and record as a test with one example each way, explains_mechanism out): textbook caught
+#   14/16 (E: 5). Record caught 0/15: the extractor already rewrites every note in general words, so no
+#   note looks like a log. The notes labelled "record" are a definition, a project detail, or generic advice.
+#   F, textbook at 0.6, the rest at 0.4: 57/75, 16 bad kept, 2 good dropped (both low confidence), 0 good
+#   dropped among high confidence. E was 53/75, 21 bad kept, 1 good dropped.
+#   F2 (record out, textbook widened to "common practice"): every note looks common. 9 to 18 good dropped.
+# verdict 2: F, textbook at 0.6, the rest at 0.4, record question removed (it never fires).
 # verdict: one judge, a role, probabilities, threshold about 0.4, drop on one signal. Diversity of hats
 #   or models does not help when every judge leans the same way. Next: sharpen the two questions that
 #   still miss (textbook, what was done), and drop explains_mechanism.
@@ -25,6 +35,8 @@
 #   C_models    black hat, glm + gemma4 + nemotron, 0.7      (different models)
 #   D_single    glm, black, temperature 0.1, run twice       (one judge; flip rate between the two runs)
 #   E_guard     glm, one judge, a role instead of a hat, probabilities, drop at 1/3 of the signals
+#   F_guard     E with NOTE_QS_F: textbook and record rewritten as a test, explains_mechanism out
+#   F2_guard    F without record, textbook widened to common practice
 # Labels: labels.jsonl, one line per candidate, written by hand (see LABEL_RUBRIC). They are the truth.
 #
 # Rules are off in here: no contracts, no tests, no abstraction. Never promote this code.
@@ -57,6 +69,33 @@ NOTE_QS = {
 RULE_QS = {
     "is_user_rejection": "the quote shows the user rejecting what the agent did or proposed. A plain request or instruction (\"fai X\", \"direi di fare Y\") is not a rejection.",
 }
+# F: the two blind questions become a test the judge can run, with one example each way.
+# explains_mechanism is out (it said yes to almost everything).
+NOTE_QS_F = {k: v for k, v in NOTE_QS.items() if k != "explains_mechanism"}
+NOTE_QS_F["is_textbook_definition"] = (
+    "a good manual or Wikipedia page on the topic already says this. Test: would someone who knows the topic "
+    "learn nothing new? Yes if the note only defines or describes a known term, tool, method or feature. No if it "
+    "adds a limit, a failure, a trade-off or a surprise seen in practice. Yes: \"La cosine similarity misura "
+    "l'angolo tra due vettori.\" No: \"Con soglia cosine 0.95, due note che dicono il contrario sembrano duplicate.\"")
+NOTE_QS_F["is_record_of_what_was_done"] = (
+    "it is a log or a status of this work. Test: remove the past tense and every fact of this session (what was "
+    "built, changed or chosen, which file, which number). Yes if no idea usable elsewhere is left. No if a reusable "
+    "idea is left. Yes: \"Abbiamo spostato la validazione JSON dal format al prompt e ora funziona.\" No: \"Se un "
+    "modello ignora lo schema in format, si chiede il JSON nel prompt e lo si valida nel codice.\"")
+# F2: the extractor already rewrites every note in general words, so a "record of what was done" never looks
+# like a log and F caught 0 of 15. Those notes are a definition, a project detail, or common practice.
+# So record is out, and textbook widens to common practice.
+NOTE_QS_F2 = {k: v for k, v in NOTE_QS_F.items() if k != "is_record_of_what_was_done"}
+NOTE_QS_F2["is_textbook_definition"] = (
+    "a good manual, Wikipedia page or senior colleague already says this. Test: would someone experienced in "
+    "the topic learn nothing new? Yes if the note only defines a known term, tool, method or feature, or gives "
+    "advice any experienced person already follows (measure before you change, test small, keep logic in one "
+    "place, clean up after a failed test). No if it adds a limit, a failure, a trade-off or a surprise seen in "
+    "practice. Yes: \"La cosine similarity misura l'angolo tra due vettori.\" Yes: \"Prima di cambiare strumento "
+    "conviene fare una prova piccola.\" No: \"Con soglia cosine 0.95, due note che dicono il contrario sembrano "
+    "duplicate.\"")
+QSETS = {"E_guard": NOTE_QS, "F_guard": NOTE_QS_F, "F2_guard": NOTE_QS_F2}
+
 DROP_IF_TRUE = ["is_textbook_definition", "is_agent_unconfirmed_claim", "is_project_detail", "is_record_of_what_was_done", "is_about_the_agent"]
 DROP_IF_FALSE = ["explains_mechanism", "is_user_rejection"]
 
@@ -74,11 +113,13 @@ VARIANTS = {
     "C_models": [("glm", "black", 0.7), ("gemma", "black", 0.7), ("nemotron", "black", 0.7)],
     "D_single": [("glm", "black", 0.1), ("glm", "black", 0.1)],   # scored per judge, not by majority
     "E_guard":  [("glm", "guard", 0.1)],                         # probabilities; drop at 1/3 of the signals
+    "F_guard":  [("glm", "guard", 0.1)],                         # E with NOTE_QS_F
+    "F2_guard": [("glm", "guard", 0.1)],                         # E with NOTE_QS_F2
 }
 
 
-def task_prob(kind):
-    qs = NOTE_QS if kind == "note" else RULE_QS
+def task_prob(kind, note_qs=NOTE_QS):
+    qs = note_qs if kind == "note" else RULE_QS
     lines = "\n".join(f"- {k}: {v}" for k, v in qs.items())
     shape = ", ".join(f'"{k}": 0.0' for k in qs)
     return f"""
@@ -184,7 +225,7 @@ def run(variant):
 
     def one(job):
         c, j, (model, hatname, temp) = job
-        ans, log = llm_with_judge(c, model, hatname, temp)
+        ans, log = llm_with_judge(c, model, hatname, temp, QSETS.get(variant, NOTE_QS))
         return {"id": c["id"], "judge": j, "model": model, "hat": hatname, "answers": ans, "llm": log}
     out = (HERE / f"run_{variant}.jsonl").open("w")
     with ThreadPoolExecutor(PARALLEL) as pool:
@@ -194,8 +235,8 @@ def run(variant):
     print(f"{variant} done")
 
 
-def llm_with_judge(c, model, hatname, temp):
-    qs = NOTE_QS if c["type"] == "note" else RULE_QS
+def llm_with_judge(c, model, hatname, temp, note_qs=NOTE_QS):
+    qs = note_qs if c["type"] == "note" else RULE_QS
 
     def v(d):
         if prob:
@@ -206,7 +247,7 @@ def llm_with_judge(c, model, hatname, temp):
     # x.llm reads x.MODEL; threads share it, so pass the model through the request instead
     import urllib.request, time
     prob = hatname == "guard"
-    msgs = [{"role": "system", "content": HATS[hatname] + (task_prob if prob else task)(c["type"])}, {"role": "user", "content": context(c)}]
+    msgs = [{"role": "system", "content": HATS[hatname] + (task_prob(c["type"], note_qs) if prob else task(c["type"]))}, {"role": "user", "content": context(c)}]
     log = []
     for attempt in range(2):
         body = json.dumps({"model": MODELS[model], "stream": False, "think": "low", "format": "json",
@@ -239,8 +280,8 @@ def score(subset="all"):
     labels = {l["id"]: l for l in map(json.loads, (HERE / "labels.jsonl").open())
               if subset == "all" or l.get("confidence") == "high"}
     print(f"labels used: {len(labels)} ({subset})")
-    score_prob(labels)
-    for variant in [v for v in VARIANTS if v != "E_guard"]:
+    for v in QSETS: score_prob(labels, v)
+    for variant in [v for v in VARIANTS if v not in QSETS]:
         f = HERE / f"run_{variant}.jsonl"
         if not f.exists(): continue
         rows = [json.loads(l) for l in f.open()]
@@ -282,11 +323,11 @@ def score(subset="all"):
             print(f"  flips between two runs at t=0.1: {flips['flip']}/{flips['flip'] + flips['same']}")
 
 
-def score_prob(labels):
-    f = HERE / "run_E_guard.jsonl"
+def score_prob(labels, variant="E_guard"):
+    f = HERE / f"run_{variant}.jsonl"
     if not f.exists(): return
     rows = [r for r in map(json.loads, f.open()) if r["answers"]]
-    print(f"\n=== E_guard  ({len(rows)} answers)")
+    print(f"\n=== {variant}  ({len(rows)} answers)")
     for th in (0.3, 0.4, 0.5, 0.6, 0.7):
         for need in ("any", "third"):
             dec, perq = Counter(), defaultdict(Counter)
@@ -309,5 +350,50 @@ def score_prob(labels):
                 print(f"      {q:30} label-true {c['TP'] + c['FN']:>2}: caught {c['TP']:>2}, missed {c['FN']:>2}; false alarms {c['FP']:>2}")
 
 
+# ---------------------------------------------------------------- tune
+
+GOOD_DROPPED_COST = 3     # losing a good note costs 3 bad notes kept: decay removes the bad ones later
+GRID = (0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6)
+
+
+def tune(variant="E_guard"):
+    """One threshold per question, chosen by code on stored probabilities. No new calls.
+    Cost = bad kept + 3 * good dropped. Hard limit: no good note with a high-confidence label dropped.
+    explains_mechanism is ignored. 75 items and 6 knobs: read it as a direction, not as a number."""
+    labels = {l["id"]: l for l in map(json.loads, (HERE / "labels.jsonl").open())}
+    rows = [r for r in map(json.loads, (HERE / f"run_{variant}.jsonl").open()) if r["answers"]]
+    qs = [q for q in DROP_IF_TRUE] + ["is_user_rejection"]
+
+    def evaluate(th):
+        dec, hi_good_dropped = Counter(), 0
+        for r in rows:
+            lab, a = labels[r["id"]], r["answers"]
+            drop = any(a.get(q, 0) >= th[q] for q in DROP_IF_TRUE if q in a) or \
+                ("is_user_rejection" in a and a["is_user_rejection"] < th["is_user_rejection"])
+            dec[("drop" if drop else "keep", "keep" if lab["keep"] else "drop")] += 1
+            hi_good_dropped += drop and lab["keep"] and lab.get("confidence") == "high"
+        cost = dec[("keep", "drop")] + GOOD_DROPPED_COST * dec[("drop", "keep")]
+        return cost, dec, hi_good_dropped
+
+    def show(name, th):
+        cost, dec, hi = evaluate(th)
+        right = dec[("keep", "keep")] + dec[("drop", "drop")]
+        print(f"  {name:16} {right}/{sum(dec.values())} right | kept bad {dec[('keep', 'drop')]:>2}  dropped good "
+              f"{dec[('drop', 'keep')]:>2} (high-conf {hi})  cost {cost}")
+
+    print(f"=== tune {variant}")
+    for g in (0.3, 0.4, 0.5):
+        show(f"all at {g}", {q: g for q in qs})
+    th = {q: 0.4 for q in qs}
+    for _ in range(5):                               # coordinate descent over the grid
+        changed = False
+        for q in qs:
+            best = min(GRID, key=lambda v: (evaluate({**th, q: v})[2] > 0, evaluate({**th, q: v})[0], abs(v - th[q])))
+            if best != th[q]: th[q], changed = best, True
+        if not changed: break
+    show("per question", th)
+    for q in qs: print(f"      {q:30} {th[q]}")
+
+
 if __name__ == "__main__":
-    {"build": build, "run": run, "score": score}[sys.argv[1]](*sys.argv[2:])
+    {"build": build, "run": run, "score": score, "tune": tune}[sys.argv[1]](*sys.argv[2:])

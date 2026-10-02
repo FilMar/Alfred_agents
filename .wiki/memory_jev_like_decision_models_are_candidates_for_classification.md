@@ -39,5 +39,5 @@ The test that would adopt one, not run yet: label about 60 candidates from the e
 
 ## Cross-references
 
-- [memory_critic_is_one_guard_with_probabilities](memory_critic_is_one_guard_with_probabilities) — the closed questions these models would answer
+- [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question) — the closed questions these models would answer
 - [memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](memory_distiller_is_a_pipeline_of_small_calls_with_no_tools) — the steps listed above
