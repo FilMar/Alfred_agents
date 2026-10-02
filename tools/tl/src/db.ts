@@ -46,9 +46,9 @@ CREATE TABLE IF NOT EXISTS contents (
 export function open(path: string = DB_PATH): Database {
   if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
   const db = new Database(path, { create: true });
-  db.exec("PRAGMA journal_mode = WAL");
-  db.exec("PRAGMA foreign_keys = ON");
-  db.exec(SCHEMA);
+  db.run("PRAGMA journal_mode = WAL");
+  db.run("PRAGMA foreign_keys = ON");
+  db.run(SCHEMA);
   migrate(db);
   return db;
 }
@@ -60,12 +60,12 @@ export function open(path: string = DB_PATH): Database {
 export function migrate(db: Database): void {
   const columns = db.query("PRAGMA table_info(sessions)").all() as Array<{ name: string }>;
   if (!columns.some((c) => c.name === "harness")) {
-    db.exec("ALTER TABLE sessions ADD COLUMN harness TEXT");
+    db.run("ALTER TABLE sessions ADD COLUMN harness TEXT");
   }
   assert(hasColumn(db, "sessions", "harness"), "migrate: sessions carries harness");
 
   if (!hasColumn(db, "contents", "tools")) {
-    db.exec("ALTER TABLE contents ADD COLUMN tools TEXT");
+    db.run("ALTER TABLE contents ADD COLUMN tools TEXT");
   }
   assert(hasColumn(db, "contents", "tools"), "migrate: contents carries tools");
 }
