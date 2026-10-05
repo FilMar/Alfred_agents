@@ -68,3 +68,5 @@ The schema is written with the real distiller, not with the spike.
 - [memory_episode_summaries_are_a_derived_index_over_tl](memory_episode_summaries_are_a_derived_index_over_tl) — the episode index that carries `extractor_id`
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the tables tl has today
 - [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) — use, not reading, judges a note
+- [memory_distiller_is_its_own_tool_td_and_tl_stays_the_register](memory_distiller_is_its_own_tool_td_and_tl_stays_the_register) — td checks the config; tl stores it
+- [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) — what a call in the config must state

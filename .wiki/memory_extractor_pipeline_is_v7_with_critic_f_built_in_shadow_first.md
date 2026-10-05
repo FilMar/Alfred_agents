@@ -63,3 +63,5 @@ F drops 2.5 times what the council dropped on the same candidates, and costs one
 - [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) — manual distillation goes on until active mode
 - [memory_hindsight_not_adopted_its_shape_is_copied](memory_hindsight_not_adopted_its_shape_is_copied) — where the shape comes from
 - [.memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](.memory_distiller_is_a_pipeline_of_small_calls_with_no_tools) — the replaced decision
+- [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) — how every call reaches the model
+- [memory_distiller_is_its_own_tool_td_and_tl_stays_the_register](memory_distiller_is_its_own_tool_td_and_tl_stays_the_register) — where the pipeline lives
