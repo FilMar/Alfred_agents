@@ -7,7 +7,7 @@ sources: [conversation, "https://github.com/vectorize-io/hindsight", "https://gi
 
 Hindsight does not replace `tl`, and it is not the engine of the distiller. `tb` and `ti` stay as they are.
 
-What is taken from Hindsight and mem0 is their shape, not their code: one structured LLM call with no tools, and code for every other step. The distiller is built in place on that shape. See [memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](memory_distiller_is_a_pipeline_of_small_calls_with_no_tools).
+What is taken from Hindsight and mem0 is their shape, not their code: one structured LLM call with no tools, and code for every other step. The distiller is built in place on that shape. See [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first).
 
 This closes the open question "Hindsight as the engine" in [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) and in `tools/tl/ROADMAP.md`.
 

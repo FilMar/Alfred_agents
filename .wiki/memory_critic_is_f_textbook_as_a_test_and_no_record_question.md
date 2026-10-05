@@ -41,7 +41,7 @@ The principle of the replaced decisions still holds. No model is asked whether a
 
 ## Cross-references
 
-- [memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](memory_distiller_is_a_pipeline_of_small_calls_with_no_tools) — where the critic sits (phase 1b)
+- [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — where the critic sits (phase 1b)
 - [memory_extractor_is_data_immutable_config_rows_in_tl](memory_extractor_is_data_immutable_config_rows_in_tl) — the questions and thresholds live in the extractor config, not in code
 - [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) — use, not reading, promotes a note
 - [.memory_critic_is_one_guard_with_probabilities](.memory_critic_is_one_guard_with_probabilities) — the replaced decision (variant E)

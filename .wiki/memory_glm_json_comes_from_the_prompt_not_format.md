@@ -15,4 +15,4 @@ Schema-constrained output cannot be taken for granted on a cloud model, so the c
 
 ## Cross-references
 
-- [memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](memory_distiller_is_a_pipeline_of_small_calls_with_no_tools) — the calls this applies to
+- [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — the calls this applies to

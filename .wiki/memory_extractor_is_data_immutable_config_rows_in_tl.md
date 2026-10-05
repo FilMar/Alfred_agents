@@ -64,7 +64,7 @@ The schema is written with the real distiller, not with the spike.
 ## Cross-references
 
 - [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question) — the first config the table would hold
-- [memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](memory_distiller_is_a_pipeline_of_small_calls_with_no_tools) — the phases the config describes
+- [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — the phases the config describes
 - [memory_episode_summaries_are_a_derived_index_over_tl](memory_episode_summaries_are_a_derived_index_over_tl) — the episode index that carries `extractor_id`
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the tables tl has today
 - [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) — use, not reading, judges a note

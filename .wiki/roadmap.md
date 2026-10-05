@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-10-02
+updated: 2026-10-05
 ---
 
 ## Tasks
@@ -16,6 +16,7 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] Career coach: consult memory before each answer. No decision yet.
 - [ ] Episode index over tl (`tl_episodes`, `tl search`), after the extraction pipeline is stable. [detail](memory_episode_summaries_are_a_derived_index_over_tl)
 - [ ] Extractor as data in tl: `extractor` (immutable JSON config) and `extractions` (every candidate), with the real distiller. [detail](memory_extractor_is_data_immutable_config_rows_in_tl)
+- [ ] Build the extractor in shadow: phases 0 to 2b, writes only to `extractions`. Settle in-session repeats and the 0.95 cut. [detail](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first)
 - [ ] Decay of `provvisoria` notes: with critic F about 16 of 75 bad candidates pass. No decision yet. [detail](memory_critic_is_f_textbook_as_a_test_and_no_record_question)
 
 ### th
