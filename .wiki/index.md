@@ -63,6 +63,7 @@ updated: 2026-10-05
 | [graph_third_os_agent_turns_stay_async](graph_third_os_agent_turns_stay_async) | Phase 3 is async: th spawns under bwrap even as a library |
 | [graph_curation_via_th_agent](graph_curation_via_th_agent) | Curation via a th member, live-streamed, kill-switch not a gate |
 | [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
+| [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) | Contract messages: stable prefix, then the values the assert reads |
 | [skill_router_pass_planned](skill_router_pass_planned) | Router pass design, deliberately deferred |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |
 | [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards |

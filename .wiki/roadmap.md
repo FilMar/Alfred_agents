@@ -52,6 +52,7 @@ Design only, no code yet.
 ### skills
 
 - [ ] Router pass: shrink each multi-direction skill to a dispatch table. [detail](skill_router_pass_planned)
+- [ ] Ritchie: contract messages carry the values, in all four languages, and `contract_report.py` checks the format. [detail](skill_ritchie_contract_messages_carry_values)
 
 ## Cross-references
 
