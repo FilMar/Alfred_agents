@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, ti, embedding, measurement, hook]
-sources: [scripts/tb_threshold.py, scripts/reports/fase0_threshold.json, extensions/tb_ti/claude.sh, skills/christopher/SKILL.md, skills/mose/SKILL.md]
+sources: [spikes/2026-09-28-tb-corpus/tb_threshold.py, spikes/2026-09-28-tb-corpus/reports/fase0_threshold.json, extensions/tb_ti/claude.sh, skills/christopher/SKILL.md, skills/mose/SKILL.md]
 ---
 
 ## Decision
@@ -35,7 +35,7 @@ the start. That is most of the reason 545 notes of 747 have never been hit: the 
 were never offered, so they could not be used. A cutoff nobody measured turned a
 feature off and left no error behind.
 
-The full precision curve is in `scripts/reports/fase0_threshold.json`. Its knee is at
+The full precision curve is in `spikes/2026-09-28-tb-corpus/reports/fase0_threshold.json`. Its knee is at
 0.65, where the right note is first for 95.5% of the queries that pass, but only 18%
 of queries pass. The hook sits below the knee on purpose: a prompt is longer and less
 focused than a test query, so it scores lower, and a hook that never speaks is worth

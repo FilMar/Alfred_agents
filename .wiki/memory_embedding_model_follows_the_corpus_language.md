@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, ti, embedding, measurement]
-sources: [ROADMAP_MEMORIA.md, tools/tb/src/infra.ts, scripts/tb_benchmark.py, scripts/reports/fase0_benchmark.json]
+sources: [ROADMAP_MEMORIA.md, tools/tb/src/infra.ts, spikes/2026-09-28-tb-corpus/tb_benchmark.py, spikes/2026-09-28-tb-corpus/reports/fase0_benchmark.json]
 ---
 
 ## Decision
@@ -17,7 +17,7 @@ about a hundred languages. That is the whole reason, and it is measurable.
 
 The test set is 120 Italian paraphrases of a note's `what`. A paraphrase may not
 reuse any word that is rare in the corpus, so the query cannot win on shared
-vocabulary. The set is generated once and committed, in `scripts/data/paraphrases.json`.
+vocabulary. The set is generated once and committed, in `spikes/2026-09-28-tb-corpus/data/paraphrases.json`.
 Dense only, 747 notes:
 
 | measure | v1.5, no prefix | v2-moe, with prefix |

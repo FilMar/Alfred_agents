@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, tl, schema]
-sources: [ROADMAP_MEMORIA.md, tools/tb/src/types.ts, scripts/data/translations_it.json]
+sources: [ROADMAP_MEMORIA.md, tools/tb/src/types.ts, spikes/2026-09-28-tb-corpus/data/translations_it.json]
 replaces: [memory_keep_raw_source_for_reingest]
 ---
 
@@ -36,7 +36,7 @@ The field also failed a rule this project already had: do not add a field becaus
 might be needed; find the query that reads it. `source_raw` had no reader. Its only
 content after the migration was an empty string on 725 notes and the English original
 of 22 translated ones — and those 22 originals belong in git next to their translation,
-which is where they now are, in `scripts/data/translations_it.json`.
+which is where they now are, in `spikes/2026-09-28-tb-corpus/data/translations_it.json`.
 
 On the name: "event" came from the first design of `tl`, when it was an event log with
 one row per event. `tl` is a work archive with `sessions` and `exchanges`, and no table

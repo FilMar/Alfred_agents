@@ -2,7 +2,7 @@
 """Measures the related block of a depth-1 search: fan-out, scores, and what a
 threshold would keep. Read-only. Writes reports/fase1_related.json.
 
-Run: python3 scripts/tb_related_report.py
+Run: python3 spikes/2026-09-28-tb-corpus/tb_related_report.py
 """
 
 import json

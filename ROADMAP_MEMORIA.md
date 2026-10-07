@@ -23,7 +23,7 @@ L'identità sta in due metà che non si mescolano: descrittiva in `tb` col campo
 
 ## Diagnosi misurata (2026-09-28, prima della Fase 0)
 
-Corpus: **737 note** in `third-brain`, **54 regole** in `pi_identity`. A fine giornata, dopo Platone e Mosè: 747 e 56. Ogni riga qui sotto si riproduce con `scripts/tb_corpus_report.py`.
+Corpus: **737 note** in `third-brain`, **54 regole** in `pi_identity`. A fine giornata, dopo Platone e Mosè: 747 e 56. Ogni riga qui sotto si riproduce con `spikes/2026-09-28-tb-corpus/tb_corpus_report.py`.
 
 | Misura | Valore | Cosa dice |
 |---|---|---|
@@ -109,7 +109,7 @@ un modello addestrato su due compiti che li distingue dal prefisso non può aver
 sola funzione che li serve entrambi.
 
 Confronto dense-only, 747 note, 120 parafrasi italiane a cui è vietato riusare le
-parole rare della nota (`scripts/data/paraphrases.json`, generate una volta e
+parole rare della nota (`spikes/2026-09-28-tb-corpus/data/paraphrases.json`, generate una volta e
 committate; 8 su 120 conservano una parola rara dopo un tentativo di riscrittura):
 
 | misura | v1.5 senza prefisso | v2-moe con prefisso |
@@ -133,7 +133,7 @@ il cross-lingua non era un caso ipotetico da non misurare: era il 3% del corpus,
 ed era il 3% peggio servito.
 
 Misurato con una parafrasi italiana del `what` di ognuna delle 22
-(`scripts/reports/fase0_crosslingual.json`):
+(`spikes/2026-09-28-tb-corpus/reports/fase0_crosslingual.json`):
 
 | | v1.5 | v2-moe |
 |---|---|---|
@@ -151,7 +151,7 @@ orfanato ogni arco in entrata. Quindi riscrittura sul posto, id invariato — ch
 `upsert` è letteralmente la cancellazione e la ricreazione, in un'operazione sola.
 `when`, `kind`, `tags`, `refs`, `backrefs` e `hits` restano, e `updated_at` trova il
 suo primo scrittore vero. L'inglese originale sta in
-`scripts/data/translations_it.json`, sotto git accanto alla traduzione: il posto dei
+`spikes/2026-09-28-tb-corpus/data/translations_it.json`, sotto git accanto alla traduzione: il posto dei
 record è il repository, non il payload.
 
 Le stesse 22 query italiane, sulla stessa collection, prima e dopo:
@@ -163,8 +163,8 @@ Le stesse 22 query italiane, sulla stessa collection, prima e dopo:
 
 Il corpus è ora italiano al 100%: 747 su 747. Tradotte a mano, non da un modello
 locale: 22 note sono poche e il testo resta nel Third Brain per sempre. Le traduzioni
-sono committate in `scripts/data/translations_it.json`, quindi rivedibili riga per
-riga in git, e `scripts/tb_retranslate.ts` passa dal vero percorso di scrittura di
+sono committate in `spikes/2026-09-28-tb-corpus/data/translations_it.json`, quindi rivedibili riga per
+riga in git, e `spikes/2026-09-28-tb-corpus/tb_retranslate.ts` passa dal vero percorso di scrittura di
 `tb` — così il vettore sparso lo ricostruisce il codice di produzione e non una
 reimplementazione dell'hash.
 
@@ -173,7 +173,7 @@ futuro cambio di modello, ed è basso abbastanza da non essere un argomento.
 
 **Le soglie, misurate invece che scelte.** Sotto v2 una risposta giusta sta a 0.43
 nel caso peggiore, una query fuori tema non supera 0.25, e la fascia tra le due è
-vuota. La curva completa è in `scripts/reports/fase0_threshold.json`: il ginocchio
+vuota. La curva completa è in `spikes/2026-09-28-tb-corpus/reports/fase0_threshold.json`: il ginocchio
 di precisione è a 0.65, dove la nota giusta è prima nel 95.5% dei casi ma passa solo
 il 18% delle query.
 
@@ -214,7 +214,7 @@ Nella stessa passata: 26 ref duplicati collassati, 1 self-ref rimosso, 1 payload
 `id` riempito, e `backrefs` **ricalcolato da zero** — era dato derivato e non tornava in
 nessuna delle due direzioni (18 ref senza backref, 13 backref senza ref, di cui 7 verso
 note inesistenti). Ora 1134 archi in entrambi i sensi. Ogni singola modifica è in
-`scripts/reports/fase0_repair.json`.
+`spikes/2026-09-28-tb-corpus/reports/fase0_repair.json`.
 
 **Gli strumenti che restano.** `scripts/`, solo stdlib, nessuna dipendenza:
 `qdrant_clone.py` (copia una collection con vettori, payload e indici),
@@ -257,7 +257,7 @@ Venti righe previste, cinquanta scritte. Due punti del piano li hanno smentiti l
 
 **Non fatto, perche le misure lo smentiscono**
 
-- ~~Tagliare i correlati con `min_score`~~. Misurato su 8 query, `limit 10` (`scripts/reports/fase1_related.json`): **0 correlati su 161 passano 0.5**, la soglia del hook; 44 su 161 passano 0.35. Il taglio non riduce il blocco, lo cancella — e cancella prima la metà utile, perche `.wiki/memory_refs_carry_non_semantic_reach` misura che il 23% degli archi punta oltre il 200° vicino denso della sorgente. Un arco esiste per una ragione che la query non porta: il suo score è basso per costruzione, non per irrilevanza. I correlati si ordinano e si tagliano **per rango** (`--related-limit`, 25 di default, 3 nel hook).
+- ~~Tagliare i correlati con `min_score`~~. Misurato su 8 query, `limit 10` (`spikes/2026-09-28-tb-corpus/reports/fase1_related.json`): **0 correlati su 161 passano 0.5**, la soglia del hook; 44 su 161 passano 0.35. Il taglio non riduce il blocco, lo cancella — e cancella prima la metà utile, perche `.wiki/memory_refs_carry_non_semantic_reach` misura che il 23% degli archi punta oltre il 200° vicino denso della sorgente. Un arco esiste per una ragione che la query non porta: il suo score è basso per costruzione, non per irrilevanza. I correlati si ordinano e si tagliano **per rango** (`--related-limit`, 25 di default, 3 nel hook).
 - ~~`--min-score` nativo su `ti search`~~. Esisteva già, wired end-to-end (`tools/ti/src/cli.ts:70` → `identity.ts:45` → `score_threshold`). Il debito era chiuso e la roadmap non lo sapeva.
 
 **Trovato mentre si scriveva**

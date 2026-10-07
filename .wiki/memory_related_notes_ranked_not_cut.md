@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, retrieval, telemetry, scoring]
-sources: [conversation, scripts/reports/fase1_related.json, tools/tb/src/qdrant.ts, tools/tb/src/types.ts, .wiki/memory_refs_carry_non_semantic_reach.md]
+sources: [conversation, spikes/2026-09-28-tb-corpus/reports/fase1_related.json, tools/tb/src/qdrant.ts, tools/tb/src/types.ts, .wiki/memory_refs_carry_non_semantic_reach.md]
 replaces: [memory_related_results_need_scores]
 ---
 
@@ -21,7 +21,7 @@ Every result carries `via`: `search` for a match, `related` for an arrival throu
 
 The plan said the related block would be "ranked, cut by `min_score`, and compared with a direct hit". Ranking survived the measurement; cutting did not.
 
-Measured on 747 notes, 8 queries, `limit 10` (`scripts/reports/fase1_related.json`):
+Measured on 747 notes, 8 queries, `limit 10` (`spikes/2026-09-28-tb-corpus/reports/fase1_related.json`):
 
 | | value |
 |---|---|

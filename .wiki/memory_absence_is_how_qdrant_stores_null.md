@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, qdrant, schema]
-sources: [tools/tb/src/types.ts, scripts/tb_fase0_fields.py, ROADMAP_MEMORIA.md]
+sources: [tools/tb/src/types.ts, spikes/2026-09-28-tb-corpus/tb_fase0_fields.py, ROADMAP_MEMORIA.md]
 ---
 
 ## Decision
