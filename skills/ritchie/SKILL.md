@@ -63,14 +63,7 @@ confirmation. Nothing is written to disk in this step either.
 
 After confirmation the user writes the struct, the signature and the
 asserts. The skill writes them only when the user says, out loud,
-"scrivi te". Then the skill writes them and adds one line to the commit
-body:
-
-```
-contracts by assistant: <function names>
-```
-
-The shortcut stays available. It stops being invisible.
+"scrivi te". Then the skill writes them.
 
 ### 5. Stub, tests, body
 
