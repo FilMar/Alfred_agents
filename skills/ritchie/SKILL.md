@@ -1,6 +1,6 @@
 ---
 name: ritchie
-description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It never writes a struct, a signature or a contract on its own. It proposes, asks, and waits."
+description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It works in phases, one file per phase: structs, signatures, contracts. The user edits the file, Ritchie answers in the file, and the user says ok. Tests and bodies come from two independent `th` runs."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
@@ -33,17 +33,26 @@ Then the project's `.wiki/` (via omero) and its CLAUDE.md. A project rule
 that is stricter than this skill wins. Pick the language row in the
 mechanism map below and read its section in `references/languages.md`.
 
-### 2. Propose bare structs and signatures
+### 2. Structs, in the file
 
-Structs with private fields. Function signatures. No body, no assert, not
-one. Post them and stop. Debate until the user approves every name and
-every type. Nothing is written to disk in this step.
+Write the structs into the real target file. Private fields, no function,
+no body. Post one line in chat: the path. Stop.
 
-### 3. Interrogate, one signature at a time
+The user edits the file. You read it, change what you disagree with, and
+say why in one line. The file is the debate. Repeat until the user says
+"ok". Chat carries no struct text.
 
-Before proposing any contract, question the user about each signature.
-This is not a quiz. The user can answer only if they hold the invariant in
-their head. Four base questions, tuned to the function in front of you:
+### 3. Signatures, in the same file
+
+Add the function signatures under the structs. The body is the `todo`
+placeholder. No assert yet. Same loop as step 2: the file is the debate,
+"ok" closes the phase.
+
+### 4. Contracts, in the same file
+
+Before each contract, question the user about that signature. The user can
+answer only if they hold the invariant in their head. Four base questions,
+tuned to the function in front of you:
 
 - "If I delete this postcondition, which wrong body still passes every
   test?"
@@ -55,30 +64,22 @@ When an answer shows the user has not understood, hold the line. Explain,
 then ask again. A softened interrogation is the failure this skill exists
 to prevent: the user stops understanding the code written for them.
 
-Only then propose the contract in words, one signature at a time:
-preconditions, postconditions, five at most. Ask for explicit
-confirmation. Nothing is written to disk in this step either.
+Then write the contracts into the file: preconditions above the `todo`,
+postconditions below it, five at most per function. Same loop as step 2.
+"ok" closes the phase.
 
-### 4. Write, or wait
+The contracts must be complete. In step 5 the tests have no assert of
+their own: the contract is the only oracle.
 
-After confirmation the user writes the struct, the signature and the
-asserts. The skill writes them only when the user says, out loud,
-"scrivi te". Then the skill writes them.
+### 5. Tests and body, two independent runs
 
-### 5. Stub, tests, body
+After the contracts are approved, the file holds structs, signatures,
+contracts and `todo` bodies. Ritchie writes nothing in this step. One
+`th run` writes the tests. A second `th run` writes the bodies. Each gets
+its own copy of the file in its own directory and never sees the other's
+output. Ritchie only checks the result and edits neither.
 
-Stub: the signed contract around a `todo` placeholder. Preconditions
-above it, postconditions below it, unreachable until the body arrives.
-
-Tests from the contract, before the body. Against the stub, bare-call
-tests fail and should-panic tests pass. A bare-call test that passes
-against the stub is broken. Where the project uses annibale, the test
-author is a member that reads only signatures and the contract sheet,
-never the intent.
-
-Then the body, under the rules below. The placeholder line becomes the
-computation. No assert is removed to make room. While signatures and
-asserts stand, the body is yours: refactor it freely.
+Commands, isolation rules and the check order: `references/phase-runs.md`.
 
 ### 6. Check and gate
 
