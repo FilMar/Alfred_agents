@@ -2,8 +2,10 @@
 // read and write goes through our own API.
 
 import { HttpClient } from "../../tb/src/infra.js";
+import { assert } from "../../tb/src/types.js";
 import { API_PORT } from "./api.js";
-import type { Contents, Exchange, Session } from "./types.js";
+import type { Contents, Exchange, Extraction, ExtractionFilters, Extractor, NewExtraction, NewExtractor, Session } from "./types.js";
+import { isRowId, validateNewExtractions, validateNewExtractor } from "./types.js";
 import type { ExchangeFilters, SessionFilters } from "./db.js";
 
 export const API_URL = process.env.TL_API_URL ?? `http://localhost:${API_PORT}`;
@@ -60,6 +62,42 @@ export async function fetchContents(id: string, withTools: boolean): Promise<Con
 
 export async function markDistilled(id: string, distilled: string | null): Promise<void> {
   await client.request("PATCH", `/exchanges/${id}`, { distilled });
+}
+
+export async function putExtractor(row: NewExtractor): Promise<number> {
+  assert(validateNewExtractor(row) === null, `putExtractor: ${validateNewExtractor(row)}`);
+  const result = await client.request<{ id: number }>("POST", "/extractors", row);
+  const id = result.id;
+  assert(isRowId(id), "putExtractor: the new id is a row id");
+  return id;
+}
+
+export async function fetchExtractor(id: number | "active"): Promise<Extractor> {
+  assert(id === "active" || isRowId(id), `fetchExtractor: id is a row id or active, id=${id}`);
+  const result = await client.request<Extractor>("GET", `/extractors/${id}`);
+  assert(validateNewExtractor(result) === null, `fetchExtractor: ${validateNewExtractor(result)}`);
+  assert(id !== "active" || result.active, "fetchExtractor: asking for active returns an active row");
+  assert(id === "active" || result.id === id, "fetchExtractor: the row returned is the one asked for");
+  return result;
+}
+
+export async function activateExtractor(id: number): Promise<void> {
+  assert(isRowId(id), `activateExtractor: id is a row id, id=${id}`);
+  await client.request("PATCH", `/extractors/${id}`, { active: true });
+}
+
+export async function putExtractions(rows: NewExtraction[]): Promise<number> {
+  assert(validateNewExtractions(rows) === null, `putExtractions: ${validateNewExtractions(rows)}`);
+  const result = await client.request<{ written: number }>("POST", "/extractions", rows);
+  const written = result.written;
+  assert(written === rows.length, "putExtractions: every row is written");
+  return written;
+}
+
+export async function fetchExtractions(filters: ExtractionFilters = {}): Promise<Extraction[]> {
+  const result = await client.request<Extraction[]>("GET", `/extractions${query(filters as Record<string, unknown>)}`);
+  assert(validateNewExtractions(result) === null, `fetchExtractions: ${validateNewExtractions(result)}`);
+  return result;
 }
 
 function query(params: Record<string, unknown>): string {

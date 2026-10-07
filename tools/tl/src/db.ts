@@ -6,8 +6,13 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
 import { assert } from "../../tb/src/types.js";
-import type { Contents, Exchange, ExchangeKind, Harness, Session } from "./types.js";
-import { validateContents, validateExchange, validateSession } from "./types.js";
+import type {
+  CandidateKind, Contents, Exchange, ExchangeKind, Extraction, ExtractionFilters, Extractor, Harness,
+  NewExtraction, NewExtractor, Session,
+} from "./types.js";
+import {
+  isRowId, validateContents, validateExchange, validateNewExtraction, validateNewExtractor, validateSession,
+} from "./types.js";
 
 export const DB_PATH = process.env.TL_DB ?? join(homedir(), ".tl", "tl.db");
 
@@ -40,7 +45,33 @@ CREATE TABLE IF NOT EXISTS contents (
   output      TEXT NOT NULL,
   tools       TEXT
 );
+CREATE TABLE IF NOT EXISTS extractor (
+  id      INTEGER PRIMARY KEY AUTOINCREMENT,
+  parent  INTEGER REFERENCES extractor(id),
+  why     TEXT NOT NULL,
+  active  INTEGER NOT NULL DEFAULT 0 CHECK (active IN (0, 1)),
+  config  TEXT NOT NULL CHECK (json_valid(config)),
+  created TEXT NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS extractor_one_active ON extractor(active) WHERE active = 1;
+CREATE TABLE IF NOT EXISTS extractions (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  extractor_id  INTEGER NOT NULL REFERENCES extractor(id),
+  run           TEXT NOT NULL,
+  exchange_id   TEXT NOT NULL REFERENCES exchanges(id),
+  kind          TEXT NOT NULL CHECK (kind IN ('note', 'rule')),
+  body          TEXT NOT NULL CHECK (json_valid(body)),
+  quote         TEXT NOT NULL,
+  dropped_by    TEXT,
+  probabilities TEXT CHECK (probabilities IS NULL OR json_valid(probabilities)),
+  verdict       TEXT,
+  of            TEXT,
+  saved_id      TEXT,
+  created       TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS extractions_by_run ON extractions(extractor_id, run);
 `;
+
 
 /** Opens the archive, creating the file and the tables when they are missing. */
 export function open(path: string = DB_PATH): Database {
@@ -217,6 +248,175 @@ function toContents(row: RawContents): Contents {
   };
   assert(validateContents(contents) === null, `toContents: ${validateContents(contents)}`);
   return contents;
+}
+
+export function insertExtractor(db: Database, row: NewExtractor): number {
+  assert(validateNewExtractor(row) === null, `insertExtractor: ${validateNewExtractor(row)}`);
+  const result = db.prepare(
+    `INSERT INTO extractor (parent, why, config, created) VALUES ($parent, $why, $config, $created)`,
+  ).run({
+    $parent: row.parent ?? null,
+    $why: row.why,
+    $config: row.config,
+    $created: row.created,
+  });
+  const id = Number(result.lastInsertRowid);
+  assert(isRowId(id), "insertExtractor: the new id is a row id");
+  assert(getExtractor(db, id)?.config === row.config, "insertExtractor: the stored config is the one given");
+  assert(getExtractor(db, id)?.active === false, "insertExtractor: a new extractor is inactive");
+  return id;
+}
+
+export function getExtractor(db: Database, id: number): Extractor | null {
+  assert(isRowId(id), `getExtractor: id is a row id, id=${id}`);
+  const row = db.prepare(`SELECT * FROM extractor WHERE id = $id`).get({ $id: id }) as RawExtractor | null;
+  const result = row ? toExtractor(row) : null;
+  assert(result === null || result.id === id, "getExtractor: the row found is the one asked for");
+  return result;
+}
+
+export function getActiveExtractor(db: Database): Extractor | null {
+  const row = db.prepare(`SELECT * FROM extractor WHERE active = 1`).get() as RawExtractor | null;
+  const result = row ? toExtractor(row) : null;
+  assert(result === null || result.active, "getActiveExtractor: the row found is active");
+  return result;
+}
+
+export function setActiveExtractor(db: Database, id: number): boolean {
+  assert(isRowId(id), `setActiveExtractor: id is a row id, id=${id}`);
+  const success = getExtractor(db, id) !== null;
+  if (success) {
+    db.transaction(() => {
+      db.prepare(`UPDATE extractor SET active = 0 WHERE active = 1`).run();
+      db.prepare(`UPDATE extractor SET active = 1 WHERE id = $id`).run({ $id: id });
+    })();
+  }
+  assert(!success || isOnlyActive(db, id), "setActiveExtractor: after a change the extractor is the only active one");
+  assert(success || getExtractor(db, id) === null, "setActiveExtractor: false means the extractor does not exist");
+  return success;
+}
+
+export function insertExtraction(db: Database, row: NewExtraction): number {
+  assert(validateNewExtraction(row) === null, `insertExtraction: ${validateNewExtraction(row)}`);
+  const result = db.prepare(
+    `INSERT INTO extractions (extractor_id, run, exchange_id, kind, body, quote, dropped_by, probabilities, verdict, of, saved_id, created)
+     VALUES ($extractor_id, $run, $exchange_id, $kind, $body, $quote, $dropped_by, $probabilities, $verdict, $of, $saved_id, $created)`,
+  ).run({
+    $extractor_id: row.extractor_id,
+    $run: row.run,
+    $exchange_id: row.exchange_id,
+    $kind: row.kind,
+    $body: row.body,
+    $quote: row.quote,
+    $dropped_by: row.dropped_by ?? null,
+    $probabilities: row.probabilities ?? null,
+    $verdict: row.verdict ?? null,
+    $of: row.of ?? null,
+    $saved_id: row.saved_id ?? null,
+    $created: row.created,
+  });
+  const id = Number(result.lastInsertRowid);
+  assert(isRowId(id), "insertExtraction: the new id is a row id");
+  assert(extractionExists(db, id), "insertExtraction: the row is stored");
+  return id;
+}
+
+export function listExtractions(db: Database, filters: ExtractionFilters = {}): Extraction[] {
+  assert(filters.extractor_id === undefined || isRowId(filters.extractor_id), `listExtractions: extractor_id is a row id, extractor_id=${filters.extractor_id}`);
+  const where: string[] = [];
+  const params: Record<string, string | number> = {};
+
+  if (filters.extractor_id !== undefined) { where.push("extractor_id = $extractor_id"); params.$extractor_id = filters.extractor_id; }
+  if (filters.run !== undefined) { where.push("run = $run"); params.$run = filters.run; }
+  if (filters.exchange_id !== undefined) { where.push("exchange_id = $exchange_id"); params.$exchange_id = filters.exchange_id; }
+  if (filters.kept === true) where.push("dropped_by IS NULL");
+  if (filters.kept === false) where.push("dropped_by IS NOT NULL");
+
+  const clause = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
+  const rows = db.prepare(`SELECT * FROM extractions ${clause} ORDER BY id ASC`).all(params) as RawExtraction[];
+  const result = rows.map(toExtraction);
+  assert(matchAll(result, filters), "listExtractions: every row matches the filters");
+  assert(isAscending(result), "listExtractions: rows come in id order");
+  return result;
+}
+
+function isOnlyActive(db: Database, id: number): boolean {
+  assert(isRowId(id), `isOnlyActive: id is a row id, id=${id}`);
+  const row = db.prepare(`SELECT id FROM extractor WHERE active = 1`).get() as { id: number } | null;
+  return row !== null && row.id === id;
+}
+
+function extractionExists(db: Database, id: number): boolean {
+  assert(isRowId(id), `extractionExists: id is a row id, id=${id}`);
+  return db.prepare(`SELECT 1 FROM extractions WHERE id = $id`).get({ $id: id }) !== null;
+}
+
+function matchAll(rows: Extraction[], filters: ExtractionFilters): boolean {
+  assert(Array.isArray(rows), "matchAll: rows is an array");
+  for (const row of rows) {
+    if (filters.extractor_id !== undefined && row.extractor_id !== filters.extractor_id) return false;
+    if (filters.run !== undefined && row.run !== filters.run) return false;
+    if (filters.exchange_id !== undefined && row.exchange_id !== filters.exchange_id) return false;
+    if (filters.kept === true && row.dropped_by !== null) return false;
+    if (filters.kept === false && row.dropped_by === null) return false;
+  }
+  return true;
+}
+
+function isAscending(rows: Extraction[]): boolean {
+  assert(Array.isArray(rows), "isAscending: rows is an array");
+  for (let i = 0; i < rows.length - 1; i++) {
+    if (rows[i].id >= rows[i + 1].id) return false;
+  }
+  return true;
+}
+
+type RawExtractor = {
+  id: number; parent: number | null; why: string; active: number; config: string; created: string;
+};
+
+type RawExtraction = {
+  id: number; extractor_id: number; run: string; exchange_id: string; kind: string; body: string;
+  quote: string; dropped_by: string | null; probabilities: string | null; verdict: string | null;
+  of: string | null; saved_id: string | null; created: string;
+};
+
+function toExtractor(row: RawExtractor): Extractor {
+  assert(row.active === 0 || row.active === 1, `toExtractor: active is 0 or 1, active=${row.active}`);
+  const result: Extractor = {
+    id: row.id,
+    parent: row.parent,
+    why: row.why,
+    active: row.active === 1,
+    config: row.config,
+    created: row.created,
+  };
+  assert(validateNewExtractor(result) === null, `toExtractor: ${validateNewExtractor(result)}`);
+  assert(result.id === row.id, "toExtractor: the id is kept");
+  assert(result.active === (row.active === 1), "toExtractor: active is the flag as a boolean");
+  return result;
+}
+
+function toExtraction(row: RawExtraction): Extraction {
+  assert(isRowId(row.id), `toExtraction: id is a row id, id=${row.id}`);
+  const result: Extraction = {
+    id: row.id,
+    extractor_id: row.extractor_id,
+    run: row.run,
+    exchange_id: row.exchange_id,
+    kind: row.kind as CandidateKind,
+    body: row.body,
+    quote: row.quote,
+    dropped_by: row.dropped_by,
+    probabilities: row.probabilities,
+    verdict: row.verdict,
+    of: row.of,
+    saved_id: row.saved_id,
+    created: row.created,
+  };
+  assert(validateNewExtraction(result) === null, `toExtraction: ${validateNewExtraction(result)}`);
+  assert(result.id === row.id, "toExtraction: the id is kept");
+  return result;
 }
 
 /** Ids already in the archive, so the ingester knows what it can skip. */

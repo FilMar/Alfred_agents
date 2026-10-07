@@ -92,6 +92,50 @@ export interface Contents {
   tools?: string;
 }
 
+export const CANDIDATE_KINDS = ["note", "rule"] as const;
+
+export type CandidateKind = (typeof CANDIDATE_KINDS)[number];
+
+export const DROP_PREFIXES = ["check:", "critic:"] as const;
+
+export const NEAR_IDENTICAL = "near_identical";
+
+export interface Extractor {
+  id: number;
+  parent: number | null;
+  why: string;
+  active: boolean;
+  config: string;
+  created: string;
+}
+
+export type NewExtractor = Omit<Extractor, "id" | "active">;
+
+export interface Extraction {
+  id: number;
+  extractor_id: number;
+  run: string;
+  exchange_id: string;
+  kind: CandidateKind;
+  body: string;
+  quote: string;
+  dropped_by: string | null;
+  probabilities: string | null;
+  verdict: string | null;
+  of: string | null;
+  saved_id: string | null;
+  created: string;
+}
+
+export type NewExtraction = Omit<Extraction, "id">;
+
+export interface ExtractionFilters {
+  extractor_id?: number;
+  run?: string;
+  exchange_id?: string;
+  kept?: boolean;
+}
+
 // ─── Validation ───────────────────────────────────────────────────────────────
 
 /** Returns the first message describing why the row cannot be written, or null. */
@@ -125,6 +169,121 @@ export function validateContents(contents: Contents): string | null {
   if (typeof contents.output !== "string") return "contents.output is required";
   if (contents.tools !== undefined && !isFilled(contents.tools)) return "contents.tools is not a non-empty string";
   return null;
+}
+
+export function validateNewExtractor(row: NewExtractor): string | null {
+  const result = firstFailure([
+    [!isFilled(row.why), "why is required"],
+    [!isJson(row.config), "config must be JSON"],
+    [!TIMESTAMP_SHAPE.test(row.created), `created is not ISO-8601 UTC: ${row.created}`],
+    [row.parent !== null && !isRowId(row.parent), `parent is not a row id: ${row.parent}`],
+  ]);
+  assert(result === null || result.length > 0, "validateNewExtractor: the result is null or a message");
+  assert(result !== null || isFilled(row.why), "validateNewExtractor: null means why is filled");
+  assert(result !== null || isJson(row.config), "validateNewExtractor: null means config is JSON");
+  assert(result !== null || TIMESTAMP_SHAPE.test(row.created), "validateNewExtractor: null means created is ISO-8601 UTC");
+  assert(result !== null || row.parent === null || isRowId(row.parent), "validateNewExtractor: null means parent is empty or a row id");
+  return result;
+}
+
+export function validateNewExtraction(row: NewExtraction): string | null {
+  const result = validateExtractionIdentity(row) ?? validateExtractionPayload(row) ?? validateExtractionOutcome(row);
+  assert(result === null || result.length > 0, "validateNewExtraction: the result is null or a message");
+  return result;
+}
+
+export function validateNewExtractions(rows: NewExtraction[]): string | null {
+  let result: string | null = null;
+  for (const row of rows) {
+    result = validateNewExtraction(row);
+    if (result !== null) break;
+  }
+  assert(result === null || result.length > 0, "validateNewExtractions: the result is null or a message");
+  return result;
+}
+
+function validateExtractionIdentity(row: NewExtraction): string | null {
+  const result = firstFailure([
+    [!isRowId(row.extractor_id), `extractor_id is not a row id: ${row.extractor_id}`],
+    [!isFilled(row.run), "run is required"],
+    [!ID_SHAPE.test(row.exchange_id), `exchange_id is not an id: ${row.exchange_id}`],
+    [!isCandidateKind(row.kind), `kind is not ${CANDIDATE_KINDS.join(" or ")}: ${row.kind}`],
+  ]);
+  assert(result !== null || isRowId(row.extractor_id), "validateExtractionIdentity: null means extractor_id is a row id");
+  assert(result !== null || isFilled(row.run), "validateExtractionIdentity: null means run is filled");
+  assert(result !== null || ID_SHAPE.test(row.exchange_id), "validateExtractionIdentity: null means exchange_id is an id");
+  assert(result !== null || isCandidateKind(row.kind), "validateExtractionIdentity: null means kind is a candidate kind");
+  return result;
+}
+
+function validateExtractionPayload(row: NewExtraction): string | null {
+  const result = firstFailure([
+    [!isFilled(row.quote), "quote is required"],
+    [!isJson(row.body), "body must be JSON"],
+    [row.probabilities !== null && !isJson(row.probabilities), "probabilities must be JSON"],
+    [!TIMESTAMP_SHAPE.test(row.created), `created is not ISO-8601 UTC: ${row.created}`],
+  ]);
+  assert(result !== null || isFilled(row.quote), "validateExtractionPayload: null means quote is filled");
+  assert(result !== null || isJson(row.body), "validateExtractionPayload: null means body is JSON");
+  assert(result !== null || row.probabilities === null || isJson(row.probabilities), "validateExtractionPayload: null means probabilities are empty or JSON");
+  assert(result !== null || TIMESTAMP_SHAPE.test(row.created), "validateExtractionPayload: null means created is ISO-8601 UTC");
+  return result;
+}
+
+function validateExtractionOutcome(row: NewExtraction): string | null {
+  const dropped = row.dropped_by !== null;
+  const result = firstFailure([
+    [dropped && !isDropReason(row.dropped_by), `dropped_by is not a known reason: ${row.dropped_by}`],
+    [dropped && row.verdict !== null, "a dropped candidate has no verdict"],
+    [row.saved_id !== null && row.verdict === null, "a saved candidate has a verdict"],
+    [row.of !== null && row.verdict === null, "a pointer comes with a verdict"],
+    [dropped && String(row.dropped_by).startsWith("check:") && row.probabilities !== null, "a check drop has no probabilities"],
+  ]);
+  assert(result !== null || row.dropped_by === null || isDropReason(row.dropped_by), "validateExtractionOutcome: null means dropped_by is empty or a known reason");
+  assert(result !== null || row.dropped_by === null || row.verdict === null, "validateExtractionOutcome: null means a dropped candidate has no verdict");
+  assert(result !== null || row.saved_id === null || row.verdict !== null, "validateExtractionOutcome: null means a saved candidate has a verdict");
+  assert(result !== null || row.of === null || row.verdict !== null, "validateExtractionOutcome: null means a pointer comes with a verdict");
+  assert(result !== null || row.dropped_by === null || !row.dropped_by.startsWith("check:") || row.probabilities === null, "validateExtractionOutcome: null means a check drop has no probabilities");
+  return result;
+}
+
+function firstFailure(checks: Array<[boolean, string]>): string | null {
+  const failed = checks.find(([bad]) => bad);
+  const result = failed === undefined ? null : failed[1];
+  assert(result === null || result.length > 0, "firstFailure: the result is null or a message");
+  return result;
+}
+
+export function isRowId(value: unknown): boolean {
+  const result = Number.isInteger(value) && (value as number) > 0;
+  assert(!result || typeof value === "number", "isRowId: a row id is a number");
+  return result;
+}
+
+function isJson(text: unknown): boolean {
+  let result = typeof text === "string";
+  if (result) {
+    try {
+      JSON.parse(text as string);
+    } catch {
+      result = false;
+    }
+  }
+  assert(!result || typeof text === "string", "isJson: JSON text is a string");
+  return result;
+}
+
+function isDropReason(text: unknown): boolean {
+  const reason = typeof text === "string" ? text : "";
+  const result = reason === NEAR_IDENTICAL || DROP_PREFIXES.some((p) => reason.length > p.length && reason.startsWith(p));
+  assert(!result || isFilled(text), "isDropReason: a reason is not empty");
+  return result;
+}
+
+function isCandidateKind(value: unknown): boolean {
+  const result = typeof value === "string" && (CANDIDATE_KINDS as readonly string[]).includes(value);
+  assert(!result || typeof value === "string", "isCandidateKind: a kind is a string");
+  return result;
 }
 
 const TOKEN_FIELDS = ["tokens_in", "tokens_out", "tokens_cache_read", "tokens_cache_write"] as const;

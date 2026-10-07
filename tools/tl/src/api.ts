@@ -5,9 +5,10 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import type { Database } from "bun:sqlite";
 
+import { assert } from "../../tb/src/types.js";
 import * as db from "./db.js";
-import type { Contents, Exchange, ExchangeKind, Harness, Session } from "./types.js";
-import { EXCHANGE_KINDS, HARNESSES, TIMESTAMP_SHAPE, validateContents, validateExchange, validateSession } from "./types.js";
+import type { Contents, Exchange, ExchangeKind, Harness, NewExtraction, NewExtractor, Session } from "./types.js";
+import { EXCHANGE_KINDS, HARNESSES, TIMESTAMP_SHAPE, validateContents, validateExchange, validateNewExtraction, validateNewExtractor, validateSession } from "./types.js";
 
 export const API_PORT = Number(process.env.TL_API_PORT ?? 8790);
 
@@ -20,6 +21,9 @@ const OPENAPI_SPEC = {
     "/exchanges/{id}": { get: { summary: "One exchange" }, patch: { summary: "Set or clear distilled" } },
     "/contents": { post: { summary: "Upsert one body or an array of them" } },
     "/contents/{id}": { get: { summary: "The body of one exchange. Tool calls and results only with ?tools=true" } },
+    "/extractors": { post: { summary: "Write one extractor. It starts inactive. Answers with its id" } },
+    "/extractors/{id}": { get: { summary: "One extractor, or the active one for the id `active`" }, patch: { summary: "Set active. The only change an extractor allows" } },
+    "/extractions": { post: { summary: "Write one extraction or an array of them" }, get: { summary: "List extractions by extractor, run, exchange or kept" } },
     "/health": { get: { summary: "Row counts, to prove the archive answers" } },
   },
 };
@@ -87,7 +91,52 @@ export function createApp(handle: Database): Hono {
     return done ? c.json({ id: c.req.param("id"), distilled: value }) : c.json({ error: "exchange not found" }, 404);
   });
 
+  extractorRoutes(app, handle);
+
   return app;
+}
+
+function extractorRoutes(app: Hono, handle: Database): void {
+  app.post("/extractors", async (c) => {
+    const body = await c.req.json().catch(() => null) as NewExtractor | null;
+    if (body === null) return c.json({ error: "body is not JSON" }, 400);
+    const invalid = validateNewExtractor(body);
+    if (invalid) return c.json({ error: invalid }, 400);
+    return c.json({ id: db.insertExtractor(handle, body) });
+  });
+
+  app.get("/extractors/:id", (c) => {
+    const id = c.req.param("id");
+    const found = id === "active" ? db.getActiveExtractor(handle) : db.getExtractor(handle, Number(id));
+    return found ? c.json(found) : c.json({ error: "extractor not found" }, 404);
+  });
+
+  app.patch("/extractors/:id", async (c) => {
+    const id = Number(c.req.param("id"));
+    const body = await c.req.json().catch(() => null) as { active?: boolean } | null;
+    if (body === null || body.active !== true) return c.json({ error: "active: true is the only change allowed" }, 400);
+    const done = db.setActiveExtractor(handle, id);
+    return done ? c.json({ id, active: true }) : c.json({ error: "extractor not found" }, 404);
+  });
+
+  app.post("/extractions", async (c) => write<NewExtraction>(c, validateNewExtraction, (row) => db.insertExtraction(handle, row)));
+
+  app.get("/extractions", (c) => c.json(db.listExtractions(handle, {
+    extractor_id: intParam(c.req.query("extractor_id")),
+    run: c.req.query("run"),
+    exchange_id: c.req.query("exchange_id"),
+    kept: boolParam(c.req.query("kept")),
+  })));
+
+  assert(hasExtractorRoutes(app), "extractorRoutes: the extractor and extraction routes are registered");
+}
+
+const EXTRACTOR_ROUTES = ["POST /extractors", "GET /extractors/:id", "PATCH /extractors/:id", "POST /extractions", "GET /extractions"];
+
+function hasExtractorRoutes(app: Hono): boolean {
+  assert(Array.isArray(app.routes), "hasExtractorRoutes: the app lists its routes");
+  const have = new Set(app.routes.map((r) => `${r.method} ${r.path}`));
+  return EXTRACTOR_ROUTES.every((route) => have.has(route));
 }
 
 /** One row or an array of them, every row validated before the first write. */
