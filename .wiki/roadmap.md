@@ -23,7 +23,6 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] td: rewrite the config with ritchie as `ModelConnection`, `Role`, `CriticCheck` and `Extractor`, with JSON as the only way in. Then component 7 (checks), 12 (recorder), 2 (registry), 4 (LLM client).
 - [ ] Put `tests/` in a `tsc` project, so a type error in a test is caught.
 - [ ] `errorMessage` has three copies, in `tb`, `ti` and `th`. Pick one home for it. [detail](style_contract_helpers_live_in_one_shared_module)
-- [ ] Update `phase-runs.md` of the ritchie skill to the two-run flow. [detail](skill_ritchie_step_five_runs_tests_blind_then_bodies_with_the_tests_and_a_runner)
 - [ ] Decay of `provvisoria` notes: with critic F about 16 of 75 bad candidates pass. No decision yet. [detail](memory_critic_is_f_textbook_as_a_test_and_no_record_question)
 
 ### th

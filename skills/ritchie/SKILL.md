@@ -82,9 +82,10 @@ After the contracts are approved, the file holds structs, signatures,
 contracts and `todo` bodies. Ritchie writes nothing in this step. One
 `th run` writes the tests. A second `th run` writes the bodies. Each gets
 its own copy of the file in its own directory and never sees the other's
-output. Ritchie only checks the result and edits neither.
+output. Ritchie only checks the result and edits neither. When the user
+asks for it, Ritchie writes both itself instead: that is direct mode.
 
-Commands, isolation rules and the check order: `references/phase-runs.md`.
+Commands, direct mode, and the checks: `references/phase-runs.md`.
 
 ### 7. Check and gate
 

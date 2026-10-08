@@ -7,7 +7,8 @@ Flags:
   lines>N      more than N logic lines (asserts, blanks, comments, lone brackets excluded)
   asserts>N    more than N asserts in one function
   compound     an assert joins two clauses with && / and
-  computes     an assert holds a closure, lambda, comprehension or iterator call
+  computes     an assert condition holds a closure, lambda, comprehension or iterator call;
+               the message is not checked, so a lazy message closure is fine
   recursion    the body calls the function by its own name
   test-assert  a test function holds an assert of its own
 
@@ -225,13 +226,36 @@ def scan_file(path, lang, limit_lines, limit_asserts):
     return functions
 
 
+def condition_of(joined, lang):
+    """The condition of an assert, without its message: a lazy message is a closure, not computation."""
+    if lang == "python":
+        start = joined.find("assert") + len("assert")
+        depth = 0
+    else:
+        start = joined.find("(") + 1
+        depth = 1
+    keep = 2 if re.search(r"assert_(?:eq|ne)!", joined) else 1
+    args = 0
+    for k in range(start, len(joined)):
+        ch = joined[k]
+        if ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+        elif ch == "," and depth == (0 if lang == "python" else 1):
+            args += 1
+            if args == keep:
+                return joined[start:k]
+    return joined[start:]
+
+
 def judge(fn, lang, receiver, is_method, limit_lines, limit_asserts):
     if fn.logic_lines > limit_lines:
         fn.flags.append(f"lines>{limit_lines}")
     if len(fn.asserts) > limit_asserts:
         fn.flags.append(f"asserts>{limit_asserts}")
     for text in fn.asserts:
-        joined = " ".join(strip_comment(t, lang) for t in text)
+        joined = condition_of(" ".join(strip_comment(t, lang) for t in text), lang)
         if AND_TOKEN[lang] in joined:
             fn.flags.append("compound")
         if any(m.search(joined) for m in COMPUTE_MARKERS[lang]):
