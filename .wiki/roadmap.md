@@ -20,7 +20,7 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] td open point: which sessions `td distill` takes. One by hand, or every session with pending exchanges? In shadow the queue never empties.
 - [ ] td open point: components 5 to 10 as small classes or as plain functions, with pure parts split from the call parts. [detail](memory_distiller_td_is_fourteen_components_behind_one_entry_point)
 - [ ] td open point: search in `tb` and `ti`. Add an HTTP search to both, or call their CLI from `td`.
-- [ ] td: config (component 1) and phase 1 checks (component 7) are done. Next: 12 (recorder), 2 (registry), 4 (LLM client).
+- [ ] td: config (1), phase 1 checks (7) and recorder (12) are done. Next: 2 (registry), 4 (LLM client).
 - [ ] td: change the extraction prompt so the model may propose new tags beside known ones. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - [ ] td: after the first shadow runs, read the proposed tags in `extractions` and pick a guard for semantic tag synonyms. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - [ ] Put `tests/` in a `tsc` project, so a type error in a test is caught.
