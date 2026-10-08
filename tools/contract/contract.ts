@@ -5,8 +5,8 @@ export class ContractError extends Error {
   }
 }
 
-export function assert(cond: boolean, msg: string): asserts cond {
-  if (!cond) throw new ContractError(msg);
+export function assert(cond: boolean, msg: string | (() => string)): asserts cond {
+  if (!cond) throw new ContractError(typeof msg === "string" ? msg : msg());
 }
 
 export function isNonBlank(text: string): boolean {
