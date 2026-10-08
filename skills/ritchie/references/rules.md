@@ -253,6 +253,16 @@ as the net against silent numeric drift. UI glue gets no tests, or one
 smoke test. A test that breaks on a refactor that did not change
 behaviour is raised to the contract level or deleted, not repaired.
 
+**Classifiers get an outcome table.** Some functions decide a class: is
+this text Italian, is this quote in the target, which drop reason fires.
+Their rule is their own definition, so a contract can only restate it.
+A contract and a body that share one predicate agree even when the
+predicate is wrong. A mutant proves it: in the `td` checks, an inverted
+`isItalian` passed every contract-only test. For these functions, a
+table of inputs with the expected result is the one independent
+oracle. Keep the table small and write it from the spec, not from a run
+of the body.
+
 **Why the message must be stable.** The invalid-input test matches the
 precondition's message by substring. Rewording the message breaks the
 test with the contract unchanged. Keep the message short and next to the

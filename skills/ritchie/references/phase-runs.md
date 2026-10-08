@@ -10,7 +10,7 @@ Check `th run --help` when a flag fails.
 
 ```
 th run --hat white-core --system "Follow the code rules in <ritchie>/SKILL.md and <ritchie>/references/rules.md. You only write." --tools read,write,edit --detach \
-  --task "In <dir-A> write the tests for <file>. Read the contracts only. Write one test for each contract message, precondition and postcondition. Add the edge values of each threshold and range: at the edge, just inside, just outside. Bare calls for valid input, expected panic message for invalid input. No assert of your own. Write the test file and stop."
+  --task "In <dir-A> write the tests for <file>. Read the contracts only. An assert above the todo line is a precondition, one below it is a postcondition. Write one test per contract message. A precondition gets an expected panic message, with input that breaks it. A postcondition never panics for a correct body: it gets a bare call with input that reaches it. Add the edge values of each threshold and range: at the edge, just inside, just outside. Import only what the file exports. No assert of your own. Write the test file and stop."
 th run --hat white-core --system "Follow the code rules in <ritchie>/SKILL.md and <ritchie>/references/rules.md. You only write." --tools read,write,edit --detach \
   --task "In <dir-B> replace each todo in <file> with the body. Keep every assert. Write the file and stop."
 ```
@@ -39,10 +39,20 @@ Ritchie moves both results into the project and checks:
    factory stops at its own `todo` first, so that test fails. This is
    expected.
 2. Against the body, the whole suite passes.
-3. One mutant: change one comparison in the body, for example `>=` to
-   `>`. At least one test must fail. If none fails, the tests are too
-   weak.
+3. Mutants: one per classifier (invert its result) and one per edge
+   comparison (`>=` to `>`). Each mutant must make at least one test
+   fail. A mutant that survives means the tests are too weak.
 
-Ritchie edits neither the tests nor the body. On a failure it shows the
-output to the user. The user picks the run to repeat. A repeated run gets
-the same input as before, never the other run's output.
+Each run writes once. Ritchie does not repeat a run. It fixes the result
+in place:
+
+- A test that breaks the rules (an import of a private name, a
+  postcondition expected to panic, a call that never reaches the check it
+  names) is rewritten or removed.
+- A body that breaks a contract is fixed at the cause. A contract that
+  let a wrong body pass is Ritchie's own gap: fix the contract first, then
+  the body.
+- A classifier gets its outcome table here, written from the spec.
+
+Then the three checks run again. Ritchie tells the user what it fixed and
+why.

@@ -79,13 +79,11 @@ their own: the contract is the only oracle.
 ### 6. Tests and body, two independent runs
 
 After the contracts are approved, the file holds structs, signatures,
-contracts and `todo` bodies. Ritchie writes nothing in this step. One
-`th run` writes the tests. A second `th run` writes the bodies. Each gets
-its own copy of the file in its own directory and never sees the other's
-output. Ritchie only checks the result and edits neither. When the user
-asks for it, Ritchie writes both itself instead: that is direct mode.
-
-Commands, direct mode, and the checks: `references/phase-runs.md`.
+contracts and `todo` bodies. One `th run` writes the tests, a second
+writes the bodies, each in its own directory, blind to the other. Each
+run writes once; Ritchie checks the result and fixes it in place. On
+request, Ritchie writes both itself: direct mode. Commands, direct mode,
+checks and fixes: `references/phase-runs.md`.
 
 ### 7. Check and gate
 
@@ -160,7 +158,8 @@ Why each rule holds, its edge cases, and where real code still deviates:
 
 - Valid input: a bare call. Invalid input: expect the precondition's
   message.
-- A test contains no assert of its own.
+- A test contains no assert of its own, except a classifier's outcome
+  table: see `references/rules.md`.
 
 **Comments**
 
