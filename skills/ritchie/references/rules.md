@@ -133,6 +133,13 @@ dispatch tables (a game tick, a key-name lookup). The older codebase has
 one 124-line `Display` match over opcodes, already listed as debt there,
 and three recursive tree walks written before the no-recursion rule.
 
+**One exit when there are postconditions.** A postcondition sits below the
+body, so an early `return` skips it. The body assigns `result` and falls
+through to the asserts. A body run once copied the postconditions next to
+each early return instead: the contracts then exist twice and drift
+apart. `scripts/check_body_diff.py` rejects both: a changed contract line
+and a `return` in a body that has postconditions after it.
+
 ## Structs
 
 **Why private fields, no exception.** With a public field no single place

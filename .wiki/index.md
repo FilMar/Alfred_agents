@@ -71,6 +71,7 @@ updated: 2026-10-07
 | [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
 | [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) | Contract messages: stable prefix, then the values the assert reads |
 | [skill_ritchie_classifiers_get_an_outcome_table_and_runs_write_once](skill_ritchie_classifiers_get_an_outcome_table_and_runs_write_once) | Classifiers get expected-result tests; a th run writes once and Ritchie fixes |
+| [skill_ritchie_a_plan_run_lists_the_tests_and_the_body_run_only_fills_todo_lines](skill_ritchie_a_plan_run_lists_the_tests_and_the_body_run_only_fills_todo_lines) | Step 6: plan run, reviewed plan, test run; the body run only fills todo lines, checked by a script |
 | [skill_router_pass_planned](skill_router_pass_planned) | Router pass design, deliberately deferred |
 | [style_contract_helpers_live_in_one_shared_module](style_contract_helpers_live_in_one_shared_module) | assert and generic checks live in tools/contract, shared by every tool |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |

@@ -1,6 +1,6 @@
 ---
 name: ritchie
-description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It works in phases. The entities are debated in chat first, struct code only. Then structs, signatures and contracts go into the file, one phase at a time: the user edits the file, Ritchie answers in the file, and the user says ok. Tests and bodies come from two independent `th` runs."
+description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It works in phases. The entities are debated in chat first, struct code only. Then structs, signatures and contracts go into the file, one phase at a time: the user edits the file, Ritchie answers in the file, and the user says ok. Tests and bodies come from `th` runs: a plan, then tests and bodies written blind to each other."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
@@ -76,18 +76,18 @@ postconditions below it, five at most per function. Same loop as step 3.
 The contracts must be complete. In step 6 the tests have no assert of
 their own: the contract is the only oracle.
 
-### 6. Tests and body, two independent runs
+### 6. Tests and body, three runs
 
-After the contracts are approved, the file holds structs, signatures,
-contracts and `todo` bodies. One `th run` writes the tests, a second
-writes the bodies, each in its own directory, blind to the other. Each
-run writes once; Ritchie checks the result and fixes it in place. On
-request, Ritchie writes both itself: direct mode. Commands, direct mode,
-checks and fixes: `references/phase-runs.md`.
+After the contracts are approved, three `th run` calls write: a plan run
+lists the tests in prose, Ritchie reviews it, a test run writes them, and
+a body run fills only the `todo` lines, blind to plan and tests. Ritchie
+checks and fixes in place, or on request writes both: direct mode. Spec,
+commands, checks: `references/phase-runs.md`.
 
 ### 7. Check and gate
 
 ```
+scripts/check_body_diff.py <todo-file> <body-file>
 scripts/contract_report.py <path>
 ```
 
@@ -125,7 +125,7 @@ Why each rule holds, its edge cases, and where real code still deviates:
   be tested through I/O moves into a pure function called from the edge.
 - Every loop and every queue has an explicit bound. A loop that must not
   end asserts it.
-- No recursion.
+- No recursion. No early `return` before postconditions: one exit.
 
 **Structs**
 
