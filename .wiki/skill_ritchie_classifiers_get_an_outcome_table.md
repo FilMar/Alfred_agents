@@ -8,7 +8,7 @@ replaces: [skill_ritchie_classifiers_get_an_outcome_table_and_runs_write_once]
 
 A classifier gets an outcome table: a small set of inputs with the expected result, `expect(...).toBe(...)`. A classifier is a pure function whose rule is its own definition: is this text Italian, which drop reason fires, which tags are known. This is the one exception to "a test contains no assert of its own". The table is written from the spec, before the body.
 
-The rule on `th` runs in the replaced decision is gone with the runs: see [skill_ritchie_step_six_is_direct_tests_first_then_the_body](skill_ritchie_step_six_is_direct_tests_first_then_the_body).
+The rule on `th` runs in the replaced decision is gone with the runs: see [.skill_ritchie_step_six_is_direct_tests_first_then_the_body](.skill_ritchie_step_six_is_direct_tests_first_then_the_body).
 
 ## Why
 
@@ -17,5 +17,5 @@ A contract cannot judge a classifier. In `td` component 7 the contract says "the
 ## Cross-references
 
 - [.skill_ritchie_classifiers_get_an_outcome_table_and_runs_write_once](.skill_ritchie_classifiers_get_an_outcome_table_and_runs_write_once) — the replaced decision, with the old rule on runs
-- [skill_ritchie_step_six_is_direct_tests_first_then_the_body](skill_ritchie_step_six_is_direct_tests_first_then_the_body) — where the table sits in step 6
+- [skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role](skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role) — where the table sits in step 6
 - [memory_td_candidates_keep_known_tags_and_propose_new_ones](memory_td_candidates_keep_known_tags_and_propose_new_ones) — the classifier behind the tag table

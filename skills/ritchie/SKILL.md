@@ -1,6 +1,6 @@
 ---
 name: ritchie
-description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It works in phases. The entities are debated in chat first, struct code only. Then structs, signatures and contracts go into the file, one phase at a time: the user edits the file, Ritchie answers in the file, and the user says ok. Tests come before the bodies, from the contracts only."
+description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It works in phases. The entities are debated in chat first, struct code only. Then structs, signatures and contracts go into the file, one phase at a time: the user edits the file, Ritchie answers in the file, and the user says ok. Tests come before the bodies, from the contracts only, each written by its own th run."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
@@ -76,16 +76,18 @@ postconditions below it, five at most per function. Same loop as step 3.
 The contracts must be complete. In step 6 the tests have no assert of
 their own: the contract is the only oracle.
 
-### 6. Tests, then body
+### 6. Tests, then body, by two th runs
 
-Ritchie writes the tests from the contracts and the spec, before any
-body. Then it writes each body in the place of its `todo` line only, and
-runs the mutants. Steps and checks: `references/tests-and-body.md`.
+Ritchie writes a spec, then calls `scripts/th_write.sh` twice: a run
+writes the tests, then a second run writes the bodies. Each run is a th
+member with its own hat and system on a fixed model. The script checks
+the bodies with `scripts/check_body_diff.py`. Ritchie never edits the
+contracts. It checks each result and fixes it. Steps and checks:
+`references/tests-and-body.md`.
 
 ### 7. Check and gate
 
 ```
-scripts/check_body_diff.py <todo-file> <body-file>
 scripts/contract_report.py <path>
 ```
 
