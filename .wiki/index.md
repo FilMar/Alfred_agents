@@ -55,7 +55,7 @@ updated: 2026-10-07
 | [memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy](memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy) | fromJson is the only way in; constructors keep a frozen copy, extra fields are refused |
 | [memory_td_candidates_keep_known_tags_and_propose_new_ones](memory_td_candidates_keep_known_tags_and_propose_new_ones) | A candidate needs one known tag and may propose new ones; synonyms matched by a lexical key |
 | [memory_td_config_json_is_checked_on_both_sides_and_must_round_trip](memory_td_config_json_is_checked_on_both_sides_and_must_round_trip) | Config classes check the JSON shape on read; fromJson must write back the same JSON |
-| [skill_ritchie_step_six_plans_then_writes_tests_blind_then_bodies_with_a_runner](skill_ritchie_step_six_plans_then_writes_tests_blind_then_bodies_with_a_runner) | Step 6: a test plan, blind tests, then bodies with the tests and a runner, only in the todo lines |
+| [skill_ritchie_step_six_is_direct_tests_first_then_the_body](skill_ritchie_step_six_is_direct_tests_first_then_the_body) | Step 6 is direct: tests first from the contracts, then the body in the todo lines, then mutants |
 | [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) | Calls go through pi-ai: reasoning low and the system role for Ollama, or the prompt is lost or glm thinks 15x |
 | [memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading) | Phase 3 bridges by shape; 0/20 ref recovery, so judge by reading the yes answers |
 | [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) | GLM ignores format schemas; JSON from the prompt, checked by code, one retry |
@@ -70,7 +70,7 @@ updated: 2026-10-07
 | [graph_curation_via_th_agent](graph_curation_via_th_agent) | Curation via a th member, live-streamed, kill-switch not a gate |
 | [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
 | [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) | Contract messages: stable prefix, then the values the assert reads |
-| [skill_ritchie_classifiers_get_an_outcome_table_and_runs_write_once](skill_ritchie_classifiers_get_an_outcome_table_and_runs_write_once) | Classifiers get expected-result tests; a th run writes once and Ritchie fixes |
+| [skill_ritchie_classifiers_get_an_outcome_table](skill_ritchie_classifiers_get_an_outcome_table) | A classifier gets an outcome table: the one test with an assert of its own |
 | [skill_router_pass_planned](skill_router_pass_planned) | Router pass design, deliberately deferred |
 | [style_contract_helpers_live_in_one_shared_module](style_contract_helpers_live_in_one_shared_module) | assert and generic checks live in tools/contract, shared by every tool |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |

@@ -1,6 +1,6 @@
 ---
 name: ritchie
-description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It works in phases. The entities are debated in chat first, struct code only. Then structs, signatures and contracts go into the file, one phase at a time: the user edits the file, Ritchie answers in the file, and the user says ok. Tests and bodies come from `th` runs: a plan, blind tests, then bodies that run the tests."
+description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It works in phases. The entities are debated in chat first, struct code only. Then structs, signatures and contracts go into the file, one phase at a time: the user edits the file, Ritchie answers in the file, and the user says ok. Tests come before the bodies, from the contracts only."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
@@ -76,13 +76,11 @@ postconditions below it, five at most per function. Same loop as step 3.
 The contracts must be complete. In step 6 the tests have no assert of
 their own: the contract is the only oracle.
 
-### 6. Tests and body, three runs in order
+### 6. Tests, then body
 
-After the contracts are approved, three `th run` calls write, in order:
-a plan of the tests in prose, which Ritchie reviews; the tests, blind;
-the bodies, only in the `todo` lines, with the tests and a runner. Ritchie
-checks and fixes in place, or on request writes both: direct mode. Spec,
-commands, checks: `references/phase-runs.md`.
+Ritchie writes the tests from the contracts and the spec, before any
+body. Then it writes each body in the place of its `todo` line only, and
+runs the mutants. Steps and checks: `references/tests-and-body.md`.
 
 ### 7. Check and gate
 
