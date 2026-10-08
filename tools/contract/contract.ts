@@ -17,6 +17,10 @@ export function isPositiveInt(value: number): boolean {
   return Number.isInteger(value) && value > 0;
 }
 
+export function isUnit(value: number): boolean {
+  return Number.isFinite(value) && value >= 0 && value <= 1;
+}
+
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
