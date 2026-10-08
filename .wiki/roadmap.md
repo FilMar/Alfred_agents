@@ -20,9 +20,9 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] td open point: which sessions `td distill` takes. One by hand, or every session with pending exchanges? In shadow the queue never empties.
 - [ ] td open point: components 5 to 10 as small classes or as plain functions, with pure parts split from the call parts. [detail](memory_distiller_td_is_fourteen_components_behind_one_entry_point)
 - [ ] td open point: search in `tb` and `ti`. Add an HTTP search to both, or call their CLI from `td`.
-- [ ] td: config classes are done in `tools/td/src/config.ts`. Next are the registry (component 2) and the LLM client (component 4).
-- [ ] td config gaps: `compat` and the question list are shared with the caller; `contextWindow` and `maxTokens` in `toPiModel` are fixed numbers; `compat as any`; no test for `reasoning: true` or a non-empty `compat`.
-- [ ] Put `tests/` in a `tsc` project, so a type error in a test is caught. Today `tests/td_config.test.ts` imports `Think` and `Drops` as values.
+- [ ] td: rewrite the config with ritchie as `ModelConnection`, `Role`, `CriticCheck` and `Extractor`, with JSON as the only way in. Then component 7 (checks), 12 (recorder), 2 (registry), 4 (LLM client).
+- [ ] Put `tests/` in a `tsc` project, so a type error in a test is caught.
+- [ ] `errorMessage` has three copies, in `tb`, `ti` and `th`. Pick one home for it. [detail](style_contract_helpers_live_in_one_shared_module)
 - [ ] Update `phase-runs.md` of the ritchie skill to the two-run flow. [detail](skill_ritchie_step_five_runs_tests_blind_then_bodies_with_the_tests_and_a_runner)
 - [ ] Decay of `provvisoria` notes: with critic F about 16 of 75 bad candidates pass. No decision yet. [detail](memory_critic_is_f_textbook_as_a_test_and_no_record_question)
 

@@ -69,7 +69,9 @@ updated: 2026-10-07
 | [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
 | [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) | Contract messages: stable prefix, then the values the assert reads |
 | [skill_router_pass_planned](skill_router_pass_planned) | Router pass design, deliberately deferred |
+| [style_contract_helpers_live_in_one_shared_module](style_contract_helpers_live_in_one_shared_module) | assert and generic checks live in tools/contract, shared by every tool |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |
+| [style_type_checks_are_private_static_methods_of_their_class](style_type_checks_are_private_static_methods_of_their_class) | A check that knows one type is a private static method; getters have no contract |
 | [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards |
 | [wiki_superseded_hidden_with_dot](wiki_superseded_hidden_with_dot) | The wiki itself: immutable chains; dead decisions hidden with a dot |
 | [wiki_decision_is_written_when_the_design_ends](wiki_decision_is_written_when_the_design_ends) | A page is written after the design settles, never during it |
