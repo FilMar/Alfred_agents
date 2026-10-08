@@ -12,7 +12,7 @@ import { join } from "node:path";
 
 import { HttpClient } from "../../tb/src/infra.js";
 import { assert } from "../../contract/contract.js";
-import { API_URL } from "../../tl/src/client.js";
+import { apiUrl } from "../../tl/src/client.js";
 import * as pi from "../../tl/src/pi.js";
 import { joinBody, joinTools } from "../../tl/src/transcript.js";
 import { exchangeId } from "../../tl/src/types.js";
@@ -30,7 +30,7 @@ export function spoolDir(): string {
   return dir;
 }
 
-const client = new HttpClient({ baseUrl: API_URL, timeout: DEADLINE_MS });
+const client = new HttpClient({ baseUrl: apiUrl(), timeout: DEADLINE_MS });
 
 export interface RunRows {
   session: Session;

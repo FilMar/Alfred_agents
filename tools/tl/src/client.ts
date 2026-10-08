@@ -8,7 +8,12 @@ import type { Contents, Exchange, Extraction, ExtractionFilters, Extractor, NewE
 import { isRowId, validateNewExtractions, validateNewExtractor } from "./types.js";
 import type { ExchangeFilters, SessionFilters } from "./db.js";
 
-export const API_URL = process.env.TL_API_URL ?? `http://localhost:${API_PORT}`;
+// Read on each call: a test may point it at its own server.
+export function apiUrl(): string {
+  const result = process.env.TL_API_URL ?? `http://localhost:${API_PORT}`;
+  assert(result.length > 0, "apiUrl: the url is not empty");
+  return result;
+}
 
 const TIMEOUT_MS = 10_000;
 
@@ -16,10 +21,12 @@ const TIMEOUT_MS = 10_000;
 const CONTENTS_PER_REQUEST = 20;
 const ROWS_PER_REQUEST = 200;
 
-const client = new HttpClient({ baseUrl: API_URL, timeout: TIMEOUT_MS });
+function client(): HttpClient {
+  return new HttpClient({ baseUrl: apiUrl(), timeout: TIMEOUT_MS });
+}
 
 export async function health(): Promise<{ sessions: number; exchanges: number; contents: number }> {
-  return client.request("GET", "/health");
+  return client().request("GET", "/health");
 }
 
 export async function putSessions(rows: Session[]): Promise<number> {
@@ -38,35 +45,35 @@ async function putBatched<T>(path: string, rows: T[], perRequest: number): Promi
   let written = 0;
   for (let i = 0; i < rows.length; i += perRequest) {
     const batch = rows.slice(i, i + perRequest);
-    const answer = await client.request<{ written: number }>("POST", path, batch);
+    const answer = await client().request<{ written: number }>("POST", path, batch);
     written += answer.written;
   }
   return written;
 }
 
 export async function fetchSessions(filters: SessionFilters = {}): Promise<Session[]> {
-  return client.request("GET", `/sessions${query(filters as Record<string, unknown>)}`);
+  return client().request("GET", `/sessions${query(filters as Record<string, unknown>)}`);
 }
 
 export async function fetchExchanges(filters: ExchangeFilters = {}): Promise<Exchange[]> {
-  return client.request("GET", `/exchanges${query(filters as Record<string, unknown>)}`);
+  return client().request("GET", `/exchanges${query(filters as Record<string, unknown>)}`);
 }
 
 export async function fetchExchange(id: string): Promise<Exchange> {
-  return client.request("GET", `/exchanges/${id}`);
+  return client().request("GET", `/exchanges/${id}`);
 }
 
 export async function fetchContents(id: string, withTools: boolean): Promise<Contents> {
-  return client.request("GET", `/contents/${id}${withTools ? "?tools=true" : ""}`);
+  return client().request("GET", `/contents/${id}${withTools ? "?tools=true" : ""}`);
 }
 
 export async function markDistilled(id: string, distilled: string | null): Promise<void> {
-  await client.request("PATCH", `/exchanges/${id}`, { distilled });
+  await client().request("PATCH", `/exchanges/${id}`, { distilled });
 }
 
 export async function putExtractor(row: NewExtractor): Promise<number> {
   assert(validateNewExtractor(row) === null, `putExtractor: ${validateNewExtractor(row)}`);
-  const result = await client.request<{ id: number }>("POST", "/extractors", row);
+  const result = await client().request<{ id: number }>("POST", "/extractors", row);
   const id = result.id;
   assert(isRowId(id), "putExtractor: the new id is a row id");
   return id;
@@ -74,7 +81,7 @@ export async function putExtractor(row: NewExtractor): Promise<number> {
 
 export async function fetchExtractor(id: number | "active"): Promise<Extractor> {
   assert(id === "active" || isRowId(id), `fetchExtractor: id is a row id or active, id=${id}`);
-  const result = await client.request<Extractor>("GET", `/extractors/${id}`);
+  const result = await client().request<Extractor>("GET", `/extractors/${id}`);
   assert(validateNewExtractor(result) === null, `fetchExtractor: ${validateNewExtractor(result)}`);
   assert(id !== "active" || result.active, "fetchExtractor: asking for active returns an active row");
   assert(id === "active" || result.id === id, "fetchExtractor: the row returned is the one asked for");
@@ -83,19 +90,19 @@ export async function fetchExtractor(id: number | "active"): Promise<Extractor> 
 
 export async function activateExtractor(id: number): Promise<void> {
   assert(isRowId(id), `activateExtractor: id is a row id, id=${id}`);
-  await client.request("PATCH", `/extractors/${id}`, { active: true });
+  await client().request("PATCH", `/extractors/${id}`, { active: true });
 }
 
 export async function putExtractions(rows: NewExtraction[]): Promise<number> {
   assert(validateNewExtractions(rows) === null, `putExtractions: ${validateNewExtractions(rows)}`);
-  const result = await client.request<{ written: number }>("POST", "/extractions", rows);
+  const result = await client().request<{ written: number }>("POST", "/extractions", rows);
   const written = result.written;
   assert(written === rows.length, "putExtractions: every row is written");
   return written;
 }
 
 export async function fetchExtractions(filters: ExtractionFilters = {}): Promise<Extraction[]> {
-  const result = await client.request<Extraction[]>("GET", `/extractions${query(filters as Record<string, unknown>)}`);
+  const result = await client().request<Extraction[]>("GET", `/extractions${query(filters as Record<string, unknown>)}`);
   assert(validateNewExtractions(result) === null, `fetchExtractions: ${validateNewExtractions(result)}`);
   return result;
 }

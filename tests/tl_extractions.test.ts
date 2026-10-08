@@ -53,6 +53,8 @@ describe("types.ts", () => {
     validateNewExtraction({ ...extraction, exchange_id: "e" });
     validateNewExtraction({ ...extraction, kind: "memo" as never });
     validateNewExtraction({ ...extraction, quote: "" });
+    validateNewExtraction({ ...extraction, quote: "", dropped_by: "check:quote" });
+    validateNewExtraction({ ...extraction, quote: "", dropped_by: "critic:is_project_detail" });
     validateNewExtraction({ ...extraction, body: "{" });
     validateNewExtraction({ ...extraction, probabilities: "{" });
     validateNewExtraction({ ...extraction, dropped_by: "critc:is_project_detail" });

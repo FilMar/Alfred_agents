@@ -218,12 +218,12 @@ function validateExtractionIdentity(row: NewExtraction): string | null {
 
 function validateExtractionPayload(row: NewExtraction): string | null {
   const result = firstFailure([
-    [!isFilled(row.quote), "quote is required"],
+    [!isFilled(row.quote) && !isCheckDrop(row.dropped_by), "quote is required unless a check dropped the candidate"],
     [!isJson(row.body), "body must be JSON"],
     [row.probabilities !== null && !isJson(row.probabilities), "probabilities must be JSON"],
     [!TIMESTAMP_SHAPE.test(row.created), `created is not ISO-8601 UTC: ${row.created}`],
   ]);
-  assert(result !== null || isFilled(row.quote), "validateExtractionPayload: null means quote is filled");
+  assert(result !== null || isFilled(row.quote) || isCheckDrop(row.dropped_by), "validateExtractionPayload: null means quote is filled or a check dropped the candidate");
   assert(result !== null || isJson(row.body), "validateExtractionPayload: null means body is JSON");
   assert(result !== null || row.probabilities === null || isJson(row.probabilities), "validateExtractionPayload: null means probabilities are empty or JSON");
   assert(result !== null || TIMESTAMP_SHAPE.test(row.created), "validateExtractionPayload: null means created is ISO-8601 UTC");
@@ -237,13 +237,13 @@ function validateExtractionOutcome(row: NewExtraction): string | null {
     [dropped && row.verdict !== null, "a dropped candidate has no verdict"],
     [row.saved_id !== null && row.verdict === null, "a saved candidate has a verdict"],
     [row.of !== null && row.verdict === null, "a pointer comes with a verdict"],
-    [dropped && String(row.dropped_by).startsWith("check:") && row.probabilities !== null, "a check drop has no probabilities"],
+    [isCheckDrop(row.dropped_by) && row.probabilities !== null, "a check drop has no probabilities"],
   ]);
   assert(result !== null || row.dropped_by === null || isDropReason(row.dropped_by), "validateExtractionOutcome: null means dropped_by is empty or a known reason");
   assert(result !== null || row.dropped_by === null || row.verdict === null, "validateExtractionOutcome: null means a dropped candidate has no verdict");
   assert(result !== null || row.saved_id === null || row.verdict !== null, "validateExtractionOutcome: null means a saved candidate has a verdict");
   assert(result !== null || row.of === null || row.verdict !== null, "validateExtractionOutcome: null means a pointer comes with a verdict");
-  assert(result !== null || row.dropped_by === null || !row.dropped_by.startsWith("check:") || row.probabilities === null, "validateExtractionOutcome: null means a check drop has no probabilities");
+  assert(result !== null || !isCheckDrop(row.dropped_by) || row.probabilities === null, "validateExtractionOutcome: null means a check drop has no probabilities");
   return result;
 }
 
@@ -277,6 +277,12 @@ function isDropReason(text: unknown): boolean {
   const reason = typeof text === "string" ? text : "";
   const result = reason === NEAR_IDENTICAL || DROP_PREFIXES.some((p) => reason.length > p.length && reason.startsWith(p));
   assert(!result || isFilled(text), "isDropReason: a reason is not empty");
+  return result;
+}
+
+function isCheckDrop(reason: string | null): boolean {
+  const result = reason !== null && reason.startsWith("check:");
+  assert(!result || typeof reason === "string", "isCheckDrop: a check drop is a string");
   return result;
 }
 
