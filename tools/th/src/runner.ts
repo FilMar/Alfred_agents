@@ -266,14 +266,18 @@ function attachIO(session: AgentSession, paths: JobPaths): IOHandles {
 // ─── Execution ────────────────────────────────────────────────────────────────
 
 async function promptWithTimeout(session: AgentSession, task: string, timeoutSec: number): Promise<void> {
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error(`Timeout dopo ${timeoutSec}s`)), timeoutSec * 1000)
-  );
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Timeout dopo ${timeoutSec}s`)), timeoutSec * 1000);
+  });
   try {
     await Promise.race([session.prompt(task), timeoutPromise]);
   } catch (err) {
     await session.abort();
     throw err;
+  } finally {
+    // A live timer keeps the process up.
+    clearTimeout(timer);
   }
 }
 
