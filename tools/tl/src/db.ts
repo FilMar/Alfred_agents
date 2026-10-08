@@ -5,7 +5,7 @@ import { mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
-import { assert } from "../../tb/src/types.js";
+import { assert } from "../../contract/contract.js";
 import type {
   CandidateKind, Contents, Exchange, ExchangeKind, Extraction, ExtractionFilters, Extractor, Harness,
   NewExtraction, NewExtractor, Session,

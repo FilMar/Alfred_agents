@@ -5,7 +5,7 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import type { Database } from "bun:sqlite";
 
-import { assert } from "../../tb/src/types.js";
+import { assert } from "../../contract/contract.js";
 import * as db from "./db.js";
 import type { Contents, Exchange, ExchangeKind, Harness, NewExtraction, NewExtractor, Session } from "./types.js";
 import { EXCHANGE_KINDS, HARNESSES, TIMESTAMP_SHAPE, validateContents, validateExchange, validateNewExtraction, validateNewExtractor, validateSession } from "./types.js";

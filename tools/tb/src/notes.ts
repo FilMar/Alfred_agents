@@ -2,7 +2,8 @@ import { embedDocument, embedQuery, EMBED_MODEL } from "./infra.js";
 import { ensureCollection, upsert, setPayload, setPayloadMany, getByIds, search, scroll, scrollLinkedTo, scrollAllIds, deletePoints, randomNoteId, noteId, listTags, NOTE_ID_SHAPE } from "./qdrant.js";
 import type { ScrollOptions, TagFacet } from "./qdrant.js";
 import { REFS_LIMIT } from "./infra.js";
-import { noteToText, withoutLink, nextHit, nextRelatedHit, matchPrefix, groupByPayload, validateSearchOptions, assert, ABOUT_NOBODY } from "./types.js";
+import { assert } from "../../contract/contract.js";
+import { noteToText, withoutLink, nextHit, nextRelatedHit, matchPrefix, groupByPayload, validateSearchOptions, ABOUT_NOBODY } from "./types.js";
 import type { Note, NoteType, NoteStatus, Link, SearchOptions, SearchResult, DirectResult, RelatedResult, PayloadWrite } from "./types.js";
 
 // ─── Serendipity ──────────────────────────────────────────────────────────────

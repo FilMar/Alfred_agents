@@ -4,7 +4,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { tmpdir, homedir } from "node:os";
 import { basename, join } from "node:path";
 import { randomBytes, randomUUID } from "node:crypto";
-import { assert } from "../../tb/src/types.js";
+import { assert } from "../../contract/contract.js";
 import { archiveRun, spoolDir, SPOOL_SUFFIX } from "./archive.js";
 import type { FinishedRun } from "./archive.js";
 import {

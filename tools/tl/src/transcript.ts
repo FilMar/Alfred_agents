@@ -2,7 +2,7 @@
 // exchange, and everything until the next question belongs to it. The shape of a
 // line is not shared, so each reader brings its own predicates.
 
-import { assert } from "../../tb/src/types.js";
+import { assert } from "../../contract/contract.js";
 import type { Contents, Exchange, Session } from "./types.js";
 
 export const MAIN_ACTOR = "alfredo";

@@ -2,7 +2,7 @@
 // read and write goes through our own API.
 
 import { HttpClient } from "../../tb/src/infra.js";
-import { assert } from "../../tb/src/types.js";
+import { assert } from "../../contract/contract.js";
 import { API_PORT } from "./api.js";
 import type { Contents, Exchange, Extraction, ExtractionFilters, Extractor, NewExtraction, NewExtractor, Session } from "./types.js";
 import { isRowId, validateNewExtractions, validateNewExtractor } from "./types.js";

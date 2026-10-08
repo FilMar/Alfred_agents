@@ -5,7 +5,7 @@
 // instead of a UUID, so the exchange id is derived — one shape in the archive, and
 // still deterministic, which is what keeps a second write a no-op.
 
-import { assert } from "../../tb/src/types.js";
+import { assert } from "../../contract/contract.js";
 import type { Contents, Exchange, Harness, Session } from "./types.js";
 import { exchangeId, validateContents } from "./types.js";
 import type { ParsedExchange, ParsedTranscript, ParseOptions, Span, Tokens } from "./transcript.js";

@@ -1,16 +1,4 @@
-// ─── Contract ─────────────────────────────────────────────────────────────────
-
-/** A broken contract is a bug in tb, never bad input. Its own type keeps the two apart. */
-export class ContractError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ContractError";
-  }
-}
-
-export function assert(cond: boolean, msg: string): asserts cond {
-  if (!cond) throw new ContractError(msg);
-}
+import { assert } from "../../contract/contract.js";
 
 // ─── Enum constants ─────────────────────────────────────────────────────
 

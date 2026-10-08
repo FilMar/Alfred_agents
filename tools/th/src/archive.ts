@@ -11,7 +11,7 @@ import { homedir, hostname } from "node:os";
 import { join } from "node:path";
 
 import { HttpClient } from "../../tb/src/infra.js";
-import { assert } from "../../tb/src/types.js";
+import { assert } from "../../contract/contract.js";
 import { API_URL } from "../../tl/src/client.js";
 import * as pi from "../../tl/src/pi.js";
 import { joinBody, joinTools } from "../../tl/src/transcript.js";

@@ -11,7 +11,8 @@ import { serveApi, API_PORT } from "./api.js";
 import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId } from "./notes.js";
 import { getByIds } from "./qdrant.js";
 import type { NoteType, SearchOptions, Link } from "./types.js";
-import { NOTE_TYPES, NOTE_STATUSES, isValidKind, normalizeTags, errorMessage, ContractError } from "./types.js";
+import { ContractError } from "../../contract/contract.js";
+import { NOTE_TYPES, NOTE_STATUSES, isValidKind, normalizeTags, errorMessage } from "./types.js";
 
 // ─── Compose path ─────────────────────────────────────────────────────────────
 

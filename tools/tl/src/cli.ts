@@ -2,7 +2,8 @@
 
 import { Command } from "commander";
 
-import { assert, ContractError, errorMessage } from "../../tb/src/types.js";
+import { assert, ContractError } from "../../contract/contract.js";
+import { errorMessage } from "../../tb/src/types.js";
 import { API_PORT, serveApi } from "./api.js";
 import * as client from "./client.js";
 import { ingestAll, ingestSession, ingestTranscript } from "./ingest.js";

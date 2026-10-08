@@ -3,7 +3,7 @@
 
 import { createHash } from "node:crypto";
 
-import { assert } from "../../tb/src/types.js";
+import { assert } from "../../contract/contract.js";
 
 // ─── Enum constants ───────────────────────────────────────────────────────────
 

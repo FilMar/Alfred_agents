@@ -1,6 +1,6 @@
 // Reader for a Claude Code transcript. Pure: the caller reads the file.
 
-import { assert } from "../../tb/src/types.js";
+import { assert } from "../../contract/contract.js";
 import type { Contents, Exchange, Harness, Session } from "./types.js";
 import { validateContents } from "./types.js";
 import type { ParsedExchange, ParsedTranscript, ParseOptions, Span, Tokens } from "./transcript.js";
