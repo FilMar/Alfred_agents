@@ -22,6 +22,6 @@ The blind split stays. The test run still never sees the body, so the first draf
 
 ## Cross-references
 
-- [skill_ritchie_step_five_runs_tests_blind_then_bodies_with_the_tests_and_a_runner](skill_ritchie_step_five_runs_tests_blind_then_bodies_with_the_tests_and_a_runner) — the earlier shape of step 6
+- [skill_ritchie_step_five_runs_tests_blind_then_bodies_with_the_tests_and_a_runner](.skill_ritchie_step_five_runs_tests_blind_then_bodies_with_the_tests_and_a_runner) — the earlier shape of step 6
 - [style_type_checks_are_private_static_methods_of_their_class](style_type_checks_are_private_static_methods_of_their_class) — where the checks live
 - [memory_td_candidates_keep_known_tags_and_propose_new_ones](memory_td_candidates_keep_known_tags_and_propose_new_ones) — the classifier behind the tag table

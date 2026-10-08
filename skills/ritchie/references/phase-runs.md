@@ -1,15 +1,16 @@
-# Tests and body: three runs
+# Tests and body: three runs, in order
 
 After the contracts are approved, the file holds structs, signatures,
-contracts and `todo` bodies. Three `th run` calls write. Ritchie reviews
-the plan, then checks and fixes the result.
+contracts and `todo` bodies. Three `th run` calls write, one after the
+other:
 
-1. **Plan.** One run reads the contracts and writes a test plan in prose.
-2. **Tests.** One run writes the tests from the file and the reviewed plan.
-3. **Body.** One run replaces each `todo` with a body.
-
-The body run starts at once, next to the plan run. The test run starts
-after Ritchie reviews the plan.
+1. **Plan.** A run reads the contracts and `spec.md` and writes a test
+   plan in prose. Ritchie reviews it.
+2. **Tests.** A run writes the tests from the file and the plan, blind:
+   no body exists yet. Ritchie runs check 1 against the `todo` file.
+3. **Body.** A run gets the file, `spec.md` and the tests, with a runner.
+   It replaces each `todo` and repeats until the tests and the type check
+   are green. It never sees the plan.
 
 ## The spec
 
@@ -19,18 +20,28 @@ facts the contracts cannot carry. Examples: the rule of each classifier
 type. The plan run and the body run both get it. It is spec, not output,
 so sharing it keeps the runs independent.
 
+The body run sees the tests. It can still not bend them or the
+contracts: `check_body_diff.py` rejects any change outside the todo
+lines, and the test file is compared with the one Ritchie gave it.
+
 ## Commands
 
-Give each run its own scratch directory and its own copy of the file.
-`th run` needs a hat: use `white-core`. Check `th run --help` when a flag
-fails. Pass a long task with `--task "$(cat <task-file>)"`.
+The plan run and the test run each get their own scratch directory and
+their own copy of the file. The body run needs the project to build and
+test, so it gets a git worktree: the `todo` file and the tests are copied
+in, and `node_modules` is linked. `th run` needs a hat: use `white-core`.
+Check `th run --help` when a flag fails. Pass a long task with
+`--task "$(cat <task-file>)"`.
 
 ```
-SYS="Follow the code rules in <ritchie>/SKILL.md and <ritchie>/references/rules.md. You only write."
-th run --hat white-core --system "$SYS" --tools read,write,edit --detach --task "<plan task>"
-th run --hat white-core --system "$SYS" --tools read,write,edit --detach --task "<body task>"
+SYS="Follow the code rules in <ritchie>/SKILL.md and <ritchie>/references/rules.md."
+th run --hat white-core --system "$SYS" --tools read,write,edit --no-archive --detach --task "<plan task>"
 # after the plan review:
-th run --hat white-core --system "$SYS" --tools read,write,edit --detach --task "<test task>"
+th run --hat white-core --system "$SYS" --tools read,write,edit --no-archive --detach --task "<test task>"
+# after check 1:
+git worktree add <dir-B> HEAD
+ln -s "$PWD/node_modules" <dir-B>/node_modules
+th run --hat white-core --system "$SYS" --tools read,write,edit,bash --no-archive --detach --task "<body task>"
 ```
 
 **Plan task.** In `<dir-P>`, read `<file>` and `spec.md`. Write `plan.md`.
@@ -57,12 +68,15 @@ and stop.
 `<file>` with the body, in the place of that line only. Change no other
 line: the contracts, the signatures and the helpers stay as they are. A
 function with postconditions has no `return` in its body: assign
-`result` and let the postconditions run. Write the file and stop.
+`result` and let the postconditions run. Run `<test command>` and
+`<type check command>`, and repeat until both are green. Never edit a
+test. If a test looks wrong, name it and say why in the last message.
 
-- The test run and the plan run never see a body. The body run never sees
-  the plan or a test.
-- No run runs code or checks anything. They write and stop.
-- No run gets the user's intent. It gets the file and `spec.md`.
+- The plan run and the test run never see a body. The body run never sees
+  the plan.
+- Only the body run runs code.
+- No run gets the user's intent. It gets the file, `spec.md`, and for the
+  body run the tests.
 
 ## Plan review
 
@@ -81,9 +95,11 @@ only. Then it writes the body. The checks below still apply, all of them.
 
 Ritchie moves the results into the project and checks:
 
-0. The body only replaced the todo lines:
+0. The body only replaced the todo lines, and the tests are the ones
+   Ritchie gave the body run:
    ```
    scripts/check_body_diff.py <todo-file> <body-file>
+   cmp <test-file> <dir-B>/<test-file>
    ```
    A failure rejects the body before any test runs.
 1. Against the `todo` file, every bare-call test fails and every
