@@ -53,6 +53,7 @@ updated: 2026-10-07
 | [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_distiller_td_is_fourteen_components_behind_one_entry_point) | The 14 components of td, what each does and what it touches |
 | [memory_td_critic_check_drops_at_least_at_the_threshold_and_under_below_it](memory_td_critic_check_drops_at_least_at_the_threshold_and_under_below_it) | A critic check drops at p >= threshold for atLeast and p < threshold for under |
 | [memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy](memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy) | fromJson is the only way in; constructors keep a frozen copy, extra fields are refused |
+| [memory_td_candidates_keep_known_tags_and_propose_new_ones](memory_td_candidates_keep_known_tags_and_propose_new_ones) | A candidate needs one known tag and may propose new ones; synonyms matched by a lexical key |
 | [memory_td_config_json_is_checked_on_both_sides_and_must_round_trip](memory_td_config_json_is_checked_on_both_sides_and_must_round_trip) | Config classes check the JSON shape on read; fromJson must write back the same JSON |
 | [skill_ritchie_step_five_runs_tests_blind_then_bodies_with_the_tests_and_a_runner](skill_ritchie_step_five_runs_tests_blind_then_bodies_with_the_tests_and_a_runner) | Ritchie step 5: tests blind first, then bodies with the tests and a runner; the cost is lost independence |
 | [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) | Calls go through pi-ai: reasoning low and the system role for Ollama, or the prompt is lost or glm thinks 15x |
@@ -69,6 +70,7 @@ updated: 2026-10-07
 | [graph_curation_via_th_agent](graph_curation_via_th_agent) | Curation via a th member, live-streamed, kill-switch not a gate |
 | [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
 | [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) | Contract messages: stable prefix, then the values the assert reads |
+| [skill_ritchie_classifiers_get_an_outcome_table_and_runs_write_once](skill_ritchie_classifiers_get_an_outcome_table_and_runs_write_once) | Classifiers get expected-result tests; a th run writes once and Ritchie fixes |
 | [skill_router_pass_planned](skill_router_pass_planned) | Router pass design, deliberately deferred |
 | [style_contract_helpers_live_in_one_shared_module](style_contract_helpers_live_in_one_shared_module) | assert and generic checks live in tools/contract, shared by every tool |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |
