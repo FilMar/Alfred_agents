@@ -67,6 +67,30 @@ under the test runner. Optimization level and assertions are independent
 knobs. The checked profile keeps both on: fast, and contracts enforced.
 The plain release build stays for shipping.
 
+**Why the interrogation opens in the user's words.** The high-level
+question — what must this function respect, when is the input correct,
+when is the output — is the phase's opening move, never its end. The
+point is the user holding the invariant before the code exists. A
+contract the user cannot state is a contract the user will not own.
+
+**Why the sharpening questions exist.** A vague answer ("it should
+work", "the input must be valid") carries no invariant. Each question
+breaks one specific vagueness:
+
+- "If I delete this postcondition, which wrong body still passes every
+  test?" — a postcondition nobody can see fail holds nothing. If no
+  wrong body comes to mind, it is decoration.
+- "What is the smallest input that makes this function fail?" — a
+  precondition that only restates the signature. The smallest failing
+  input is the precondition in concrete form.
+- "Who, upstream, already guarantees this?" — a check that repeats one
+  already made elsewhere in the chain.
+- "Is this number a threshold, or a state the type failed to model?" —
+  a magic constant. A threshold is a state that belongs in a type.
+
+Explain first, question second. The phase closes when the user states
+the invariant, not when the list runs out.
+
 **Measured deviations** (the report script on the source codebase):
 
 - 31 functions still carry a compound assert (`a && b`). They predate the

@@ -1,6 +1,6 @@
 ---
 name: ritchie
-description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It works in phases, one file per phase: structs, signatures, contracts. The user edits the file, Ritchie answers in the file, and the user says ok. Tests and bodies come from two independent `th` runs."
+description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It works in phases. The entities are debated in chat first, struct code only. Then structs, signatures and contracts go into the file, one phase at a time: the user edits the file, Ritchie answers in the file, and the user says ok. Tests and bodies come from two independent `th` runs."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
@@ -33,45 +33,50 @@ Then the project's `.wiki/` (via omero) and its CLAUDE.md. A project rule
 that is stricter than this skill wins. Pick the language row in the
 mechanism map below and read its section in `references/languages.md`.
 
-### 2. Structs, in the file
+### 2. Entities, in chat
 
-Write the structs into the real target file. Private fields, no function,
-no body. Post one line in chat: the path. Stop.
+Before any file is touched, debate the structs and the types at play.
+Each type is a physical entity: it holds state, it acts, someone
+commands it. For each one, say what it knows, what it does not know,
+and who commands it. Write the struct code in chat, structs only, and
+argue what each entity should do and where its state ends. Paste,
+change, paste again, until the user says "ok".
+
+### 3. Structs, in the file
+
+Write the agreed structs into the real target file. Private fields, no
+function, no body. Post one line in chat: the path. Stop.
 
 The user edits the file. You read it, change what you disagree with, and
 say why in one line. The file is the debate. Repeat until the user says
-"ok". Chat carries no struct text.
+"ok". From this step on, chat carries no code text.
 
-### 3. Signatures, in the same file
+### 4. Signatures, in the same file
 
 Add the function signatures under the structs. The body is the `todo`
-placeholder. No assert yet. Same loop as step 2: the file is the debate,
+placeholder. No assert yet. Same loop as step 3: the file is the debate,
 "ok" closes the phase.
 
-### 4. Contracts, in the same file
+### 5. Contracts, in the same file
 
-Before each contract, question the user about that signature. The user can
-answer only if they hold the invariant in their head. Four base questions,
-tuned to the function in front of you:
+Before each contract, ask the user one high-level question about that
+signature: "This function does X. In your words: what must it respect?
+When is its input correct, when is its output?"
 
-- "If I delete this postcondition, which wrong body still passes every
-  test?"
-- "What is the smallest input that makes this function fail?"
-- "Who, upstream, already guarantees this?"
-- "Is this number a threshold, or a state the type failed to model?"
-
-When an answer shows the user has not understood, hold the line. Explain,
-then ask again. A softened interrogation is the failure this skill exists
-to prevent: the user stops understanding the code written for them.
+The user can answer only if they hold the invariant in their head. A
+vague or wrong answer: hold the line, one sharpening question from
+`references/rules.md`, tuned to the function. A softened interrogation
+is the failure this skill exists to prevent: the user stops
+understanding the code written for them.
 
 Then write the contracts into the file: preconditions above the `todo`,
-postconditions below it, five at most per function. Same loop as step 2.
+postconditions below it, five at most per function. Same loop as step 3.
 "ok" closes the phase.
 
-The contracts must be complete. In step 5 the tests have no assert of
+The contracts must be complete. In step 6 the tests have no assert of
 their own: the contract is the only oracle.
 
-### 5. Tests and body, two independent runs
+### 6. Tests and body, two independent runs
 
 After the contracts are approved, the file holds structs, signatures,
 contracts and `todo` bodies. Ritchie writes nothing in this step. One
@@ -81,7 +86,7 @@ output. Ritchie only checks the result and edits neither.
 
 Commands, isolation rules and the check order: `references/phase-runs.md`.
 
-### 6. Check and gate
+### 7. Check and gate
 
 ```
 scripts/contract_report.py <path>
