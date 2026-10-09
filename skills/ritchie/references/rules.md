@@ -147,6 +147,18 @@ holds the rule for what makes it valid. Every call site re-derives the
 invariant and the copies drift. This is the principle in its purest form:
 the thing that owns the state is the only thing that touches it.
 
+**Privacy protects the write, not the read.** The rule came from Rust,
+where a private field is the only way to stop a write and to force
+construction through one function. A language whose type system makes a
+value read-only already stops the write. There a getter over a plain
+field is ceremony, and a class around plain data adds code with no
+guarantee. The case behind this: a TypeScript pipeline of immutable
+values (turns, model answers, episodes) was written as classes with
+private state, frozen copies and one getter per field. A small pure step
+grew from 15 lines of spike to 170. A `Readonly` type and contracted
+functions keep the same guarantee. A brand is added only where an
+invariant must hold for every value.
+
 **Why consuming builders.** A builder that takes ownership and returns a
 new value cannot leave a half-built struct behind. The call site reads as
 one expression. A `with_x` that mutates in place is a setter with a

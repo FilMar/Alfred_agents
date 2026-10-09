@@ -140,34 +140,48 @@ metacharacters, or escape them with `re.escape`.
 
 ## TypeScript
 
-`#field` is private at runtime, not only in the type checker. The builder
-keeps the state in one `readonly` object and spreads it into a new
-instance.
+A value is a `Readonly` type plus the functions that build it or derive a
+new one from it. `readonly` stops the write at compile time, so fields are
+read directly. No class, no getter, no `Object.freeze`.
 
 ```ts
 import { assert } from "./contract";
 
-type CameraState = { readonly zoom: number; readonly pan: number };
+export type Camera = Readonly<{ zoom: number; pan: number }>;
 
-export class Camera {
-  readonly #s: CameraState;
-  private constructor(s: CameraState) {
-    this.#s = s;
-  }
-  static default(): Camera {
-    return new Camera({ zoom: 1, pan: 0 });
-  }
-  withZoom(zoom: number): Camera {
-    assert(zoom > 0, "Camera.withZoom: zoom above zero");
-    const result = new Camera({ ...this.#s, zoom });
-    assert(result.zoom() === zoom, "Camera.withZoom: zoom stored");
-    return result;
-  }
-  zoom(): number {
-    return this.#s.zoom;
-  }
+export function defaultCamera(): Camera {
+  return { zoom: 1, pan: 0 };
+}
+
+export function withZoom(camera: Camera, zoom: number): Camera {
+  assert(zoom > 0, "withZoom: zoom above zero");
+  const result = { ...camera, zoom };
+  assert(result.zoom === zoom, "withZoom: zoom stored");
+  return result;
 }
 ```
+
+When an invariant must hold for every value, a literal must not skip the
+constructor. A brand makes the type opaque: only the function that casts
+can make one.
+
+```ts
+declare const sessionMapBrand: unique symbol;
+export type SessionMap = Readonly<{ episodes: readonly Episode[] }> & { readonly [sessionMapBrand]: true };
+
+export function sessionMapOf(episodes: readonly Episode[], turnCount: number): SessionMap {
+  assert(covers(episodes, turnCount), "sessionMapOf: the episodes cover every turn");
+  const result = { episodes } as SessionMap;
+  return result;
+}
+```
+
+A class is right only when the value owns a resource or a connection that
+methods share. Then `#field` keeps it private at runtime.
+
+Function names carry the type when the module holds more than one:
+`withZoom` in `camera.ts`, `episodeOf` in `episodes.ts`. The contract
+message starts with the function name.
 
 Contract: one small module, `contract.ts`, exporting
 `assert(cond: boolean, msg: string): asserts cond`, which throws
@@ -182,18 +196,18 @@ Tests, with vitest or jest:
 
 ```ts
 test("withZoom keeps zoom", () => {
-  Camera.default().withZoom(2);
+  withZoom(defaultCamera(), 2);
 });
 
 test("withZoom rejects zero", () => {
-  expect(() => Camera.default().withZoom(0)).toThrow("Camera.withZoom: zoom above zero");
+  expect(() => withZoom(defaultCamera(), 0)).toThrow("withZoom: zoom above zero");
 });
 ```
 
 `toThrow(string)` matches by substring.
 
-Classes use `extends` only for the language's own error types when a
-library demands it. Everything else composes.
+`extends` is used only for the language's own error types when a library
+demands it. Everything else composes.
 
 ## Go
 

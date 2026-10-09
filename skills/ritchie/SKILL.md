@@ -129,13 +129,19 @@ Why each rule holds, its edge cases, and where real code still deviates:
 
 **Structs**
 
-- Fields are private, always. Test code included. No exception for plain
-  data.
+- A value is immutable. Only its own contracted functions build it or
+  derive a new one from it. This is what "private" protects: the write,
+  not the read.
+- Where only privacy can stop the write (Rust, Go, Python), fields are
+  private and read through getters. Where the type system makes the
+  value read-only (a TypeScript `Readonly` type), fields are read
+  directly, and a getter exists only for a computed value.
+- A plain type with a construction function is the default. A class or
+  an opaque type is used only when an invariant must hold for every
+  value, so that no literal can skip the constructor.
 - Build with consuming builders: `default()` or `new()` for required
   fields, then `with_x(self, ...) -> Self`. Each returns a new value.
-- Reads through getters, writes through setters, both on the owning
-  struct. No struct touches another's internals, same module or crate
-  included.
+- No struct writes another's state, same module or crate included.
 - No inheritance. Inheritance is privileged access to someone else's
   state.
 - A constructor returns the type already wrapped. The wrapper hides behind
@@ -188,8 +194,9 @@ Why each rule holds, its edge cases, and where real code still deviates:
 
 | rule            | Rust                              | Python                                | TypeScript                      | Go                                   |
 |-----------------|-----------------------------------|---------------------------------------|---------------------------------|--------------------------------------|
-| private fields  | private field + getter            | `_field` + `@property`                | `#field` + getter method        | unexported field + getter            |
-| builder         | `with_x(self) -> Self`            | frozen dataclass + `replace`          | `readonly` state + spread       | value receiver returns the copy      |
+| immutable value | private field + getter            | `_field` + `@property`                | `Readonly` type, read directly  | unexported field + getter            |
+| invariant held  | private field                     | `_field`                              | branded type                    | unexported field                     |
+| builder         | `with_x(self) -> Self`            | frozen dataclass + `replace`          | function returns a spread copy  | value receiver returns the copy      |
 | contract        | `debug_assert!`                   | `assert` (off under `-O`)             | `assert()` helper, strippable   | `contract.Assert` (always on)        |
 | checked profile | `release-checked`                 | run without `-O`                      | build that keeps `assert()`     | default                              |
 | stub            | `todo!()`                         | `raise NotImplementedError`           | `throw new Error("todo")`       | `panic("todo")`                      |
