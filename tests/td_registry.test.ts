@@ -24,7 +24,7 @@ const ruleCheck = { name: "is_user_rejection", text: "The user rejected somethin
 function extractor(): Extractor {
   return Extractor.fromJson({
     episodes: role, extract: role, critic: role, novelty: role,
-    checks: [noteCheck, ruleCheck], episodeChars: 4000, topK: 5,
+    checks: [noteCheck, ruleCheck], episodeChars: 4000, targetInputChars: 6000, targetOutputChars: 8000, listingChars: 300, vocabularySize: 80, topK: 5,
   });
 }
 

@@ -25,6 +25,10 @@ const extractor = {
   novelty: role,
   checks: [noteCheck, ruleCheck],
   episodeChars: 4000,
+  targetInputChars: 6000,
+  targetOutputChars: 8000,
+  listingChars: 300,
+  vocabularySize: 80,
   topK: 5,
 };
 
@@ -199,6 +203,10 @@ describe("Extractor", () => {
     x.critic();
     x.novelty();
     x.episodeChars();
+    x.targetInputChars();
+    x.targetOutputChars();
+    x.listingChars();
+    x.vocabularySize();
     x.topK();
   });
 
@@ -224,13 +232,24 @@ describe("Extractor", () => {
     expect(() => Extractor.fromJson({ ...extractor, checks: [noteCheck, ruleCheck, noteCheck] })).toThrow("Extractor: check names are unique");
   });
 
-  test("episodeChars zero", () => {
-    expect(() => Extractor.fromJson({ ...extractor, episodeChars: 0 })).toThrow("Extractor: episodeChars is a positive integer");
-  });
+  for (const size of ["episodeChars", "targetInputChars", "targetOutputChars", "listingChars", "vocabularySize", "topK"]) {
+    test(`${size} zero`, () => {
+      expect(() => Extractor.fromJson({ ...extractor, [size]: 0 })).toThrow(`Extractor: every size is a positive integer, bad=${size}`);
+    });
 
-  test("topK not an integer", () => {
-    expect(() => Extractor.fromJson({ ...extractor, topK: 1.5 })).toThrow("Extractor: topK is a positive integer");
-  });
+    test(`${size} one, the smallest size`, () => {
+      Extractor.fromJson({ ...extractor, [size]: 1 });
+    });
+
+    test(`${size} not an integer`, () => {
+      expect(() => Extractor.fromJson({ ...extractor, [size]: 1.5 })).toThrow(`Extractor: every size is a positive integer, bad=${size}`);
+    });
+
+    test(`${size} missing`, () => {
+      const { [size]: _, ...rest } = extractor as Record<string, unknown>;
+      expect(() => Extractor.fromJson(rest)).toThrow("Extractor.fromJson: raw is an extractor");
+    });
+  }
 
   test("an extra field breaks the round trip", () => {
     expect(() => Extractor.fromJson({ ...extractor, extra: 1 })).toThrow("Extractor.fromJson: the extractor writes back the json it came from");

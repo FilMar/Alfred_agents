@@ -255,8 +255,14 @@ type ExtractorState = {
   readonly novelty: Role;
   readonly checks: readonly CriticCheck[];
   readonly episodeChars: number;
+  readonly targetInputChars: number;
+  readonly targetOutputChars: number;
+  readonly listingChars: number;
+  readonly vocabularySize: number;
   readonly topK: number;
 };
+
+const SIZES = ["episodeChars", "targetInputChars", "targetOutputChars", "listingChars", "vocabularySize", "topK"] as const;
 
 export type ExtractorJson = Omit<ExtractorState, "episodes" | "extract" | "critic" | "novelty" | "checks"> & {
   readonly episodes: RoleJson;
@@ -273,8 +279,7 @@ export class Extractor {
     assert(Extractor.#hasKind(s.checks, "note"), () => `Extractor: at least one check for a note, checks=${s.checks.length}`);
     assert(Extractor.#hasKind(s.checks, "rule"), () => `Extractor: at least one check for a rule, checks=${s.checks.length}`);
     assert(Extractor.#hasUniqueNames(s.checks), () => `Extractor: check names are unique, names=${s.checks.map((c) => c.name()).join(",")}`);
-    assert(isPositiveInt(s.episodeChars), () => `Extractor: episodeChars is a positive integer, episodeChars=${s.episodeChars}`);
-    assert(isPositiveInt(s.topK), () => `Extractor: topK is a positive integer, topK=${s.topK}`);
+    assert(Extractor.#badSize(s) === null, () => `Extractor: every size is a positive integer, bad=${Extractor.#badSize(s)}`);
     this.#s = Object.freeze({
       episodes: s.episodes,
       extract: s.extract,
@@ -282,6 +287,10 @@ export class Extractor {
       novelty: s.novelty,
       checks: Object.freeze([...s.checks]),
       episodeChars: s.episodeChars,
+      targetInputChars: s.targetInputChars,
+      targetOutputChars: s.targetOutputChars,
+      listingChars: s.listingChars,
+      vocabularySize: s.vocabularySize,
       topK: s.topK,
     });
   }
@@ -340,6 +349,22 @@ export class Extractor {
     return this.#s.episodeChars;
   }
 
+  targetInputChars(): number {
+    return this.#s.targetInputChars;
+  }
+
+  targetOutputChars(): number {
+    return this.#s.targetOutputChars;
+  }
+
+  listingChars(): number {
+    return this.#s.listingChars;
+  }
+
+  vocabularySize(): number {
+    return this.#s.vocabularySize;
+  }
+
   topK(): number {
     return this.#s.topK;
   }
@@ -352,6 +377,10 @@ export class Extractor {
       novelty: this.#s.novelty.toJson(),
       checks: this.#s.checks.map((c) => c.toJson()),
       episodeChars: this.#s.episodeChars,
+      targetInputChars: this.#s.targetInputChars,
+      targetOutputChars: this.#s.targetOutputChars,
+      listingChars: this.#s.listingChars,
+      vocabularySize: this.#s.vocabularySize,
       topK: this.#s.topK,
     });
   }
@@ -364,9 +393,12 @@ export class Extractor {
       isRecord(raw.critic) &&
       isRecord(raw.novelty) &&
       Array.isArray(raw.checks) &&
-      typeof raw.episodeChars === "number" &&
-      typeof raw.topK === "number"
+      SIZES.every((k) => typeof raw[k] === "number")
     );
+  }
+
+  static #badSize(s: ExtractorState): string | null {
+    return SIZES.find((k) => !isPositiveInt(s[k])) ?? null;
   }
 
   #countOf(kind: CandidateKind): number {
