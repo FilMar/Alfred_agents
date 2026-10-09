@@ -6,6 +6,14 @@ import type { SessionRead, Turn } from "./session.js";
 
 const MAP_HEADER = "## The whole session, episode by episode (later episodes can deny claims made earlier)";
 
+export function cut(text: string, chars: number): string {
+  assert(isPositiveInt(chars), () => `cut: chars is a positive integer, got=${chars}`);
+  const result = Array.from(text).slice(0, chars).join("");
+  assert(Array.from(result).length <= chars, "cut: at most chars code points");
+  assert(text.startsWith(result), "cut: the cut is a prefix of the text");
+  return result;
+}
+
 type EpisodeState = {
   readonly from: number;
   readonly to: number;
@@ -79,7 +87,7 @@ export class SessionMap {
     assert(turns.length > 0, "SessionMap.listing: there are turns");
     assert(isPositiveInt(listingChars), () => `SessionMap.listing: listingChars is a positive integer, got=${listingChars}`);
     const result = turns
-      .map((t, k) => `${k}: USER: ${JSON.stringify(SessionMap.#cut(t.input(), listingChars))}\n   AGENT: ${JSON.stringify(SessionMap.#cut(t.output(), listingChars))}`)
+      .map((t, k) => `${k}: USER: ${JSON.stringify(cut(t.input(), listingChars))}\n   AGENT: ${JSON.stringify(cut(t.output(), listingChars))}`)
       .join("\n");
     assert(result.split("\n").length === 2 * turns.length, "SessionMap.listing: two lines per turn");
     assert(result.startsWith("0: USER: "), "SessionMap.listing: the first turn is number 0");
@@ -118,13 +126,6 @@ export class SessionMap {
     const result = [MAP_HEADER, ...this.#s.episodes.map((e) => `- [${e.from()}-${e.to()}] ${e.summary()}`)].join("\n");
     assert(result.startsWith(`${MAP_HEADER}\n`), "SessionMap.text: the text starts with the header");
     assert(this.#namesEvery(result), "SessionMap.text: the text names every episode");
-    return result;
-  }
-
-  static #cut(text: string, chars: number): string {
-    const result = Array.from(text).slice(0, chars).join("");
-    assert(Array.from(result).length <= chars, "SessionMap.#cut: at most chars code points");
-    assert(text.startsWith(result), "SessionMap.#cut: the cut is a prefix of the text");
     return result;
   }
 

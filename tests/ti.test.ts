@@ -1,4 +1,4 @@
-import { describe, it, expect, spyOn, beforeEach } from "bun:test";
+import { describe, it, expect, spyOn, beforeEach, afterAll, mock } from "bun:test";
 import { qdrantClient, ollamaClient, VECTOR_SIZE, DOCUMENT_PREFIX, QUERY_PREFIX } from "../tools/tb/src/infra.js";
 import type { IdentityEntry } from "../tools/ti/src/types.js";
 
@@ -13,6 +13,9 @@ const EMBEDDING = Array.from({ length: VECTOR_SIZE }, (_, i) => (i % 10) / 10);
 
 // Dynamic import to ensure mocks are in place
 const { addEntry, searchEntries, listEntries, deleteEntry, appendDo } = await import("../tools/ti/src/identity.js");
+
+// The clients are shared by every test file.
+afterAll(() => mock.restore());
 
 describe("Third Identity (ti) Behavioral Tests", () => {
   beforeEach(() => {

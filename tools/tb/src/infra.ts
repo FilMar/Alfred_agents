@@ -1,7 +1,7 @@
 // ─── HTTP client ─────────────────────────────────────────────────────────────
 
 export interface HttpClientConfig {
-  baseUrl: string;
+  baseUrl: string | (() => string);
   timeout?: number;
 }
 
@@ -20,7 +20,8 @@ export class HttpClient {
 
   // Returns the raw Response without throwing on non-ok.
   async fetch(method: string, path: string, body?: unknown): Promise<Response> {
-    return globalThis.fetch(`${this.config.baseUrl}${path}`, {
+    const base = typeof this.config.baseUrl === "string" ? this.config.baseUrl : this.config.baseUrl();
+    return globalThis.fetch(`${base}${path}`, {
       method,
       signal: AbortSignal.timeout(this.config.timeout ?? 10_000),
       headers: body ? { "Content-Type": "application/json" } : {},
@@ -41,8 +42,9 @@ export class HttpClient {
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-export const QDRANT_URL = process.env.QDRANT_URL ?? "http://localhost:6333";
-export const OLLAMA_URL = process.env.OLLAMA_URL ?? "http://localhost:11434";
+// Read per call, so a test server wins.
+export const qdrantUrl = (): string => process.env.QDRANT_URL ?? "http://localhost:6333";
+export const ollamaUrl = (): string => process.env.OLLAMA_URL ?? "http://localhost:11434";
 
 export const COLLECTION = "third-brain";
 export const EMBED_MODEL = "nomic-embed-text-v2-moe";
@@ -57,8 +59,8 @@ export const REFS_LIMIT = 6;
 
 // ─── Client instances ─────────────────────────────────────────────────────────
 
-export const qdrantClient = new HttpClient({ baseUrl: QDRANT_URL, timeout: QDRANT_TIMEOUT_MS });
-export const ollamaClient = new HttpClient({ baseUrl: OLLAMA_URL, timeout: OLLAMA_TIMEOUT_MS });
+export const qdrantClient = new HttpClient({ baseUrl: qdrantUrl, timeout: QDRANT_TIMEOUT_MS });
+export const ollamaClient = new HttpClient({ baseUrl: ollamaUrl, timeout: OLLAMA_TIMEOUT_MS });
 
 // ─── Embed ───────────────────────────────────────────────────────────────────
 

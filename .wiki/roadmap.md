@@ -18,9 +18,9 @@ One line per task. The reason and the plan live in the linked decision.
 - [x] Extractor as data in tl: `extractor` (immutable JSON config) and `extractions` (every candidate), with the real distiller. [detail](memory_extractor_is_data_immutable_config_rows_in_tl)
 - [ ] Build the extractor in shadow as `tools/td` over `pi-ai`: phases 0 to 2b, writes only to `extractions`. Settle in-session repeats and the 0.95 cut. [detail](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first)
 - [ ] td open point: which sessions `td distill` takes. One by hand, or every session with pending exchanges? In shadow the queue never empties.
-- [ ] td open point: components 5 to 10 as small classes or as plain functions, with pure parts split from the call parts. [detail](memory_distiller_td_is_fourteen_components_behind_one_entry_point)
-- [ ] td open point: search in `tb` and `ti`. Add an HTTP search to both, or call their CLI from `td`.
-- [ ] td: config (1), registry (2), session reader (3), model caller (4), episodes (5), phase 1 checks (7) and recorder (12) are done. Next: 6 (extraction).
+- [x] td open point: components 5 to 10 as small classes or as plain functions. Plain functions from 6 on. [detail](skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes)
+- [ ] td open point: search in `tb` and `ti`. Phase 1 imports `tb` as a module for the vocabulary; the same likely fits the search of component 9.
+- [ ] td: config (1), registry (2), session reader (3), model caller (4), episodes (5), extraction (6), phase 1 checks (7) and recorder (12) are done. Next: 8 (critic), then a minimal Distiller on one session, before 9 to 11.
 - [ ] td open point: episodes are not saved, and a split is not deterministic. A run that restarts mid-session gets a new map. Decide with Save (11) or the Distiller (13). [detail](memory_td_episodes_split_a_session_in_one_call_checked_for_full_cover_and_listed_as_json_strings)
 - [ ] td: change the extraction prompt so the model may propose new tags beside known ones. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - [ ] td: after the first shadow runs, read the proposed tags in `extractions` and pick a guard for semantic tag synonyms. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
