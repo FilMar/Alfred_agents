@@ -78,6 +78,10 @@ updated: 2026-10-11
 | [skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes](skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes) | TS values are Readonly types with contracted functions; brand only for an invariant; class only for a resource |
 | [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) | Calls go through pi-ai: reasoning low and the system role for Ollama, or the prompt is lost or glm thinks 15x |
 | [memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading) | Phase 3 bridges by shape; 0/20 ref recovery, so judge by reading the yes answers |
+| [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_replaces_the_promotion_switch](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_replaces_the_promotion_switch) | tb refine: trust 0..1 derived from the hit counters, start 0.5, dry run by default |
+| [memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search](memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search) | trust under 0.2 archives a note: hidden from search, reversible, archived_at |
+| [memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first](memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first) | Six months in the archive, counted from archived_at, then delete after an append-only log line |
+| [memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21) | What counts as a hit, what a hit means, and why no new field yet |
 | [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) | GLM ignores format schemas; JSON from the prompt, checked by code, one retry |
 | [memory_jev_like_decision_models_are_candidates_for_classification](memory_jev_like_decision_models_are_candidates_for_classification) | tev1 and nimble: local decision models for the classification steps; not adopted until tested |
 | [orchestrator_and_cockpit_removed](orchestrator_and_cockpit_removed) | Both tools removed; unused code was breaking the test suite |
@@ -92,6 +96,9 @@ updated: 2026-10-11
 | [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) | Contract messages: stable prefix, then the values the assert reads |
 | [skill_ritchie_classifiers_get_an_outcome_table](skill_ritchie_classifiers_get_an_outcome_table) | A classifier gets an outcome table: the one test with an assert of its own |
 | [skill_router_pass_planned](skill_router_pass_planned) | Router pass design, deliberately deferred |
+| [skill_ritchie_spec_is_a_minimal_italian_document](skill_ritchie_spec_is_a_minimal_italian_document) | The spec: a minimal Italian document — entities, flows, invariants; the code is not the spec |
+| [skill_ritchie_review_is_the_verdict_packet](skill_ritchie_review_is_the_verdict_packet) | The review: six sections from Esito to Scostamenti, self-contained |
+| [skill_ritchie_spec_review_pair_is_ephemeral_scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding) | The pair is scaffolding: removed at approval, the wiki page is the record |
 | [style_contract_helpers_live_in_one_shared_module](style_contract_helpers_live_in_one_shared_module) | assert and generic checks live in tools/contract, shared by every tool |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |
 | [style_type_checks_are_private_static_methods_of_their_class](style_type_checks_are_private_static_methods_of_their_class) | A check that knows one type is a private static method; getters have no contract |

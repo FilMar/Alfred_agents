@@ -39,8 +39,15 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] Put `tests/` in a `tsc` project, so a type error in a test is caught.
 - [ ] Drop the `client.ts?extractions` import trick in `tests/tl_extractions.test.ts`: the client now reads its url on each call. [detail](memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store)
 - [ ] `errorMessage` has three copies, in `tb`, `ti` and `th`. Pick one home for it. [detail](style_contract_helpers_live_in_one_shared_module)
-- [ ] Decay of `provvisoria` notes: with critic F about 16 of 75 bad candidates pass. No decision yet. [detail](memory_critic_is_f_textbook_as_a_test_and_no_record_question)
-- [ ] Build the path from `provvisoria` to `promossa`.
+- [ ] `tb refine`: add `trust`, computed from the hit counters, dry run first. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_replaces_the_promotion_switch)
+- [ ] `tb refine --apply`: archive notes under trust 0.2, with `archived_at`. [detail](memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search)
+- [ ] `tb refine`: delete after six months in the archive, log line first. [detail](memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first)
+- [ ] `tb refine`: fix the weights and the 0.2 threshold after the first dry run. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_replaces_the_promotion_switch)
+- [ ] `tb refine`: tune the decay after 30 days of hits. [detail](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21)
+- [ ] `tb search`: option to include archived notes, counted as a signal. [detail](memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search)
+- [ ] Run `tb refine` on a timer. Then import the history in batches with `--max-saved`. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_replaces_the_promotion_switch)
+- [ ] Decide the fate of `status` once `trust` has proved itself. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_replaces_the_promotion_switch)
+- [ ] Decay of `provvisoria` notes: with critic F about 16 of 75 bad candidates pass. Now covered by `trust`. [detail](memory_critic_is_f_textbook_as_a_test_and_no_record_question)
 - [ ] td: run two or three more sessions in shadow, then active, and tune.
 - [ ] td: `append` can add a `do` that its rule's `if` does not cover. Make it prudent, or let `ti` edit a `do`.
 - [ ] td: the critic lets a generic rule pass. Add a too-generic check for rules.
@@ -89,6 +96,7 @@ Design only, no code yet.
 - [ ] Ritchie: add an integration net for code that turns errors into values. [detail](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores)
 - [ ] Ritchie: make the mutant run a script, not a hand step.
 - [ ] Ritchie: test runs time out on files with heavy fixtures. Give the run a fixture helper.
+- [ ] Ritchie: the first real run with the SPEC/REVIEW pair checks both templates in practice. [detail](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding)
 
 ## Cross-references
 
