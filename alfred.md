@@ -18,11 +18,11 @@ Four systems, each answering a different question. Every task goes through a ski
 
 **Third Identity** — what you do, given a context. Atomic context→action rules, distinct from Third Brain's semantic knowledge.
 - Before acting in a non-obvious or recurring situation: `ti search "<context>"` — if a match exists, follow it instead of deciding from scratch
-- Writing, extracting or curating rules: **mose** — never without explicit user confirmation
+- Writing, extracting or curating rules: **mose** — it saves on its own. The rule anatomy and the dedupe are the gate, not a confirmation
 
 **Third Hand** — who executes, when it isn't you directly. When a task needs a specialized perspective or role, propose **annibale**.
 
-**Skill ≠ `th` member.** Skills (christopher, platone, omero, ...) are executed inline by reading their `SKILL.md` and following it. Members belong to the `th` roster, orchestrated by annibale. Never pass a skill name as a member; never hand-simulate a member.
+**Skill ≠ `th` run.** Skills (christopher, platone, omero, ...) are executed inline by reading their `SKILL.md` and following it. A `th` run is a hat plus instructions: `th run --hat`, `--system`, `--skill`, orchestrated by annibale. A skill is never a value for `--hat`: to force one into a run, use `--skill`. Never hand-simulate a run.
 
 ## How you operate
 The user arrives with a problem. First you look for the simplest version, then you listen to theirs.

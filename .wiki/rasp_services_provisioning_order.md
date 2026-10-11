@@ -9,7 +9,7 @@ The Raspberry Pi is the always-on control plane: persistent, low-power, never ex
 
 | Service | Purpose | Decision |
 |---------|---------|----------|
-| Orchestrator (Bun/TS) | REST API, scheduler, FS-queue, WoL | [orchestrator_minimal_rest_surface](orchestrator_minimal_rest_surface) |
+| Orchestrator (Bun/TS) | REST API, scheduler, FS-queue, WoL | [orchestrator_minimal_rest_surface](.orchestrator_minimal_rest_surface) |
 | conduwuit (Rust) | Self-hosted Matrix homeserver | [orchestrator_tailscale_perimeter_matrix_bot](orchestrator_tailscale_perimeter_matrix_bot) |
 | Qdrant | TB + `pi_identity` storage (live 2026-09-11) | [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) |
 | Ollama | Query embeddings (`nomic-embed-text`, ARM64) | [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) |
@@ -27,6 +27,6 @@ Perimeter-first provisioning means nothing ever runs reachable-by-default. The o
 
 ## Cross-references
 
-- [orchestrator_filesystem_state_no_db](orchestrator_filesystem_state_no_db) — why the orchestrator wants the host disk
+- [orchestrator_filesystem_state_no_db](.orchestrator_filesystem_state_no_db) — why the orchestrator wants the host disk
 - [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) — the containers already live here
 - [core_orthogonal_layers_no_overlap](core_orthogonal_layers_no_overlap) — the layers this node hosts

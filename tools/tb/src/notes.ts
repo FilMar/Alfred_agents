@@ -1,9 +1,10 @@
-import { embed } from "./infra.js";
-import { ensureCollection, upsert, setPayload, getByIds, search, scroll, scrollLinkedTo, deletePoints, randomNoteId, noteId, listTags } from "./qdrant.js";
+import { embedDocument, embedQuery, EMBED_MODEL } from "./infra.js";
+import { ensureCollection, upsert, setPayload, setPayloadMany, getByIds, search, scroll, scrollLinkedTo, scrollAllIds, deletePoints, randomNoteId, noteId, listTags, NOTE_ID_SHAPE } from "./qdrant.js";
 import type { ScrollOptions, TagFacet } from "./qdrant.js";
 import { REFS_LIMIT } from "./infra.js";
-import { noteToText, withoutLink, nextHit } from "./types.js";
-import type { Note, NoteType, Link, SearchOptions, SearchResult } from "./types.js";
+import { assert } from "../../contract/contract.js";
+import { noteToText, withoutLink, nextHit, nextRelatedHit, matchPrefix, groupByPayload, validateSearchOptions, ABOUT_NOBODY } from "./types.js";
+import type { Note, NoteType, NoteStatus, Link, SearchOptions, SearchResult, DirectResult, RelatedResult, PayloadWrite } from "./types.js";
 
 // ─── Serendipity ──────────────────────────────────────────────────────────────
 
@@ -34,6 +35,8 @@ export interface CreateNoteParams {
   kind?: NoteType;
   tags?: string[];
   source?: string;
+  exchange?: string;
+  status?: NoteStatus;
 }
 
 export async function createNote(params: CreateNoteParams): Promise<Note> {
@@ -50,10 +53,15 @@ export async function createNote(params: CreateNoteParams): Promise<Note> {
     tags: params.tags ?? [],
     kind: params.kind ?? "dato",
     ...(params.source && { source: params.source }),
+    ...(params.exchange && { exchange: params.exchange }),
     refs: [],
+    embed_model: EMBED_MODEL,
+    status: params.status ?? "promossa",
+    about: ABOUT_NOBODY,
+    updated_at: when,
   };
 
-  const vector = await embed(noteToText(note));
+  const vector = await embedDocument(noteToText(note));
   await upsert(note, vector);
 
   return note;
@@ -101,25 +109,75 @@ export async function changeTags(id: string, tags: string[]): Promise<void> {
 }
 
 export async function searchNotes(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
+  const invalid = validateSearchOptions(options);
+  if (invalid) throw new Error(invalid);
+
   await ensureCollection();
-  const vector = await embed(query);
+  const vector = await embedQuery(query);
   const results = await search(vector, { ...options, query_text: query });
   if (options.record_hits !== false) await recordHits(results);
   return results;
 }
 
-/** Counts one hit on every direct search result. A failed write never fails the search. */
+/**
+ * Counts one hit on every result, direct and related in separate fields.
+ * A failed write never fails the search.
+ */
 async function recordHits(results: SearchResult[]): Promise<void> {
   const now = new Date().toISOString();
-  const direct = results.filter((r) => r.via === "search");
-  const writes = direct.map((r) => {
-    const hit = nextHit(r.note, now);
-    Object.assign(r.note, hit);
-    return setPayload(r.note.id, hit);
-  });
-  const settled = await Promise.allSettled(writes);
+  const writes = [
+    ...directHitWrites(results.filter(isDirect), now),
+    ...relatedHitWrites(results.filter(isRelated), now),
+  ];
+
+  const settled = await Promise.allSettled(
+    groupByPayload(writes).map((group) => setPayloadMany(group.ids, group.payload)),
+  );
   const failed = settled.filter((s) => s.status === "rejected").length;
   if (failed > 0) process.stderr.write(`Warning: ${failed} hit counter update(s) failed.\n`);
+}
+
+function directHitWrites(direct: DirectResult[], now: string): PayloadWrite[] {
+  return direct.map((r) => {
+    const hit = nextHit(r.note, now);
+    Object.assign(r.note, hit);
+    return { id: r.note.id, payload: hit };
+  });
+}
+
+function relatedHitWrites(related: RelatedResult[], now: string): PayloadWrite[] {
+  return related.map((r) => {
+    const hit = nextRelatedHit(r.note, now);
+    Object.assign(r.note, hit);
+    return { id: r.note.id, payload: hit };
+  });
+}
+
+function isDirect(result: SearchResult): result is DirectResult {
+  return result.via === "search";
+}
+
+function isRelated(result: SearchResult): result is RelatedResult {
+  return result.via === "related";
+}
+
+// ─── Id resolution ────────────────────────────────────────────────────────────
+
+const ID_CANDIDATES_SHOWN = 5;
+
+/** Resolves a full id, or the one id that starts with `prefix`. */
+export async function resolveNoteId(idOrPrefix: string): Promise<string> {
+  if (NOTE_ID_SHAPE.test(idOrPrefix)) return idOrPrefix;
+
+  const matches = matchPrefix(idOrPrefix, await scrollAllIds());
+  if (matches.length === 0) throw new Error(`No note id starts with "${idOrPrefix}"`);
+  if (matches.length > 1) {
+    const shown = matches.slice(0, ID_CANDIDATES_SHOWN).join(", ");
+    throw new Error(`Ambiguous id "${idOrPrefix}": ${matches.length} notes match (${shown})`);
+  }
+
+  assert(NOTE_ID_SHAPE.test(matches[0]), "resolveNoteId: a resolved id is a full id");
+  return matches[0];
 }
 
 export interface DeleteSummary {

@@ -1,52 +1,85 @@
 # Third Log (tl)
 
-A REST API for a unified, structured event log — extracted from `th`, shared by `th`, `tb`, `ti`, and any future producer. Not a CLI: called with `curl` or any HTTP client.
+The archive of work done. A row is one thing that was asked and everything that came of it.
 
-## Problem
+`tl` is the episodic layer: what happened. It never judges, never merges, never distills. `tb` holds what you know, `ti` what you do in a context, `.wiki/` the state of a project. Distillation into notes and rules is the distiller's job, downstream.
 
-`th` tracks every `th run` in a local SQLite file (`th.db`) — no other tool logs anything, and nothing is shared across machines or across tools. This half-covers [procedural_memory_gaps](../../.wiki/procedural_memory_gaps.md): without a single event log spanning `th`, `tb`, `ti`, and (eventually) skills, any attempt to extract or bridge behavior across systems has to be built three times — once per store.
+Design decision: [`memory_tl_work_archive_not_event_log`](../../.wiki/memory_tl_work_archive_not_event_log.md).
 
-## Solution
+## Why it exists
 
-One append-only event log, hosted on the Rasp like `tb`'s Qdrant/Ollama backends, reached over HTTP inside the same Tailscale perimeter. `tl` records raw facts only — "X happened, in this context, with this outcome" — it never judges, distills, or merges. Distillation into context→action rules is [ti](../ti/README.md)'s job downstream, not `tl`'s.
+Transcripts rotate. Measured: 95 MB, 76 sessions, the oldest exactly one month back. A distiller that runs later than that has nothing to read, and 369 of 737 notes already have no recoverable source for exactly this reason. `tl` keeps the body, so a note can be re-extracted when the distiller improves.
 
-### Schema
+## Shape
 
-A single table, fixed envelope + free-form payload — not one table per source, so cross-source queries stay a single `SELECT`:
+The store is SQLite on the Rasp, next to Qdrant, inside the Tailscale perimeter. SQLite is a file and not a server, so a small HTTP service sits in front of it and the file never leaves the node.
 
 ```
-id:        string (uuid)
-timestamp: string (ISO)
-source:    string   # "th" | "tb" | "ti" | ...
-actor:     string   # member/hat name, "tb", "ti", etc.
-context:   string   # what was being done
-outcome:   string   # result/verdict
-tags:      string[]
-metadata:  object   # free-form, source-specific fields (e.g. th: hat/tokens/duration; tb: note id/kind; ti: if/do added)
+your machine:   cli.ts → ingest.ts → claude.ts | pi.ts   (one reader per harness)
+                              ↘ transcript.ts (what the two have in common)
+                              ↘ client.ts (HTTP)
+                                   ↘ types.ts (schema + validation) ↙
+the Rasp:       api.ts (CRUD per table, validates) → db.ts (bun:sqlite)
 ```
 
-### Endpoints
+The API is CRUD over the three tables plus filters. Every rule that is not a shape lives in the CLI: parsing transcripts, grouping messages into exchanges, sums by session, day or model. Two reasons. Transcripts live on the machine you work on, so the parser belongs there. And aggregates over 6,000 rows a month cost less to compute after one download than to add endpoints for — the same reason the schema carries no indexes yet.
 
-- `POST /event` — ingest one event (envelope above).
-- `GET /events` — query, filters: `source`, `actor`, `tags`, `since`/`until` (timestamp range), plus a `metadata` filter via `json_extract` for source-specific fields.
+The API still validates what it writes, because a store is a boundary and `tl` holds the only copy: `kind` is `chat` or `subtask`, timestamps are ISO-8601 UTC at fixed width with the `Z`, required fields are present, foreign keys resolve. The validator is one function in `types.ts`, shared by both sides — the CLI checks before it sends, the API checks before it writes.
 
-### Client behavior: fire-and-forget
+## Schema
 
-Logging must never block or fail the caller's actual work. Every producer (`th`, `tb`, `ti`) posts to `tl` with a short timeout (~1-2s, no retry) and swallows failures into a stderr warning — an unreachable `tl` degrades to "no log entry", never to "the run didn't happen."
+Three tables: `sessions`, `exchanges`, `contents`. Bodies live in `contents` so that `SELECT *` on `exchanges` stays readable. A body has `input`, `output` (what the assistant said, text only) and `tools` (the tool calls and their results, in order; `NULL` when there were none). Nothing is compressed. `distilled` is a timestamp, `NULL` until the row is distilled, and it is the only mutable field.
 
-### Out of scope (for now)
+The full schema and the reasoning behind every column are in the decision page.
 
-- Skill invocation logging (would need a Claude Code hook — deferred, not designed here).
-- Storing full dialogues/conversations — different volume and purpose, a structured event log is not a transcript archive.
-- Migrating `th.db`'s existing history — never used or validated, starting fresh.
+## Ingestion
 
-## Stack
+One exchange is written as it happens, by an end-of-turn hook. The hook does no parsing: it hands the ingester a transcript and says "up to here".
 
-- Bun + TypeScript, `Bun.serve` — same pattern as `tools/orchestrator`.
-- SQLite (local file on the Rasp, path via `TL_DB`) — no Qdrant/Ollama involved, this is structured tabular data, not semantic search.
+```sh
+tl ingest --transcript <path>     # the hook, one exchange
+tl ingest --session <id>          # same, when only the id is known
+tl ingest --all                   # fills the gaps, and backfills what is on disk
+tl ingest --all --refresh         # sends every row again, when the parser improves
+```
 
-## Development
+Both roots are walked one directory deep, which is what excludes delegated runs by construction: a Claude subagent writes under `<session>/subagents/`, `pi` writes a sub-run under `<session>/<id>/run-N/`. Neither is a row, for the reason given below.
 
-- Entry point: `tools/tl/src/main.ts`. Env: `TL_PORT`, `TL_DB`.
-- Run locally: `bun tools/tl/src/main.ts`.
-- Tests: `bun test tests/tl.test.ts` (to be added alongside implementation).
+An exchange id is derived from the transcript, not generated, so writing is idempotent: running the same ingest twice changes nothing. That makes a missed exchange late rather than lost — the hook can fail, the Rasp can be unreachable, and the next `--all` picks it up, because the transcript survives for 30 days.
+
+**Two harnesses, one schema.** Claude Code and `pi` both write JSONL and agree on nothing else, so there is a reader each and a shared span splitter. A file says which reader it needs: `pi` opens with a `session` record.
+
+| | Claude Code | pi |
+|---|---|---|
+| a question is | a `user` line carrying `origin` | a message with `role: "user"` |
+| a tool answer is | a `user` line holding `tool_result` | a message with `role: "toolResult"` |
+| tokens | `input_tokens`, `cache_read_input_tokens`, … | `input`, `cacheRead`, … plus a **cost in money** |
+| message ids | UUIDs, used as they are | eight hex characters, so the id is derived |
+| a compaction | assistant lines, counted like any answer | a record of its own, counted too |
+
+`pi`'s ids are derived with `exchangeId(session, id)` — SHA256 shaped as a UUID, the same trick as a note id in `tb`. One shape in the archive, still deterministic, so a second write is still a no-op, and the original is kept in `meta.source_id`.
+
+Which tool ran a session is a column on `sessions`, not a field repeated on every row: `tl sessions --harness pi`. See [`memory_session_names_its_harness`](../../.wiki/memory_session_names_its_harness.md).
+
+Every row a transcript yields is `kind: chat`, written by `alfredo`.
+
+`subtask` is a `th` run, and `th` files that row itself when the run ends — it builds its agent session in memory, so no transcript exists to read, and its output files live in `/tmp` and are wiped. A run is its own session, with `harness: "th"`. See [`memory_th_run_files_its_own_row`](../../.wiki/memory_th_run_files_its_own_row.md). A native subagent is not a `subtask` either — its task call and its report are already inside the output of the exchange that asked for it. What is not counted is the tokens it spent internally: measured, 2.4% of all output tokens, across 8 sessions out of 43.
+
+## Commands
+
+| command | what it does |
+|---|---|
+| `tl ingest` | reads transcripts, writes sessions, exchanges and contents |
+| `tl sessions` | lists sessions, newest first, `--harness claude\|pi` to pick one |
+| `tl show <exchange>` | one exchange with its full input and output. `--tools` adds the tool calls and results |
+| `tl cost` | sums tokens by session, day or model |
+| `tl pending` | exchanges with `distilled IS NULL`, the distiller's queue |
+| `tl extractions` | the candidates the distiller wrote: where each dropped, its probabilities, its verdict. Filters: `--extractor`, `--run`, `--exchange`, `--kept` |
+| `tl distilled <id...>` | sets `distilled` to now, so the exchanges leave the queue |
+| `tl serve` | runs the HTTP service (on the Rasp) |
+
+`TL_API_PORT` defaults to 8790 (`tb` uses 8788, `ti` 8789). `TL_API_URL` tells the CLI where the service is.
+
+## Backups
+
+`tl` is in the Clio backups. It holds the only copy of the transcripts once they rotate.

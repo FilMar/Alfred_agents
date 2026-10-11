@@ -23,5 +23,5 @@ No database for this: `GET /runs` is a glob over `/tmp/th-*.status` plus reading
 ## Cross-references
 
 - [th_detached_runs_state_in_tmp](th_detached_runs_state_in_tmp) — the files the API reads
-- [memory_tl_unified_event_log](memory_tl_unified_event_log) — durable history, the part the API does not serve
+- [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — durable history, the part the API does not serve
 - [style_dual_entrypoint](style_dual_entrypoint) — the pattern this extends to `th`, with an async divergence

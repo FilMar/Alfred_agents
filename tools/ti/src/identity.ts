@@ -1,4 +1,4 @@
-import { ollamaClient, EMBED_MODEL } from "../../tb/src/infra.js";
+import { embedDocument, embedQuery, EMBED_MODEL } from "../../tb/src/infra.js";
 import * as qdrant from "./qdrant.js";
 import type { IdentityEntry, SearchOptions } from "./types.js";
 
@@ -9,20 +9,26 @@ import type { IdentityEntry, SearchOptions } from "./types.js";
  * - Must never overwrite an existing entry; always create a new point.
  * - Side effect: writes to Qdrant.
  */
-export async function addEntry(ifText: string, doText: string, tags: string[]): Promise<IdentityEntry> {
+export async function addEntry(ifText: string, doText: string, tags: string[], exchange?: string): Promise<IdentityEntry> {
   await qdrant.ensureCollection();
-  const data = await ollamaClient.request<{ embeddings: number[][] }>("POST", "/api/embed", { model: EMBED_MODEL, input: ifText });
-  const vector = data.embeddings[0];
-  
+  const vector = await embedDocument(ifText);
+
   const id = crypto.randomUUID();
-  await qdrant.upsertPoint(id, vector, { if: ifText, do: [doText], tags });
-  
+  await qdrant.upsertPoint(id, vector, {
+    if: ifText,
+    do: [doText],
+    tags,
+    ...(exchange && { exchange }),
+    embed_model: EMBED_MODEL,
+  });
+
   return {
     id,
     vector: [],
     if: ifText,
     do: [doText],
-    tags
+    tags,
+    ...(exchange && { exchange }),
   };
 }
 
@@ -36,8 +42,8 @@ export async function addEntry(ifText: string, doText: string, tags: string[]): 
  */
 export async function searchEntries(query: string, options: SearchOptions): Promise<IdentityEntry[]> {
   await qdrant.ensureCollection();
-  const data = await ollamaClient.request<{ embeddings: number[][] }>("POST", "/api/embed", { model: EMBED_MODEL, input: query });
-  const vector = data.embeddings[0];
+  const vector = await embedQuery(query);
+
   
   const filter = options.tags?.length ? { must: [{ key: "tags", match: { any: options.tags } }] } : undefined;
   const res = await qdrant.queryPoints(vector, {
@@ -63,9 +69,15 @@ export async function searchEntries(query: string, options: SearchOptions): Prom
 export async function listEntries(tags?: string[]): Promise<IdentityEntry[]> {
   await qdrant.ensureCollection();
   const filter = tags?.length ? { must: [{ key: "tags", match: { any: tags } }] } : undefined;
-  const res = await qdrant.scrollPoints({ filter });
+  const points: any[] = [];
+  let offset: any = undefined;
+  do {
+    const res = await qdrant.scrollPoints({ filter, limit: 100, offset });
+    points.push(...(res.result?.points ?? []));
+    offset = res.result?.next_page_offset ?? null;
+  } while (offset !== null);
 
-  return (res.result?.points ?? []).map((p: any) => ({
+  return points.map((p: any) => ({
     id: p.id,
     vector: p.vector ?? [],
     ...p.payload,
@@ -102,10 +114,12 @@ export async function appendDo(id: string, doText: string): Promise<IdentityEntr
   const vector = point.vector;
   const updatedDo = [...existingEntry.do, doText];
   
-  await qdrant.upsertPoint(id, vector, { 
-    if: existingEntry.if, 
-    do: updatedDo, 
-    tags: existingEntry.tags 
+  await qdrant.upsertPoint(id, vector, {
+    if: existingEntry.if,
+    do: updatedDo,
+    tags: existingEntry.tags,
+    ...(existingEntry.exchange && { exchange: existingEntry.exchange }),
+    ...(existingEntry.embed_model && { embed_model: existingEntry.embed_model }),
   });
   
   return {

@@ -37,18 +37,18 @@ Do not proceed without concrete answers.
 ## Phase 1 — Architecture (parallel)
 
 ```bash
-P_W=$(th run --member <name-white> --task "Analyse the requirements: data structures, types, existing dependencies to reuse, constraints.
+P_W=$(th run --hat white-core --task "Analyse the requirements: data structures, types, existing dependencies to reuse, constraints.
 
 Requirements:
 <phase 0>" --detach)
 
-P_G=$(th run --member <name-green> --task "Propose 2-3 alternative architectures with trade-offs for:
+P_G=$(th run --hat green-core --task "Propose 2-3 alternative architectures with trade-offs for:
 <phase 0>
 
 Do not choose — generate variants." --detach)
 
 th wait "$(echo "$P_W" | jq -r '.status')" "$(echo "$P_G" | jq -r '.status')" \
-  || echo "A member failed — inspect its .status/.log before continuing." >&2
+  || echo "A run failed — inspect its .status/.log before continuing." >&2
 
 OUT_W=$(cat "$(echo "$P_W" | jq -r '.out')")
 OUT_G=$(cat "$(echo "$P_G" | jq -r '.out')")
@@ -60,10 +60,10 @@ Present both perspectives to the user. Ask which architecture to adopt before co
 
 ## Phase 2 — Stub
 
-The coder member must have `--tools read,write,edit,bash`.
+The coding run must pass `--tools read,write,edit,bash`.
 
 ```bash
-th run --member <name-white> --task "Write the signatures and data structures for:
+th run --hat white-core --task "Write the signatures and data structures for:
 <chosen architecture>
 
 Rules:
@@ -72,16 +72,16 @@ Rules:
 - The code must already compile (or pass type-check) in this state"
 ```
 
-Annibale runs the compiler or type-checker itself, not the member, and confirms it succeeds before moving on.
+Annibale runs the compiler or type-checker itself, never a run, and confirms it succeeds before moving on.
 
 ---
 
 ## Phase 3 — Tests
 
-The black member must have `--tools read,write,bash`.
+The black run must pass `--tools read,write,bash`.
 
 ```bash
-th run --member <name-black> --task "Write behavioural tests for these signatures:
+th run --hat black-core --task "Write behavioural tests for these signatures:
 <phase 2 output>
 
 Rules:
@@ -91,7 +91,7 @@ Rules:
 - Do not mock what you can test for real"
 ```
 
-Annibale runs the test command directly — not the black member — and confirms every test fails. If any already pass, the test is wrong.
+Annibale runs the test command directly — never the black run — and confirms every test fails. If any already pass, the test is wrong.
 
 ---
 
@@ -102,7 +102,7 @@ ERRORS="<initial test runner output>"
 ITER=0
 
 while true; do
-  th run --member <name-white> --task "Implement the functions to make the tests pass.
+  th run --hat white-core --task "Implement the functions to make the tests pass.
 
 Signatures:
 <phase 2 output>
@@ -115,7 +115,7 @@ $ERRORS
 
 Do not run the test suite yourself. Write the code and stop."
 
-  # Annibale runs the test command itself here — never the member:
+  # Annibale runs the test command itself here — never a run:
   TEST_OUTPUT=$(<test-command> 2>&1)
   TEST_EXIT=$?
   ITER=$((ITER + 1))
@@ -136,12 +136,12 @@ done
 ## Phase 5 — Review (parallel)
 
 ```bash
-P_B=$(th run --member <name-black> --task "Code review. Look for: duplicated code, obscure names, hidden logic, dead code.
+P_B=$(th run --hat black-core --task "Code review. Look for: duplicated code, obscure names, hidden logic, dead code.
 
 Code:
 <implementation>" --detach)
 
-P_W=$(th run --member <name-white> --task "Verify conformity. Compare requirements and implementation line by line. Do not make assumptions.
+P_W=$(th run --hat white-core --task "Verify conformity. Compare requirements and implementation line by line. Do not make assumptions.
 
 Requirements:
 <phase 0>
@@ -150,7 +150,7 @@ Code:
 <implementation>" --detach)
 
 th wait "$(echo "$P_B" | jq -r '.status')" "$(echo "$P_W" | jq -r '.status')" \
-  || echo "A member failed — inspect its .status/.log before continuing." >&2
+  || echo "A run failed — inspect its .status/.log before continuing." >&2
 
 OUT_B=$(cat "$(echo "$P_B" | jq -r '.out')")
 OUT_W=$(cat "$(echo "$P_W" | jq -r '.out')")
@@ -163,7 +163,7 @@ Present issues found. If there are non-trivial fixes, go back to phase 4.
 ## Phase 6 — Wiki
 
 ```bash
-th run --member <member> --task "Use the omero skill to update the project wiki with the new feature.
+th run --hat blue-core --task "Use the omero skill to update the project wiki with the new feature.
 
 What was implemented:
 <summary>
@@ -184,4 +184,4 @@ Architectural decisions:
 - **The loop has a limit.** After 3 fruitless iterations, escalate to the user.
 - **Review is separate from implementation.** Do not review during the loop.
 - **Omero always closes.** The wiki is part of the deliverable, not an option.
-- **Verification never runs inside the member.** Annibale runs the compiler and the test command itself, between phases — never the member, and never the same run that produced the code.
+- **Verification never runs inside a run.** Annibale runs the compiler and the test command itself, between phases — never a hat, and never the run that produced the code.

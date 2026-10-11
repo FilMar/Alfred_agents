@@ -2,9 +2,11 @@ import { openSync, writeSync, closeSync, writeFileSync, readFileSync, statSync }
 import { setTimeout as sleep } from "node:timers/promises";
 import { spawn, spawnSync } from "node:child_process";
 import { tmpdir, homedir } from "node:os";
-import { join } from "node:path";
-import { randomUUID } from "node:crypto";
-import { insertRun, finishRun, type RunUsage } from "./db.js";
+import { basename, join } from "node:path";
+import { randomBytes, randomUUID } from "node:crypto";
+import { assert } from "../../contract/contract.js";
+import { archiveRun, spoolDir, SPOOL_SUFFIX } from "./archive.js";
+import type { FinishedRun } from "./archive.js";
 import {
   AuthStorage,
   createAgentSession,
@@ -16,7 +18,7 @@ import {
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
 import { getModel, getProviders } from "@earendil-works/pi-ai";
 import type { KnownProvider, Usage } from "@earendil-works/pi-ai";
-import { ensureLocalMember, loadMember, validateName } from "./members.js";
+import { composeSystemPrompt, findSkill, getHat, skillBlock, validateName } from "./prompt.js";
 
 // ─── Sandbox (bwrap) ──────────────────────────────────────────────────────────
 
@@ -88,7 +90,7 @@ export function sandboxExec(bin: string, args: string[]): Promise<number> {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type JobPaths = { out: string; log: string; status: string; pid: string };
+export type JobPaths = { out: string; log: string; status: string; pid: string };
 type AgentSession = Awaited<ReturnType<typeof createAgentSession>>["session"];
 type IOHandles = { emit: (text: string) => void; close: () => void };
 
@@ -96,6 +98,14 @@ export type RunMemberOpts = {
   thinkingLevel?: string;
   modelStr?: string;
   timeoutSec?: number;
+  /** Extra instructions, in front of the hat. What a member file used to hold. */
+  system?: string;
+  /** Tools the run may use. Empty means every tool. */
+  tools?: string[];
+  /** A skill the run must follow, injected whole instead of merely offered. */
+  skill?: string;
+  /** False keeps the run out of the archive. Default true. */
+  archive?: boolean;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -110,20 +120,6 @@ function truncate(str: string, max: number): string {
 /** Sum billed usage across every assistant message of a finished session.
  *  Input is cumulative per API call (you pay context on each), so summing
  *  reflects real billed usage rather than a single turn. */
-function sumUsage(messages: AgentSession["messages"]): RunUsage {
-  let inputTokens = 0;
-  let outputTokens = 0;
-  let costUsd = 0;
-  for (const m of messages) {
-    const u = (m as { usage?: Usage }).usage;
-    if (!u) continue;
-    inputTokens += (u.input ?? 0) + (u.cacheRead ?? 0) + (u.cacheWrite ?? 0);
-    outputTokens += u.output ?? 0;
-    costUsd += u.cost?.total ?? 0;
-  }
-  return { inputTokens, outputTokens, costUsd };
-}
-
 function createRegistry() {
   const authStorage = AuthStorage.create();
   return { authStorage, modelRegistry: ModelRegistry.create(authStorage) };
@@ -142,14 +138,16 @@ export async function listAvailableModels(): Promise<Array<{ provider: string; i
   return available.map((m) => ({ provider: m.provider, id: m.id, name: m.name }));
 }
 
-export function makeJobPaths(memberName: string): JobPaths {
-  validateName(memberName);
-  const base = join(tmpdir(), `th-${memberName}-${Date.now()}`);
-  return { out: `${base}.out`, log: `${base}.log`, status: `${base}.status`, pid: `${base}.pid` };
+export function makeJobPaths(hat: string): JobPaths {
+  validateName(hat);
+  const base = join(tmpdir(), `th-${hat}-${Date.now()}-${randomBytes(2).toString("hex")}`);
+  const paths = { out: `${base}.out`, log: `${base}.log`, status: `${base}.status`, pid: `${base}.pid` };
+  assert(new Set(Object.values(paths)).size === 4, "makeJobPaths: four distinct paths");
+  return paths;
 }
 
 export function spawnDetached(
-  memberName: string,
+  hat: string,
   task: string,
   paths: JobPaths,
   opts: RunMemberOpts,
@@ -159,7 +157,7 @@ export function spawnDetached(
   writeFileSync(paths.status, "running");
   const child = spawnSandboxed(execPath, [
     runnerPath,
-    memberName,
+    hat,
     task,
     JSON.stringify(paths),
     JSON.stringify(opts),
@@ -197,7 +195,7 @@ async function resolveModel(modelStr: string) {
 }
 
 async function buildSession(
-  memberName: string,
+  hat: string | undefined,
   opts: RunMemberOpts,
 ): Promise<{ session: AgentSession }> {
   if (opts.thinkingLevel && !THINKING_LEVELS.includes(opts.thinkingLevel as ThinkingLevel)) {
@@ -206,9 +204,8 @@ async function buildSession(
 
   const model = opts.modelStr ? await resolveModel(opts.modelStr) : undefined;
 
-  const autoInstantiated = ensureLocalMember(memberName);
-  if (autoInstantiated) process.stderr.write(`info: instantiated "${memberName}" from global into .th/members/\n`);
-  const { member, systemPrompt } = loadMember(memberName);
+  const skill = opts.skill === undefined ? undefined : skillBlock(findSkill(opts.skill));
+  const systemPrompt = composeSystemPrompt(opts.system, hat === undefined ? "" : getHat(hat), skill);
 
   const loader = new DefaultResourceLoader({
     cwd: process.cwd(),
@@ -220,7 +217,7 @@ async function buildSession(
 
   const { authStorage, modelRegistry } = createRegistry();
   const { session } = await createAgentSession({
-    tools: member.tools,
+    ...(opts.tools?.length ? { tools: opts.tools } : {}),
     resourceLoader: loader,
     sessionManager: SessionManager.inMemory(),
     authStorage,
@@ -269,21 +266,25 @@ function attachIO(session: AgentSession, paths: JobPaths): IOHandles {
 // ─── Execution ────────────────────────────────────────────────────────────────
 
 async function promptWithTimeout(session: AgentSession, task: string, timeoutSec: number): Promise<void> {
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error(`Timeout dopo ${timeoutSec}s`)), timeoutSec * 1000)
-  );
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Timeout dopo ${timeoutSec}s`)), timeoutSec * 1000);
+  });
   try {
     await Promise.race([session.prompt(task), timeoutPromise]);
   } catch (err) {
     await session.abort();
     throw err;
+  } finally {
+    // A live timer keeps the process up.
+    clearTimeout(timer);
   }
 }
 
 async function executeSession(
   session: AgentSession,
   task: string,
-  opts: { timeoutSec?: number; statusPath: string; runId: string; emit: (t: string) => void },
+  opts: { timeoutSec?: number; statusPath: string; run: RunSeed; archive: boolean; emit: (t: string) => void },
 ): Promise<void> {
   let runStatus: "done" | "error" | "timeout" = "error";
   try {
@@ -304,34 +305,61 @@ async function executeSession(
     writeFileSync(opts.statusPath, `error: ${err instanceof Error ? err.message : String(err)}`);
     throw err;
   } finally {
-    finishRun(opts.runId, runStatus, sumUsage(session.messages));
+    const run: FinishedRun = { ...opts.run, status: runStatus, finished_at: new Date().toISOString() };
+    if (opts.archive) await archiveRun(run, session.messages, spoolPathFor(opts.statusPath));
   }
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
-export async function runMember(
-  memberName: string,
+/** What a run knows about itself before it ends. The archive fills in the rest. */
+type RunSeed = Omit<FinishedRun, "status" | "finished_at">;
+
+/**
+ * What the run is called, in its files and as the actor of its archived row: the
+ * hat, or the skill when a run is a skill and wears no hat.
+ */
+export function runLabel(hat: string | undefined, skill: string | undefined): string {
+  const label = hat ?? skill;
+  if (label === undefined) throw new Error("A run needs a hat, a skill, or both.");
+  return label;
+}
+
+/** The spool leaves /tmp: tmpfs is wiped by the very reboot that an unreachable archive invites. */
+export function spoolPathFor(statusPath: string): string {
+  assert(statusPath.endsWith(".status"), "spoolPathFor: takes a status path");
+  const path = join(spoolDir(), basename(statusPath).replace(/\.status$/, SPOOL_SUFFIX));
+  assert(path.endsWith(SPOOL_SUFFIX), "spoolPathFor: names an unarchived file");
+  return path;
+}
+
+export async function runHat(
+  hat: string | undefined,
   task: string,
   paths: JobPaths,
   opts: RunMemberOpts = {},
 ): Promise<void> {
-  const { session } = await buildSession(memberName, opts);
+  const { session } = await buildSession(hat, opts);
 
-  const runId = randomUUID();
-  insertRun({
-    id: runId,
-    member: memberName,
-    task: task.slice(0, 300),
+  const run: RunSeed = {
+    id: randomUUID(),
+    hat: runLabel(hat, opts.skill),
+    ...(opts.skill !== undefined && { skill: opts.skill }),
+    task,
     started_at: new Date().toISOString(),
-    status: "running",
-    out_path: paths.out,
-    log_path: paths.log,
-  });
+    ...(opts.timeoutSec !== undefined && { timeout_s: opts.timeoutSec }),
+    ...(opts.thinkingLevel !== undefined && { thinking: opts.thinkingLevel }),
+  };
 
   const { emit, close } = attachIO(session, paths);
   try {
-    await executeSession(session, task, { timeoutSec: opts.timeoutSec, statusPath: paths.status, runId, emit });
+    await executeSession(session, task, {
+      timeoutSec: opts.timeoutSec,
+      statusPath: paths.status,
+      run,
+      archive: opts.archive !== false,
+      emit,
+    });
   } finally {
     close();
   }

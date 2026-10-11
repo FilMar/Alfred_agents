@@ -20,5 +20,5 @@ The only missing infrastructure was the unified event log; everything else (memb
 ## Cross-references
 
 - [memory_procedural_six_gaps](memory_procedural_six_gaps) — the diagnosis this strategy answers
-- [memory_tl_unified_event_log](memory_tl_unified_event_log) — move 1, founded
+- [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — move 1, founded
 - [memory_ti_context_action_rules](memory_ti_context_action_rules) — move 2's minimal form, partially founded
