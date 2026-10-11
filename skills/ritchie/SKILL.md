@@ -1,105 +1,100 @@
 ---
 name: ritchie
-description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. It works in phases. The entities are debated in chat first, struct code only. Then structs, signatures and contracts go into the file, one phase at a time: the user edits the file, Ritchie answers in the file, and the user says ok. Tests come before the bodies, from the contracts only, each written by its own th run."
+description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. Three phases: the user approves the principles and the domain spec once, then Ritchie works alone — structs, contracts, tests, bodies — then the user reviews the result against a report."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
 # Ritchie
 
-Small functions that call each other. Then a language, then Unix.
+State has one owner. The contract is the boundary. The type protects,
+the ceremony does not.
 
-## The principle
+## The principles
 
-State is never touched from outside the thing that owns it. Behaviour lives
-where the state lives. Every function declares at its boundary what it
-demands and what it guarantees.
-
-Every rule below follows from this line. When a case is not in the list,
-derive the answer from the line and say that you did.
+Seven principles, why each holds, and how to derive a case they do not
+cover: `references/principles.md`. Every rule below follows from them.
+When a case is not in the list, derive the answer from the principle
+and say which one.
 
 Edison is the twin skill. A spike suspends every rule here. When a spike
-becomes a feature, the feature is written from scratch under these rules.
-Spike code is evidence, never a starting point.
+becomes a feature, the feature is written from scratch under these
+rules. Spike code is evidence, never a starting point.
+
+## New language?
+
+If the project's language has no sheet in `references/languages/`,
+follow `references/adapting-a-language.md`: answer eight questions,
+write the sheet, present it to the user, then write code.
 
 ## Steps
 
-### 1. Read the project
+### 0. Read the project
 
 ```
 ti search "<what you are about to write>"
 ```
 
-Then the project's `.wiki/` (via omero) and its CLAUDE.md. A project rule
-that is stricter than this skill wins. Pick the language row in the
-mechanism map below and read its section in `references/languages.md`.
+Then the project's `.wiki/` (via omero) and its CLAUDE.md. A project
+rule that is stricter than this skill wins. Check
+`references/languages/` for the language's sheet; read it.
 
-### 2. Entities, in chat
+### 1. Setup — the user is present
 
-Before any file is touched, debate the structs and the types at play.
-Each type is a physical entity: it holds state, it acts, someone
-commands it. For each one, say what it knows, what it does not know,
-and who commands it. Write the struct code in chat, structs only, and
-argue what each entity should do and where its state ends. Paste,
-change, paste again, until the user says "ok".
+Present the principle that governs the work (usually P1 plus the two
+that bite hardest here) and have the user confirm or amend it.
 
-### 3. Structs, in the file
+Then write a spec file next to the work, never in the code: the domain
+in the user's words — the entities, who commands whom, and the
+invariants of the domain at a high level. Each entity: what it knows,
+what it does not know, who commands it.
 
-Write the agreed structs into the real target file. Private fields, no
-function, no body. Post one line in chat: the path. Stop.
+The file persists. It is the decision log: the work can resume from it,
+and the review at the end checks the code against it.
 
-The user edits the file. You read it, change what you disagree with, and
-say why in one line. The file is the debate. Repeat until the user says
-"ok". From this step on, chat carries no code text.
+The user says "ok". That is the only approval in the middle of the
+work: none.
 
-### 4. Signatures, in the same file
+### 2. Work — the user is absent
 
-Add the function signatures under the structs. The body is the `todo`
-placeholder. No assert yet. Same loop as step 3: the file is the debate,
-"ok" closes the phase.
+Read the language sheet. Translate it into code, in this order, all in
+the target file:
 
-### 5. Contracts, in the same file
+1. **Structs.** Private fields where the language needs privacy to stop
+   the write; plain read-only shapes where the type system already
+   stops it (P3). No functions yet.
+2. **Signatures.** Bodies are the stub. No asserts yet.
+3. **Contracts.** Derive preconditions and postconditions from the
+   invariants the user stated in the spec, at most five per function,
+   one assert per invariant. A contract that does not derive from the
+   spec is marked `derive?` and reported, never written silently.
+4. **Tests, then body, by two th runs.** `scripts/th_write.sh` writes
+   the tests, then the bodies — one run each, details in
+   `references/tests-and-body.md`. The test run never sees a body. Run
+   the tests against the stub file: every bare-call test fails, every
+   should-panic test passes. The body run is checked by
+   `scripts/check_body_diff.py`.
 
-Before each contract, ask the user one high-level question about that
-signature: "This function does X. In your words: what must it respect?
-When is its input correct, when is its output?"
+The file is the work. Chat carries no code text from here on.
 
-The user can answer only if they hold the invariant in their head. A
-vague or wrong answer: hold the line, one sharpening question from
-`references/rules.md`, tuned to the function. A softened interrogation
-is the failure this skill exists to prevent: the user stops
-understanding the code written for them.
-
-Then write the contracts into the file: preconditions above the `todo`,
-postconditions below it, five at most per function. Same loop as step 3.
-"ok" closes the phase.
-
-The contracts must be complete. In step 6 the tests have no assert of
-their own: the contract is the only oracle.
-
-### 6. Tests, then body, by two th runs
-
-Ritchie writes a spec, then calls `scripts/th_write.sh` twice: a run
-writes the tests, then a second run writes the bodies. Each run is a th
-member with its own hat and system on a fixed model. The script checks
-the bodies with `scripts/check_body_diff.py`. Ritchie never edits the
-contracts. It checks each result and fixes it. Steps and checks:
-`references/tests-and-body.md`.
-
-### 7. Check and gate
+### 3. Review — the user is present
 
 ```
 scripts/contract_report.py <path>
 ```
 
-Then the project's formatter and linter at their strictest setting, then
-the test suite. All three green before commit. A warning about unused
-code stays visible until the code is used or removed: a suppression
-annotation is not a fix.
+Then the project's formatter and linter at their strictest setting,
+then the test suite. All three green before commit.
+
+Present to the user: the spec file, the contract report, the list of
+`derive?` contracts with the principle each one was derived from, and
+the test results. The user reads the code here — this is the moment
+the user keeps the ability to judge it. The user approves, or sends
+the work back with one comment; only the involved part repeats.
 
 ## The rules
 
-Why each rule holds, its edge cases, and where real code still deviates:
-`references/rules.md`.
+Why each rule holds, its edge cases, and where real code still
+deviates: `references/rules.md`.
 
 **Contracts**
 
@@ -130,25 +125,26 @@ Why each rule holds, its edge cases, and where real code still deviates:
 **Structs**
 
 - A value is immutable. Only its own contracted functions build it or
-  derive a new one from it. This is what "private" protects: the write,
-  not the read.
-- Where only privacy can stop the write (Rust, Go, Python), fields are
+  derive a new one from it.
+- Where only privacy can stop the write (Rust, Python), fields are
   private and read through getters. Where the type system makes the
   value read-only (a TypeScript `Readonly` type), fields are read
   directly, and a getter exists only for a computed value.
 - A plain type with a construction function is the default. A class or
   an opaque type is used only when an invariant must hold for every
   value, so that no literal can skip the constructor.
-- Build with consuming builders: `default()` or `new()` for required
-  fields, then `with_x(self, ...) -> Self`. Each returns a new value.
+- Build short in the common case: the shortest construction the
+  language allows. Consuming builders (`with_x(self) -> Self`,
+  `replace`, a spread copy) when a per-step contract or many optional
+  fields justify them. Each returns a new value.
 - No struct writes another's state, same module or crate included.
 - No inheritance. Inheritance is privileged access to someone else's
   state.
-- A constructor returns the type already wrapped. The wrapper hides behind
-  an alias.
+- A constructor returns the type already wrapped. The wrapper hides
+  behind an alias.
 - A newtype replaces a bare primitive when the name cannot carry the
-  meaning, and replaces a magic threshold: a threshold is a state the type
-  failed to model.
+  meaning, and replaces a magic threshold: a threshold is a state the
+  type failed to model. No newtype by habit.
 - When the same function shape repeats, extract the skeleton: shared
   signature, dispatch table, shared checks centralized before dispatch.
 - A size or a counter has an explicit-width integer type. The
@@ -166,41 +162,29 @@ Why each rule holds, its edge cases, and where real code still deviates:
   message.
 - A test contains no assert of its own, except a classifier's outcome
   table: see `references/rules.md`.
+- Reject weak oracles: tautological, self-oracle, vacuous, no
+  assertion. See `references/principles.md`.
 
 **Comments**
 
-- Zero, doc comments included. The signature and the code say everything.
-  The exception is a why that code cannot express: five words at most, as
-  a plain `//`.
+- Zero, doc comments included. The signature and the code say
+  everything. The exception is a why that code cannot express: five
+  words at most, as a plain `//`.
 - Where a comment would go, put a plainly true assert instead. The
   contract replaces the comment.
-- Design rationale goes in the project wiki, never inline.
+- Design rationale goes in the project wiki and in the spec file, never
+  inline.
 
 **Abstraction**
 
-- Nearly everything is a struct with its interface. The program is those
-  structs calling each other. "Abstract" means encapsulated, not
+- Nearly everything is a struct with its interface. The program is
+  those structs calling each other. "Abstract" means encapsulated, not
   generalized in advance.
 - An abstraction must make sense of the domain, not of the code.
 - A helper lives where its knowledge lives, not where it looks most
   reusable.
-- A trait or interface pays only with one consumer and many implementors.
-  Never over a backend that has one implementation.
+- A trait or interface pays only with one consumer and many
+  implementors. Never over a backend that has one implementation.
 - DRY at the second copy, not the third.
 - A dependency arrives in the commit that uses it, never for a feature
   still to come.
-
-## Mechanism map
-
-| rule            | Rust                              | Python                                | TypeScript                      | Go                                   |
-|-----------------|-----------------------------------|---------------------------------------|---------------------------------|--------------------------------------|
-| immutable value | private field + getter            | `_field` + `@property`                | `Readonly` type, read directly  | unexported field + getter            |
-| invariant held  | private field                     | `_field`                              | branded type                    | unexported field                     |
-| builder         | `with_x(self) -> Self`            | frozen dataclass + `replace`          | function returns a spread copy  | value receiver returns the copy      |
-| contract        | `debug_assert!`                   | `assert` (off under `-O`)             | `assert()` helper, strippable   | `contract.Assert` (always on)        |
-| checked profile | `release-checked`                 | run without `-O`                      | build that keeps `assert()`     | default                              |
-| stub            | `todo!()`                         | `raise NotImplementedError`           | `throw new Error("todo")`       | `panic("todo")`                      |
-| invalid input   | `#[should_panic(expected)]`       | `pytest.raises(match=)`               | `expect().toThrow()`            | `contract.ExpectPanic`               |
-
-Code shapes for each cell, and the Go decision, in
-`references/languages.md`.
