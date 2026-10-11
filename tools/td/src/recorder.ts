@@ -85,6 +85,18 @@ export class Outcome {
     return this.#s.droppedBy === null;
   }
 
+  verdict(): string | null {
+    return this.#s.verdict;
+  }
+
+  savedId(): string | null {
+    return this.#s.savedId;
+  }
+
+  probabilities(): Probabilities | null {
+    return this.#s.probabilities;
+  }
+
   toRow(head: RowHead): NewExtraction {
     const s = this.#s;
     const result: NewExtraction = {

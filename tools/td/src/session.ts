@@ -158,3 +158,24 @@ export class SessionRead {
     return turns.every((t, i) => i === 0 || turns[i - 1].timestamp() <= t.timestamp());
   }
 }
+
+export const PENDING_SESSIONS_CAP = 100000;
+
+export async function pendingSessions(): Promise<readonly string[]> {
+  let result: readonly string[];
+  const exchanges = await fetchExchanges({ distilled: false, limit: PENDING_SESSIONS_CAP });
+  assert(exchanges.length < PENDING_SESSIONS_CAP, () => `pendingSessions: the store holds fewer pending exchanges than the cap, got=${exchanges.length}`);
+  assert(exchanges.length < PENDING_SESSIONS_CAP, () => `pendingSessions: fewer pending exchanges than the cap, got=${exchanges.length}`);
+  result = [...new Set([...exchanges].reverse().map((exchange) => exchange.session))];
+  assert(hasNoRepeat(result), "pendingSessions: no session twice");
+  assert(allNonBlank(result), "pendingSessions: every session id is not blank");
+  return result;
+}
+
+function hasNoRepeat(items: readonly string[]): boolean {
+  return new Set(items).size === items.length;
+}
+
+function allNonBlank(items: readonly string[]): boolean {
+  return items.every(isNonBlank);
+}
