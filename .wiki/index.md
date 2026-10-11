@@ -1,7 +1,7 @@
 ---
 tags: [pi, index]
 sources: []
-updated: 2026-10-09
+updated: 2026-10-11
 ---
 
 ## Pages
@@ -48,7 +48,7 @@ updated: 2026-10-09
 | [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) | Manual distillation with platone; the automatic service waits on five open problems |
 | [memory_episode_summaries_are_a_derived_index_over_tl](memory_episode_summaries_are_a_derived_index_over_tl) | Phase 0 episode summaries become a derived, rebuildable search index over tl |
 | [memory_hindsight_not_adopted_its_shape_is_copied](memory_hindsight_not_adopted_its_shape_is_copied) | No Hindsight; copy its shape: one structured call, code for the rest |
-| [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) | The extractor is the v7 pipeline with critic F, no tools, built in shadow first; two open points: in-session repeats, the 0.95 cut never fires |
+| [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) | The extractor is the v7 pipeline with critic F, no tools, built in shadow first; in-session repeats still open, the 0.95 cut is dropped and `distilled` is a run time (see the td rows below) |
 | [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question) | The critic F: guard role, probabilities, textbook as a test at 0.6, no record question; cost counts a lost good note 3 times |
 | [memory_extractor_is_data_immutable_config_rows_in_tl](memory_extractor_is_data_immutable_config_rows_in_tl) | The extractor is an immutable JSON config row in tl; every candidate, kept or dropped, goes to extractions |
 | [memory_distiller_is_its_own_tool_td_and_tl_stays_the_register](memory_distiller_is_its_own_tool_td_and_tl_stays_the_register) | The distiller is tools/td, a library with a thin CLI; tl keeps the tables and the API, td checks the config |
@@ -66,6 +66,12 @@ updated: 2026-10-09
 | [memory_tb_clients_read_their_url_per_call_and_ti_tests_restore_their_spies](memory_tb_clients_read_their_url_per_call_and_ti_tests_restore_their_spies) | tb clients read the url per call; ti tests restore their spies, since Bun shares modules |
 | [memory_td_extractor_one_is_the_spike_v7_with_critic_f_and_the_critic_system_is_the_guard_hat_only](memory_td_extractor_one_is_the_spike_v7_with_critic_f_and_the_critic_system_is_the_guard_hat_only) | Extractor row 1 = spike v7 + critic F; critic system is the guard hat, task block from the checks |
 | [memory_td_text_cuts_are_config_sizes_and_extractor_two_replaces_row_one](memory_td_text_cuts_are_config_sizes_and_extractor_two_replaces_row_one) | Four text cuts become config sizes; extractor row 2 is active, row 1 is dead |
+| [memory_td_phase_2a_only_searches_neighbours_and_leaves_no_hit_so_the_cosine_cut_is_gone](memory_td_phase_2a_only_searches_neighbours_and_leaves_no_hit_so_the_cosine_cut_is_gone) | Phase 2a is a read-only neighbour search with record_hits off; the 0.95 cut never fired, so it is gone |
+| [memory_td_distilled_is_set_for_a_whole_session_at_the_end_to_the_run_time](memory_td_distilled_is_set_for_a_whole_session_at_the_end_to_the_run_time) | A session is the unit of distilled: closed once, with the run time, only when nothing failed; redone whole otherwise |
+| [memory_td_ref_only_saves_nothing_because_a_ref_needs_two_notes](memory_td_ref_only_saves_nothing_because_a_ref_needs_two_notes) | ref_only writes nothing: a ref links two notes and the candidate makes none |
+| [memory_td_world_errors_return_as_values_and_programmer_errors_are_rethrown](memory_td_world_errors_return_as_values_and_programmer_errors_are_rethrown) | Store errors become a failure value; ContractError, TypeError and ReferenceError are rethrown |
+| [memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending](memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending) | --max-saved caps the writes of a run; a capped session stays pending and is redone |
+| [memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores) | td tests use in-memory stubs; an end-to-end test checks the stores, since bare calls cannot tell a save from a failure |
 | [memory_tl_extraction_quote_may_be_blank_only_when_a_check_dropped_it](memory_tl_extraction_quote_may_be_blank_only_when_a_check_dropped_it) | A blank quote is allowed only on a check drop, so those drops can be logged |
 | [memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store](memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store) | apiUrl() is read per call; a test server always wins over the real store |
 | [skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role](skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role) | Step 6 is two th runs through th_write.sh: black hat for tests, white for bodies, GLM-5.3 fixed |

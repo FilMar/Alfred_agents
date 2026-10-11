@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-10-09
+updated: 2026-10-11
 ---
 
 ## Tasks
@@ -23,12 +23,16 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] Career coach: consult memory before each answer. No decision yet.
 - [ ] Episode index over tl (`tl_episodes`, `tl search`), after the extraction pipeline is stable. [detail](memory_episode_summaries_are_a_derived_index_over_tl)
 - [x] Extractor as data in tl: `extractor` (immutable JSON config) and `extractions` (every candidate), with the real distiller. [detail](memory_extractor_is_data_immutable_config_rows_in_tl)
-- [ ] Build the extractor in shadow as `tools/td` over `pi-ai`: phases 0 to 2b, writes only to `extractions`. Settle in-session repeats and the 0.95 cut. [detail](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first)
-- [ ] td open point: which sessions `td distill` takes. One by hand, or every session with pending exchanges? In shadow the queue never empties.
+- [x] Build the extractor as `tools/td` over `pi-ai`, in shadow and in active mode. [detail](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first)
+- [x] td open point: which sessions `td distill` takes. Every session with pending exchanges, or one. [detail](memory_td_distilled_is_set_for_a_whole_session_at_the_end_to_the_run_time)
 - [x] td open point: components 5 to 10 as small classes or as plain functions. Plain functions from 6 on. [detail](skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes)
-- [ ] td open point: search in `tb` and `ti`. Phase 1 imports `tb` as a module for the vocabulary; the same likely fits the search of component 9.
-- [ ] td: config (1), registry (2), session reader (3), model caller (4), episodes (5), extraction (6), phase 1 checks (7), critic F (8) and recorder (12) are done. Next: a minimal Distiller (13) on one session, before 9 to 11.
-- [ ] td open point: episodes are not saved, and a split is not deterministic. A run that restarts mid-session gets a new map. Decide with Save (11) or the Distiller (13). [detail](memory_td_episodes_split_a_session_in_one_call_checked_for_full_cover_and_listed_as_json_strings)
+- [x] td open point: search in `tb` and `ti`. Imported as modules, no hit recorded. [detail](memory_td_phase_2a_only_searches_neighbours_and_leaves_no_hit_so_the_cosine_cut_is_gone)
+- [x] td: all 14 components are built. First live run on the Rasp done 2026-10-11. [detail](memory_distiller_td_is_fourteen_components_behind_one_entry_point)
+- [x] td: the 0.95 cut is dropped. [detail](memory_td_phase_2a_only_searches_neighbours_and_leaves_no_hit_so_the_cosine_cut_is_gone)
+- [x] td: `ref_only` saves nothing. [detail](memory_td_ref_only_saves_nothing_because_a_ref_needs_two_notes)
+- [x] td: `--max-saved` caps the writes of a run. [detail](memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending)
+- [x] `tl extractions` command: list the candidates by extractor, run or exchange.
+- [x] td open point: a split is not deterministic, so a session is redone whole. [detail](memory_td_distilled_is_set_for_a_whole_session_at_the_end_to_the_run_time)
 - [ ] td: change the extraction prompt so the model may propose new tags beside known ones. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - [ ] td: after the first shadow runs, read the proposed tags in `extractions` and pick a guard for semantic tag synonyms. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - [ ] ritchie `check_body_diff.py` reads a `return` inside a callback (a `sort` comparator) as one that skips a postcondition. Ignore returns in nested functions.
@@ -36,6 +40,17 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] Drop the `client.ts?extractions` import trick in `tests/tl_extractions.test.ts`: the client now reads its url on each call. [detail](memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store)
 - [ ] `errorMessage` has three copies, in `tb`, `ti` and `th`. Pick one home for it. [detail](style_contract_helpers_live_in_one_shared_module)
 - [ ] Decay of `provvisoria` notes: with critic F about 16 of 75 bad candidates pass. No decision yet. [detail](memory_critic_is_f_textbook_as_a_test_and_no_record_question)
+- [ ] Build the path from `provvisoria` to `promossa`.
+- [ ] td: run two or three more sessions in shadow, then active, and tune.
+- [ ] td: `append` can add a `do` that its rule's `if` does not cover. Make it prudent, or let `ti` edit a `do`.
+- [ ] td: the critic lets a generic rule pass. Add a too-generic check for rules.
+- [ ] td: one session saved two near-equal notes. The session list is not enough.
+- [ ] td phase 3: bridges between saved notes. [detail](memory_bridges_by_shape_are_judged_by_reading)
+- [ ] Run `td distill --active` on a timer, then retire erodoto. [detail](memory_distillation_stays_manual_for_now)
+- [ ] Add a limit to the extractions API, then to `tl extractions`.
+- [ ] Remove `Outcome.nearIdentical` and `NEAR_IDENTICAL`. No caller is left.
+- [ ] Decide where the td spec log lives: `tools/td` or the wiki.
+- [ ] Spike files are deleted. Old decisions still list them as sources. Decide how to mark them.
 
 ### th
 
@@ -71,6 +86,9 @@ Design only, no code yet.
 
 - [ ] Router pass: shrink each multi-direction skill to a dispatch table. [detail](skill_router_pass_planned)
 - [ ] Ritchie: contract messages carry the values, in all four languages, and `contract_report.py` checks the format. [detail](skill_ritchie_contract_messages_carry_values)
+- [ ] Ritchie: add an integration net for code that turns errors into values. [detail](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores)
+- [ ] Ritchie: make the mutant run a script, not a hand step.
+- [ ] Ritchie: test runs time out on files with heavy fixtures. Give the run a fixture helper.
 
 ## Cross-references
 
