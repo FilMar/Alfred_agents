@@ -74,6 +74,7 @@ Every row a transcript yields is `kind: chat`, written by `alfredo`.
 | `tl show <exchange>` | one exchange with its full input and output. `--tools` adds the tool calls and results |
 | `tl cost` | sums tokens by session, day or model |
 | `tl pending` | exchanges with `distilled IS NULL`, the distiller's queue |
+| `tl extractions` | the candidates the distiller wrote: where each dropped, its probabilities, its verdict. Filters: `--extractor`, `--run`, `--exchange`, `--kept` |
 | `tl distilled <id...>` | sets `distilled` to now, so the exchanges leave the queue |
 | `tl serve` | runs the HTTP service (on the Rasp) |
 

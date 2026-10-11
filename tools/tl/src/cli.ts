@@ -132,6 +132,25 @@ program
     }
   });
 
+// ─── extractions ──────────────────────────────────────────────────────────────
+
+program
+  .command("extractions")
+  .description("Candidates the distiller wrote, with where each one dropped and its verdict")
+  .option("--extractor <id>", "Only this extractor row")
+  .option("--run <iso>", "Only this run")
+  .option("--exchange <id>", "Only this exchange")
+  .option("--kept", "Only the candidates no check or critic dropped")
+  .action(async (opts) => {
+    const extractor = opts.extractor === undefined ? undefined : parseInt(opts.extractor, 10);
+    if (extractor !== undefined && !Number.isInteger(extractor)) die("--extractor must be an extractor row id.");
+    try {
+      out(await client.fetchExtractions({ extractor_id: extractor, run: opts.run, exchange_id: opts.exchange, kept: opts.kept ? true : undefined }));
+    } catch (err) {
+      die(errorMessage(err));
+    }
+  });
+
 // ─── distilled ────────────────────────────────────────────────────────────────
 
 program
