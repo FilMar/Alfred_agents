@@ -8,6 +8,13 @@ updated: 2026-10-09
 
 One line per task. The reason and the plan live in the linked decision.
 
+### tools
+
+- [ ] P0: JSON Schema contract layer for tb/ti/th/tl CLI output, CI-checked. [detail](core_mcp_not_adopted_cli_json_schemas_first)
+- [ ] P1: scoped command whitelist and audit logging for shell invocations (prompt injection mitigation). [detail](core_mcp_not_adopted_cli_json_schemas_first)
+- [ ] P1: fix SQLite race conditions and zombie process cleanup in th. [detail](core_mcp_not_adopted_cli_json_schemas_first)
+- [ ] P2: write the binary trigger rule in ti (second independent client mounts tools → build MCP stdio shim). [detail](core_mcp_not_adopted_cli_json_schemas_first)
+
 ### memory
 
 - [ ] Learn from outcomes: procedural memory for members and skills. [detail](memory_procedural_six_gaps)
@@ -20,7 +27,7 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] td open point: which sessions `td distill` takes. One by hand, or every session with pending exchanges? In shadow the queue never empties.
 - [x] td open point: components 5 to 10 as small classes or as plain functions. Plain functions from 6 on. [detail](skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes)
 - [ ] td open point: search in `tb` and `ti`. Phase 1 imports `tb` as a module for the vocabulary; the same likely fits the search of component 9.
-- [ ] td: config (1), registry (2), session reader (3), model caller (4), episodes (5), extraction (6), phase 1 checks (7) and recorder (12) are done. Next: 8 (critic), then a minimal Distiller on one session, before 9 to 11.
+- [ ] td: config (1), registry (2), session reader (3), model caller (4), episodes (5), extraction (6), phase 1 checks (7), critic F (8) and recorder (12) are done. Next: a minimal Distiller (13) on one session, before 9 to 11.
 - [ ] td open point: episodes are not saved, and a split is not deterministic. A run that restarts mid-session gets a new map. Decide with Save (11) or the Distiller (13). [detail](memory_td_episodes_split_a_session_in_one_call_checked_for_full_cover_and_listed_as_json_strings)
 - [ ] td: change the extraction prompt so the model may propose new tags beside known ones. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - [ ] td: after the first shadow runs, read the proposed tags in `extractions` and pick a guard for semantic tag synonyms. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
