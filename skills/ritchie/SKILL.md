@@ -43,13 +43,10 @@ rule that is stricter than this skill wins. Check
 Present the principle that governs the work (usually P1 plus the two
 that bite hardest here) and have the user confirm or amend it.
 
-Then write a spec file next to the work, never in the code: the domain
-in the user's words — the entities, who commands whom, and the
-invariants of the domain at a high level. Each entity: what it knows,
-what it does not know, who commands it.
-
-The file persists. It is the decision log: the work can resume from it,
-and the review at the end checks the code against it.
+Then write `SPEC.md` next to the work, never in the code: the domain in
+the user's words, in Italian, on the shape of
+`references/spec-template.md`. It is committed with the branch. While
+the run is open, it is the decision log the work resumes from.
 
 The user says "ok". That is the only approval in the middle of the
 work: none.
@@ -85,11 +82,17 @@ scripts/contract_report.py <path>
 Then the project's formatter and linter at their strictest setting,
 then the test suite. All three green before commit.
 
-Present to the user: the spec file, the contract report, the list of
-`derive?` contracts with the principle each one was derived from, and
-the test results. The user reads the code here — this is the moment
-the user keeps the ability to judge it. The user approves, or sends
-the work back with one comment; only the involved part repeats.
+Write `REVIEW.md` next to the work, in Italian, on the shape of
+`references/review-template.md`, and present it. The user reads the
+code here — this is the moment the user keeps the ability to judge it.
+The user approves, or sends the work back with one comment; only the
+involved part repeats, and the review is updated each round.
+
+On approval, the scaffolding is removed. If the project has a `.wiki/`,
+omero files the decision as a wiki page — the why, in English, immutable,
+with `sources` pointing at the pair — and the pair leaves the tree; git
+keeps the raw text in the branch history. Without a `.wiki/`, the pair
+stays: it is the only record.
 
 ## The rules
 
