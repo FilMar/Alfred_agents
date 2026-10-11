@@ -5,6 +5,7 @@
   "private": true,
   "bin": {
     "tb": "./tools/tb/src/cli.ts",
+    "td": "./tools/td/src/cli.ts",
     "th": "./tools/th/src/cli.ts",
     "ti": "./tools/ti/src/cli.ts",
     "tl": "./tools/tl/src/cli.ts"
