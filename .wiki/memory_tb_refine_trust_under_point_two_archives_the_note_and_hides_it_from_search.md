@@ -25,5 +25,5 @@ Hiding comes before deleting for one reason: a hit measures retrieval, not value
 
 ## Cross-references
 
-- [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_replaces_the_promotion_switch](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_replaces_the_promotion_switch) — where `trust` comes from
+- [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start) — where `trust` comes from
 - [memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first](memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first) — what happens after six months

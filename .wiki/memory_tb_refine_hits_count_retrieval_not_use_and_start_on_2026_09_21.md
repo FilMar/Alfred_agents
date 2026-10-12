@@ -30,5 +30,5 @@ The data on 2026-10-11 (793 notes) shows the signal is useful and noisy. 201 not
 ## Cross-references
 
 - [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) — the hook that adds most hits
-- [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_replaces_the_promotion_switch](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_replaces_the_promotion_switch) — how the counters enter `trust`
+- [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start) — how the counters enter `trust`
 - [memory_td_phase_2a_only_searches_neighbours_and_leaves_no_hit_so_the_cosine_cut_is_gone](memory_td_phase_2a_only_searches_neighbours_and_leaves_no_hit_so_the_cosine_cut_is_gone) — why `td` records no hits
