@@ -87,7 +87,7 @@ After scanning, classify opportunities in priority order:
 
 ### 3. Distil before saving
 
-A new synthesis follows [../references/note_quality.md](../references/note_quality.md): the `why` test, the Italian text, the duplicate and contradiction checks, the fields and the purity of the text. Read it before any `tb save`.
+A new synthesis follows [../platone/references/note_quality.md](../platone/references/note_quality.md): the `why` test, the Italian text, the duplicate and contradiction checks, the fields and the purity of the text. Read it before any `tb save`.
 
 If you cannot write a `why` that holds without mentioning the conversation, do not save. The concept is not mature yet.
 

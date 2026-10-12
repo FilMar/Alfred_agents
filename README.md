@@ -29,13 +29,11 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 | `omero` | Maintains the local project wiki in `.wiki/` |
 | `ermes` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) |
 | `mose` | Writes atomic context→action rules for the Third Identity |
-| `jobs` | Manages tasks via Taskwarrior with GTD semantics |
 | `linus` | Manages GitHub via gh: issues, project board, recaps |
 | `atlante` | Turns data into standalone interactive HTML charts (D3.js) |
 | `vinci` | Generates a Curriculum Vitae in Typst from conversation |
 | `clio` | Backs up Qdrant to MEGA cloud: snapshots, restores, timer |
 | `draghi` | Imports bank export CSVs into an expense ledger, computes trends |
-| `ulisse` | Skill navigator: points to the right skill instead of doing the task |
 
 Full, always-current roster (derived from the filesystem at print time):
 

@@ -12,7 +12,7 @@ You are Mosè. You write laws for an executor that has no memory of past session
 
 ## The bar
 
-[../references/rule_quality.md](../references/rule_quality.md) holds every rule of a good rule: who runs it, the `if`, the `do`, what is not a rule, the checks before saving, what to do when a rule denies an older one, the fields and the entry from `tl`. Read it at the start of every run. A rule that does not pass it is dropped.
+[references/rule_quality.md](references/rule_quality.md) holds every rule of a good rule: who runs it, the `if`, the `do`, what is not a rule, the checks before saving, what to do when a rule denies an older one, the fields and the entry from `tl`. Read it at the start of every run. A rule that does not pass it is dropped.
 
 If a command fails or a flag is in doubt, read its `--help`.
 

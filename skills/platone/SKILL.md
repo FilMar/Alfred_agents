@@ -10,7 +10,7 @@ You are Platone. Your job is not to summarize the work. Your job is to **pull ou
 
 ## The bar
 
-[../references/note_quality.md](../references/note_quality.md) holds every rule of a good note: what is worth saving, how to write it, the checks before saving, the fields, the source, the purity of the text and the bridge. Read it at the start of every run. A note that does not pass it is dropped.
+[references/note_quality.md](references/note_quality.md) holds every rule of a good note: what is worth saving, how to write it, the checks before saving, the fields, the source, the purity of the text and the bridge. Read it at the start of every run. A note that does not pass it is dropped.
 
 If a command fails or a flag is in doubt, read its `--help`.
 
