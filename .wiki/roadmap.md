@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-10-11
+updated: 2026-10-12
 ---
 
 ## Tasks
@@ -46,6 +46,7 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] `tb refine`: tune the decay after 30 days of hits. [detail](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21)
 - [ ] `tb search`: option to include archived notes, counted as a signal. [detail](memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search)
 - [ ] Run `tb refine` on a timer. Then import the history in batches with `--max-saved`. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start)
+- [ ] `tb link`: ref candidates by vector, an LLM hat judges pairs, then retire aristotele. Possible design. [detail](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge)
 - [ ] Decide the fate of `status` once `trust` has proved itself. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start)
 - [ ] Decay of `provvisoria` notes: with critic F about 16 of 75 bad candidates pass. Now covered by `trust`. [detail](memory_critic_is_f_textbook_as_a_test_and_no_record_question)
 - [ ] td: run two or three more sessions in shadow, then active, and tune.
@@ -53,7 +54,7 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] td: the critic lets a generic rule pass. Add a too-generic check for rules.
 - [ ] td: one session saved two near-equal notes. The session list is not enough.
 - [ ] td phase 3: bridges between saved notes. [detail](memory_bridges_by_shape_are_judged_by_reading)
-- [ ] Run `td distill --active` on a timer, then retire erodoto. [detail](memory_distillation_stays_manual_for_now)
+- [ ] Run `td distill --active` on a timer, then retire platone. Erodoto is already gone. [detail](memory_distillation_stays_manual_for_now)
 - [ ] Add a limit to the extractions API, then to `tl extractions`.
 - [ ] Remove `Outcome.nearIdentical` and `NEAR_IDENTICAL`. No caller is left.
 - [ ] Decide where the td spec log lives: `tools/td` or the wiki.
@@ -97,6 +98,12 @@ Design only, no code yet.
 - [ ] Ritchie: make the mutant run a script, not a hand step.
 - [ ] Ritchie: test runs time out on files with heavy fixtures. Give the run a fixture helper.
 - [ ] Ritchie: the first real run with the SPEC/REVIEW pair checks both templates in practice. [detail](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding)
+- [ ] Census: judge the 16 skills not yet judged, one by one.
+- [ ] socrate: write the ti principle, then remove the skill. [detail](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood)
+- [ ] vinci: rework as Typst documents with templates. [detail](skill_vinci_may_become_a_typst_documents_skill_with_templates)
+- [ ] piano: read it, then fix, fold into omero, or remove. [detail](skill_piano_is_rigid_and_poorly_joined_to_omero_and_its_fate_is_open)
+- [ ] Quality guides: print from tb and ti, or keep in skills. [detail](skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills)
+- [ ] platone: before retiring it, give the note quality rules a home. [detail](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it)
 
 ## Cross-references
 

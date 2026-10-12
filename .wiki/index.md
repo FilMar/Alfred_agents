@@ -1,7 +1,7 @@
 ---
 tags: [pi, index]
 sources: []
-updated: 2026-10-11
+updated: 2026-10-12
 ---
 
 ## Pages
@@ -82,6 +82,16 @@ updated: 2026-10-11
 | [memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search](memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search) | trust under 0.2 archives a note: hidden from search, reversible, archived_at |
 | [memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first](memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first) | Six months in the archive, counted from archived_at, then delete after an append-only log line |
 | [memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21) | What counts as a hit, what a hit means, and why no new field yet |
+| [memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge) | Possible design, no code: `tb link` finds ref candidates by vector, one LLM hat judges pairs, refs carry an origin; hubs later |
+| [skill_jobs_removed_because_taskwarrior_is_no_longer_used](skill_jobs_removed_because_taskwarrior_is_no_longer_used) | Removed 2026-10-12: Taskwarrior is no longer used |
+| [skill_ulisse_removed_because_skill_descriptions_already_route](skill_ulisse_removed_because_skill_descriptions_already_route) | Removed 2026-10-12: skill descriptions already route a task |
+| [skill_erodoto_removed_because_td_replaces_it_and_it_only_batched_platone_and_mose](skill_erodoto_removed_because_td_replaces_it_and_it_only_batched_platone_and_mose) | Removed 2026-10-12: td replaces it; it only batched platone and mose |
+| [skill_quality_references_moved_into_platone_and_mose](skill_quality_references_moved_into_platone_and_mose) | The shared references folder is gone; each file sits in its skill |
+| [skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood) | Idea: socrate becomes a ti rule, then the skill is removed |
+| [skill_vinci_may_become_a_typst_documents_skill_with_templates](skill_vinci_may_become_a_typst_documents_skill_with_templates) | Idea: vinci becomes Typst documents with templates; the CV is one |
+| [skill_piano_is_rigid_and_poorly_joined_to_omero_and_its_fate_is_open](skill_piano_is_rigid_and_poorly_joined_to_omero_and_its_fate_is_open) | Open question: fix piano, fold it into omero, or remove it |
+| [skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it) | Idea: retire platone with the timer; keep the note quality rules |
+| [skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills](skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills) | Idea: tb guide and ti guide print the quality rules; skills keep none |
 | [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) | GLM ignores format schemas; JSON from the prompt, checked by code, one retry |
 | [memory_jev_like_decision_models_are_candidates_for_classification](memory_jev_like_decision_models_are_candidates_for_classification) | tev1 and nimble: local decision models for the classification steps; not adopted until tested |
 | [orchestrator_and_cockpit_removed](orchestrator_and_cockpit_removed) | Both tools removed; unused code was breaking the test suite |
