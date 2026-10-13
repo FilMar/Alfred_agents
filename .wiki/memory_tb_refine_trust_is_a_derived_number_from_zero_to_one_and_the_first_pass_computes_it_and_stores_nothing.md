@@ -50,6 +50,6 @@ The weights and the half-life are guesses. They are not fixed until the dry run 
 - [memory_score_is_always_the_engine_cosine](memory_score_is_always_the_engine_cosine) — why `trust` is a separate number
 - [memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21) — what the inputs mean
 - [memory_tb_refine_trust_measures_vitality_not_quality_so_the_archive_comes_before_any_delete](memory_tb_refine_trust_measures_vitality_not_quality_so_the_archive_comes_before_any_delete) — what the number does not say
-- [memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search](memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search) — the first consequence of a low value
+- [memory_tb_refine_an_archived_note_is_left_out_of_the_hook_only_and_a_deliberate_search_still_finds_it](memory_tb_refine_an_archived_note_is_left_out_of_the_hook_only_and_a_deliberate_search_still_finds_it) — the first consequence of a low value
 - [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question) — the open question on the life of provisional notes
 - [.memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start](.memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start) — the version that said each note gets a `trust` field

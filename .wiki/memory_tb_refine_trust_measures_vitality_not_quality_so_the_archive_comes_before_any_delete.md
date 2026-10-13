@@ -31,5 +31,5 @@ The first dry run is the test. If the notes under 0.2 include notes the user kno
 ## Cross-references
 
 - [memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21) — what a hit means, and its noise
-- [memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search](memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search) — the archive comes first because of this
-- [memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first](memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first) — the delete, with its log line
+- [memory_tb_refine_an_archived_note_is_left_out_of_the_hook_only_and_a_deliberate_search_still_finds_it](memory_tb_refine_an_archived_note_is_left_out_of_the_hook_only_and_a_deliberate_search_still_finds_it) — the archive comes first because of this
+- [memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first) — the delete, with its log line

@@ -17,4 +17,4 @@ Alternative that lost: sort by `when`. It puts the oldest first, but the oldest 
 
 ## Cross-references
 
-- [memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search](memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search) — what happens to the notes in this list once `--apply` exists
+- [memory_tb_refine_an_archived_note_is_left_out_of_the_hook_only_and_a_deliberate_search_still_finds_it](memory_tb_refine_an_archived_note_is_left_out_of_the_hook_only_and_a_deliberate_search_still_finds_it) — what happens to the notes in this list once `--apply` exists
