@@ -38,7 +38,7 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] ritchie `check_body_diff.py` reads a `return` inside a callback (a `sort` comparator) as one that skips a postcondition. Ignore returns in nested functions.
 - [ ] Put `tests/` in a `tsc` project, so a type error in a test is caught.
 - [ ] Drop the `client.ts?extractions` import trick in `tests/tl_extractions.test.ts`: the client now reads its url on each call. [detail](memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store)
-- [ ] `errorMessage` has three copies, in `tb`, `ti` and `th`. Pick one home for it. [detail](style_contract_helpers_live_in_one_shared_module)
+- [ ] Move the helpers copied between tools to one shared module: `errorMessage` (3 copies), `die` and `out` (all five CLIs), `normalizeTags`, `ensureCollection` and `deletePoints` (`tb` and `ti`), `allNonBlank` (3 copies in `td`), `isPositiveInt` (`tb`, while `contract` has it). [detail](style_contract_helpers_live_in_one_shared_module)
 - [x] `tb refine`: add `trust`, computed from the hit counters, dry run first. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing)
 - [ ] `tb refine --apply`: archive notes under trust 0.2, with `archived_at`. [detail](memory_tb_refine_an_archived_note_is_left_out_of_the_hook_only_and_a_deliberate_search_still_finds_it)
 - [ ] `tb refine`: delete a note archived with no signal for a year, log line first. Not before 2027-09-21. [detail](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first)
@@ -57,9 +57,9 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] td phase 3: bridges between saved notes. [detail](memory_bridges_by_shape_are_judged_by_reading)
 - [ ] Run `td distill --active` on a timer, then retire platone. Erodoto is already gone. [detail](memory_distillation_stays_manual_for_now)
 - [ ] Add a limit to the extractions API, then to `tl extractions`.
-- [ ] Remove `Outcome.nearIdentical` and `NEAR_IDENTICAL`. No caller is left.
-- [ ] Decide where the td spec log lives: `tools/td` or the wiki.
-- [ ] Spike files are deleted. Old decisions still list them as sources. Decide how to mark them.
+- [ ] Remove `Outcome.nearIdentical` and `NEAR_IDENTICAL`. Only tests call them, and 0 of 293 stored extraction rows carry `near_identical`, so the `tl` validator can drop it too.
+- [x] Decide where the td spec log lives: the wiki. The ritchie close files the SPEC/REVIEW pair as decision pages.
+- [ ] About 37 `sources` point to files that are gone (`ROADMAP_MEMORIA.md` in 9 pages, the spike files in 9, `.wiki/architettura.md` in 4, and more). Pick one rule for a source that left the tree, for example the commit hash. The SPEC/REVIEW pairs are in git history on purpose.
 
 ### th
 
@@ -105,6 +105,29 @@ Design only, no code yet.
 - [ ] piano: read it, then fix, fold into omero, or remove. [detail](skill_piano_is_rigid_and_poorly_joined_to_omero_and_its_fate_is_open)
 - [ ] Quality guides: print from tb and ti, or keep in skills. [detail](skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills)
 - [ ] platone: before retiring it, give the note quality rules a home. [detail](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it)
+
+### cleanup
+
+Found by an audit on 2026-10-13. Each line names the path that proves it.
+
+- [ ] **Git:** pick the trunk. `origin/HEAD` points to `master`, last commit 2026-05-11. `main` is 316 commits ahead.
+- [ ] **Git:** delete the 16 local branches already merged into `main`, and the same on origin.
+- [ ] **Git:** review, then delete four old unmerged branches: `master`, `feature/alfred-pi`, `feature/cockpit-skeleton`, `refactor/no-more-agents`. Delete `origin/release` too.
+- [ ] **Repo:** `package.json` has `module` pointing to a missing `index.ts`. Drop `croner`, `js-yaml`, `youtube-transcript` and `@types/js-yaml`: no file imports them.
+- [ ] **Repo:** `setup.sh` links `tb`, `th` and `ti` only. Add `tl` and `td`. `td` is not on the PATH today. Keep one install path: `tb` resolves to `~/.bun/bin`, the others to `~/.local/bin`.
+- [ ] **Repo:** gather the service units in one folder: `tools/tb/tb.service`, `tools/ti/ti.service`, `tools/tl/deploy/tl.service`. `tl.service` still says `WorkingDirectory=%h/Alfred_agents`.
+- [ ] **Repo:** delete `tools/ti/ROADMAP.md` and `tools/tl/ROADMAP.md`: every box is open and the tools exist. The `tl` one points to a missing `ROADMAP_MEMORIA.md`. Check the two READMEs against the CLIs.
+- [ ] **Repo:** `scripts/qdrant_alias_point.py`, `qdrant_clone.py` and `qdrant_backup.sh`: nothing references them. One-off migrations, or replaced by `clio`. Keep or delete.
+- [ ] **Repo:** decide four loose items: `proposta-riorganizzazione-llm-wiki.md` at the repo root (untracked), `skills/synced` (4.6 MB, ignored by git, writer unknown), the root `justfile` that repeats the `package.json` scripts, and `.pi/settings.json` (tracked, holds `{}`).
+- [ ] **Code:** delete `knownExchangeIds` in `tools/tl/src/db.ts`: no use anywhere.
+- [ ] **Code:** remove the repeated assert in `tools/td/src/session.ts` lines 167-168.
+- [ ] **Code:** the `tl` parsers `claude.ts` and `pi.ts` share 13 function names (`parse`, `sessionOf`, `modelOf`, `sumTokens`, `toExchange` and others). Find what is the same and move it.
+- [ ] **Code:** confirm by hand, then delete or document `tl cost`, `th models` and `th get`. No skill, hook or page uses them.
+- [ ] **Rules and skills:** `ti` rules that name removed skills: `0eb0f8db` and `4961928a` (erodoto), `8898d87e` (jobs). Rewrite or delete them with mose.
+- [ ] **Rules and skills:** retire efesto `references/MIGRATION.md` and the justfile checks in `lint_skill.py`: no skill has a justfile left.
+- [ ] **Wiki:** read, then replace or mark these live pages that describe removed parts: `rasp_services_provisioning_order`, `orchestrator_tailscale_perimeter_matrix_bot`, `memory_tb_ti_on_rasp`, `th_sandbox_bwrap_fixed_binds`, `skill_router_pass_planned`, `agents_named_after_famous_figures`. Proof: [orchestrator_and_cockpit_removed](orchestrator_and_cockpit_removed) and [skill_ulisse_removed_because_skill_descriptions_already_route](skill_ulisse_removed_because_skill_descriptions_already_route).
+- [ ] **Wiki:** `memory_human_gate_is_the_bottleneck` and `memory_critic_is_f_textbook_as_a_test_and_no_record_question` still say a note enters as `provvisoria`. `memory_distillation_stays_manual_for_now` has premises that `td` already solved. Replace the three with the decision on the timer. The roadmap line on the decay of `provvisoria` notes goes with them.
+- [ ] **Wiki:** clean this page: drop the `### cockpit` section (all struck), and drop the `[x]` lines, since git is the log.
 
 ## Cross-references
 
