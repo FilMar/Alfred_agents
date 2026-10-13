@@ -1,4 +1,4 @@
-import { assert, isUnit } from "../../contract/contract.js";
+import { assert, isUnit } from "../../common/contract.js";
 import type { Note } from "./types.js";
 
 export const COUNTERS_START = new Date("2026-09-21T00:00:00.000Z");

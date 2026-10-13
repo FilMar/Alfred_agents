@@ -1,6 +1,6 @@
-import { assert, isNonBlank, isPositiveInt, isRecord, isUnit, sameJson } from "../../contract/contract.js";
+import { assert, isNonBlank, isPositiveInt, isRecord, isUnit, sameJson } from "../../common/contract.js";
 import { putExtractions } from "../../tl/src/client.js";
-import { ID_SHAPE, NEAR_IDENTICAL, TIMESTAMP_SHAPE, validateNewExtraction } from "../../tl/src/types.js";
+import { ID_SHAPE, TIMESTAMP_SHAPE, validateNewExtraction } from "../../tl/src/types.js";
 import type { NewExtraction } from "../../tl/src/types.js";
 import type { Checked, NoteCandidate, NoteCandidateJson, RuleCandidate, RuleCandidateJson } from "./candidate.js";
 
@@ -52,13 +52,6 @@ export class Outcome {
     const droppedBy = drop === null ? null : `critic:${drop}`;
     const result = new Outcome({ ...this.#s, probabilities: Object.freeze({ ...probabilities }), droppedBy });
     assert(result.#s.droppedBy === (drop === null ? null : `critic:${drop}`), () => `Outcome.judged: a critic drop is recorded as critic:<name>, drop=${drop}`);
-    return result;
-  }
-
-  nearIdentical(): Outcome {
-    assert(this.isOpen(), () => `Outcome.nearIdentical: only an open candidate is dropped, droppedBy=${this.#s.droppedBy}`);
-    const result = new Outcome({ ...this.#s, droppedBy: NEAR_IDENTICAL });
-    assert(result.#s.droppedBy === NEAR_IDENTICAL, "Outcome.nearIdentical: the drop is near_identical");
     return result;
   }
 

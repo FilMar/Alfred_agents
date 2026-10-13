@@ -9,9 +9,9 @@ The `tb` and `ti` CLIs hold no local state. Notes and identity entries live as p
 
 ## Why
 
-Stateless clients make deployment a URL change, not a data migration. There is nothing to sync because there is only one store. A local state store would need a reconciliation step between every copy — the exact work that makes personal wikis and memory systems rot. See [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) for the live deployment.
+Stateless clients make deployment a URL change, not a data migration. There is nothing to sync because there is only one store. A local state store would need a reconciliation step between every copy — the exact work that makes personal wikis and memory systems rot. See [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there) for the live deployment.
 
 ## Cross-references
 
-- [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) — the backing services and where they live
+- [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there) — the backing services and where they live
 - [style_dual_entrypoint](style_dual_entrypoint) — how `tb`/`ti` expose the same logic over CLI and HTTP

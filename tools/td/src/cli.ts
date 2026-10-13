@@ -2,21 +2,12 @@
 
 import { Command } from "commander";
 
-import { ContractError } from "../../contract/contract.js";
-import { errorMessage } from "../../tb/src/types.js";
+import { ContractError } from "../../common/contract.js";
 import { distillAll, distillerOf } from "./distiller.js";
 import type { ExchangeReport, SessionReport } from "./distiller.js";
 import { Version } from "./registry.js";
 import { pendingSessions } from "./session.js";
-
-function out(data: unknown): void {
-  process.stdout.write(JSON.stringify(data, null, 2) + "\n");
-}
-
-function die(message: string): never {
-  process.stderr.write(`Error: ${message}\n`);
-  process.exit(1);
-}
+import { die, errorMessage, out } from "../../common/cli.js";
 
 function exchangeSummary(report: ExchangeReport) {
   return {

@@ -4,18 +4,11 @@ import { Command } from "commander";
 import { checkHealth, EMBED_MODEL } from "../../tb/src/infra.js";
 import * as identity from "./identity.js";
 import { serveApi, API_PORT } from "./api.js";
-import { normalizeTags, errorMessage } from "./types.js";
+import { collect, die, errorMessage, out } from "../../common/cli.js";
+import { normalizeTags } from "../../common/tags.js";
+
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
-
-function out(data: unknown): void {
-  process.stdout.write(JSON.stringify(data, null, 2) + "\n");
-}
-
-function die(message: string): never {
-  process.stderr.write(`Error: ${message}\n`);
-  process.exit(1);
-}
 
 // ─── Health guard ─────────────────────────────────────────────────────────────
 
@@ -35,11 +28,6 @@ async function requireServices(opts: { needsEmbedding?: boolean } = {}): Promise
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function collect(val: string, acc: string[]): string[] {
-  acc.push(val);
-  return acc;
-}
 
 // ─── Programma ────────────────────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-import { assert, isNonBlank, isPositiveInt, isRecord } from "../../contract/contract.js";
+import { assert, isNonBlank, isPositiveInt, isRecord } from "../../common/contract.js";
 import type { Extractor } from "./config.js";
 import { ModelCaller } from "./model_caller.js";
 import type { JsonCheck, ModelAnswer } from "./model_caller.js";

@@ -13,6 +13,10 @@ export function isNonBlank(text: string): boolean {
   return text.trim().length > 0;
 }
 
+export function allNonBlank(items: readonly string[]): boolean {
+  return items.every(isNonBlank);
+}
+
 export function isPositiveInt(value: number): boolean {
   return Number.isInteger(value) && value > 0;
 }

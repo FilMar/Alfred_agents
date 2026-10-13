@@ -1,4 +1,4 @@
-import { assert, isNonBlank } from "../../contract/contract.js";
+import { assert, isNonBlank } from "../../common/contract.js";
 import type { Extractor } from "./config.js";
 import { critique, kindOf } from "./critic.js";
 import type { Candidate, Judgement } from "./critic.js";

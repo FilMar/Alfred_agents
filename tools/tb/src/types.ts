@@ -1,4 +1,4 @@
-import { assert } from "../../contract/contract.js";
+import { assert } from "../../common/contract.js";
 
 // ─── Enum constants ─────────────────────────────────────────────────────
 
@@ -36,16 +36,6 @@ export function isEvidence(kind: NoteType): boolean {
 /** Type guard: validates an arbitrary kind against the NOTE_TYPES enum. */
 export function isValidKind(kind: string): kind is NoteType {
   return (NOTE_TYPES as readonly string[]).includes(kind);
-}
-
-/** Normalizes a tag list: split on commas, trim, drop empties. */
-export function normalizeTags(tags: string[]): string[] {
-  return tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean);
-}
-
-/** Extracts a readable message from an unknown error type. */
-export function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 /** Canonical text to embed for a note: context + content. */

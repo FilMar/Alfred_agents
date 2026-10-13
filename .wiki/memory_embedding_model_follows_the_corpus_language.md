@@ -51,5 +51,5 @@ price of every future model change, and it is low enough not to be an argument.
 
 - [The alias makes the migration reversible](memory_alias_makes_migration_reversible)
 - [Score cutoffs belong to the model](memory_score_cutoffs_belong_to_the_model)
-- [tb and ti on the Pi](memory_tb_ti_on_rasp) — that page argues feasibility with a
+- [tb and ti on the Pi](memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there) — that page argues feasibility with a
   137M model. v2-moe is 475M. If Ollama runs on the Pi, the number needs a new measure.

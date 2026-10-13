@@ -2,24 +2,15 @@
 
 import { Command } from "commander";
 
-import { assert, ContractError } from "../../contract/contract.js";
-import { errorMessage } from "../../tb/src/types.js";
+import { assert, ContractError } from "../../common/contract.js";
 import { API_PORT, serveApi } from "./api.js";
 import * as client from "./client.js";
 import { ingestAll, ingestSession, ingestTranscript } from "./ingest.js";
 import { dayOf, HARNESSES, sumBy, TIMESTAMP_SHAPE } from "./types.js";
 import type { Exchange } from "./types.js";
+import { die, errorMessage, out } from "../../common/cli.js";
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
-
-function out(data: unknown): void {
-  process.stdout.write(JSON.stringify(data, null, 2) + "\n");
-}
-
-function die(message: string): never {
-  process.stderr.write(`Error: ${message}\n`);
-  process.exit(1);
-}
 
 // How many exchanges a sum reads before it is wrong to do this in the client.
 const COST_LIMIT = 5_000;

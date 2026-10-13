@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 
 import * as identity from "./identity.js";
-import { normalizeTags, errorMessage } from "./types.js";
+import { errorMessage } from "../../common/cli.js";
+import { normalizeTags } from "../../common/tags.js";
 
 export const API_PORT = Number(process.env.TI_API_PORT ?? 8789);
 

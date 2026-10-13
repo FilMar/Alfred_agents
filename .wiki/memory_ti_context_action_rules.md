@@ -20,7 +20,7 @@ Pending work: a native `--min-score` parameter for `ti search` (and `tb search`)
 ## Cross-references
 
 - [memory_procedural_six_gaps](memory_procedural_six_gaps) — the gap analysis `ti` extends
-- [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) — the Qdrant instance `ti` shares with `tb`
+- [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there) — the Qdrant instance `ti` shares with `tb`
 - [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) — how `ti` rules reach the agent before every prompt
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the raw facts `tl` would feed `ti`'s distillation
 - [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) — `ti` as the procedural type, and the test that splits it from `tb`

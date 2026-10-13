@@ -12,8 +12,10 @@ import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, b
 import { getByIds } from "./qdrant.js";
 import { refineReport, COUNTERS_START, REFINE_NOTES_LIMIT } from "./refine.js";
 import type { NoteType, SearchOptions, Link } from "./types.js";
-import { ContractError } from "../../contract/contract.js";
-import { NOTE_TYPES, isValidKind, normalizeTags, errorMessage } from "./types.js";
+import { ContractError } from "../../common/contract.js";
+import { NOTE_TYPES, isValidKind } from "./types.js";
+import { collect, die, errorMessage, out } from "../../common/cli.js";
+import { normalizeTags } from "../../common/tags.js";
 
 // ─── Compose path ─────────────────────────────────────────────────────────────
 
@@ -24,15 +26,6 @@ const QDRANT_POLL_RETRIES = 10;
 const QDRANT_POLL_INTERVAL_MS = 1_000;
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
-
-function out(data: unknown): void {
-  process.stdout.write(JSON.stringify(data, null, 2) + "\n");
-}
-
-function die(message: string): never {
-  process.stderr.write(`Error: ${message}\n`);
-  process.exit(1);
-}
 
 /** Accepts a full id or a unique prefix, the way the graph view prints it. */
 async function resolveOrDie(idOrPrefix: string): Promise<string> {
@@ -61,11 +54,6 @@ async function requireServices(opts: { needsEmbedding?: boolean } = {}): Promise
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function collect(val: string, acc: string[]): string[] {
-  acc.push(val);
-  return acc;
-}
 
 function validateKind(kind: string): asserts kind is NoteType {
   if (!isValidKind(kind)) {

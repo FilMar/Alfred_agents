@@ -1,4 +1,4 @@
-import { assert, isNonBlank, isPositiveInt, isRecord } from "../../contract/contract.js";
+import { allNonBlank, assert, isNonBlank, isPositiveInt, isRecord } from "../../common/contract.js";
 import { listTags } from "../../tb/src/qdrant.js";
 import { Checked, Evidence, NoteCandidate, ProjectTerms, RuleCandidate, TagVocabulary } from "./candidate.js";
 import type { Extractor } from "./config.js";
@@ -121,9 +121,6 @@ export async function loadVocabulary(size: number): Promise<readonly string[]> {
   return result;
 }
 
-function allNonBlank(items: readonly string[]): boolean {
-  return items.every(isNonBlank);
-}
 
 function isIndexIn(index: number, length: number): boolean {
   return Number.isInteger(index) && index >= 0 && index < length;

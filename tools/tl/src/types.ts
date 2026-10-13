@@ -3,7 +3,7 @@
 
 import { createHash } from "node:crypto";
 
-import { assert } from "../../contract/contract.js";
+import { assert } from "../../common/contract.js";
 
 // ─── Enum constants ───────────────────────────────────────────────────────────
 
@@ -97,8 +97,6 @@ export const CANDIDATE_KINDS = ["note", "rule"] as const;
 export type CandidateKind = (typeof CANDIDATE_KINDS)[number];
 
 export const DROP_PREFIXES = ["check:", "critic:"] as const;
-
-export const NEAR_IDENTICAL = "near_identical";
 
 export interface Extractor {
   id: number;
@@ -275,7 +273,7 @@ function isJson(text: unknown): boolean {
 
 function isDropReason(text: unknown): boolean {
   const reason = typeof text === "string" ? text : "";
-  const result = reason === NEAR_IDENTICAL || DROP_PREFIXES.some((p) => reason.length > p.length && reason.startsWith(p));
+  const result = DROP_PREFIXES.some((p) => reason.length > p.length && reason.startsWith(p));
   assert(!result || isFilled(text), "isDropReason: a reason is not empty");
   return result;
 }

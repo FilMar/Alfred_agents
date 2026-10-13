@@ -1,4 +1,4 @@
-import { assert, isNonBlank, isPositiveInt } from "../../contract/contract.js";
+import { assert, isNonBlank, isPositiveInt } from "../../common/contract.js";
 import { searchNotes } from "../../tb/src/notes.js";
 import type { Note } from "../../tb/src/types.js";
 import { searchEntries } from "../../ti/src/identity.js";

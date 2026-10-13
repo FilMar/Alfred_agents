@@ -4,14 +4,12 @@
 
 Checks:
   ERROR  SKILL.md missing, or frontmatter invalid (see validate.py)
-  ERROR  legacy justfile present in the skill folder
   ERROR  `just` or `pi-just` call inside a SKILL.md code block
   ERROR  a script lacks a `# desc:` header in its first 5 lines
   ERROR  SKILL.md references a script that is not in scripts/
   WARN   a script is never mentioned in SKILL.md (dead script?)
   WARN   a script is not executable
          (both warnings skip library files: no shebang on line 1)
-  WARN   scripts/guard.sh present (justfile-era leftover)
   WARN   SKILL.md is over 200 lines (move detail to references/)
 
 Usage: lint_skill.py [<skill-dir> ...]
@@ -73,9 +71,6 @@ def lint(skill_dir: Path):
     if not ok:
         errors.append(f"frontmatter: {msg}")
 
-    if (skill_dir / "justfile").exists():
-        errors.append("legacy justfile present — migrate it (efesto references/MIGRATION.md)")
-
     text = skill_md_path.read_text(encoding="utf-8")
     if len(text.splitlines()) > MAX_SKILL_MD_LINES:
         warnings.append(
@@ -100,9 +95,6 @@ def lint(skill_dir: Path):
         errors.append(f"SKILL.md references scripts/{name} but the file does not exist")
 
     for f in scripts:
-        if f.name == "guard.sh":
-            warnings.append("scripts/guard.sh is a justfile-era leftover — delete it")
-            continue
         if not has_desc_header(f):
             errors.append(
                 f"scripts/{f.name}: no `# desc:` header in the first {DESC_HEADER_LINES} lines"

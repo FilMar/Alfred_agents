@@ -19,5 +19,5 @@ The first config of `td` had all checks as free functions at the end of the file
 
 ## Cross-references
 
-- [style_contract_helpers_live_in_one_shared_module](style_contract_helpers_live_in_one_shared_module) — where checks with no domain go
+- [style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags) — where checks with no domain go
 - [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_distiller_td_is_fourteen_components_behind_one_entry_point) — component 1 is the config

@@ -5,7 +5,7 @@ import { mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
-import { assert } from "../../contract/contract.js";
+import { assert } from "../../common/contract.js";
 import type {
   CandidateKind, Contents, Exchange, ExchangeKind, Extraction, ExtractionFilters, Extractor, Harness,
   NewExtraction, NewExtractor, Session,
@@ -417,13 +417,6 @@ function toExtraction(row: RawExtraction): Extraction {
   assert(validateNewExtraction(result) === null, `toExtraction: ${validateNewExtraction(result)}`);
   assert(result.id === row.id, "toExtraction: the id is kept");
   return result;
-}
-
-/** Ids already in the archive, so the ingester knows what it can skip. */
-export function knownExchangeIds(db: Database, session: string): Set<string> {
-  const rows = db.query(`SELECT id FROM exchanges WHERE session = $session`)
-    .all({ $session: session }) as Array<{ id: string }>;
-  return new Set(rows.map((r) => r.id));
 }
 
 // ─── Row mapping ──────────────────────────────────────────────────────────────

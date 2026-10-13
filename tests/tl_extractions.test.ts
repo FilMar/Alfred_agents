@@ -60,7 +60,6 @@ describe("types.ts", () => {
     validateNewExtraction({ ...extraction, dropped_by: "critc:is_project_detail" });
     validateNewExtraction({ ...extraction, dropped_by: "critic:is_project_detail", verdict: "new" });
     validateNewExtraction({ ...extraction, dropped_by: "check:no_quote", probabilities: "{}" });
-    validateNewExtraction({ ...extraction, dropped_by: "near_identical", probabilities: "{}" });
     validateNewExtraction({ ...extraction, saved_id: "x" });
     validateNewExtraction({ ...extraction, of: "x" });
     validateNewExtraction({ ...extraction, verdict: "extends", of: "x", saved_id: "y" });

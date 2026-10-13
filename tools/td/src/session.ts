@@ -1,4 +1,4 @@
-import { assert, isNonBlank } from "../../contract/contract.js";
+import { allNonBlank, assert, isNonBlank } from "../../common/contract.js";
 import { fetchContents, fetchExchanges } from "../../tl/src/client.js";
 import { TIMESTAMP_SHAPE } from "../../tl/src/types.js";
 import type { Contents, Exchange } from "../../tl/src/types.js";
@@ -165,7 +165,6 @@ export async function pendingSessions(): Promise<readonly string[]> {
   let result: readonly string[];
   const exchanges = await fetchExchanges({ distilled: false, limit: PENDING_SESSIONS_CAP });
   assert(exchanges.length < PENDING_SESSIONS_CAP, () => `pendingSessions: the store holds fewer pending exchanges than the cap, got=${exchanges.length}`);
-  assert(exchanges.length < PENDING_SESSIONS_CAP, () => `pendingSessions: fewer pending exchanges than the cap, got=${exchanges.length}`);
   result = [...new Set([...exchanges].reverse().map((exchange) => exchange.session))];
   assert(hasNoRepeat(result), "pendingSessions: no session twice");
   assert(allNonBlank(result), "pendingSessions: every session id is not blank");
@@ -176,6 +175,3 @@ function hasNoRepeat(items: readonly string[]): boolean {
   return new Set(items).size === items.length;
 }
 
-function allNonBlank(items: readonly string[]): boolean {
-  return items.every(isNonBlank);
-}

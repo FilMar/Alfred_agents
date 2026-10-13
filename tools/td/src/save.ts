@@ -1,7 +1,7 @@
-import { assert, ContractError, isNonBlank, isPositiveInt } from "../../contract/contract.js";
+import { assert, ContractError, isNonBlank, isPositiveInt } from "../../common/contract.js";
 import { addRefs, createNote } from "../../tb/src/notes.js";
 import { getByIds } from "../../tb/src/qdrant.js";
-import { errorMessage } from "../../tb/src/types.js";
+import { errorMessage } from "../../common/cli.js";
 import type { NoteType } from "../../tb/src/types.js";
 import { addEntry, appendDo } from "../../ti/src/identity.js";
 import { getPointById } from "../../ti/src/qdrant.js";

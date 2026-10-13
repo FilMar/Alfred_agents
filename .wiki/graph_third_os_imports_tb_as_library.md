@@ -32,6 +32,6 @@ Holding the vectors in RAM is not an optimisation added on top. It falls out of 
 
 - [core_tb_stateless_single_source](core_tb_stateless_single_source) — the modules this imports
 - [style_dual_entrypoint](style_dual_entrypoint) — the CLI/HTTP pattern, and why this skips the HTTP half
-- [memory_tb_ti_on_rasp](memory_tb_ti_on_rasp) — why `tb` is already on the same machine
+- [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there) — why `tb` is already on the same machine
 - [graph_third_os_webapp_wider_than_workbench](graph_third_os_webapp_wider_than_workbench) — the app this serves
 </content>

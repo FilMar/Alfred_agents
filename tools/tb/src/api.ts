@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 
 import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
-import { NOTE_TYPES, isValidKind, normalizeTags, errorMessage, validateSearchOptions } from "./types.js";
+import { NOTE_TYPES, isValidKind, validateSearchOptions } from "./types.js";
+import { errorMessage } from "../../common/cli.js";
+import { normalizeTags } from "../../common/tags.js";
 import type { NoteType, SearchOptions } from "./types.js";
 import type { ScrollOptions } from "./qdrant.js";
 
