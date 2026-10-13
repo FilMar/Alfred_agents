@@ -10,6 +10,7 @@ import { serveGraph, GRAPH_PORT } from "./graph/server.js";
 import { serveApi, API_PORT } from "./api.js";
 import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId } from "./notes.js";
 import { getByIds } from "./qdrant.js";
+import { refineReport, COUNTERS_START, REFINE_NOTES_LIMIT } from "./refine.js";
 import type { NoteType, SearchOptions, Link } from "./types.js";
 import { ContractError } from "../../contract/contract.js";
 import { NOTE_TYPES, NOTE_STATUSES, isValidKind, normalizeTags, errorMessage } from "./types.js";
@@ -318,6 +319,19 @@ program
     });
 
     out(notes);
+  });
+
+// ─── refine ───────────────────────────────────────────────────────────────────
+
+program
+  .command("refine")
+  .description("Dry run: print the trust spread and the notes under the floor. Writes nothing.")
+  .action(async () => {
+    await requireServices({ needsEmbedding: false });
+
+    const notes = await browseNotes({ limit: REFINE_NOTES_LIMIT });
+
+    out(refineReport(notes, new Date(), COUNTERS_START));
   });
 
 // ─── graph ────────────────────────────────────────────────────────────────────

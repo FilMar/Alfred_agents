@@ -62,6 +62,7 @@ export function startMemoryStubs(): MemoryStubs {
       const url = new URL(req.url);
       const path = url.pathname;
       if (failing !== null && path.includes(failing)) return json({ error: "stub failure" }, 500);
+      if (path === "/") return json({ title: "memory stub" });
       const m = /^\/collections\/([^/]+)(\/.*)?$/.exec(path);
       if (m === null) return new Response("not found", { status: 404 });
       const [, name, rest = ""] = m;
@@ -122,6 +123,7 @@ export function startMemoryStubs(): MemoryStubs {
   const ollama = Bun.serve({
     port: 0,
     async fetch(req) {
+      if (req.method === "GET") return json({ models: [] });
       if (failing !== null && "/api/embed".includes(failing)) return json({ error: "stub failure" }, 500);
       const body: any = await req.json();
       return json({ embeddings: [embed(String(body.input))] });
