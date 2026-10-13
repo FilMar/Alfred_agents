@@ -4,25 +4,50 @@ sources: []
 updated: 2026-10-13
 ---
 
-## Pages
+## roadmap
 
 | Page | Content |
 |------|---------|
 | [roadmap](roadmap) | Future task list |
+
+## core
+
+| Page | Content |
+|------|---------|
 | [core_orthogonal_layers_no_overlap](core_orthogonal_layers_no_overlap) | The five layers and the no-overlap boundary |
 | [core_mcp_not_adopted_cli_json_schemas_first](core_mcp_not_adopted_cli_json_schemas_first) | No MCP migration; contract layer with JSON Schemas first, MCP shim behind a trigger |
 | [core_tb_stateless_single_source](core_tb_stateless_single_source) | CLIs hold no state; Qdrant + Ollama over HTTP |
 | [core_td_mvr_removed](core_td_mvr_removed) | Ghost tools removed; git holds the history |
+
+## th
+
+| Page | Content |
+|------|---------|
 | [th_sandbox_bwrap_fixed_binds](th_sandbox_bwrap_fixed_binds) | bwrap profile; run warns, sandbox-exec refuses |
 | [th_detached_runs_state_in_tmp](th_detached_runs_state_in_tmp) | Detached runs keep state in /tmp files |
 | [th_http_api_scoped_no_db](th_http_api_scoped_no_db) | Planned th HTTP API; glob over /tmp, no DB |
 | [th_verification_outside_members](th_verification_outside_members) | Verification never inside a member's run |
 | [th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends](th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends) | A run with --timeout exits when its prompt ends; the old timer kept it up |
+
+## agents
+
+| Page | Content |
+|------|---------|
 | [agents_hats_replace_members](agents_hats_replace_members) | A delegated run is a hat plus instructions; skills stay inline |
 | [agents_skill_forced_not_offered](agents_skill_forced_not_offered) | --skill puts a skill's whole text in a run, as a constraint |
 | [agents_roster_lives_on_filesystem](agents_roster_lives_on_filesystem) | Roster derived from the filesystem, never tabled |
 | [agents_named_after_famous_figures](agents_named_after_famous_figures) | Naming rule: famous figure with matching trait |
+
+## hook
+
+| Page | Content |
+|------|---------|
 | [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) | tb/ti search injected on every prompt |
+
+## memory
+
+| Page | Content |
+|------|---------|
 | [memory_procedural_six_gaps](memory_procedural_six_gaps) | The six gaps to procedural memory |
 | [memory_log_first_three_moves](memory_log_first_three_moves) | Grow on data, not hypotheses; log first |
 | [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) | tl: an archive of work; chat and subtask, three tables |
@@ -74,15 +99,10 @@ updated: 2026-10-13
 | [memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores) | td tests use in-memory stubs; an end-to-end test checks the stores, since bare calls cannot tell a save from a failure |
 | [memory_tl_extraction_quote_may_be_blank_only_when_a_check_dropped_it](memory_tl_extraction_quote_may_be_blank_only_when_a_check_dropped_it) | A blank quote is allowed only on a check drop, so those drops can be logged |
 | [memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store](memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store) | apiUrl() is read per call; a test server always wins over the real store |
-| [skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role](skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role) | Step 6 is two th runs through th_write.sh: black hat for tests, white for bodies, GLM-5.3 fixed |
-| [skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes](skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes) | TS values are Readonly types with contracted functions; brand only for an invariant; class only for a resource |
 | [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) | Calls go through pi-ai: reasoning low and the system role for Ollama, or the prompt is lost or glm thinks 15x |
 | [memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading) | Phase 3 bridges by shape; 0/20 ref recovery, so judge by reading the yes answers |
 | [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing) | tb refine: trust 0..1 derived from the hit counters, start 0.5, floor at 2026-09-21; the first pass computes it and stores nothing |
 | [memory_tb_refine_an_archived_note_is_left_out_of_the_hook_only_and_a_deliberate_search_still_finds_it](memory_tb_refine_an_archived_note_is_left_out_of_the_hook_only_and_a_deliberate_search_still_finds_it) | trust under 0.2 sets archived_at; the note is left out of the hook only, a deliberate search still finds it |
-| [memory_tb_refine_apply_owns_archived_at](memory_tb_refine_apply_owns_archived_at) | Only --apply writes archived_at; a hit does not clear it, the next run does; two requests |
-| [memory_tb_refine_apply_runs_at_session_start](memory_tb_refine_apply_runs_at_session_start) | --apply runs at the start of every session, no interval check; the switch is the settings.json entry |
-| [memory_tb_refine_apply_has_no_write_cap](memory_tb_refine_apply_has_no_write_cap) | --apply has no cap on writes per run |
 | [memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first) | Delete when archived and no signal for 365 days, after an append-only log line; not before 2027-09-21 |
 | [memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21) | What counts as a hit, what a hit means, and why no new field yet |
 | [memory_tb_refine_browse_notes_reads_one_page_so_refine_passes_a_limit_of_10000_and_asserts_the_read_is_not_cut](memory_tb_refine_browse_notes_reads_one_page_so_refine_passes_a_limit_of_10000_and_asserts_the_read_is_not_cut) | browseNotes reads one page of 20; refine passes limit 10000 and asserts the read is not cut |
@@ -90,10 +110,22 @@ updated: 2026-10-13
 | [memory_tb_refine_trust_measures_vitality_not_quality_so_the_archive_comes_before_any_delete](memory_tb_refine_trust_measures_vitality_not_quality_so_the_archive_comes_before_any_delete) | trust says a note is alive, not that it is good: archive before delete, quality is open |
 | [memory_tb_refine_the_cap_of_10_on_hits_stays_although_the_outer_min_of_1_makes_it_redundant](memory_tb_refine_the_cap_of_10_on_hits_stays_although_the_outer_min_of_1_makes_it_redundant) | The cap of 10 on hits is redundant with min(1, ...) today; it stays because the weights may change |
 | [memory_tb_refine_the_archive_is_not_a_deletion_queue_because_a_deliberate_search_revives_a_note_and_the_hook_never_does](memory_tb_refine_the_archive_is_not_a_deletion_queue_because_a_deliberate_search_revives_a_note_and_the_hook_never_does) | The archive is not a deletion queue: a deliberate search revives a note, the hook never does |
+| [memory_tb_refine_apply_owns_archived_at](memory_tb_refine_apply_owns_archived_at) | Only --apply writes archived_at; a hit does not clear it, the next run does; two requests |
+| [memory_tb_refine_apply_runs_at_session_start](memory_tb_refine_apply_runs_at_session_start) | --apply runs at the start of every session, no interval check; the switch is the settings.json entry |
+| [memory_tb_refine_apply_has_no_write_cap](memory_tb_refine_apply_has_no_write_cap) | --apply has no cap on writes per run |
 | [memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known) | Threshold 0.2 and half-life 90 wait for the hit rate of Nov-Dec 2026: with no new hit, 164 notes fall together on 2027-01-18 |
 | [memory_tb_note_status_field_is_removed_because_nothing_reads_it_and_nothing_promotes_it](memory_tb_note_status_field_is_removed_because_nothing_reads_it_and_nothing_promotes_it) | The note status field is removed: nobody reads it and nobody promotes it; old notes keep it |
 | [memory_tb_note_payload_is_pinned_by_an_exact_test_so_a_key_cannot_appear_or_vanish_unseen](memory_tb_note_payload_is_pinned_by_an_exact_test_so_a_key_cannot_appear_or_vanish_unseen) | A test pins the exact payload of a note; fields arrive from precise writes |
 | [memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge) | Possible design, no code: `tb link` finds ref candidates by vector, one LLM hat judges pairs, refs carry an origin; hubs later |
+| [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) | GLM ignores format schemas; JSON from the prompt, checked by code, one retry |
+| [memory_jev_like_decision_models_are_candidates_for_classification](memory_jev_like_decision_models_are_candidates_for_classification) | tev1 and nimble: local decision models for the classification steps; not adopted until tested |
+
+## skill
+
+| Page | Content |
+|------|---------|
+| [skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role](skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role) | Step 6 is two th runs through th_write.sh: black hat for tests, white for bodies, GLM-5.3 fixed |
+| [skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes](skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes) | TS values are Readonly types with contracted functions; brand only for an invariant; class only for a resource |
 | [skill_jobs_removed_because_taskwarrior_is_no_longer_used](skill_jobs_removed_because_taskwarrior_is_no_longer_used) | Removed 2026-10-12: Taskwarrior is no longer used |
 | [skill_ulisse_removed_because_skill_descriptions_already_route](skill_ulisse_removed_because_skill_descriptions_already_route) | Removed 2026-10-12: skill descriptions already route a task |
 | [skill_erodoto_removed_because_td_replaces_it_and_it_only_batched_platone_and_mose](skill_erodoto_removed_because_td_replaces_it_and_it_only_batched_platone_and_mose) | Removed 2026-10-12: td replaces it; it only batched platone and mose |
@@ -103,14 +135,6 @@ updated: 2026-10-13
 | [skill_piano_is_rigid_and_poorly_joined_to_omero_and_its_fate_is_open](skill_piano_is_rigid_and_poorly_joined_to_omero_and_its_fate_is_open) | Open question: fix piano, fold it into omero, or remove it |
 | [skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it) | Idea: retire platone with the timer; keep the note quality rules |
 | [skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills](skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills) | Idea: tb guide and ti guide print the quality rules; skills keep none |
-| [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) | GLM ignores format schemas; JSON from the prompt, checked by code, one retry |
-| [memory_jev_like_decision_models_are_candidates_for_classification](memory_jev_like_decision_models_are_candidates_for_classification) | tev1 and nimble: local decision models for the classification steps; not adopted until tested |
-| [orchestrator_and_cockpit_removed](orchestrator_and_cockpit_removed) | Both tools removed; unused code was breaking the test suite |
-| [graph_third_os_webapp_wider_than_workbench](graph_third_os_webapp_wider_than_workbench) | third_os: read, write and AI over tb's graph; ti out for now |
-| [graph_third_os_imports_tb_as_library](graph_third_os_imports_tb_as_library) | Runs on the Rasp, imports tb's modules, keeps vectors in RAM |
-| [graph_third_os_canvas_physics_dom_text](graph_third_os_canvas_physics_dom_text) | canvas = physics, DOM = text; fake depth, no framework |
-| [graph_third_os_agent_turns_stay_async](graph_third_os_agent_turns_stay_async) | Phase 3 is async: th spawns under bwrap even as a library |
-| [graph_curation_via_th_agent](graph_curation_via_th_agent) | Curation via a th member, live-streamed, kill-switch not a gate |
 | [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
 | [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) | Contract messages: stable prefix, then the values the assert reads |
 | [skill_ritchie_classifiers_get_an_outcome_table](skill_ritchie_classifiers_get_an_outcome_table) | A classifier gets an outcome table: the one test with an assert of its own |
@@ -118,12 +142,36 @@ updated: 2026-10-13
 | [skill_ritchie_spec_is_a_minimal_italian_document](skill_ritchie_spec_is_a_minimal_italian_document) | The spec: a minimal Italian document — entities, flows, invariants; the code is not the spec |
 | [skill_ritchie_review_is_the_verdict_packet](skill_ritchie_review_is_the_verdict_packet) | The review: six sections from Esito to Scostamenti, self-contained |
 | [skill_ritchie_spec_review_pair_is_ephemeral_scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding) | The pair is scaffolding: removed at approval, the wiki page is the record |
+
+## graph
+
+| Page | Content |
+|------|---------|
+| [graph_third_os_webapp_wider_than_workbench](graph_third_os_webapp_wider_than_workbench) | third_os: read, write and AI over tb's graph; ti out for now |
+| [graph_third_os_imports_tb_as_library](graph_third_os_imports_tb_as_library) | Runs on the Rasp, imports tb's modules, keeps vectors in RAM |
+| [graph_third_os_canvas_physics_dom_text](graph_third_os_canvas_physics_dom_text) | canvas = physics, DOM = text; fake depth, no framework |
+| [graph_third_os_agent_turns_stay_async](graph_third_os_agent_turns_stay_async) | Phase 3 is async: th spawns under bwrap even as a library |
+| [graph_curation_via_th_agent](graph_curation_via_th_agent) | Curation via a th member, live-streamed, kill-switch not a gate |
+
+## orchestrator
+
+| Page | Content |
+|------|---------|
+| [orchestrator_and_cockpit_removed](orchestrator_and_cockpit_removed) | Both tools removed; unused code was breaking the test suite |
+
+## style
+
+| Page | Content |
+|------|---------|
 | [style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags) | tools/common holds every shared module: contract, cli helpers, tags |
 | [style_a_source_that_left_the_tree_is_written_as_path_at_commit_hash_or_marked_deleted](style_a_source_that_left_the_tree_is_written_as_path_at_commit_hash_or_marked_deleted) | A source that left the tree is written path@hash, or (deleted) if git never held it |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |
 | [style_type_checks_are_private_static_methods_of_their_class](style_type_checks_are_private_static_methods_of_their_class) | A check that knows one type is a private static method; getters have no contract |
 | [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards |
-| [wiki_superseded_hidden_with_dot](wiki_superseded_hidden_with_dot) | The wiki itself: immutable chains; dead decisions hidden with a dot |
-| [wiki_decision_is_written_when_the_design_ends](wiki_decision_is_written_when_the_design_ends) | A page is written after the design settles, never during it |
 
-Only live decisions are listed. A decision superseded by a newer one (see `replaces` in its frontmatter) is renamed with a leading dot and drops out of this table. It is never deleted.
+## wiki
+
+| Page | Content |
+|------|---------|
+| [wiki_edit_in_place_delete_superseded](wiki_edit_in_place_delete_superseded) | Edit in place; a reversal deletes the old file; git keeps it |
+| [wiki_decision_is_written_when_the_design_ends](wiki_decision_is_written_when_the_design_ends) | A page is written after the design settles, never during it |

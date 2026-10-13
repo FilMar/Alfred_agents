@@ -24,10 +24,10 @@ Measured on 2026-09-28: the suite had 7 to 8 failures out of 154, and they moved
 
 Removing the orchestrator made the suite green for the first time: **161 of 161, stable over three consecutive runs**. That is the price of unused code stated as a number. It does not sit in the directory it occupies; it sits in every run of the suite, in every diagnosis that has to route around it, and in the trust the suite loses when its red is permanent.
 
-The code is not gone: git holds it, and the nine superseded pages are on disk with a leading dot. If a recurring task ever appears that needs a machine woken over Wake-on-LAN, the design is there to read. What is gone is the claim that it is current.
+The code is not gone: git holds it, and the nine superseded pages are in git history. If a recurring task ever appears that needs a machine woken over Wake-on-LAN, the design is there to read. What is gone is the claim that it is current.
 
 ## Cross-references
 
 - `orchestrator_tailscale_perimeter_matrix_bot` — the decision that outlived the tool
 - [agents_hats_replace_members](agents_hats_replace_members) — where delegated execution lives now
-- [wiki_superseded_hidden_with_dot](wiki_superseded_hidden_with_dot) — why the nine pages are hidden rather than deleted
+- [wiki_edit_in_place_delete_superseded](wiki_edit_in_place_delete_superseded) — the rule now: a reversed decision is deleted, and git holds it

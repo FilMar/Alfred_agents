@@ -35,5 +35,5 @@ What this also means: the extraction is the job Platone does, so Platone is not 
 
 - [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) — the four types, and why the wiki is not one of them
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — why a `Write` to the wiki needs no special event
-- [wiki_superseded_hidden_with_dot](wiki_superseded_hidden_with_dot) — the immutability that makes a copy of a page safe
+- [wiki_edit_in_place_delete_superseded](wiki_edit_in_place_delete_superseded) — a page changes in place; a reversal deletes the old one
 - [core_orthogonal_layers_no_overlap](core_orthogonal_layers_no_overlap) — the boundary this keeps

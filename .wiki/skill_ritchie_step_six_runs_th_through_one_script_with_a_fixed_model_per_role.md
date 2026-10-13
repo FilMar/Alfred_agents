@@ -39,5 +39,5 @@ Each run works on copies in a temp directory and cannot run code. The body run r
 
 ## Cross-references
 
-- [.skill_ritchie_step_six_is_direct_tests_first_then_the_body](.skill_ritchie_step_six_is_direct_tests_first_then_the_body) — the direct flow, replaced
+- `skill_ritchie_step_six_is_direct_tests_first_then_the_body@c9ffb93` — the direct flow, replaced
 - [skill_ritchie_classifiers_get_an_outcome_table](skill_ritchie_classifiers_get_an_outcome_table) — the outcome tables the tests use

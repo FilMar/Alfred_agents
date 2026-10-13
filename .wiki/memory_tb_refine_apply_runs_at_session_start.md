@@ -9,7 +9,7 @@ sources: [tools/tb/SPEC.md@78af67d, tools/tb/REVIEW.md@78af67d, conversation]
 
 There is no check on the time since the last run.
 
-The switch is not set. For Claude Code it is a `SessionStart` entry in `~/.claude/settings.json`, which the user adds after the January 2027 reading of the hit rate. For pi it is the extension link that `setup.sh` makes.
+The switch is on since 2026-10-13, by the user's order. For Claude Code it is the `SessionStart` entry (matcher `startup`, timeout 5) in `~/.claude/settings.json`. It calls `~/.claude/hooks/refine-tb.sh`, a link to `extensions/tb_refine/claude.sh`. For pi it is the link `~/.pi/agent/extensions/tb_refine.ts` to `extensions/tb_refine/pi.ts`. Both links were made by hand, like the ones of `tb_ti` and `tl`.
 
 ## Why
 
@@ -17,7 +17,7 @@ The run costs half a second and is idempotent, so a check on the interval would 
 
 The Curator of Hermes Agent has the same shape: use counters, thresholds in days, a reversible archive, no automatic delete. It checks 168 hours since the last run and 2 hours idle, because its run can be an LLM review. Hindsight has no forgetting at all. See [the Curator docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/curator) and [the Hindsight paper](https://arxiv.org/html/2512.12818v1).
 
-The first wave is 164 notes on 2027-01-18. With the entry in `settings.json` they would be archived at the first session start after that day. So the entry goes in after the parameters are fixed.
+The first wave is 164 notes on 2027-01-18. The entry is on before the parameters are fixed, so the weights, the half-life and the 0.2 threshold must be settled before that day. Otherwise those notes are archived at the first session start after it, with the values in the code.
 
 Known limit: two sessions opened together can run two rounds. The `archived_at` of a note may then be the second instant.
 

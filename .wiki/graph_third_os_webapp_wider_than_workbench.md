@@ -1,7 +1,7 @@
 ---
 tags: [graph, tb, web-ui, third-os, notes]
 sources: [ROADMAP.md@cf2cccf, conversation]
-replaces: [.graph_note_workbench_direct_manipulation]
+replaces: [graph_note_workbench_direct_manipulation@cc7d21c]
 ---
 
 ## Decision
@@ -39,5 +39,5 @@ Dropping `ti` for now is a layout decision, not a judgement on `ti`. Nodes with 
 - [graph_third_os_canvas_physics_dom_text](graph_third_os_canvas_physics_dom_text) — how it draws
 - [graph_third_os_agent_turns_stay_async](graph_third_os_agent_turns_stay_async) — how phase 3 runs
 - [graph_curation_via_th_agent](graph_curation_via_th_agent) — the whole-graph companion to this per-note review
-- [graph_note_workbench_direct_manipulation](.graph_note_workbench_direct_manipulation) — the narrower decision this replaces
+- `graph_note_workbench_direct_manipulation@cc7d21c` — the narrower decision this replaces
 </content>

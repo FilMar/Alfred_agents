@@ -29,9 +29,8 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] Drop the `client.ts?extractions` import trick in `tests/tl_extractions.test.ts`: the client now reads its url on each call. [detail](memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store)
 - [ ] Pick a home for `requireServices`, still copied in the `tb` and `ti` CLIs. It needs `checkHealth` from `tb`, so it cannot go to `common`. Or leave it. [detail](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags)
 - [ ] `tb refine`: delete a note archived with no signal for a year, log line first. Not before 2027-09-21. [detail](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first)
-- [ ] `tb refine`: read the hit rate in January 2027. Then fix the weights, the half-life and the 0.2 threshold. [detail](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known)
+- [ ] `tb refine`: read the hit rate, then fix the weights, the half-life and the 0.2 threshold before 2027-01-18. The hook now archives the first wave on its own. [detail](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known)
 - [ ] `tb refine`: tune the decay after 30 days of hits. [detail](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21)
-- [ ] Add the `SessionStart` entry for `tb refine --apply` to `~/.claude/settings.json`, after the January 2027 reading. [detail](memory_tb_refine_apply_runs_at_session_start)
 - [ ] Import the history in batches with `--max-saved`. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing)
 - [ ] Try the Claude Code `SessionStart` hook and the pi `session_start` event of `tb_refine` in a real session. They are only syntax-checked.
 - [ ] `tb link`: ref candidates by vector, an LLM hat judges pairs, then retire aristotele. Possible design. [detail](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge)

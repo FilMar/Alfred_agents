@@ -43,7 +43,7 @@ What is config and what is code follows [memory_extractor_is_data_immutable_conf
 
 F drops 2.5 times what the council dropped on the same candidates, and costs one call per candidate instead of three. Read by hand, the 90 items of the fresh run are mostly general and carry a mechanism. About 10 are weak: textbook practice that passed, project conventions, one wrong generalisation. No invented or denied claim was found. One in nine weak is what decay has to clean.
 
-**Episodes as context, the exchange as the unit.** A lesson often spans several exchanges: a wrong guess, a denial, then the real cause. The session map gives every call the end of the story. The history is in [.memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](.memory_distiller_is_a_pipeline_of_small_calls_with_no_tools).
+**Episodes as context, the exchange as the unit.** A lesson often spans several exchanges: a wrong guess, a denial, then the real cause. The session map gives every call the end of the story. The history is in `memory_distiller_is_a_pipeline_of_small_calls_with_no_tools@65fe6c3`.
 
 **Shadow first.** The first real runs fill `extractions` with kept and dropped candidates and the critic's probabilities. Thresholds can then move without new calls, before anything reaches `tb` or `ti`.
 
@@ -62,6 +62,6 @@ F drops 2.5 times what the council dropped on the same candidates, and costs one
 - [memory_episode_summaries_are_a_derived_index_over_tl](memory_episode_summaries_are_a_derived_index_over_tl) — phase 0b output reused as an index
 - [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) — manual distillation goes on until active mode
 - [memory_hindsight_not_adopted_its_shape_is_copied](memory_hindsight_not_adopted_its_shape_is_copied) — where the shape comes from
-- [.memory_distiller_is_a_pipeline_of_small_calls_with_no_tools](.memory_distiller_is_a_pipeline_of_small_calls_with_no_tools) — the replaced decision
+- `memory_distiller_is_a_pipeline_of_small_calls_with_no_tools@65fe6c3` — the replaced decision
 - [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) — how every call reaches the model
 - [memory_distiller_is_its_own_tool_td_and_tl_stays_the_register](memory_distiller_is_its_own_tool_td_and_tl_stays_the_register) — where the pipeline lives

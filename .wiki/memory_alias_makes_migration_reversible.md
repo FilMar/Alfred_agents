@@ -30,6 +30,6 @@ The `ensureCollection()` prerequisite is the real risk in this plan. A migration
 
 ## Cross-references
 
-- [memory_keep_raw_source_for_reingest](.memory_keep_raw_source_for_reingest) — the other half of a migration that can be redone
+- `memory_keep_raw_source_for_reingest@08e919f` — the other half of a migration that can be redone
 - [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there) — where the collections live, and where mass re-embedding runs from
 - [core_tb_stateless_single_source](core_tb_stateless_single_source) — why an alias is enough to repoint every client
