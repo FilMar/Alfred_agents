@@ -4,7 +4,7 @@ A style or code convention is a decision like any other. Its topic is `style_<na
 
 When a pattern or non-obvious convention emerges, follow `ingest.md` and write it as a decision under that topic. Put the pattern and a representative code snippet in `## Decision`. Put the rationale and how to extend it in `## Why`.
 
-List existing style decisions with `Glob .wiki/style_*.md`. If the code changes and a style decision no longer holds, write a new one with `replaces:` set — do not edit the old one.
+List existing style decisions with `Glob .wiki/style_*.md`. If the code changes and a style decision still holds in spirit, edit it in place. If it no longer holds, write a new one with `replaces:` set and delete the old one (see `ingest.md`).
 
 ## English style
 

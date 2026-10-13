@@ -20,25 +20,25 @@ The rule serves two readers at once: a human skimming the page, and the agent th
 
 ### Decision
 
-A markdown file in `.wiki/` that records exactly one decision on one topic. Name is `<topic>_<slug>` (lowercase, underscore); the slug is long and says the whole decision. Structure is `## Decision`, `## Why`, `## Cross-references`. Under 100 lines — a longer file holds more than one decision and gets split. Once written, its body never changes — a typo fix is the only exception. A change of course is a new decision file, never an edit to the old one.
+A markdown file in `.wiki/` that records exactly one decision on one topic. Name is `<topic>_<slug>` (lowercase, underscore); the slug is three to six words. Structure is `## Decision`, `## Why`, and `## Cross-references` only when needed. Under 40 lines — a longer file holds more than one decision and gets split. It changes in place while it stays the same decision. A reversal is a new decision file and the old one is deleted.
 
 A decision records the why. The what — the current state of a topic — lives in the code, and a decision does not restate it. A design target with no code yet is the one case where the decision is also the state.
 
 ### Topic
 
-The prefix a group of decisions share, e.g. `core_ca_chunk`. Not a file of its own — `Glob .wiki/<topic>_*.md` lists every decision made on it. The files have no order; `replaces` says which one is live. A style or code convention is a topic too, named `style_<name>`.
+The prefix a group of decisions share, e.g. `core_ca_chunk`. Not a file of its own — `Glob .wiki/<topic>_*.md` lists every decision made on it. The files have no order. A style or code convention is a topic too, named `style_<name>`.
 
 ### Replaces
 
-A field in a decision's frontmatter: the filename(s) of the decision(s) it replaces. Written once, on the new file — the old file is never touched.
+A field in a decision's frontmatter: the decision(s) it reverses, written as `file@hash`. The hash is the last commit that held the old file, so `git show <hash>:.wiki/<file>` restores it.
 
 ### Live decision
 
-A decision no other decision names in its `replaces` field. It is the current word on its topic and belongs in `index.md`.
+A decision file that exists. It is the current word on its topic and belongs in `index.md`.
 
 ### Superseded decision
 
-A decision some other decision names in `replaces`. It is renamed with a leading dot (`.<topic>_<slug>.md`) and drops out of `index.md`. It stays on disk as history — it is never deleted — but the dot keeps it out of `ls`, out of `Glob`, and out of ripgrep, which skips hidden files by default. So a search of `.wiki/` returns live decisions only. Links to it keep the dot in the target: `[Text](.old_decision)`.
+A decision a newer one reversed. It is deleted in the same change that writes the new one. Git keeps it; the new decision's `replaces` points to it.
 
 ### Source
 
@@ -46,7 +46,7 @@ A project file a decision was built from. Tracked in its `sources:` frontmatter.
 
 ### Frontmatter
 
-Real YAML frontmatter at the top of a decision, between two `---` lines. Holds `tags`, `sources`, `replaces` (omitted when the decision replaces nothing). It is metadata — put classification here, not in the file name. Special pages (`index`, `roadmap`) keep an `updated: YYYY-MM-DD` field instead of `replaces`, since they are mutable.
+Real YAML frontmatter at the top of a decision, between two `---` lines. Holds `tags`, `sources`, `replaces` (omitted when the decision reverses nothing). It is metadata — put classification here, not in the file name. Special pages (`index`, `roadmap`) keep an `updated: YYYY-MM-DD` field instead of `replaces`, since they are mutable.
 
 ### Tag
 
@@ -56,7 +56,7 @@ A label in frontmatter. Groups decisions by theme. Lives in frontmatter, never i
 
 ### Index
 
-The catalogue page (`index.md`). A table listing every live decision with a link and a one-line summary. Updated on every ingest — a row is added for a new decision and removed for the one it superseded. It is the entry point for a query.
+The catalogue page (`index.md`). One `## <topic>` section per topic, each a table of its decisions with a link and a one-line summary. Updated on every ingest — a row is added for a new decision and removed for the one it reversed. It is the entry point for a query.
 
 ### Roadmap
 
@@ -70,7 +70,7 @@ A link from one decision to another. Written in the `## Cross-references` sectio
 
 ### Ingest
 
-Reading a source and turning it into a decision. Writes a new decision file (or edits a same-session typo), updates cross-references and the index. Procedure: `ingest.md`.
+Reading a source and turning it into a decision. Writes a new decision file or edits an existing one, updates cross-references and the index. Procedure: `ingest.md`.
 
 ### Query
 
@@ -82,7 +82,7 @@ A style or code convention recorded as a decision under topic `style_<name>`. Re
 
 ### Lint
 
-The health-check. Flags contradictions, orphan decisions, missing concept decisions, a `replaces` target that does not exist, and an `index.md` out of step with which decisions are live. Procedure: `lint.md`.
+The health-check. Flags contradictions, orphan decisions, missing concept decisions, a link to a deleted file, and an `index.md` out of step with the files on disk. Procedure: `lint.md`.
 
 ### Orphan
 
