@@ -33,7 +33,7 @@ When this is built, `aristotele` is retired. `platone` and `erodoto` are retired
 
 `aristotele` does three things. Only one of them needs judgment. Running all three through an LLM on the whole graph is costly and hard to audit. Splitting by nature keeps the LLM call small, and keeps every write traceable.
 
-`tb refine` measures if a note is alive. `aristotele` shapes the graph: links, hubs, isolated notes. They are different problems, so `refine` does not replace it. See [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start).
+`tb refine` measures if a note is alive. `aristotele` shapes the graph: links, hubs, isolated notes. They are different problems, so `refine` does not replace it. See [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing).
 
 Phase 3 of the distiller already looks for bridges, but only for each new note, by shape ([memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading)). It does not reach old isolated notes. `tb link` covers the existing corpus. That decision also says: if fewer than half of the bridges hold, bridges go back to the whole-graph curator. This design is that curator, in code.
 
@@ -49,4 +49,4 @@ Where it can break: the similarity threshold. Too low gives trivial bridges. Too
 - [memory_refs_carry_non_semantic_reach](memory_refs_carry_non_semantic_reach) — why near is not enough
 - [graph_curation_via_th_agent](graph_curation_via_th_agent) — the manual, watched curation in the dashboard
 - [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) — the distiller that replaces `platone` and `erodoto`
-- [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start) — the pattern `tb link` copies
+- [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing) — the pattern `tb link` copies

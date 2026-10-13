@@ -1,7 +1,7 @@
 ---
 tags: [pi, index]
 sources: []
-updated: 2026-10-12
+updated: 2026-10-13
 ---
 
 ## Pages
@@ -78,10 +78,15 @@ updated: 2026-10-12
 | [skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes](skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes) | TS values are Readonly types with contracted functions; brand only for an invariant; class only for a resource |
 | [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) | Calls go through pi-ai: reasoning low and the system role for Ollama, or the prompt is lost or glm thinks 15x |
 | [memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading) | Phase 3 bridges by shape; 0/20 ref recovery, so judge by reading the yes answers |
-| [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start) | tb refine: trust 0..1 derived from the hit counters, start 0.5, last signal floored at 2026-09-21, dry run by default |
+| [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing) | tb refine: trust 0..1 derived from the hit counters, start 0.5, floor at 2026-09-21; the first pass computes it and stores nothing |
 | [memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search](memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it_from_search) | trust under 0.2 archives a note: hidden from search, reversible, archived_at |
 | [memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first](memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_with_a_log_line_first) | Six months in the archive, counted from archived_at, then delete after an append-only log line |
 | [memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21) | What counts as a hit, what a hit means, and why no new field yet |
+| [memory_tb_refine_browse_notes_reads_one_page_so_refine_passes_a_limit_of_10000_and_asserts_the_read_is_not_cut](memory_tb_refine_browse_notes_reads_one_page_so_refine_passes_a_limit_of_10000_and_asserts_the_read_is_not_cut) | browseNotes reads one page of 20; refine passes limit 10000 and asserts the read is not cut |
+| [memory_tb_refine_the_list_of_low_notes_is_sorted_by_trust_ascending_then_by_id](memory_tb_refine_the_list_of_low_notes_is_sorted_by_trust_ascending_then_by_id) | The list under 0.2 is sorted by trust, lowest first, then by id |
+| [memory_tb_refine_trust_measures_vitality_not_quality_so_the_archive_comes_before_any_delete](memory_tb_refine_trust_measures_vitality_not_quality_so_the_archive_comes_before_any_delete) | trust says a note is alive, not that it is good: archive before delete, quality is open |
+| [memory_tb_refine_the_cap_of_10_on_hits_stays_although_the_outer_min_of_1_makes_it_redundant](memory_tb_refine_the_cap_of_10_on_hits_stays_although_the_outer_min_of_1_makes_it_redundant) | The cap of 10 on hits is redundant with min(1, ...) today; it stays because the weights may change |
+| [memory_tb_refine_the_archive_is_a_deletion_queue_with_six_months_notice_because_archived_notes_get_no_hits](memory_tb_refine_the_archive_is_a_deletion_queue_with_six_months_notice_because_archived_notes_get_no_hits) | Archived notes get no hits: the archive is a deletion queue unless a search includes it |
 | [memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge) | Possible design, no code: `tb link` finds ref candidates by vector, one LLM hat judges pairs, refs carry an origin; hubs later |
 | [skill_jobs_removed_because_taskwarrior_is_no_longer_used](skill_jobs_removed_because_taskwarrior_is_no_longer_used) | Removed 2026-10-12: Taskwarrior is no longer used |
 | [skill_ulisse_removed_because_skill_descriptions_already_route](skill_ulisse_removed_because_skill_descriptions_already_route) | Removed 2026-10-12: skill descriptions already route a task |
