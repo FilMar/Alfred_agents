@@ -29,6 +29,7 @@ type NoteFields = {
   hits_related?: number;
   last_hit?: string;
   last_hit_related?: string;
+  archived_at?: string;
 };
 
 // Note carries many fields: the tests fill only id, when, what and the counters, and cast.
@@ -387,6 +388,7 @@ describe("refineReport", () => {
     expect(refineReport([], NOW, COUNTERS_START)).toEqual({
       spread: { bins: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], total: 0, belowFloor: 0 },
       low: [],
+      plan: { archive: [], restore: [] },
     });
   });
 
@@ -400,9 +402,7 @@ describe("refineReport", () => {
       makeNote({ id: "aa", when: "2026-05-01T00:00:00.000Z", what: "a".repeat(90), last_hit: "2026-06-23T00:00:00.000Z" }),
       makeNote({ id: "gone", when: "2026-02-01T00:00:00.000Z", what: "gone", last_hit: "2026-03-25T00:00:00.000Z" }),
     ];
-    expect(refineReport(notes, NOW, COUNTERS_START)).toEqual({
-      spread: { bins: [1, 2, 2, 0, 0, 1, 0, 0, 0, 1], total: 7, belowFloor: 3 },
-      low: [
+    const low = [
         {
           id: "gone",
           trust: 0.0625,
@@ -427,8 +427,23 @@ describe("refineReport", () => {
           hits: 0,
           hits_related: 0,
         },
-      ],
+    ];
+    expect(refineReport(notes, NOW, COUNTERS_START)).toEqual({
+      spread: { bins: [1, 2, 2, 0, 0, 1, 0, 0, 0, 1], total: 7, belowFloor: 3 },
+      low,
+      plan: { archive: low, restore: [] },
     });
+  });
+
+  test("an archived note that was hit again goes to restore, one still under the floor stays archived", () => {
+    const notes = [
+      makeNote({ id: "back", when: "2026-02-01T00:00:00.000Z", what: "back", hits: 2, last_hit: NOW_ISO, archived_at: "2026-10-01T00:00:00.000Z" }),
+      makeNote({ id: "still", when: "2026-02-01T00:00:00.000Z", what: "still", last_hit: "2026-03-25T00:00:00.000Z", archived_at: "2026-10-01T00:00:00.000Z" }),
+    ];
+    const report = refineReport(notes, NOW, COUNTERS_START);
+    expect(report.plan.archive).toEqual([]);
+    expect(report.plan.restore.map((entry) => entry.id)).toEqual(["back"]);
+    expect(report.low.map((entry) => entry.id)).toEqual(["still"]);
   });
 
   test("a signal-less note before the counters start is worth 0.5 on the first day", () => {
@@ -436,6 +451,7 @@ describe("refineReport", () => {
     expect(refineReport(notes, COUNTERS_START, COUNTERS_START)).toEqual({
       spread: { bins: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0], total: 1, belowFloor: 0 },
       low: [],
+      plan: { archive: [], restore: [] },
     });
   });
 
@@ -444,6 +460,7 @@ describe("refineReport", () => {
     expect(refineReport(notes, AFTER_118, COUNTERS_START)).toEqual({
       spread: { bins: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], total: 1, belowFloor: 0 },
       low: [],
+      plan: { archive: [], restore: [] },
     });
   });
 

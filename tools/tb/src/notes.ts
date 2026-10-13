@@ -1,5 +1,5 @@
 import { embedDocument, embedQuery, EMBED_MODEL } from "./infra.js";
-import { ensureCollection, upsert, setPayload, setPayloadMany, getByIds, search, scroll, scrollLinkedTo, scrollAllIds, deletePoints, randomNoteId, noteId, listTags, NOTE_ID_SHAPE } from "./qdrant.js";
+import { ensureCollection, upsert, setPayload, setPayloadMany, deletePayloadKeys, getByIds, search, scroll, scrollLinkedTo, scrollAllIds, deletePoints, randomNoteId, noteId, listTags, NOTE_ID_SHAPE } from "./qdrant.js";
 import type { ScrollOptions, TagFacet } from "./qdrant.js";
 import { REFS_LIMIT } from "./infra.js";
 import { assert } from "../../common/contract.js";
@@ -104,6 +104,16 @@ export async function changeTags(id: string, tags: string[]): Promise<void> {
   const found = await getByIds([id]);
   if (found.length === 0) throw new Error(`Note not found: ${id}`);
   await setPayload(id, { tags });
+}
+
+export async function markArchived(ids: string[], at: Date): Promise<void> {
+  await ensureCollection();
+  await setPayloadMany(ids, { archived_at: at.toISOString() });
+}
+
+export async function clearArchived(ids: string[]): Promise<void> {
+  await ensureCollection();
+  await deletePayloadKeys(ids, ["archived_at"]);
 }
 
 export async function searchNotes(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {

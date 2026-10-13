@@ -7,7 +7,7 @@ import { startMemoryStubs } from "./helpers/td_stubs.ts";
 const memory = startMemoryStubs();
 afterAll(() => memory.stop());
 
-const { createNote, addRefs, searchNotes } = await import("../tools/tb/src/notes.ts");
+const { createNote, addRefs, searchNotes, markArchived, clearArchived } = await import("../tools/tb/src/notes.ts");
 const { EMBED_MODEL } = await import("../tools/tb/src/infra.ts");
 const { ABOUT_NOBODY } = await import("../tools/tb/src/types.ts");
 
@@ -66,5 +66,18 @@ describe("the payload after a search", () => {
       hits_related: 1,
       last_hit_related: expect.any(String),
     });
+  });
+});
+
+describe("the payload after archiving", () => {
+  test("archived_at is the only key added, and clearing it gives the fresh payload back", async () => {
+    const at = new Date("2026-10-13T12:00:00.000Z");
+    const note = await createNote({ what: "gamma tre", why: "motivo tre" });
+
+    await markArchived([note.id], at);
+    expect(payloadOf(note.id)).toStrictEqual({ ...fresh("gamma tre", "motivo tre"), archived_at: at.toISOString() });
+
+    await clearArchived([note.id]);
+    expect(payloadOf(note.id)).toStrictEqual(fresh("gamma tre", "motivo tre"));
   });
 });

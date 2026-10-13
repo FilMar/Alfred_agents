@@ -19,7 +19,7 @@ ti search "$prompt" --limit 2 --min-score 0.5 2>/dev/null \
   | jq -c '[.[] | {if, do, tags, score}]' >"$ti_file" &
 pid_ti=$!
 
-tb search "$prompt" --depth 1 --limit 2 --min-score 0.5 --related-limit 3 2>/dev/null \
+tb search "$prompt" --depth 1 --limit 2 --min-score 0.5 --related-limit 3 --no-archived 2>/dev/null \
   | jq -c '[.[] | {what: .note.what, why: .note.why, tags: .note.tags, kind: .note.kind, score, via}]' >"$tb_file" &
 pid_tb=$!
 

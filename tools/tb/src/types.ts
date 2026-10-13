@@ -91,6 +91,8 @@ export interface Note {
   about?: string;
   /** ISO 8601 — last change to any mutable field */
   updated_at?: string;
+  /** ISO 8601 — when `tb refine --apply` archived the note. Absent while the note is live. */
+  archived_at?: string;
 }
 
 // ─── Search ──────────────────────────────────────────────────────────────────
@@ -127,6 +129,8 @@ export interface SearchOptions {
   related_limit?: number;
   /** If false, hits are not counted on the notes. Default: true. */
   record_hits?: boolean;
+  /** If true, leaves out the notes that have `archived_at`, related ones included. Default: false. */
+  exclude_archived?: boolean;
 }
 
 /** Related results kept after ranking, when the caller names no limit. */

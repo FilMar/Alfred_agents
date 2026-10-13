@@ -7,7 +7,7 @@ export default function (pi: ExtensionAPI): void {
 
     const [tiResult, tbResult] = await Promise.allSettled([
       execSearch("ti", event.prompt, { limit: 2, minScore: HOOK_MIN_SCORE }),
-      execSearch("tb", event.prompt, { depth: 1, limit: 2, minScore: HOOK_MIN_SCORE, relatedLimit: 3 }),
+      execSearch("tb", event.prompt, { depth: 1, limit: 2, minScore: HOOK_MIN_SCORE, relatedLimit: 3, noArchived: true }),
     ]);
 
     let context = "";
@@ -73,11 +73,12 @@ const HOOK_MIN_SCORE = 0.5;
 async function execSearch(
   cmd: string,
   query: string,
-  opts: { limit?: number; minScore?: number; depth?: number; relatedLimit?: number } = {},
+  opts: { limit?: number; minScore?: number; depth?: number; relatedLimit?: number; noArchived?: boolean } = {},
 ): Promise<string> {
   const args = ["search", query, "--limit", String(opts.limit ?? 5), "--min-score", String(opts.minScore ?? HOOK_MIN_SCORE)];
   if (opts.depth) args.push("--depth", String(opts.depth));
   if (opts.relatedLimit !== undefined) args.push("--related-limit", String(opts.relatedLimit));
+  if (opts.noArchived) args.push("--no-archived");
 
   try {
     const { stdout } = await runCommand(cmd, args);

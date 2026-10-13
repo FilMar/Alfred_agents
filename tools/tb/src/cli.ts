@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { checkHealth, EMBED_MODEL } from "./infra.js";
 import { serveGraph, GRAPH_PORT } from "./graph/server.js";
 import { serveApi, API_PORT } from "./api.js";
-import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId } from "./notes.js";
+import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId, markArchived, clearArchived } from "./notes.js";
 import { getByIds } from "./qdrant.js";
 import { refineReport, COUNTERS_START, REFINE_NOTES_LIMIT } from "./refine.js";
 import type { NoteType, SearchOptions, Link } from "./types.js";
@@ -185,6 +185,7 @@ program
   .option("--min-score <n>", "Minimum score to keep a direct hit (never cuts related notes)")
   .option("--related-limit <n>", "Maximum related notes kept, best score first")
   .option("--no-hits", "Do not count this search as a hit on the returned notes")
+  .option("--no-archived", "Leave out the archived notes, related ones included")
   .action(async (query: string, opts) => {
     await requireServices({ needsEmbedding: true });
 
@@ -199,6 +200,7 @@ program
       min_score: opts.minScore !== undefined ? parseFloat(opts.minScore) : undefined,
       related_limit: opts.relatedLimit !== undefined ? parseInt(opts.relatedLimit, 10) : undefined,
       record_hits: opts.hits,
+      exclude_archived: opts.archived === false,
     };
 
     const results = await searchNotes(query, options);
@@ -310,13 +312,27 @@ program
 
 program
   .command("refine")
-  .description("Dry run: print the trust spread and the notes under the floor. Writes nothing.")
-  .action(async () => {
+  .description("Print the trust spread, the notes under the floor and the plan. Writes only with --apply.")
+  .option("--apply", "Write archived_at on the notes to archive, and remove it from the notes to restore")
+  .action(async (opts) => {
     await requireServices({ needsEmbedding: false });
 
-    const notes = await browseNotes({ limit: REFINE_NOTES_LIMIT });
+    try {
+      const notes = await browseNotes({ limit: REFINE_NOTES_LIMIT });
+      const now = new Date();
+      const report = refineReport(notes, now, COUNTERS_START);
 
-    out(refineReport(notes, new Date(), COUNTERS_START));
+      if (!opts.apply) {
+        out(report);
+        return;
+      }
+
+      await markArchived(report.plan.archive.map((entry) => entry.id), now);
+      await clearArchived(report.plan.restore.map((entry) => entry.id));
+      out({ ...report, applied: { archived: report.plan.archive.length, restored: report.plan.restore.length } });
+    } catch (err) {
+      die(errorMessage(err));
+    }
   });
 
 // ─── graph ────────────────────────────────────────────────────────────────────

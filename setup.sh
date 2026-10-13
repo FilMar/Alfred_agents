@@ -59,6 +59,22 @@ if command -v claude &>/dev/null || command -v pi &>/dev/null; then
     fi
 fi
 
+# --- tl and tb_refine extensions (claude hook + pi extension) ---
+# The hooks are linked here. The entries in ~/.claude/settings.json are added by hand.
+if command -v claude &>/dev/null || command -v pi &>/dev/null; then
+    echo "tl and tb_refine extensions"
+    if command -v claude &>/dev/null; then
+        mkdir -p "$CLAUDE/hooks"
+        link "$REPO/extensions/tl/claude.sh" "$CLAUDE/hooks/ingest-tl.sh" "~/.claude/hooks/ingest-tl.sh"
+        link "$REPO/extensions/tb_refine/claude.sh" "$CLAUDE/hooks/refine-tb.sh" "~/.claude/hooks/refine-tb.sh"
+    fi
+    if command -v pi &>/dev/null; then
+        mkdir -p "$PI/extensions"
+        link "$REPO/extensions/tl/pi.ts" "$PI/extensions/tl.ts" "~/.pi/agent/extensions/tl.ts"
+        link "$REPO/extensions/tb_refine/pi.ts" "$PI/extensions/tb_refine.ts" "~/.pi/agent/extensions/tb_refine.ts"
+    fi
+fi
+
 # --- systemd user services (tb, ti HTTP API) ---
 echo "systemd user services (tb, ti)"
 mkdir -p "$HOME/.config/systemd/user"

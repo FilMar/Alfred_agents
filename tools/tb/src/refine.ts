@@ -22,7 +22,9 @@ export type LowNote = Readonly<{
   hits: number;
   hits_related: number;
 }>;
-export type RefineReport = Readonly<{ spread: Spread; low: readonly LowNote[] }>;
+export type Scored = Readonly<{ note: Note; trust: number }>;
+export type Plan = Readonly<{ archive: readonly LowNote[]; restore: readonly LowNote[] }>;
+export type RefineReport = Readonly<{ spread: Spread; low: readonly LowNote[]; plan: Plan }>;
 
 function isValidDate(date: Date): boolean {
   return Number.isFinite(date.getTime());
@@ -42,6 +44,44 @@ function allUnit(values: readonly number[]): boolean {
 
 function sum(values: readonly number[]): number {
   return values.reduce((total, value) => total + value, 0);
+}
+
+function allTrustsUnit(scored: readonly Scored[]): boolean {
+  return scored.every((entry) => isUnit(entry.trust));
+}
+
+function disjointIds(left: readonly LowNote[], right: readonly LowNote[]): boolean {
+  const ids = new Set(left.map((entry) => entry.id));
+  return right.every((entry) => !ids.has(entry.id));
+}
+
+function archiveHolds(list: readonly LowNote[], scored: readonly Scored[]): boolean {
+  const allowed = new Set(
+    scored.filter((entry) => entry.trust < TRUST_FLOOR && entry.note.archived_at === undefined).map((entry) => entry.note.id),
+  );
+  return list.every((entry) => allowed.has(entry.id));
+}
+
+function restoreHolds(list: readonly LowNote[], scored: readonly Scored[]): boolean {
+  const allowed = new Set(
+    scored.filter((entry) => entry.trust >= TRUST_FLOOR && entry.note.archived_at !== undefined).map((entry) => entry.note.id),
+  );
+  return list.every((entry) => allowed.has(entry.id));
+}
+
+function byTrustThenId(left: LowNote, right: LowNote): number {
+  return left.trust - right.trust || Number(left.id > right.id) - Number(left.id < right.id);
+}
+
+function viewOf(note: Note, trust: number): LowNote {
+  return {
+    id: note.id,
+    trust,
+    what: note.what.slice(0, LOW_WHAT_CHARS),
+    when: note.when,
+    hits: note.hits ?? 0,
+    hits_related: note.hits_related ?? 0,
+  };
 }
 
 function floorHolds(note: Note, signals: Signals, countersStart: Date): boolean {
@@ -112,36 +152,60 @@ export function spreadOf(trusts: readonly number[]): Spread {
 
 export function lowNoteOf(note: Note, trust: number): LowNote {
   assert(trust < TRUST_FLOOR, "lowNoteOf: the trust is under the floor");
-  let result: LowNote = { id: "", trust: 0, what: "", when: "", hits: 0, hits_related: 0 };
-  result = {
-    id: note.id,
-    trust,
-    what: note.what.slice(0, LOW_WHAT_CHARS),
-    when: note.when,
-    hits: note.hits ?? 0,
-    hits_related: note.hits_related ?? 0,
-  };
+  const result = viewOf(note, trust);
   assert(result.id === note.id, "lowNoteOf: the id is the note id");
   assert(result.what.length <= LOW_WHAT_CHARS, "lowNoteOf: what is cut to the limit");
   return result;
 }
 
+export function restoredNoteOf(note: Note, trust: number): LowNote {
+  assert(trust >= TRUST_FLOOR, "restoredNoteOf: the trust is at the floor or above");
+  const result = viewOf(note, trust);
+  assert(result.id === note.id, "restoredNoteOf: the id is the note id");
+  assert(result.what.length <= LOW_WHAT_CHARS, "restoredNoteOf: what is cut to the limit");
+  return result;
+}
+
+export function planOf(scored: readonly Scored[]): Plan {
+  assert(allTrustsUnit(scored), "planOf: every trust is between 0 and 1");
+  let result: Plan = { archive: [], restore: [] };
+  const archive: LowNote[] = [];
+  const restore: LowNote[] = [];
+  for (const entry of scored) {
+    if (entry.trust < TRUST_FLOOR && entry.note.archived_at === undefined) {
+      archive.push(lowNoteOf(entry.note, entry.trust));
+    }
+    if (entry.trust >= TRUST_FLOOR && entry.note.archived_at !== undefined) {
+      restore.push(restoredNoteOf(entry.note, entry.trust));
+    }
+  }
+  archive.sort(byTrustThenId);
+  restore.sort(byTrustThenId);
+  result = { archive, restore };
+  assert(disjointIds(result.archive, result.restore), "planOf: no note is in both lists");
+  assert(archiveHolds(result.archive, scored), "planOf: every note to archive is under the floor and not archived yet");
+  assert(restoreHolds(result.restore, scored), "planOf: every note to restore is archived and at the floor or above");
+  return result;
+}
+
 export function refineReport(notes: readonly Note[], now: Date, countersStart: Date): RefineReport {
   assert(notes.length < REFINE_NOTES_LIMIT, "refineReport: the read is not cut by the limit");
-  let result: RefineReport = { spread: { bins: [], total: 0, belowFloor: 0 }, low: [] };
-  const trusts: number[] = [];
+  let result: RefineReport = { spread: { bins: [], total: 0, belowFloor: 0 }, low: [], plan: { archive: [], restore: [] } };
+  const scored: Scored[] = [];
   const low: LowNote[] = [];
   for (const note of notes) {
     const trust = trustOf(signalsOf(note, countersStart), now);
-    trusts.push(trust);
+    scored.push({ note, trust });
     if (trust < TRUST_FLOOR) {
       low.push(lowNoteOf(note, trust));
     }
   }
-  const spread = spreadOf(trusts);
-  low.sort((left, right) => left.trust - right.trust || Number(left.id > right.id) - Number(left.id < right.id));
-  result = { spread, low };
+  const spread = spreadOf(scored.map((entry) => entry.trust));
+  const plan = planOf(scored);
+  low.sort(byTrustThenId);
+  result = { spread, low, plan };
   assert(result.spread.total === notes.length, "refineReport: the spread counts every note");
   assert(result.low.length === result.spread.belowFloor, "refineReport: one low note per trust below the floor");
+  assert(result.plan.archive.length <= result.low.length, "refineReport: the notes to archive are among the low notes");
   return result;
 }

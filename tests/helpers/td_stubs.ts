@@ -2,6 +2,7 @@
 
 import { createApp } from "../../tools/tl/src/api.ts";
 import * as db from "../../tools/tl/src/db.ts";
+import { EMBED_MODEL } from "../../tools/tb/src/infra.ts";
 
 const DIMS = 768;
 
@@ -39,6 +40,10 @@ function matches(payload: Record<string, unknown>, id: string, filter: any): boo
   const mustNot: any[] = filter.must_not ?? [];
   const test = (c: any): boolean => {
     if (c.has_id) return c.has_id.includes(id);
+    if (c.is_empty) {
+      const value = payload[c.is_empty.key];
+      return value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
+    }
     const raw = payload[c.key];
     const values = Array.isArray(raw) ? raw : [raw];
     if (c.match?.any) return values.some((v) => c.match.any.includes(v));
@@ -91,6 +96,13 @@ export function startMemoryStubs(): MemoryStubs {
         const point = points.get(decodeURIComponent(rest.slice("/points/".length)));
         return point === undefined ? json({ error: "no point" }, 404) : json({ result: { id: rest.slice(8), payload: point.payload, vector: denseOf(point.vector) } });
       }
+      if (rest === "/points/payload/delete") {
+        for (const id of body.points as string[]) {
+          const point = points.get(id);
+          if (point !== undefined) for (const key of body.keys as string[]) delete point.payload[key];
+        }
+        return json({ result: true });
+      }
       if (rest === "/points/payload") {
         for (const id of body.points as string[]) {
           const point = points.get(id);
@@ -123,7 +135,7 @@ export function startMemoryStubs(): MemoryStubs {
   const ollama = Bun.serve({
     port: 0,
     async fetch(req) {
-      if (req.method === "GET") return json({ models: [] });
+      if (req.method === "GET") return json({ models: [{ name: EMBED_MODEL }] });
       if (failing !== null && "/api/embed".includes(failing)) return json({ error: "stub failure" }, 500);
       const body: any = await req.json();
       return json({ embeddings: [embed(String(body.input))] });
