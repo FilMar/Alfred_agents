@@ -22,7 +22,7 @@ const MISSING = exchangeId(SESSION, "message-9");
 await upsertSession(tl.handle, { id: SESSION, started: NOW });
 await upsertExchange(tl.handle, { id: EXCHANGE, session: SESSION, timestamp: NOW, kind: "chat", actor: "alfredo" });
 await upsertExchange(tl.handle, { id: SECOND, session: SESSION, timestamp: NOW, kind: "chat", actor: "alfredo" });
-const storedNote = await createNote({ what: "Una nota già nel cervello", why: "Fa da bersaglio per i ref", kind: "attrito", tags: ["architettura"], exchange: EXCHANGE, status: "provvisoria" });
+const storedNote = await createNote({ what: "Una nota già nel cervello", why: "Fa da bersaglio per i ref", kind: "attrito", tags: ["architettura"], exchange: EXCHANGE });
 const storedEntry = await addEntry("Se piove a Cremona", "Porta l'ombrello", ["meteo"], EXCHANGE);
 
 afterAll(() => {

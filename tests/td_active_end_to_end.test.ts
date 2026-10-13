@@ -87,7 +87,7 @@ function enqueue(...texts: string[]) {
 }
 
 function notesStored() {
-  return [...(memory.collections.get("third-brain")?.values() ?? [])].map((p) => p.payload as { what: string; exchange?: string; status?: string; refs: { id: string; reason: string }[] });
+  return [...(memory.collections.get("third-brain")?.values() ?? [])].map((p) => p.payload as { what: string; exchange?: string; refs: { id: string; reason: string }[] });
 }
 
 function entriesStored() {
@@ -109,7 +109,7 @@ describe("active mode on stubs", () => {
     const target = turns[1].id();
     expect(report.failures).toEqual([]);
     expect(notesStored().length).toBe(notesBefore + 1);
-    expect(notesStored().find((n) => n.what === note.what)).toMatchObject({ exchange: target, status: "provvisoria" });
+    expect(notesStored().find((n) => n.what === note.what)).toMatchObject({ exchange: target });
     expect(entriesStored().length).toBe(entriesBefore + 1);
     expect(entriesStored().find((e) => e.if === rule.if)).toMatchObject({ exchange: target });
     expect(distilledOf(turns)).toEqual([distiller.recorder.run(), distiller.recorder.run()]);

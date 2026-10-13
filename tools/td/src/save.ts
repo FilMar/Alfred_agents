@@ -92,7 +92,6 @@ export async function saveNote(candidate: NoteCandidate, verdict: Verdict, excha
       kind: json.kind as NoteType,
       tags: [...json.tags, ...json.proposedTags],
       exchange: exchangeId,
-      status: "provvisoria",
     });
     savedId = note.id;
     if ((await getByIds([note.id])).length === 0) {

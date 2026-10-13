@@ -48,7 +48,7 @@ No confirmation step. The filters and the checks are the gate. A note that fails
 
 ```bash
 tb save --what "<idea>" --why "<reason>" --kind <kind> \
-  --tags <tag> --tags <tag> --status provvisoria \
+  --tags <tag> --tags <tag> \
   [--exchange "<tl exchange id>"] [--source "<origin>"]
 ```
 
@@ -56,7 +56,6 @@ tb save --what "<idea>" --why "<reason>" --kind <kind> \
 
 - **`what`.** The idea as a puzzle piece, in Italian. A reader must understand it in ten years, without the session logs.
 - **`why`.** Why the idea matters, apart from the current debate. Italian.
-- **`status`.** Always `provvisoria`. A note becomes `promossa` only through use, never through the skill that saves it.
 - **`kind`.** Exactly one. `indice` is a curation node, not an atomic note: only a curation pass creates it, never a skill that extracts notes. `tb save` defaults to `dato`, so always pass the kind.
   - `dato`: a finding, observed mechanism or fact, from a study, a systematic observation or a measurement. It can be narrative. It must have an origin (see `source`).
   - `protocollo`: something you can do. An "if A then B" procedure or a routine.

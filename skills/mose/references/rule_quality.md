@@ -66,7 +66,7 @@ The newer correction wins. Do this, in order:
 1. **Write the lesson to `tb`, first.** The old rule is about to be deleted, and its text goes with it. Save one note that says what the old rule ordered, what the new rule orders, and why the old one was wrong. Give it the origin exchange. The note follows `note_quality.md` in full.
    ```bash
    tb save --what "<old order vs new order, as a general lesson>" --why "<why the old one failed>" \
-     --kind attrito --tags <tag> --status provvisoria --exchange "<id of the correcting exchange>"
+     --kind attrito --tags <tag> --exchange "<id of the correcting exchange>"
    ```
    If the lesson is only a project detail and fails the note bar, skip the note. The new rule still carries the exchange.
 2. **Delete the old rule.**

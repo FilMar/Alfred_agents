@@ -48,7 +48,7 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] Run `tb refine` on a timer. Then import the history in batches with `--max-saved`. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing)
 - [ ] `tb link`: ref candidates by vector, an LLM hat judges pairs, then retire aristotele. Possible design. [detail](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge)
 - [ ] `tb refine`: decide if a `trust` field is stored, once a reader needs it. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing)
-- [ ] Decide the fate of `status` once `trust` has proved itself. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing)
+- [x] Remove the `status` field: nothing reads it and nothing promotes it. [detail](memory_tb_note_status_field_is_removed_because_nothing_reads_it_and_nothing_promotes_it)
 - [ ] Decay of `provvisoria` notes: with critic F about 16 of 75 bad candidates pass. Now covered by `trust`. [detail](memory_critic_is_f_textbook_as_a_test_and_no_record_question)
 - [ ] td: run two or three more sessions in shadow, then active, and tune.
 - [ ] td: `append` can add a `do` that its rule's `if` does not cover. Make it prudent, or let `ti` edit a `do`.
