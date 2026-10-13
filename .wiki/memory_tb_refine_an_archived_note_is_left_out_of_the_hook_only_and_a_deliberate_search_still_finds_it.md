@@ -6,17 +6,15 @@ replaces: [memory_tb_refine_trust_under_point_two_archives_the_note_and_hides_it
 
 ## Decision
 
-A note with `trust` under 0.2 is archived. The refiner writes `archived_at` with the day of the first archive. It does not write it again while the note stays archived.
+A note with `trust` under 0.2 is archived. `tb refine --apply` writes `archived_at`, an ISO instant, at the first archive. It does not write it again while the note stays archived.
 
 Archived means only that. Nothing moves and nothing is deleted. The note keeps its content, its refs and its backrefs.
 
-An archived note is left out of the hook only. The hook (`extensions/tb_ti/claude.sh`) injects notes at every prompt with `tb search --depth 1 ...`. It will pass a flag, for example `--no-archived`. The flag is not built yet. It must also cut the related notes that `--depth 1` reaches. If it does not, an archived note comes back through the refs of a live note.
+An archived note is left out of the hook only. The hook (`extensions/tb_ti/claude.sh`) injects notes at every prompt with `tb search --depth 1 ...`. It passes `--no-archived` (`SearchOptions.exclude_archived`). The filter is one `is_empty` condition on `archived_at`, reused by the visit of the refs, so it cuts the related notes too. `td` does not pass the flag: a candidate equal to an archived note is a duplicate.
 
 A deliberate `tb search` by the agent still finds archived notes. The result shows `archived_at`. That hit counts as a signal. On the next run `trust` is computed again. If it is 0.2 or more, `archived_at` is cleared and the hook injects the note again.
 
 The threshold 0.2 is by eye. It is fixed later, after the hit rate is known. See [memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known).
-
-The work to build: one flag and one filter on `archived_at`.
 
 ## Why
 
