@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, tl, sqlite, config]
-sources: [conversation, tools/tl/src/db.ts, spikes/2026-10-01-critic-bench/main.py]
+sources: [conversation, tools/tl/src/db.ts, spikes/2026-10-01-critic-bench/main.py (deleted)]
 ---
 
 ## Decision

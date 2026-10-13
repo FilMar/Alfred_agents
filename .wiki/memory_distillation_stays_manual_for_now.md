@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, tl, platone]
-sources: [conversation, ROADMAP_MEMORIA.md]
+sources: [conversation, ROADMAP_MEMORIA.md@7edd8d8]
 ---
 
 ## Decision

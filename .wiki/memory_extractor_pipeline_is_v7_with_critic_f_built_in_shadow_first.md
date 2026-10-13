@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, tl, tb, ti, pipeline, critic]
-sources: [conversation, spikes/2026-10-02-extractor-f/main.py, spikes/2026-10-01-extraction-hats/main.py, spikes/2026-10-01-critic-bench/main.py]
+sources: [conversation, spikes/2026-10-02-extractor-f/main.py (deleted), spikes/2026-10-01-extraction-hats/main.py (deleted), spikes/2026-10-01-critic-bench/main.py (deleted)]
 replaces: [memory_distiller_is_a_pipeline_of_small_calls_with_no_tools]
 ---
 

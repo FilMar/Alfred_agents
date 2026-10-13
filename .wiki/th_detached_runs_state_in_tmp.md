@@ -1,6 +1,6 @@
 ---
 tags: [th, detach, tmp, state]
-sources: [tools/th/src/runner.ts, tools/th/src/detached-runner.ts, .wiki/th_cli.md]
+sources: [tools/th/src/runner.ts, tools/th/src/detached-runner.ts, .wiki/th_cli.md@787028b]
 ---
 
 ## Decision

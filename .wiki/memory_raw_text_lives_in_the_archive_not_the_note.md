@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, tl, schema]
-sources: [ROADMAP_MEMORIA.md, tools/tb/src/types.ts, spikes/2026-09-28-tb-corpus/data/translations_it.json]
+sources: [ROADMAP_MEMORIA.md@7edd8d8, tools/tb/src/types.ts, spikes/2026-09-28-tb-corpus/data/translations_it.json (deleted)]
 replaces: [memory_keep_raw_source_for_reingest]
 ---
 

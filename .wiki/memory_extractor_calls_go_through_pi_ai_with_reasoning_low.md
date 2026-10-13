@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, llm, pi-ai, ollama, transport]
-sources: [conversation, spikes/2026-10-05-pi-ai-transport/main.ts]
+sources: [conversation, spikes/2026-10-05-pi-ai-transport/main.ts (deleted)]
 ---
 
 ## Decision

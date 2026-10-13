@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, ti, architecture, qdrant]
-sources: [conversation, tools/tb/src/qdrant.ts, ROADMAP.md]
+sources: [conversation, tools/tb/src/qdrant.ts, ROADMAP.md@cf2cccf]
 ---
 
 ## Decision

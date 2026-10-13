@@ -1,6 +1,6 @@
 ---
 tags: [orchestrator, cockpit, th, removal, testing]
-sources: [conversation, ROADMAP_MEMORIA.md, tools/orchestrator, tools/cockpit, tests/orchestrator.test.ts]
+sources: [conversation, ROADMAP_MEMORIA.md@7edd8d8, tools/orchestrator@787028b, tools/cockpit@a89dceb, tests/orchestrator.test.ts@40f61de]
 replaces: [orchestrator_minimal_rest_surface, orchestrator_run_task_matrix_only, orchestrator_adversarial_audit_static, orchestrator_filesystem_state_no_db, orchestrator_boot_callback_wake_window, orchestrator_bwrap_task_execution, orchestrator_metadata_exported_constants, orchestrator_remaining_work, cockpit_pivot_pi_extension_rpc]
 ---
 

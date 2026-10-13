@@ -1,6 +1,6 @@
 ---
 tags: [core, tb, architecture, qdrant]
-sources: [tools/tb/src/infra.ts, .wiki/architettura.md]
+sources: [tools/tb/src/infra.ts, .wiki/architettura.md@f87afd9]
 ---
 
 ## Decision

@@ -1,6 +1,6 @@
 ---
 tags: [core, archive, cleanup]
-sources: [conversation, .wiki/architettura.md]
+sources: [conversation, .wiki/architettura.md@f87afd9]
 ---
 
 ## Decision

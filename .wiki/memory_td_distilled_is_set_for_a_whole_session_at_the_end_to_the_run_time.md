@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, tl, session]
-sources: [tools/td/SPEC_ACTIVE.md, tools/td/src/distiller.ts, tools/td/src/save.ts, tools/td/src/session.ts]
+sources: [tools/td/SPEC_ACTIVE.md@61d5a9f, tools/td/src/distiller.ts, tools/td/src/save.ts, tools/td/src/session.ts]
 ---
 
 ## Decision

@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, tags, checks]
-sources: [conversation, tools/td/src/candidate.ts, tests/td_candidate.test.ts, spikes/2026-10-01-extraction-hats/main.py]
+sources: [conversation, tools/td/src/candidate.ts, tests/td_candidate.test.ts, spikes/2026-10-01-extraction-hats/main.py (deleted)]
 ---
 
 ## Decision

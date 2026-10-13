@@ -1,6 +1,6 @@
 ---
 tags: [th, sandbox, security, bwrap]
-sources: [tools/th/src/runner.ts, .wiki/th_cli.md, .wiki/architettura.md]
+sources: [tools/th/src/runner.ts, .wiki/th_cli.md@787028b, .wiki/architettura.md@f87afd9]
 ---
 
 ## Decision

@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, neighbours]
-sources: [tools/td/SPEC_ACTIVE.md, tools/td/src/neighbours.ts, tests/td_active_end_to_end.test.ts]
+sources: [tools/td/SPEC_ACTIVE.md@61d5a9f, tools/td/src/neighbours.ts, tests/td_active_end_to_end.test.ts]
 ---
 
 ## Decision

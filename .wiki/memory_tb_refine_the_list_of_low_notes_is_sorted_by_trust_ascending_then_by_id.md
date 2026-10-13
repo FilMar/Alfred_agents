@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, refine, output]
-sources: [tools/tb/SPEC.md, tools/tb/REVIEW.md]
+sources: [tools/tb/SPEC.md@61cd4c3, tools/tb/REVIEW.md@61cd4c3]
 ---
 
 ## Decision

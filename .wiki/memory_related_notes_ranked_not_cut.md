@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, retrieval, telemetry, scoring]
-sources: [conversation, spikes/2026-09-28-tb-corpus/reports/fase1_related.json, tools/tb/src/qdrant.ts, tools/tb/src/types.ts, .wiki/memory_refs_carry_non_semantic_reach.md]
+sources: [conversation, spikes/2026-09-28-tb-corpus/reports/fase1_related.json (deleted), tools/tb/src/qdrant.ts, tools/tb/src/types.ts, .wiki/memory_refs_carry_non_semantic_reach.md]
 replaces: [memory_related_results_need_scores]
 ---
 

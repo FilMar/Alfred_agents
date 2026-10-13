@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, note, status, schema]
-sources: [tools/tb/SPEC.md, tools/tb/REVIEW.md, conversation]
+sources: [tools/tb/SPEC.md@7f3f8be, tools/tb/REVIEW.md@7f3f8be, conversation]
 ---
 
 ## Decision

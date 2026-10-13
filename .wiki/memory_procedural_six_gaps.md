@@ -1,6 +1,6 @@
 ---
 tags: [memory, procedural, gaps, diagnosis]
-sources: [conversation, .wiki/procedural_memory_gaps.md]
+sources: [conversation, .wiki/procedural_memory_gaps.md@3d6da87]
 ---
 
 ## Decision

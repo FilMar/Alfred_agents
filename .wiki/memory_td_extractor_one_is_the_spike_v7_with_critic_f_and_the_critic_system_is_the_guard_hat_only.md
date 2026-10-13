@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, config, critic, tl]
-sources: [spikes/2026-10-02-extractor-f/main.py, spikes/2026-10-01-extraction-hats/main.py, spikes/2026-10-01-critic-bench/main.py]
+sources: [spikes/2026-10-02-extractor-f/main.py (deleted), spikes/2026-10-01-extraction-hats/main.py (deleted), spikes/2026-10-01-critic-bench/main.py (deleted)]
 ---
 
 ## Decision

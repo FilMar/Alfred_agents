@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, refine, browse, qdrant]
-sources: [tools/tb/SPEC.md, tools/tb/REVIEW.md, tools/tb/src/qdrant.ts]
+sources: [tools/tb/SPEC.md@61cd4c3, tools/tb/REVIEW.md@61cd4c3, tools/tb/src/qdrant.ts]
 ---
 
 ## Decision

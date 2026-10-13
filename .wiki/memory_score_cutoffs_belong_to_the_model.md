@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, ti, embedding, measurement, hook]
-sources: [spikes/2026-09-28-tb-corpus/tb_threshold.py, spikes/2026-09-28-tb-corpus/reports/fase0_threshold.json, extensions/tb_ti/claude.sh, skills/christopher/SKILL.md, skills/mose/SKILL.md]
+sources: [spikes/2026-09-28-tb-corpus/tb_threshold.py (deleted), spikes/2026-09-28-tb-corpus/reports/fase0_threshold.json (deleted), extensions/tb_ti/claude.sh, skills/christopher/SKILL.md, skills/mose/SKILL.md]
 ---
 
 ## Decision

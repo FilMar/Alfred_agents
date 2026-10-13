@@ -1,6 +1,6 @@
 ---
 tags: [memory, tl, episodic, distiller, index]
-sources: [spikes/2026-10-01-extraction-hats/main.py, spikes/2026-10-01-extraction-hats/extract_v3.jsonl, tools/tl/README.md]
+sources: [spikes/2026-10-01-extraction-hats/main.py (deleted), spikes/2026-10-01-extraction-hats/extract_v3.jsonl (deleted), tools/tl/README.md]
 ---
 
 ## Decision

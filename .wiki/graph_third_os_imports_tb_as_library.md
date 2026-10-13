@@ -1,6 +1,6 @@
 ---
 tags: [graph, tb, third-os, architecture, qdrant]
-sources: [ROADMAP.md, tools/tb/src/qdrant.ts, tools/tb/src/notes.ts, conversation]
+sources: [ROADMAP.md@cf2cccf, tools/tb/src/qdrant.ts, tools/tb/src/notes.ts, conversation]
 ---
 
 ## Decision

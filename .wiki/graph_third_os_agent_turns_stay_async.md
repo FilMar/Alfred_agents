@@ -1,6 +1,6 @@
 ---
 tags: [graph, third-os, th, agent, sandbox]
-sources: [ROADMAP.md, tools/th/src/runner.ts, conversation]
+sources: [ROADMAP.md@cf2cccf, tools/th/src/runner.ts, conversation]
 ---
 
 ## Decision

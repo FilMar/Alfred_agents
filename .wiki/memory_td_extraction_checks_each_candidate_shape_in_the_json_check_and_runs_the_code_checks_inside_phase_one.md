@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, extraction, phase-1]
-sources: [tools/td/src/extraction.ts, spikes/2026-10-01-extraction-hats/main.py]
+sources: [tools/td/src/extraction.ts, spikes/2026-10-01-extraction-hats/main.py (deleted)]
 ---
 
 ## Decision

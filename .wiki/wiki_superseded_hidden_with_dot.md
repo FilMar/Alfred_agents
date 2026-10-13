@@ -1,6 +1,6 @@
 ---
 tags: [wiki, meta, structure, omero]
-sources: [.wiki/wiki_decision_chain_structure.md, conversation]
+sources: [.wiki/wiki_decision_chain_structure.md@a5b5c45, conversation]
 replaces: [.wiki_decision_chain_structure]
 ---
 

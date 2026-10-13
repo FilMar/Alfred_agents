@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, ti, embedding, measurement]
-sources: [ROADMAP_MEMORIA.md, tools/tb/src/infra.ts, spikes/2026-09-28-tb-corpus/tb_benchmark.py, spikes/2026-09-28-tb-corpus/reports/fase0_benchmark.json]
+sources: [ROADMAP_MEMORIA.md@7edd8d8, tools/tb/src/infra.ts, spikes/2026-09-28-tb-corpus/tb_benchmark.py (deleted), spikes/2026-09-28-tb-corpus/reports/fase0_benchmark.json (deleted)]
 ---
 
 ## Decision

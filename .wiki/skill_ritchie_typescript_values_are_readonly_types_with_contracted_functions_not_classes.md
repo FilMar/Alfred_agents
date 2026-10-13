@@ -1,6 +1,6 @@
 ---
 tags: [skill, ritchie, typescript, structs]
-sources: [skills/ritchie/SKILL.md, skills/ritchie/references/languages.md, skills/ritchie/references/rules.md]
+sources: [skills/ritchie/SKILL.md, skills/ritchie/references/languages.md (deleted), skills/ritchie/references/rules.md]
 ---
 
 ## Decision

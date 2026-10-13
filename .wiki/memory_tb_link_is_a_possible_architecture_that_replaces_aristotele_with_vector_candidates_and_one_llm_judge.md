@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, link, refs, hubs, aristotele, architecture, idea]
-sources: [conversation, tools/tb/src/types.ts, tools/tb/SPEC.md]
+sources: [conversation, tools/tb/src/types.ts, tools/tb/SPEC.md@61cd4c3]
 ---
 
 ## Decision

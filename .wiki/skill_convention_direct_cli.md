@@ -1,6 +1,6 @@
 ---
 tags: [skills, convention, scripts, efesto]
-sources: [skills/efesto/SKILL.md, skills/efesto/references/MIGRATION.md]
+sources: [skills/efesto/SKILL.md, skills/efesto/references/MIGRATION.md@95bea9c]
 ---
 
 ## Decision

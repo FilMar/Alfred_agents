@@ -1,6 +1,6 @@
 ---
 tags: [memory, hook, tb, ti, query]
-sources: [conversation, spikes/2026-09-29-query-rewrite/main.py]
+sources: [conversation, spikes/2026-09-29-query-rewrite/main.py (deleted)]
 ---
 
 ## Decision

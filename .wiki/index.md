@@ -116,6 +116,7 @@ updated: 2026-10-13
 | [skill_ritchie_review_is_the_verdict_packet](skill_ritchie_review_is_the_verdict_packet) | The review: six sections from Esito to Scostamenti, self-contained |
 | [skill_ritchie_spec_review_pair_is_ephemeral_scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding) | The pair is scaffolding: removed at approval, the wiki page is the record |
 | [style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags) | tools/common holds every shared module: contract, cli helpers, tags |
+| [style_a_source_that_left_the_tree_is_written_as_path_at_commit_hash_or_marked_deleted](style_a_source_that_left_the_tree_is_written_as_path_at_commit_hash_or_marked_deleted) | A source that left the tree is written path@hash, or (deleted) if git never held it |
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |
 | [style_type_checks_are_private_static_methods_of_their_class](style_type_checks_are_private_static_methods_of_their_class) | A check that knows one type is a private static method; getters have no contract |
 | [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards |

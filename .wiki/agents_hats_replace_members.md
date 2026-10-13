@@ -1,6 +1,6 @@
 ---
 tags: [agents, th, hats, skills, delegation]
-sources: [conversation, tools/th/src/hats.ts, tools/th/src/runner.ts, skills/annibale/SKILL.md, ROADMAP_MEMORIA.md]
+sources: [conversation, tools/th/src/hats.ts (deleted), tools/th/src/runner.ts, skills/annibale/SKILL.md, ROADMAP_MEMORIA.md@7edd8d8]
 replaces: [agents_skills_inline_members_via_th]
 ---
 

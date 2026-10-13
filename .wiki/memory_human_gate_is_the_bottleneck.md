@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, diagnosis, curation]
-sources: [conversation, ROADMAP_MEMORIA.md, tools/tb/src/notes.ts]
+sources: [conversation, ROADMAP_MEMORIA.md@7edd8d8, tools/tb/src/notes.ts]
 ---
 
 ## Decision

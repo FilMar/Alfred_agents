@@ -1,6 +1,6 @@
 ---
 tags: [wiki, process, omero]
-sources: [conversation, ROADMAP_MEMORIA.md]
+sources: [conversation, ROADMAP_MEMORIA.md@7edd8d8]
 ---
 
 ## Decision

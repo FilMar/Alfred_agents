@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, qdrant, migration, embedding]
-sources: [conversation, ROADMAP_MEMORIA.md, tools/tb/src/infra.ts, tools/tb/src/qdrant.ts]
+sources: [conversation, ROADMAP_MEMORIA.md@7edd8d8, tools/tb/src/infra.ts, tools/tb/src/qdrant.ts]
 ---
 
 ## Decision

@@ -1,6 +1,6 @@
 ---
 tags: [th, http, api, planned]
-sources: [.wiki/th_cli.md, .wiki/log.md]
+sources: [.wiki/th_cli.md@787028b, .wiki/log.md@99f8d7c]
 ---
 
 ## Decision

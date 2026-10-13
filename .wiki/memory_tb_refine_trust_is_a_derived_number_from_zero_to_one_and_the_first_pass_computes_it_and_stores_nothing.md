@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, refine, trust, hits]
-sources: [tools/tb/SPEC.md, tools/tb/REVIEW.md, conversation]
+sources: [tools/tb/SPEC.md@61cd4c3, tools/tb/REVIEW.md@61cd4c3, conversation]
 replaces: [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_last_signal_floors_at_the_counter_start]
 ---
 

@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, components]
-sources: [conversation, memory_distiller_is_its_own_tool_td_and_tl_stays_the_register]
+sources: [conversation, memory_distiller_is_its_own_tool_td_and_tl_stays_the_register (deleted)]
 ---
 
 ## Decision

@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, ollama, glm, json]
-sources: [conversation, spikes/2026-10-01-extraction-hats/main.py]
+sources: [conversation, spikes/2026-10-01-extraction-hats/main.py (deleted)]
 ---
 
 ## Decision

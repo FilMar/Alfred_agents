@@ -1,6 +1,6 @@
 ---
 tags: [skills, router, progressive-disclosure, planned]
-sources: [conversation, .wiki/skill_migration.md]
+sources: [conversation, .wiki/skill_migration.md@b1c408c]
 ---
 
 ## Decision

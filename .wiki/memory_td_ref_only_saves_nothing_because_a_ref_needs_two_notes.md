@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, novelty]
-sources: [tools/td/SPEC_ACTIVE.md, tools/td/src/novelty.ts, tools/td/src/save.ts]
+sources: [tools/td/SPEC_ACTIVE.md@61d5a9f, tools/td/src/novelty.ts, tools/td/src/save.ts]
 ---
 
 ## Decision

@@ -1,6 +1,6 @@
 ---
 tags: [agents, roster, skills]
-sources: [.wiki/agenti.md]
+sources: [.wiki/agenti.md@f87afd9]
 ---
 
 ## Decision

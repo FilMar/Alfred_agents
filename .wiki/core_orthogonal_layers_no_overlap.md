@@ -1,6 +1,6 @@
 ---
 tags: [core, architecture, layers]
-sources: [README.md, .wiki/architettura.md]
+sources: [README.md, .wiki/architettura.md@f87afd9]
 ---
 
 ## Decision

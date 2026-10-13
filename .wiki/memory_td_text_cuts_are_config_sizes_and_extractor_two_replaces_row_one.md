@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, config, tl]
-sources: [tools/td/src/config.ts, spikes/2026-10-01-extraction-hats/main.py]
+sources: [tools/td/src/config.ts, spikes/2026-10-01-extraction-hats/main.py (deleted)]
 ---
 
 ## Decision

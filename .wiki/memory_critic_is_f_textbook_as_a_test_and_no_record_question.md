@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, critic, selectivity]
-sources: [conversation, spikes/2026-10-01-critic-bench/main.py]
+sources: [conversation, spikes/2026-10-01-critic-bench/main.py (deleted)]
 replaces: [memory_critic_is_one_guard_with_probabilities]
 ---
 

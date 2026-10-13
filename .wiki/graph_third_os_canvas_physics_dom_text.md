@@ -1,6 +1,6 @@
 ---
 tags: [graph, third-os, web-ui, frontend, style]
-sources: [ROADMAP.md, tools/tb/src/graph/graph.js, conversation]
+sources: [ROADMAP.md@cf2cccf, tools/tb/src/graph/graph.js, conversation]
 ---
 
 ## Decision

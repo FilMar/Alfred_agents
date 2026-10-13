@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, episodes, phase-0b]
-sources: [tools/td/src/episodes.ts, spikes/2026-10-01-extraction-hats/main.py]
+sources: [tools/td/src/episodes.ts, spikes/2026-10-01-extraction-hats/main.py (deleted)]
 ---
 
 ## Decision

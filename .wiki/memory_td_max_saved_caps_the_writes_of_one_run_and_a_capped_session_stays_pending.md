@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, safety]
-sources: [tools/td/SPEC_ACTIVE.md, tools/td/src/save.ts, tools/td/src/distiller.ts, tools/td/src/cli.ts]
+sources: [tools/td/SPEC_ACTIVE.md@61d5a9f, tools/td/src/save.ts, tools/td/src/distiller.ts, tools/td/src/cli.ts]
 ---
 
 ## Decision

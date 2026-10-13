@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, critic, config]
-sources: [conversation, tools/td/src/config.ts, tests/td_config.test.ts, spikes/2026-10-02-extractor-f/main.py]
+sources: [conversation, tools/td/src/config.ts, tests/td_config.test.ts, spikes/2026-10-02-extractor-f/main.py (deleted)]
 replaces: [memory_td_question_above_drops_at_the_threshold_and_below_drops_under_it]
 ---
 

@@ -44,7 +44,6 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] td phase 3: bridges between saved notes. [detail](memory_bridges_by_shape_are_judged_by_reading)
 - [ ] Run `td distill --active` on a timer, then retire platone. Erodoto is already gone. [detail](memory_distillation_stays_manual_for_now)
 - [ ] Add a limit to the extractions API, then to `tl extractions`.
-- [ ] About 37 `sources` point to files that are gone (`ROADMAP_MEMORIA.md` in 9 pages, the spike files in 9, `.wiki/architettura.md` in 4, and more). Pick one rule for a source that left the tree, for example the commit hash. The SPEC/REVIEW pairs are in git history on purpose.
 
 ### th
 
