@@ -5,38 +5,22 @@ sources: [conversation, skills/ritchie/references/review-template.md, skills/rit
 
 ## Decision
 
-Ritchie writes `REVIEW.md` in step 3, next to the work, in Italian.
-Six sections, every one mandatory:
+Ritchie writes `REVIEW.md` in step 3, next to the work, in Italian. Six sections, all mandatory:
 
-- `Esito` — the state, plus one line per review round; the last line
-  is the verdict in force.
-- `Copertura della spec` — one line per spec item, pointing at where
-  it landed in the code.
-- `Contratti derive?` — a table: contract, what it derives from,
-  which principle.
-- `Metriche` — the `contract_report.py` output, verbatim.
-- `Test` — counts and failures, not the full output.
-- `Scostamenti` — what Ritchie did differently from the plan, and
-  why. "Nessuno" is a valid entry; the section is never skipped.
+- `Esito`: the state, plus one line per review round. The last line is the verdict in force.
+- `Copertura della spec`: one line per spec item, pointing at where it landed in the code.
+- `Contratti derive?`: a table of contract, what it derives from, which principle.
+- `Metriche`: the output of `contract_report.py`, verbatim.
+- `Test`: counts and failures, not the full output.
+- `Scostamenti`: what Ritchie did differently from the plan, and why. "Nessuno" is valid. The section is never skipped.
 
 ## Why
 
-The review is the interface between Ritchie's autonomous work and the
-user's judgment. It must let the user judge without re-deriving
-everything, so it is self-contained: the machine outputs are embedded
-and the chat is free to scroll away.
+The review is the interface between the autonomous work of Ritchie and the judgment of the user. It must let the user judge without re-deriving everything, so it is self-contained: the machine outputs are embedded and the chat can scroll away.
 
-Each section answers one review question. `Esito` keeps the approve or
-send-back loop as a trail. `Copertura` answers "did we build what we
-said" — completeness, from the spec side. `Contratti derive?` answers
-the inverse: "is everything built justified by the spec or a
-principle" — traceability, from the code side. `Metriche` is the
-objective health. `Test` is the behaviour. `Scostamenti` forces the
-deviations into the open, the same rule the user keeps in ti for style
-conventions: deviations are annotated, never omitted.
+Each section answers one question. `Esito` keeps the loop of approve or send back as a trail. `Copertura` asks "did we build what we said" (completeness, from the spec). `Contratti derive?` asks the inverse, "is everything built justified by the spec or a principle" (traceability, from the code). `Metriche` is the objective health and `Test` the behaviour. `Scostamenti` forces deviations into the open, the same rule the user keeps in `ti` for style conventions: annotate, never omit.
 
-The verdict sits on top, not at the bottom: a reader of an old review
-wants the state at a glance, like a PR page.
+The verdict sits on top, not at the bottom: a reader of an old review wants the state at a glance, like a PR page.
 
 ## Cross-references
 

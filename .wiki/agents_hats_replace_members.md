@@ -11,9 +11,6 @@ Two things share the word "agent" in this repo, and they stay separate:
 - **Skills** live in `skills/<name>/SKILL.md`, one per role. They are executed **inline**: read the `SKILL.md` and follow its protocol. A skill is never a value for `--hat`.
 - **A delegated run** is a hat plus instructions, launched by `th run`. There is no roster and no file to create:
 
-```bash
-th run --hat black-core --task "<what to do>" --system "<who you are for this run>" --tools read,bash
-```
 
 A run's task text may ask it to *use* a skill ("use the christopher skill to retrieve…"). That is the run following a protocol, not the harness dispatching to a skill.
 
@@ -29,7 +26,7 @@ The distinction this replaces is unchanged in substance: a skill is read and fol
 
 Two consequences recorded here rather than by editing pages that describe them:
 
-- `fury` is retired. Its whole job was generating a member roster for a project. [skill_router_pass_planned](skill_router_pass_planned) lists it among the skills to convert in the next pass — that entry has nothing left to convert.
+- `fury` is retired. Its whole job was generating a member roster for a project.
 - [agents_roster_lives_on_filesystem](agents_roster_lives_on_filesystem) stays live and untouched: it is about the **skill** roster, printed from the filesystem by `roster.py`, which never had anything to do with members.
 
 ## Cross-references

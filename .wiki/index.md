@@ -16,8 +16,7 @@ updated: 2026-10-13
 |------|---------|
 | [core_orthogonal_layers_no_overlap](core_orthogonal_layers_no_overlap) | The five layers and the no-overlap boundary |
 | [core_mcp_not_adopted_cli_json_schemas_first](core_mcp_not_adopted_cli_json_schemas_first) | No MCP migration; contract layer with JSON Schemas first, MCP shim behind a trigger |
-| [core_tb_stateless_single_source](core_tb_stateless_single_source) | CLIs hold no state; Qdrant + Ollama over HTTP |
-| [core_td_mvr_removed](core_td_mvr_removed) | Ghost tools removed; git holds the history |
+| [core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp](core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp) | tb and ti keep no local state; every client points to the Qdrant and Ollama on the Rasp |
 
 ## th
 
@@ -52,7 +51,6 @@ updated: 2026-10-13
 | [memory_wiki_is_the_project_notebook](memory_wiki_is_the_project_notebook) | The wiki is not a memory tier; the extraction test |
 | [memory_identity_splits_descriptive_prescriptive](memory_identity_splits_descriptive_prescriptive) | about on tb notes; ti holds the executable half |
 | [memory_ti_context_action_rules](memory_ti_context_action_rules) | ti: dedicated if/do collection, dumb client |
-| [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there) | tb, ti and tl live on the Rasp, every client points there; td runs locally and calls the Rasp APIs |
 | [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) | CoALA's four types mapped to pi; episodic is the hole |
 | [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) | The human OK limits growth; use judges, not reading |
 | [memory_refs_carry_non_semantic_reach](memory_refs_carry_non_semantic_reach) | 74% of refs are not redundant with the vectors |
@@ -109,10 +107,6 @@ updated: 2026-10-13
 |------|---------|
 | [skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role](skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role) | Step 6 is two th runs through th_write.sh: black hat for tests, white for bodies, GLM-5.3 fixed |
 | [skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes](skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes) | TS values are Readonly types with contracted functions; brand only for an invariant; class only for a resource |
-| [skill_jobs_removed_because_taskwarrior_is_no_longer_used](skill_jobs_removed_because_taskwarrior_is_no_longer_used) | Removed 2026-10-12: Taskwarrior is no longer used |
-| [skill_ulisse_removed_because_skill_descriptions_already_route](skill_ulisse_removed_because_skill_descriptions_already_route) | Removed 2026-10-12: skill descriptions already route a task |
-| [skill_erodoto_removed_because_td_replaces_it_and_it_only_batched_platone_and_mose](skill_erodoto_removed_because_td_replaces_it_and_it_only_batched_platone_and_mose) | Removed 2026-10-12: td replaces it; it only batched platone and mose |
-| [skill_quality_references_moved_into_platone_and_mose](skill_quality_references_moved_into_platone_and_mose) | The shared references folder is gone; each file sits in its skill |
 | [skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood) | Idea: socrate becomes a ti rule, then the skill is removed |
 | [skill_vinci_may_become_a_typst_documents_skill_with_templates](skill_vinci_may_become_a_typst_documents_skill_with_templates) | Idea: vinci becomes Typst documents with templates; the CV is one |
 | [skill_annibale_runs_a_debate_of_made_up_viewpoints](skill_annibale_runs_a_debate_of_made_up_viewpoints) | annibale runs one agentic debate on a problem, with viewpoints made on the fly |
@@ -127,6 +121,7 @@ updated: 2026-10-13
 | [skill_ritchie_spec_is_a_minimal_italian_document](skill_ritchie_spec_is_a_minimal_italian_document) | The spec: a minimal Italian document — entities, flows, invariants; the code is not the spec |
 | [skill_ritchie_review_is_the_verdict_packet](skill_ritchie_review_is_the_verdict_packet) | The review: six sections from Esito to Scostamenti, self-contained |
 | [skill_ritchie_spec_review_pair_is_ephemeral_scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding) | The pair is scaffolding: removed at approval, the wiki page is the record |
+| [skill_census_removed_erodoto_jobs_ulisse](skill_census_removed_erodoto_jobs_ulisse) | Removed 2026-10-12: erodoto, jobs and ulisse |
 
 ## graph
 

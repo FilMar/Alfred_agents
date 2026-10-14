@@ -8,13 +8,13 @@ sources: [.wiki/th_cli.md@787028b, .wiki/log.md@99f8d7c]
 The planned `th` HTTP entry point is deliberately not full CLI parity. Routes:
 
 - `POST /run` — always detached (a multi-minute agent run must never block a request); returns `{ id, out, log, status }`.
-- `GET /runs?status=&member=&limit=` — runs in progress or recent, scoped to what is on disk in `/tmp`.
+- `GET /runs?status=&hat=&limit=` — runs in progress or recent, scoped to what is on disk in `/tmp`.
 - `GET /runs/:id` — status only; `GET /runs/:id/out` and `/log` — content.
-- `POST /member`, `GET /member`, `GET /member/:name`, `GET /hats` — member and hat management.
+- `GET /hats` — the six hats.
 
-No database for this: `GET /runs` is a glob over `/tmp/th-*.status` plus reading each file; the member filter is free because it is embedded in the filename. Status and output are split into separate GETs so a polling client can check state without pulling large output. Durable history beyond `/tmp` is out of scope — that is `tl`'s job.
+No database for this: `GET /runs` is a glob over `/tmp/th-*.status` plus reading each file; the hat filter is free because it is embedded in the filename. Status and output are split into separate GETs so a polling client can check state without pulling large output. Durable history beyond `/tmp` is out of scope — that is `tl`'s job.
 
-`sandbox-exec`, `models`, and member `delete`/`promote`/`--from` are deliberately excluded as local-only conveniences.
+`sandbox-exec` and `models` are deliberately excluded as local-only conveniences.
 
 ## Why
 

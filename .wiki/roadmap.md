@@ -81,7 +81,6 @@ Found by an audit on 2026-10-13. Each line names the path that proves it.
 - [ ] **Git:** pick the trunk. `origin/HEAD` points to `master`, last commit 2026-05-11. `main` is 316 commits ahead.
 - [ ] **Git:** delete the 16 local branches already merged into `main`, and the same on origin.
 - [ ] **Git:** review, then delete four old unmerged branches: `master`, `feature/alfred-pi`, `feature/cockpit-skeleton`, `refactor/no-more-agents`. Delete `origin/release` too.
-- [ ] **Wiki:** `memory_human_gate_is_the_bottleneck` and `memory_critic_is_f_textbook_as_a_test_and_no_record_question` still say a note enters as `provvisoria`. `memory_distillation_stays_manual_for_now` has premises that `td` already solved. Replace the three with the decision on the timer. The roadmap line on the decay of `provvisoria` notes goes with them.
 
 ## Cross-references
 

@@ -13,7 +13,7 @@ Every skill in `skills/` is one folder with up to three parts:
 
 Efesto owns and lints the convention (`skills/efesto/scripts/lint_skill.py`, whole fleet by default). The threshold cuts both ways: a sequence reused identically belongs in a script; a script wrapping a single command gets inlined. Script lists are computed (`list_scripts.sh`), never hand-written. Some skills need no scripts (piano, omero, vinci — native tools only).
 
-**Anti-patterns**: a skill calling `th run --member` directly; a wrapper recipe around a single command; a hand-written script inventory; `pi-just`/`just -f` leftovers.
+**Anti-patterns**: a skill that passes a skill name as the hat of `th run`; a wrapper recipe around a single command; a hand-written script inventory; `pi-just`/`just -f` leftovers.
 
 ## Why
 

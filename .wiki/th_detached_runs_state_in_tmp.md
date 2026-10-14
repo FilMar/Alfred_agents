@@ -5,7 +5,7 @@ sources: [tools/th/src/runner.ts, tools/th/src/detached-runner.ts, .wiki/th_cli.
 
 ## Decision
 
-A detached `th run` keeps its state in files under `/tmp`, named `th-<member>-<ts>.*`: `.out` (agent output), `.log` (thinking + tool calls), `.status` (`running` → `done` / `error: ...` / `timeout`), `.pid`. No database for in-progress state — the file set is the state.
+A detached `th run` keeps its state in files under `/tmp`, named `th-<hat>-<ms>-<hex>.*`: `.out` (agent output), `.log` (thinking + tool calls), `.status` (`running` → `done` / `error: ...` / `timeout`), `.pid`. No database for in-progress state — the file set is the state.
 
 ## Why
 

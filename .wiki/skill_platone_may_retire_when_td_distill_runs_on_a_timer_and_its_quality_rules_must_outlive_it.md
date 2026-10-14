@@ -24,9 +24,11 @@ Two side effects of `platone` have no owner in the distiller:
 
 Each of the two needs a choice: move it into the distiller, or drop it.
 
+The shared folder `skills/references/` is gone. `note_quality.md` sits in `skills/platone/references/` and `rule_quality.md` in `skills/mose/references/`. `aristotele` links to the file of `platone`, and that link goes away when either skill retires.
+
 ## Cross-references
 
-- [skill_erodoto_removed_because_td_replaces_it_and_it_only_batched_platone_and_mose](skill_erodoto_removed_because_td_replaces_it_and_it_only_batched_platone_and_mose) — the sibling skill, already removed
+- [skill_erodoto_removed_because_td_replaces_it_and_it_only_batched_platone_and_mose](skill_census_removed_erodoto_jobs_ulisse) — the sibling skill, already removed
 - [memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge) — the same idea for `aristotele`
 - [skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills](skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills) — one way to keep the rules
 - [memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading) — phase 3 of the distiller

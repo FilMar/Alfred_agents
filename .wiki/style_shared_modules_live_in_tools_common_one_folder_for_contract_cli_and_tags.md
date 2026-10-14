@@ -29,9 +29,7 @@ Ritchie puts a helper where its knowledge lives. The knowledge of `assert` is th
 
 The CLI helpers were copies: `die` and `out` in five CLIs, `errorMessage` in three files, `collect` and `normalizeTags` in two. They were identical except for white space.
 
-One folder for all shared modules gives one place to look. A folder per kind of helper would have given the next reader a map to learn.
-
-One folder also gives one place to change. The lazy message of [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) is a change to one file.
+One folder for all shared modules gives one place to look, and one place to change. A folder per kind of helper would have given the next reader a map to learn. The lazy message of [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) is a change to one file.
 
 A package with its own `package.json` lost. It adds a build and a version for a few small functions.
 

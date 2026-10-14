@@ -5,9 +5,9 @@ sources: [tools/tb/src/notes.ts, tools/tb/src/qdrant.ts, tools/ti/src/identity.t
 
 ## Decision
 
-Coding standards for the `tb` and `ti` codebases (`tools/tb/src/`, `tools/ti/src/`). `ti` was built to follow the layering `tb` established first, so the two share one style decision.
+Coding standards for the `tb` and `ti` codebases. `ti` was built to follow the layering that `tb` set first, so the two share one style decision.
 
-**Dependency direction, no circular imports** (`tb`; `ti` mirrors it with `identity.ts` in place of `notes.ts`):
+**Dependency direction, no circular imports** (`ti` mirrors `tb`, with `identity.ts` in place of `notes.ts`):
 
 ```
 cli.ts → notes.ts → qdrant.ts → infra.ts
@@ -15,27 +15,23 @@ cli.ts → notes.ts → qdrant.ts → infra.ts
                    types.ts
 ```
 
-- `infra.ts` — HTTP client, config constants, client singletons, `embed()`, `checkHealth()`
-- `types.ts` — pure types, enums, pure functions (no I/O, no local imports)
-- `qdrant.ts` — Qdrant CRUD and search, no business logic
-- `notes.ts` / `identity.ts` — business logic; orchestrates qdrant + infra
-- `cli.ts` — CLI surface only; parsing and formatting, nothing more
+- `infra.ts`: HTTP client, config constants, client singletons, `embed()`, `checkHealth()`.
+- `types.ts`: pure types, enums and pure functions. No I/O, no local imports.
+- `qdrant.ts`: Qdrant CRUD and search. No business logic.
+- `notes.ts` / `identity.ts`: business logic. It orchestrates qdrant and infra.
+- `cli.ts`: the CLI surface only. Parsing and formatting.
 
-`ti` reuses `tb`'s `infra.ts` directly as a library, never forks it, never modifies `tools/tb/`.
+`ti` reuses `infra.ts` of `tb` as a library. It never forks it and never modifies `tools/tb/`. Other rules:
 
-**Constants and config** — no magic values: config (URLs, timeouts, models, collection, limits) exported from `infra.ts`; algorithm-local values at the top of the file that uses them, unexported; CLI-local values at the top of `cli.ts`. Never hardcode a value that exists as a constant elsewhere.
-
-**Dead code**: exports never imported are dead — delete, don't comment out, don't keep "for future use".
-
-**DRY**: repeated logic becomes a private function at the top of the file.
-
-**File size**: max ~400 lines per file, split on semantics; merge micro-files (<~50 lines) into their closest logical neighbor.
-
-**Readability**: `// ─── Name ───` section headers; one exported responsibility per section; imports grouped (node built-ins → local); comments explain *why*, never *what*.
+- **No magic values.** Config is exported from `infra.ts`. Algorithm-local values sit at the top of the file that uses them, unexported. Never hardcode a value that exists as a constant elsewhere.
+- **Dead code:** an export nobody imports is dead. Delete it. Do not comment it out.
+- **DRY:** repeated logic becomes a private function at the top of the file.
+- **File size:** about 400 lines at most. Split on semantics. Merge micro-files (under about 50 lines) into their closest neighbour.
+- **Readability:** `// ─── Name ───` section headers, one responsibility per section, imports grouped. Comments explain why, never what.
 
 ## Why
 
-Four layers with one-way imports keep every responsibility testable in isolation: tests mock the HTTP client (same convention as `tests/tb.test.ts`/`tests/ti.test.ts`), so no test depends on a live Qdrant/Ollama. To extend, check the equivalent command in `tools/tb/src/cli.ts` first — stay consistent, don't reinvent. A new module in this family follows the same four-layer split and reuses `infra.ts` rather than forking it.
+Four layers with one-way imports keep every responsibility testable alone: tests mock the HTTP client, so no test depends on a live Qdrant or Ollama. To extend, check the equivalent command in `tools/tb/src/cli.ts` first and stay consistent. A new module in this family follows the same split and reuses `infra.ts`.
 
 ## Cross-references
 

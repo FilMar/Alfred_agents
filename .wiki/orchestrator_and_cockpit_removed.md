@@ -10,11 +10,7 @@ replaces: [orchestrator_minimal_rest_surface, orchestrator_run_task_matrix_only,
 
 Nothing replaces them. Delegated execution is `th`'s job. Scheduling has no user: the orchestrator was paused on 2026-07-21 because no real recurring task justified finishing it, and two months later there still is none.
 
-What the removal does **not** touch:
-
-- `orchestrator_tailscale_perimeter_matrix_bot` stays live. Its decision is about the network perimeter, not about the orchestrator: one Tailscale-only ingress, no application-level auth, and a control bot that must be self-hosted inside the tailnet rather than on Telegram's servers. `tl` was designed under that rule on the same day this removal happened, and [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there) cites it too. The page keeps its `orchestrator_` name because a file name is a page's identity — the name is stale, the decision is not.
-- `rasp_services_provisioning_order` stays live. One service left that list; the order and the dependencies between the others stand, and `tl` joins them.
-- [th_sandbox_bwrap_fixed_binds](th_sandbox_bwrap_fixed_binds) and [th_verification_outside_members](th_verification_outside_members) stay live. The orchestrator reused `th`'s sandbox and its verification stance, not the other way round.
+`th_sandbox_bwrap_fixed_binds` and `th_verification_outside_members` are not touched. The orchestrator reused the sandbox of `th` and its verification stance, not the other way round.
 
 ## Why
 
@@ -28,6 +24,5 @@ The code is not gone: git holds it, and the nine superseded pages are in git his
 
 ## Cross-references
 
-- `orchestrator_tailscale_perimeter_matrix_bot` — the decision that outlived the tool
 - [agents_hats_replace_members](agents_hats_replace_members) — where delegated execution lives now
 - [wiki_edit_in_place_delete_superseded](wiki_edit_in_place_delete_superseded) — the rule now: a reversed decision is deleted, and git holds it

@@ -7,7 +7,7 @@ sources: [conversation, tools/td/src/config.ts]
 
 A check that knows the shape or the rules of one type is a private static method of that class. Examples in `td`: `ModelConnection.#isJson(raw)` checks the JSON shape, and `ModelConnection.#fits(maxTokens, contextWindow)` checks the token limit.
 
-A check that knows no domain goes to `tools/contract/contract.ts`.
+A check that knows no domain goes to `tools/common/contract.ts`.
 
 A getter that only returns its private, immutable state has no contract. The constructor already checked that state.
 

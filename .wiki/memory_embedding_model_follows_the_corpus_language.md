@@ -31,4 +31,4 @@ Re-embedding 747 notes took 9 minutes 23 seconds, about 0.75 s per note. That is
 
 - [memory_alias_makes_migration_reversible](memory_alias_makes_migration_reversible)
 - [memory_score_cutoffs_belong_to_the_model](memory_score_cutoffs_belong_to_the_model)
-- [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there) — argues feasibility with a 137M model. v2-moe is 475M, so if Ollama runs on the Pi the number needs a new measure.
+- [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp) — argues feasibility with a 137M model. v2-moe is 475M, so if Ollama runs on the Pi the number needs a new measure.

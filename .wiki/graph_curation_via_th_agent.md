@@ -7,7 +7,7 @@ sources: [conversation]
 
 Whole-graph curation (`aristotele`'s job: dense clusters, hub notes, bridges between old isolated notes) is a global action in the dashboard, not a per-note button — it works on the whole graph, not the open note. It runs through `th` as an agentic library under the web service.
 
-- A dedicated `th` member gets its own identity and hat and a task that follows `aristotele`'s procedure. The harness never dispatches to a skill by name via `th run --member` — a skill and a member stay two different things (`agents_skills_inline_members_via_th@b896c3d`); the member's task text may instruct it to follow a skill's protocol, which is not the same as naming the skill as the member.
+- A `th` run with a hat and a task that follows the procedure of `aristotele`. A skill goes in with `th run --skill`, never as a hat: [agents_skill_forced_not_offered](agents_skill_forced_not_offered).
 - `th run` without `--detach` streams its stdout live — every tool call, so every `tb search` / `tb save` / `tb update` as it happens. The dashboard backend pipes that stream to the browser (SSE or websocket) so the user watches writes land in real time, with a kill-switch to stop the run mid-flight.
 - This is visibility-with-kill-switch, not pre-commit approval. Accepted for curation specifically because `tb` refs are append-only and `tb delete` exists — an in-flight mistake is cleaned up after, not corrupting.
 - `th`'s own HTTP API is planned, not built ([th_http_api_scoped_no_db](th_http_api_scoped_no_db)). The dashboard backend shells out to the `th` CLI as a subprocess; it does not assume an HTTP layer.
