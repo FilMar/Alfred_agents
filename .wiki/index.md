@@ -132,7 +132,8 @@ updated: 2026-10-13
 | [skill_quality_references_moved_into_platone_and_mose](skill_quality_references_moved_into_platone_and_mose) | The shared references folder is gone; each file sits in its skill |
 | [skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood) | Idea: socrate becomes a ti rule, then the skill is removed |
 | [skill_vinci_may_become_a_typst_documents_skill_with_templates](skill_vinci_may_become_a_typst_documents_skill_with_templates) | Idea: vinci becomes Typst documents with templates; the CV is one |
-| [skill_piano_is_rigid_and_poorly_joined_to_omero_and_its_fate_is_open](skill_piano_is_rigid_and_poorly_joined_to_omero_and_its_fate_is_open) | Open question: fix piano, fold it into omero, or remove it |
+| [skill_piano_writes_design_main_md](skill_piano_writes_design_main_md) | piano writes use cases in `.design/`; main.md is the project, one level of sub-projects |
+| [skill_omero_debates_design_before_decisions](skill_omero_debates_design_before_decisions) | Piano, then an omero debate that writes decisions and roadmap blocks, then edison and ritchie |
 | [skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it) | Idea: retire platone with the timer; keep the note quality rules |
 | [skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills](skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills) | Idea: tb guide and ti guide print the quality rules; skills keep none |
 | [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
