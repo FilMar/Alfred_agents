@@ -11,7 +11,7 @@ Next skill pass (decided 2026-08-18, deliberately deferred until the direct-CLI 
 2. **A dispatch table** `task direction → references/<task>.md`.
 3. Nothing else. No procedure content in the router.
 
-Work order when it starts: efesto first (rule-1 rewrite + new lint checks: line cap for router skills, dead-reference check). Then the multi-direction skills: jobs, annibale, fury, aristotele, platone, linus, piano, vinci, indiana, mose. Borderline cases decided in audit.
+Work order when it starts: efesto first (rule-1 rewrite + new lint checks: line cap for router skills, dead-reference check). Then the multi-direction skills: jobs, fury, aristotele, platone, linus, vinci, indiana, mose. Borderline cases decided in audit.
 
 ## Why
 

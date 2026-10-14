@@ -89,7 +89,7 @@ The user approves, or sends the work back with one comment; only the
 involved part repeats, and the review is updated each round.
 
 On approval, the scaffolding is removed. If the project has a `.wiki/`,
-omero files the decision as a wiki page — the why, in English, immutable,
+omero files the decision as a wiki page — the why, in English,
 with `sources` pointing at the pair — and the pair leaves the tree; git
 keeps the raw text in the branch history. Without a `.wiki/`, the pair
 stays: it is the only record.

@@ -16,8 +16,8 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 
 | Agent | Role |
 |-------|------|
-| `annibale` | Orchestrator: decomposes complex work into multi-hat flows |
-| `piano` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md |
+| `annibale` | Agentic debate: viewpoints made on the fly, one synthesis |
+| `piano` | Debates what a project or feature is for: writes `.design/main.md` |
 | `platone` | Sediments ideas in the TB atomically and connectedly |
 | `feynman` | Teaches the TB corpus with the Feynman technique |
 | `socrate` | Generates cognitive friction: finds contradictions and gaps, never closes |
@@ -63,7 +63,7 @@ Before answering on a topic that might be in the TB:
 tb search "<topic>" --depth 1
 ```
 
-For complex problems that benefit from multiple perspectives: Annibale orchestrates a multi-hat flow. Read its SKILL.md and follow it.
+For a judgment with trade-offs that benefits from several viewpoints: Annibale runs a debate. Read its SKILL.md and follow it.
 To extract content from URLs or videos: Polo.
 
 ### On a project — Omero
