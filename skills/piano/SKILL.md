@@ -53,7 +53,7 @@ A part becomes a sub-project only if it has its own users or its own "Cosa NON Ã
 
 When a sub-project is born:
 - Its use cases move to its file.
-- `main.md` keeps one line for it under `## Sotto-progetti`.
+- `main.md` keeps one line for it under `## Sotto-progetti`. While the file does not exist, the line has no link and carries `[da discutere]`.
 - `main.md` keeps the use cases of the whole project, the ones that cross sub-projects. This is where "how they fit together" lives.
 
 There are no sub-sub-projects. Only `main.md` has `## Sotto-progetti`. If a sub-project passes 40 lines, cut the variants, or split it in two sub-projects at the same level. If neither works, the boundary is wrong: say so.
