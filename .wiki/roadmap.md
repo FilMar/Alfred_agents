@@ -45,12 +45,6 @@ One line per task. The reason and the plan live in the linked decision.
 
 - [ ] Add the HTTP entry point to run agents. [detail](th_http_api_scoped_no_db)
 
-### graph
-
-Alfredo has no graphical interface (`.design/main.md`). The design of the graph is deleted, not parked. If it is needed again, it is thought from zero.
-
-- [ ] Delete the code of `tb graph`: `tools/tb/src/graph/`, the `graph` command and the `serveGraph` import in `tools/tb/src/cli.ts`, and the two `tb graph` lines in `skills/aristotele/SKILL.md`.
-
 ### design
 
 Each line is one sub-project of `.design/main.md`, to be discussed with Piano.
@@ -65,7 +59,6 @@ Each line is one sub-project of `.design/main.md`, to be discussed with Piano.
 - [ ] Ritchie: contract messages carry the values, in all four languages, and `contract_report.py` checks the format. [detail](skill_ritchie_contract_messages_carry_values)
 - [ ] Ritchie: add an integration net for code that turns errors into values. [detail](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores)
 - [ ] Ritchie: write `SPEC.md` and `REVIEW.md` in the project root, next to `.wiki/` and `.design/`. [detail](skill_ritchie_spec_is_a_minimal_italian_document)
-- [ ] Annibale: remove `--rounds` from `skills/annibale/scripts/debate.sh` and from `SKILL.md`. Agents do not talk. [detail](skill_annibale_runs_a_debate_of_made_up_viewpoints)
 - [ ] Annibale: save a viewpoint as a named expert in `.expert/` once it was reused, and call it by `:name`. [detail](skill_annibale_runs_a_debate_of_made_up_viewpoints)
 - [ ] Ritchie: make the mutant run a script, not a hand step.
 - [ ] Ritchie: test runs time out on files with heavy fixtures. Give the run a fixture helper.

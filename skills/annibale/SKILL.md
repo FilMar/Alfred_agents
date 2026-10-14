@@ -60,7 +60,6 @@ Hats run on different models, and that is the strongest source of difference. Pr
 
 ## Notes on the script
 
-- One round is the default. Extra rounds (`--rounds N`) feed the last synthesis to every voice. Studies find that debate rounds can make voices converge and lose accuracy. Use them when the user asks.
 - If it fails, run it again with the same `--run-id`. Finished steps are skipped.
 - The voices run in the run directory, not in the project, and are told to use no tools. That limits what they see. It is not a sandbox.
 - A run with a slow model can need more than the default `--timeout 600`. Raise it before you run again.

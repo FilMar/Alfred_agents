@@ -12,8 +12,6 @@
 #   --expert "<hat>:<stance>"               one voice; repeat 2 to 5 times.
 #                                           The first colon splits hat from stance.
 #   --synth <hat>                           default blue-core
-#   --rounds N                              default 1. More rounds feed the last
-#                                           synthesis to every voice. Use with care.
 #   --run-id ID                             reuse to resume a crashed run
 #   --timeout SEC                           per run, default 600
 #   --dry-run                               validate without spending any call
@@ -30,7 +28,6 @@ TASK_FILE=""
 HATS=()
 STANCES=()
 SYNTH="blue-core"
-ROUNDS=1
 RUN_ID=""
 TIMEOUT=600
 DRY_RUN=0
@@ -38,7 +35,7 @@ MAX_EXPERTS="${DEBATE_MAX_EXPERTS:-5}"
 FLOW_BASE="${TH_FLOW_DIR:-/tmp/th-flow}"
 
 usage() {
-  sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'
   exit 2
 }
 
@@ -55,7 +52,6 @@ while [[ $# -gt 0 ]]; do
       STANCES+=("${spec#*:}")
       shift 2 ;;
     --synth)     SYNTH="${2:?--synth needs a value}"; shift 2 ;;
-    --rounds)    ROUNDS="${2:?--rounds needs a value}"; shift 2 ;;
     --run-id)    RUN_ID="${2:?--run-id needs a value}"; shift 2 ;;
     --timeout)   TIMEOUT="${2:?--timeout needs a value}"; shift 2 ;;
     --dry-run)   DRY_RUN=1; shift ;;
@@ -69,7 +65,6 @@ if [[ -n "$TASK_FILE" ]]; then
   TASK=$(cat "$TASK_FILE")
 fi
 [[ -n "$TASK" ]] || { echo "missing --task or --task-file" >&2; usage; }
-[[ "$ROUNDS" =~ ^[1-9][0-9]*$ ]]  || die "--rounds must be a positive integer (got: $ROUNDS)"
 [[ "$TIMEOUT" =~ ^[1-9][0-9]*$ ]] || die "--timeout must be a positive integer (got: $TIMEOUT)"
 (( ${#HATS[@]} >= 2 ))            || die "a debate needs at least 2 --expert"
 (( ${#HATS[@]} <= MAX_EXPERTS ))  || die "${#HATS[@]} experts > max $MAX_EXPERTS (override with DEBATE_MAX_EXPERTS)"
@@ -89,7 +84,7 @@ done
 [[ -n "$RUN_ID" ]] || RUN_ID="debate-$(date +%Y%m%d-%H%M%S)"
 RUN_DIR="$FLOW_BASE/$RUN_ID"
 
-echo "debate: ${#HATS[@]} voices, $ROUNDS round(s), synth=$SYNTH" >&2
+echo "debate: ${#HATS[@]} voices, synth=$SYNTH" >&2
 echo "run dir: $RUN_DIR  (resume with --run-id $RUN_ID)" >&2
 
 if (( DRY_RUN )); then
@@ -101,7 +96,7 @@ mkdir -p "$RUN_DIR"
 {
   echo "task: $TASK"
   for i in "${!HATS[@]}"; do echo "voice $((i + 1)): ${HATS[$i]} — ${STANCES[$i]}"; done
-  echo "rounds: $ROUNDS  synth: $SYNTH  timeout: ${TIMEOUT}s"
+  echo "synth: $SYNTH  timeout: ${TIMEOUT}s"
 } > "$RUN_DIR/meta.txt"
 
 # A step is complete when its collected output exists and is non-empty.
@@ -118,86 +113,75 @@ harvest() {
   cp "$out_path" "$dest"
 }
 
-CONTEXT=""
+# Phase 1 — LAUNCH: one detached job per missing voice
+pending_status=()
+pending_ids=()
+for i in "${!HATS[@]}"; do
+  id="v$((i + 1))"
+  md="$RUN_DIR/r1-${id}.md"
+  job="$RUN_DIR/r1-${id}.job"
 
-for round in $(seq 1 "$ROUNDS"); do
-  echo "── round $round/$ROUNDS ──" >&2
+  if step_done "$md"; then
+    echo "  [skip] $id (already done)" >&2
+    continue
+  fi
+  if harvest "$job" "$md"; then
+    echo "  [harvest] $id (finished in a previous run)" >&2
+    continue
+  fi
 
-  # Phase 1 — LAUNCH: one detached job per missing voice
-  pending_status=()
-  pending_ids=()
-  for i in "${!HATS[@]}"; do
-    id="v$((i + 1))"
-    md="$RUN_DIR/r${round}-${id}.md"
-    job="$RUN_DIR/r${round}-${id}.job"
-
-    if step_done "$md"; then
-      echo "  [skip] $id (already done)" >&2
-      continue
-    fi
-    if harvest "$job" "$md"; then
-      echo "  [harvest] $id (finished in a previous run)" >&2
-      continue
-    fi
-
-    system="You are one voice in a debate, round ${round}. You know only the brief below. Do not read files and do not use tools. Stay inside this stance, and say what it cannot see.
+  system="You are one voice in a debate. You know only the brief below. Do not read files and do not use tools. Stay inside this stance, and say what it cannot see.
 
 Stance: ${STANCES[$i]}"
-    prompt="Brief:
+  prompt="Brief:
 ${TASK}
 "
-    if [[ -n "$CONTEXT" ]]; then
-      prompt+="
-Synthesis of the previous round:
-${CONTEXT}
-"
-    fi
-    prompt+="
+  prompt+="
 Answer in this form, and nothing else:
 Position: one sentence.
 Why: up to five lines. Be specific.
 What would change my mind: one line."
 
-    (cd "$RUN_DIR" && th run --hat "${HATS[$i]}" --system "$system" --task "$prompt" \
-        --detach --timeout "$TIMEOUT") > "$job"
-    pending_status+=("$(jq -r .status "$job")")
-    pending_ids+=("$id")
-    echo "  [launch] $id (${HATS[$i]})" >&2
-  done
+  (cd "$RUN_DIR" && th run --hat "${HATS[$i]}" --system "$system" --task "$prompt" \
+      --detach --timeout "$TIMEOUT") > "$job"
+  pending_status+=("$(jq -r .status "$job")")
+  pending_ids+=("$id")
+  echo "  [launch] $id (${HATS[$i]})" >&2
+done
 
-  # Phase 2 — WAIT: native poll; never synthesise early
-  if (( ${#pending_status[@]} > 0 )); then
-    th wait --timeout "$TIMEOUT" "${pending_status[@]}" > "$RUN_DIR/r${round}-wait.json" || true
+# Phase 2 — WAIT: native poll; never synthesise early
+if (( ${#pending_status[@]} > 0 )); then
+  th wait --timeout "$TIMEOUT" "${pending_status[@]}" > "$RUN_DIR/r1-wait.json" || true
+fi
+
+# Phase 3 — VALIDATE + COLLECT: every voice must have produced output
+failed=()
+for id in "${pending_ids[@]}"; do
+  if ! harvest "$RUN_DIR/r1-${id}.job" "$RUN_DIR/r1-${id}.md"; then
+    failed+=("$id: $(cat "$(jq -r .status "$RUN_DIR/r1-${id}.job")" 2>/dev/null || echo 'no status')")
   fi
+done
+if (( ${#failed[@]} > 0 )); then
+  printf 'voices failed:\n' >&2
+  printf '  %s\n' "${failed[@]}" >&2
+  die "fix or wait, then resume with: --run-id $RUN_ID"
+fi
 
-  # Phase 3 — VALIDATE + COLLECT: every voice must have produced output
-  failed=()
-  for id in "${pending_ids[@]}"; do
-    if ! harvest "$RUN_DIR/r${round}-${id}.job" "$RUN_DIR/r${round}-${id}.md"; then
-      failed+=("$id: $(cat "$(jq -r .status "$RUN_DIR/r${round}-${id}.job")" 2>/dev/null || echo 'no status')")
-    fi
-  done
-  if (( ${#failed[@]} > 0 )); then
-    printf 'round %s failed for:\n' "$round" >&2
-    printf '  %s\n' "${failed[@]}" >&2
-    die "fix or wait, then resume with: --run-id $RUN_ID"
-  fi
-
-  # Phase 4 — SYNTH: the only sequential step of the round
-  synth_md="$RUN_DIR/r${round}-synthesis.md"
-  if step_done "$synth_md"; then
-    echo "  [skip] synthesis (already done)" >&2
-  else
-    perspectives=""
-    for i in "${!HATS[@]}"; do
-      id="v$((i + 1))"
-      perspectives+="
+# Phase 4 — SYNTH: the only sequential step
+synth_md="$RUN_DIR/r1-synthesis.md"
+if step_done "$synth_md"; then
+  echo "  [skip] synthesis (already done)" >&2
+else
+  perspectives=""
+  for i in "${!HATS[@]}"; do
+    id="v$((i + 1))"
+    perspectives+="
 ## Voice $((i + 1)) (${HATS[$i]}) — ${STANCES[$i]}
-$(cat "$RUN_DIR/r${round}-${id}.md")
+$(cat "$RUN_DIR/r1-${id}.md")
 "
-    done
-    echo "  [synth] $SYNTH" >&2
-    synth_prompt="You are the synthesiser of a debate. Round ${round}.
+  done
+  echo "  [synth] $SYNTH" >&2
+  synth_prompt="You are the synthesiser of a debate.
 
 Brief:
 ${TASK}
@@ -210,12 +194,9 @@ Agreement: what the voices share.
 Tensions: where they truly disagree, and why. Do not flatten them.
 Recommendation: one concrete decision.
 Tripwires: what would make the recommendation wrong, as seen in the voices."
-    (cd "$RUN_DIR" && th run --hat "$SYNTH" --task "$synth_prompt" --timeout "$TIMEOUT") > "$synth_md"
-    step_done "$synth_md" || die "synthesis produced no output — resume with: --run-id $RUN_ID"
-  fi
+  (cd "$RUN_DIR" && th run --hat "$SYNTH" --task "$synth_prompt" --timeout "$TIMEOUT") > "$synth_md"
+  step_done "$synth_md" || die "synthesis produced no output — resume with: --run-id $RUN_ID"
+fi
 
-  CONTEXT=$(cat "$synth_md")
-done
-
-echo "── final synthesis (round $ROUNDS) ──" >&2
-cat "$RUN_DIR/r${ROUNDS}-synthesis.md"
+echo "── final synthesis ──" >&2
+cat "$RUN_DIR/r1-synthesis.md"

@@ -9,7 +9,7 @@ sources: [conversation, .design/main.md, skills/annibale/SKILL.md, skills/anniba
 
 - Annibale writes a brief that holds the whole problem. It makes two to four viewpoints on the fly. A viewpoint is a hat plus a stance written for this problem: who the voice is, what it cares about, what it cannot see.
 - `scripts/debate.sh` runs the voices in parallel. They do not see each other, and each answers with a position, the reasons, and what would change its mind. Blue then writes the agreement, the tensions, one recommendation and the tripwires.
-- One round. The voices do not see each other, and they do not see the synthesis. Agents do not talk to each other.
+- One round. The voices answer on their own, then one synthesis is written.
 - Voices run in the run directory, not in the project, and are told to use no tools. This limits what they see. It is not a sandbox.
 - Annibale decides nothing. If the decision should stay, `omero` Ingest takes the conversation as its source.
 
@@ -21,7 +21,7 @@ Removed: the `tdd-coding` flow, the Socratic `debate` flow, the parallel pattern
 
 The old script had a default synthesiser that no longer existed, and no way to give each voice its own stance. Both are fixed.
 
-Studies find that debate often does not beat one agent, that model diversity helps, and that extra rounds can make voices converge. And the design of Alfredo allows chains of independent agents, not agents that talk. So the voices are independent, hats differ, and there is one round.
+Studies find that debate often does not beat one agent, that model diversity helps, and that extra rounds can make voices converge. Alfredo builds chains of independent agents. So the voices are independent, hats differ, and there is one round.
 
 Named experts that live in `.expert/` are deferred. Members were removed for good reasons: files made once and never reused (see [agents_hats_replace_members](agents_hats_replace_members)). A viewpoint should be saved only after it was reused.
 
