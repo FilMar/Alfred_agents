@@ -121,7 +121,7 @@ updated: 2026-10-13
 | [skill_ritchie_review_is_the_verdict_packet](skill_ritchie_review_is_the_verdict_packet) | The review: six sections from Esito to Scostamenti, self-contained |
 | [skill_ritchie_spec_review_pair_is_ephemeral_scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding) | The pair is scaffolding: removed at approval, the wiki page is the record |
 | [skill_census_removed_erodoto_jobs_ulisse](skill_census_removed_erodoto_jobs_ulisse) | Removed 2026-10-12: erodoto, jobs and ulisse |
-| [skill_census_removed_ermes_draghi_vinci](skill_census_removed_ermes_draghi_vinci) | Removed 2026-10-14: ermes, draghi and vinci; linus and atlante stay |
+| [skill_census_four_unused_skills_removed](skill_census_four_unused_skills_removed) | Removed 2026-10-14: ermes, draghi, vinci and atlante; linus stays |
 
 ## orchestrator
 

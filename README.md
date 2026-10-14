@@ -29,7 +29,6 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 | `omero` | Maintains the local project wiki in `.wiki/` |
 | `mose` | Writes atomic context→action rules for the Third Identity |
 | `linus` | Manages GitHub via gh: issues, project board, recaps |
-| `atlante` | Turns data into standalone interactive HTML charts (D3.js) |
 | `clio` | Backs up Qdrant to MEGA cloud: snapshots, restores, timer |
 
 Full, always-current roster (derived from the filesystem at print time):
