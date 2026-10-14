@@ -63,7 +63,6 @@ Design only, no code yet.
 - [ ] Ritchie: add an integration net for code that turns errors into values. [detail](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores)
 - [ ] Ritchie: write `SPEC.md` and `REVIEW.md` in the project root, next to `.wiki/` and `.design/`. [detail](skill_ritchie_spec_is_a_minimal_italian_document)
 - [ ] Annibale: save a viewpoint as a named expert in `.expert/` once it was reused, and call it by `:name`. [detail](skill_annibale_runs_a_debate_of_made_up_viewpoints)
-- [ ] Rules that say "propose annibale for a specialized role" (`CLAUDE.md`, `alfred.md`, `~/.claude/CLAUDE.md`): rewrite for the debate. [detail](skill_annibale_runs_a_debate_of_made_up_viewpoints)
 - [ ] Ritchie: make the mutant run a script, not a hand step.
 - [ ] Ritchie: test runs time out on files with heavy fixtures. Give the run a fixture helper.
 - [ ] Census: judge the 16 skills not yet judged, one by one.
