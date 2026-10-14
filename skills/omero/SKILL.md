@@ -26,7 +26,7 @@ Four operations. Each has its own reference file — read it only when that oper
 
 | Operation | When | Read |
 |-----------|------|------|
-| Ingest | user points to files or directories | `references/ingest.md` |
+| Ingest | user points to files, directories, `.design/`, or the conversation | `references/ingest.md` |
 | Query | user asks a question | `references/query.md` |
 | Style | a pattern or convention emerges | `references/style.md` |
 | Lint | user requests a health-check | `references/lint.md` |
@@ -57,7 +57,7 @@ Templates live next to this skill in `templates/` (`page.md`, `index.md`, `roadm
 
 ## Rules
 
-- Never modify source files for wiki reasons.
+- Never modify source files for wiki reasons. `.design/` is a source: read it, never write it.
 - Operate only inside `.wiki/`. Never touch project source to write the wiki.
 - Edit a decision in place only while it stays the same decision. If it is reversed, write a new one with `replaces`, delete the old file, then update `index.md` and any link that pointed at the old one.
 - A decision describes only its own topic. If it depends on another topic, link to that topic's live decisions instead of repeating them.

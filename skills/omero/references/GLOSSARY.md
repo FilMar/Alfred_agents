@@ -81,7 +81,7 @@ A link from one decision to another. Written in the `## Cross-references` sectio
 
 ### Ingest
 
-Reading a source and turning it into a decision. Writes a new decision file or edits an existing one, updates cross-references and the index. Procedure: `ingest.md`.
+Reading a source and turning it into decisions and roadmap blocks. The source can be files, directories, `.design/` or the conversation. Writes a new decision file or edits an existing one, updates cross-references, the index and the roadmap. Procedure: `ingest.md`.
 
 ### Query
 
