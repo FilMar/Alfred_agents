@@ -18,7 +18,7 @@ The recipe, verified live on 2026-09-28:
 
 The swap between two models is one `POST /collections/aliases` carrying `delete_alias` and `create_alias` together, so it is atomic. An alias is transparent to upsert, to query, and to collection-info, so no caller changes.
 
-Prerequisite, not optional: `ensureCollection()` deletes the collection when `sparse_vectors` is missing from the config, then rebuilds it empty. That must become a loud error before any migration runs.
+`ensureCollection()` throws an error when `sparse_vectors` is missing from the config. It used to delete the collection and rebuild it empty. Keep it loud.
 
 ## Why
 
@@ -26,7 +26,7 @@ Re-embedding a corpus in place is irreversible. If the new model turns out worse
 
 The name carries the model and the size on purpose. A collection whose vectors came from an unknown model is a collection nobody can safely extend.
 
-The `ensureCollection()` prerequisite is the real risk in this plan. A migration creates exactly the state — a fresh collection, a config that may not match what the code expects — where that function is most likely to fire, and what it does is delete the thing just built.
+The old `ensureCollection()` was the real risk of this plan. A migration creates a fresh collection, with a config that may not match the code, and that is where the function fired. It deleted the thing just built.
 
 ## Cross-references
 

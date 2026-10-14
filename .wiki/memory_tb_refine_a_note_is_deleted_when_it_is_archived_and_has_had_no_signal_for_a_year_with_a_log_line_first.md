@@ -6,34 +6,23 @@ replaces: [memory_tb_refine_a_note_is_deleted_after_six_months_in_the_archive_wi
 
 ## Decision
 
-The refiner deletes a note when the note is archived and its last signal is older than 365 days.
+The refiner deletes a note when it is archived and its last signal is older than 365 days. Zero means no signal in a year. It does not mean `trust` near zero, because `trust` never reaches zero: it only decays.
 
-Zero means no signal in a year. It does not mean `trust` near zero, because `trust` never reaches zero. It only decays.
+The hit counters start on 2026-09-21, so no note can have a year of silence before 2027-09-21, and none can be deleted before that day. The rule needs no extra guard. A note with no signal for a year is under 0.2 even at `trust` 1.0, because `1.0 * 0.5^(365/90)` is about 0.06. The rule still asks for archived, because the half-life is not fixed.
 
-The hit counters start on 2026-09-21. So no note can have a year of silence before 2027-09-21, and no note can be deleted before that day. The rule needs no extra guard.
-
-A note with no signal for a year is under 0.2 even at `trust` 1.0, because `1.0 * 0.5^(365/90)` is about 0.06 with the half-life of 90. The rule still asks for archived, because the half-life is not fixed.
-
-Before each delete, the refiner appends one line to a log. The log is append-only. The line holds the `id`, `what`, `why` and `exchange` of the note.
+Before each delete, the refiner appends one line to an append-only log: the `id`, `what`, `why` and `exchange` of the note.
 
 - A hit before the last year gives no immunity. The decay already moved `trust` under 0.2.
-- A ref does not save a note. `tb delete` removes the refs and backrefs of the neighbours, so the graph stays whole, with one node less.
-- A note that came back above 0.2 left the archive. It has a recent signal, so the rule does not touch it.
+- A ref does not save a note. `tb delete` removes the refs and backrefs of the neighbours, so the graph stays whole with one node less.
+- A note that came back above 0.2 left the archive and has a recent signal, so the rule does not touch it.
 
 ## Why
 
-The two errors do not cost the same. Keeping a useless note costs almost nothing. Deleting a good note that is the only copy costs all of it. For the old corpus that copy is the only one: of 793 notes, 756 have no `exchange`, so no raw text to rebuild from. The log is the only trace, and one line is cheap.
+The two errors do not cost the same. Keeping a useless note costs almost nothing. Deleting a good note that is the only copy costs all of it. For the old corpus that copy is the only one: of 793 notes, 756 have no `exchange`, so no raw text to rebuild from. The log is the only trace, and one line is cheap. The step cannot be undone, so the notice is a year and not six months.
 
-The count starts at the last signal. That removes the second clock that ran from `archived_at`. There is one date to reason about.
+The count starts at the last signal. That removes the second clock that ran from `archived_at`.
 
-The step cannot be undone, so the notice is one year and not six months.
-
-Alternatives that lost:
-
-- **Six months from `archived_at`.** The first delete would come in July 2027, before one year of measure exists.
-- **Delete after one month under 0.2.** About 328 old notes have no direct hit and would go.
-- **Never delete.** The corpus grows without end and only moves the problem.
-- **A ref or one old hit saves a note.** The first is a link, not a use. The second is a hook hit on an unrelated prompt.
+Lost: six months from `archived_at` (the first delete in July 2027, before one year of measure exists); one month under 0.2 (about 328 old notes with no direct hit would go); never delete (the corpus grows without end); a ref or one old hit saves a note (a link is not a use, and an old hook hit is on an unrelated prompt).
 
 ## Cross-references
 

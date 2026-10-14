@@ -12,17 +12,17 @@ Use CoALA (Cognitive Architectures for Language Agents, Princeton) as the map of
 | Working | what the model sees right now | context window, `CLAUDE.md`, the `tb`/`ti` injection hook | built |
 | Semantic | facts, concepts, conventions | `tb`, cross-project | built |
 | Procedural | how to do things | skills (`SKILL.md`) and `ti` rules (`if` to `do`) | built |
-| Episodic | what happened, and what was learned from it | `tl` | founded, not built |
+| Episodic | what happened, and what was learned from it | `tl`, read by `td` | archive built, search not built |
 
 `.wiki/` is not one of the four. It is the project's notebook — see [memory_wiki_is_the_project_notebook](memory_wiki_is_the_project_notebook).
 
-So the hole in the stack is episodic memory, and it already has a name. Every memory product surveyed — Hindsight, Mnemosyne, Mem0 — sits in that slot. Any of them is a candidate engine for `tl`. None of them is a replacement for `tb` or `ti`.
+So the hole in the stack was episodic memory. Every memory product surveyed — Hindsight, Mnemosyne, Mem0 — sits in that slot. None of them replaces `tb` or `ti`, and none was adopted as the engine: [memory_hindsight_not_adopted_its_shape_is_copied](memory_hindsight_not_adopted_its_shape_is_copied).
 
 The survey also gives a clean test for the `tb` / `ti` split, from the Hermes stack: knowledge you want to keep and organise across everything you do is world knowledge, so it is `tb`. A fact about how you like to work, or about what you are doing right now, is operational memory, so it is `ti`.
 
 ## Why
 
-The layers of pi were designed from the inside, one need at a time. CoALA is an outside frame, and it agrees with the split. That is worth more than agreement from inside, because it makes the missing piece visible by absence instead of by intuition. Three of four types exist and one does not, and the one that does not is the one already planned and unbuilt.
+The layers of pi were designed from the inside, one need at a time. CoALA is an outside frame, and it agrees with the split. That is worth more than agreement from inside, because it makes the missing piece visible by absence instead of by intuition. Three of four types existed and one did not, and it was the one already planned.
 
 It also settles a recurring question. Products in this space are easy to mistake for competitors of `tb`, because they all say "memory". They are not: they store distilled experience across sessions, which is episodic. `tb` stores facts and concepts, which is semantic. The two answer different questions and both are needed.
 

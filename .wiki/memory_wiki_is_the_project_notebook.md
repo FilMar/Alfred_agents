@@ -7,7 +7,7 @@ sources: [conversation, .wiki/index.md]
 
 `.wiki/` is not a tier of the memory stack. It is the notebook an agent writes to track how one project evolved. It lives and dies with the project.
 
-A wiki page is an episodic record **about the project**, written in semantic form: dated, immutable, "this is why we chose that on 23 September", but phrased as a stable fact rather than an event.
+A wiki page is an episodic record **about the project**, written in semantic form: dated, "this is why we chose that on 23 September", but phrased as a stable fact rather than an event.
 
 So every page has two halves, and the test that splits them is one question:
 
@@ -29,7 +29,7 @@ Keeping the wiki in the repo was never the problem, and moving it out would cost
 
 Rejected: indexing `.wiki/` into Qdrant so it is searchable across projects. It looks like the shortcut and it fills `tb` with forty projects' conventions, which kills the rule that makes the wiki cheap. Distillation is supposed to lose information — that is the work.
 
-What this also means: the extraction is the job Platone does, so Platone is not a courtesy at the end of a session. It is the only pump that moves knowledge from the project's fence to the cross-project store.
+What this also means: the extraction is the job of the distiller and of Platone. Without that pump, knowledge does not leave the project's fence for the cross-project store.
 
 ## Cross-references
 

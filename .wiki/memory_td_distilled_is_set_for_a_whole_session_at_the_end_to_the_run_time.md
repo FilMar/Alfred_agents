@@ -13,7 +13,7 @@ A session is the unit of `distilled`.
 - With any failure, nothing closes. The next run takes the whole session again.
 - `td distill` with no argument takes every session that has pending exchanges, one after the other. `td distill <session>` takes one.
 
-This replaces one line of the pipeline decision. Its last row said `distilled` is the extractor id. `tl` checks that `distilled` is a time, so an id cannot be stored.
+`tl` checks that `distilled` is a time, so an extractor id cannot be stored there.
 
 ## Why
 

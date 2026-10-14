@@ -23,7 +23,6 @@ No marker of origin takes its place.
 
 The roadmap said to decide the fate of `status` once `trust` had proved itself. That condition was wrong. The field does not depend on `trust`. It had no reader.
 
-Two decisions describe the old path: a new note enters as `provvisoria` and use decides. That detail no longer holds. The rest of those pages stands. See [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) and [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question).
 
 Alternatives that lost:
 

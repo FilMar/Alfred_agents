@@ -101,6 +101,7 @@ updated: 2026-10-13
 | [memory_refine_archive_hides_from_hook_only](memory_refine_archive_hides_from_hook_only) | Archived notes leave the hook only; a deliberate search revives them; refine owns archived_at |
 | [memory_refine_apply_runs_at_session_start](memory_refine_apply_runs_at_session_start) | tb refine --apply runs at session start, with no write cap |
 | [memory_refine_hits_measure_retrieval](memory_refine_hits_measure_retrieval) | A hit is retrieval, not use; trust measures vitality, so archive comes before delete |
+| [memory_tl_timestamps_are_iso_8601_utc_text](memory_tl_timestamps_are_iso_8601_utc_text) | Times in tl are ISO-8601 UTC text, fixed width, with the Z |
 
 ## skill
 

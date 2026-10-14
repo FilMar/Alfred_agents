@@ -5,21 +5,19 @@ sources: [conversation, ROADMAP_MEMORIA.md@7edd8d8]
 
 ## Decision
 
-Distillation stays manual for now. No service runs every 10 minutes. The user runs `platone` on a window of `tl pending`. Platone ends with `tl distilled <id...>`, so every exchange it read leaves the queue, with notes or without.
+Distillation is started by hand. No timer runs it. The user runs `td distill --active`, or runs `platone` on a window of `tl pending`. Both empty the queue the same way: every exchange that was read leaves `tl pending`, with notes or without.
 
-The automatic distiller waits until the problems below have an answer. A reminder at session start, that prints the size of `tl pending`, is the missing piece of the manual flow.
+An automatic run waits for a trigger. None is chosen. A reminder at session start, that prints the size of `tl pending`, is the missing piece of the manual flow.
 
 ## Why
 
-The manual flow already works end to end: `tl pending`, platone, `tb save --exchange`, `tl distilled`. An automatic service adds cost and risk and no new capability. These problems came up when it was designed:
+An automatic service adds cost and risk and no new capability while the manual flow works. These problems came up when it was first designed on `th run`, and `td` has solved them:
 
-- **It feeds itself.** `th run` archives every finished run as a `kind: subtask` row, and that row enters `tl pending`. A distiller built on `th` would read its own runs forever.
-- **The fix is a third kind.** A `kind: distill` row would keep only exchange data, with no input and no output, and a `parent` pointing at the exchange it distilled. It must not appear in `tl` as an ordinary subtask. This needs a change in `tl` and in `th run`.
-- **Knowledge also comes from task runs.** Skipping `subtask` rows to break the loop would throw away what the runs of tasks taught. The filter must be on the distiller's own rows, not on the kind.
-- **Fixed cost per run.** Every `th run` carries about 9k input tokens of system prompt. Small exchanges cost more in overhead than in content. A direct call to the Ollama API would avoid it.
-- **`th --timeout` bug.** `promptWithTimeout` in `tools/th/src/runner.ts` never clears its timer. The process stays alive for the full timeout after the run ends. A service that waits on the process would stall.
+- **It fed itself.** `th run` archives every finished run as a `subtask` row, and that row entered `tl pending`. `td` calls `pi-ai` and not `th`, so it archives no runs of its own.
+- **Fixed cost per run.** A `th run` carries about 9k input tokens of system prompt. A call through `pi-ai` has none. See [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low).
+- **The timeout bug.** `th --timeout` kept the process alive. It is fixed: [th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends](th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends).
 
-Open with the roadmap and not decided here: Hindsight as the engine, the dedup threshold, how many days a provisional note lives.
+What is left is only the trigger: a timer, the end of a session, or a count of pending exchanges. The manual flow stays until one is chosen. After that, `platone` can retire: [skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it).
 
 ## Cross-references
 

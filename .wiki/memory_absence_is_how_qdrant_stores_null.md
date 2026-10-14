@@ -22,11 +22,8 @@ default is nothing. The reader has to handle a missing key anyway, so writing th
 buys nothing and costs a lookup per note.
 
 The fields that survive the same test are the ones that carry information on an old
-note: `embed_model` says which model made the vector, `status: promossa` says a human
-read it, `about: mondo` says it describes no one in particular, `updated_at` says when
-it last changed. `source_raw: ""` is the one deliberate exception. Empty is not the
-same as missing there: it marks a note the migration saw and found no raw text for,
-which is different from a note nobody has looked at.
+note: `embed_model` says which model made the vector, `about: mondo` says it describes
+no one in particular, `updated_at` says when it last changed.
 
 ## Cross-references
 

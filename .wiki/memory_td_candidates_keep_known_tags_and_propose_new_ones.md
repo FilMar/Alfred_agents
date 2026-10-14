@@ -17,7 +17,7 @@ Semantic synonyms (`ai` and `intelligenza-artificiale`) are not caught here. In 
 
 ## Why
 
-The extraction spike gave the model a closed vocabulary: the first 80 tags of `tb tags`. Nobody had decided it. It only followed from "no valid tag" in the list of checks. With a closed vocabulary a new topic never gets its own tag, unless a person adds it by hand. Manual distillation (platone, erodoto) does create tags: 126 tags today, many used once.
+The extraction spike gave the model a closed vocabulary: the first 80 tags of `tb tags`. Nobody had decided it. It only followed from "no valid tag" in the list of checks. With a closed vocabulary a new topic never gets its own tag, unless a person adds it by hand. Manual distillation (platone) does create tags: 126 tags today, many used once.
 
 An open vocabulary brings back what the spike avoided: synonyms of tags that exist. The known tag keeps every candidate tied to the graph. The proposed tags show, with data, how often a new tag is needed and how often it is a synonym.
 

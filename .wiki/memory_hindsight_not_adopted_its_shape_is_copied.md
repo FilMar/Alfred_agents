@@ -32,8 +32,6 @@ Neither system asks the model to be selective, and neither one cleans up at writ
 
 So the gap between "it works for them with 20B" and "it fails for us with a bigger model" was the shape of the task, not the size of the model. Our first distiller was one agent that read a 15k-token protocol, drove three CLIs and judged value. Theirs is one narrow call.
 
-**The cost of building in place is small.** The spike that copied the shape ran a 38-exchange session in about 2 minutes, for about 2 cents.
-
 ## Cross-references
 
 - [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) — where Hindsight was first named as a candidate for the episodic slot
