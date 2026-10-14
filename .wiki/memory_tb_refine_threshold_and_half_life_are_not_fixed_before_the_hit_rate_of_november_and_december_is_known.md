@@ -42,5 +42,5 @@ The review is simple. In January 2027, read the hit counts of the 190 notes with
 ## Cross-references
 
 - [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing) — the formula and its weights
-- [memory_tb_refine_the_archive_is_not_a_deletion_queue_because_a_deliberate_search_revives_a_note_and_the_hook_never_does](memory_tb_refine_the_archive_is_not_a_deletion_queue_because_a_deliberate_search_revives_a_note_and_the_hook_never_does) — how a note leaves the archive
-- [memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21) — the hit counters and the date they start
+- [memory_tb_refine_the_archive_is_not_a_deletion_queue_because_a_deliberate_search_revives_a_note_and_the_hook_never_does](memory_refine_archive_hides_from_hook_only) — how a note leaves the archive
+- [memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21](memory_refine_hits_measure_retrieval) — the hit counters and the date they start

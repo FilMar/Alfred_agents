@@ -32,4 +32,4 @@ Cost: three tools and two texts to cut. That is code that stays, so it would go 
 - [skill_quality_references_moved_into_platone_and_mose](skill_quality_references_moved_into_platone_and_mose) — the current state this idea would replace
 - [skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it) — why the rules must outlive `platone`
 - [skill_convention_direct_cli](skill_convention_direct_cli) — skill holds procedure, CLI holds syntax
-- [memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy](memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy) — why a prompt copy in the extractor freezes
+- [memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy](memory_td_config_enters_as_checked_json) — why a prompt copy in the extractor freezes

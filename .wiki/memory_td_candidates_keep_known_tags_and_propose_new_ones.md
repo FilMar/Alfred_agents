@@ -28,4 +28,4 @@ The extraction prompt still says "only from the given vocabulary". It is part of
 ## Cross-references
 
 - [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — phase 1 and its checks
-- [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_distiller_td_is_fourteen_components_behind_one_entry_point) — component 7
+- [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_td_is_its_own_tool) — component 7

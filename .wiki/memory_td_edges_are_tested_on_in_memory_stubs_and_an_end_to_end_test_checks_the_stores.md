@@ -22,6 +22,5 @@ A stub that fails on demand is the only way to test the world-error path without
 ## Cross-references
 
 - [skill_ritchie_classifiers_get_an_outcome_table](skill_ritchie_classifiers_get_an_outcome_table) — the other case of a test with its own expect
-- [memory_td_world_errors_return_as_values_and_programmer_errors_are_rethrown](memory_td_world_errors_return_as_values_and_programmer_errors_are_rethrown) — the bug that showed the gap
-- [memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store](memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store) — why the stubs set the url in the environment
-- [memory_tb_clients_read_their_url_per_call_and_ti_tests_restore_their_spies](memory_tb_clients_read_their_url_per_call_and_ti_tests_restore_their_spies) — the same rule for `tb`
+- [memory_td_world_errors_return_as_values_and_programmer_errors_are_rethrown](memory_td_errors_are_values_or_thrown) — the bug that showed the gap
+- [memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store](memory_clients_read_their_url_per_call) — why the stubs set the url in the environment

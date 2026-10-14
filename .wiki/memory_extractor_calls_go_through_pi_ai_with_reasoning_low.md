@@ -47,5 +47,5 @@ Between Ollama by hand and `pi-ai` with reasoning low, the mean difference is 0.
 
 - [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — the calls this applies to
 - [memory_extractor_is_data_immutable_config_rows_in_tl](memory_extractor_is_data_immutable_config_rows_in_tl) — the config that names the model
-- [memory_distiller_is_its_own_tool_td_and_tl_stays_the_register](memory_distiller_is_its_own_tool_td_and_tl_stays_the_register) — the tool that makes the calls
+- [memory_distiller_is_its_own_tool_td_and_tl_stays_the_register](memory_td_is_its_own_tool) — the tool that makes the calls
 - [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) — the JSON still comes from the prompt, checked by code

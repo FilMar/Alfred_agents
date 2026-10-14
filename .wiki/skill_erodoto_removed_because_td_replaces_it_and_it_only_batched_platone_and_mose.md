@@ -20,5 +20,5 @@ A lesson from this case, as an idea and not a rule: an automation replaces a ski
 ## Cross-references
 
 - [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) — the earlier plan, written when distillation was manual
-- [memory_distiller_is_its_own_tool_td_and_tl_stays_the_register](memory_distiller_is_its_own_tool_td_and_tl_stays_the_register) — the tool that replaces it
+- [memory_distiller_is_its_own_tool_td_and_tl_stays_the_register](memory_td_is_its_own_tool) — the tool that replaces it
 - [skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it) — what is left to do for `platone`

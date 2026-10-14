@@ -20,4 +20,4 @@ The first config of `td` had all checks as free functions at the end of the file
 ## Cross-references
 
 - [style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags) — where checks with no domain go
-- [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_distiller_td_is_fourteen_components_behind_one_entry_point) — component 1 is the config
+- [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_td_is_its_own_tool) — component 1 is the config

@@ -11,7 +11,7 @@ sources: [conversation, tools/ti/src/identity.ts, tools/ti/src/qdrant.ts, tests/
 
 ## Why
 
-`tb` answers "what do I know about X"; it does not answer "what should happen given context X". Mixing the two retrieval patterns in one collection degrades both: behavioral queries get diluted by semantic noise, semantic queries get cluttered with situational one-offs. `ti` is the concrete resolution of gaps 3 and 4 from [memory_procedural_six_gaps](memory_procedural_six_gaps) — narrower than the full move-2 plan, human-in-the-loop by design, consistent with log-first intelligence-after.
+`tb` answers "what do I know about X"; it does not answer "what should happen given context X". Mixing the two retrieval patterns in one collection degrades both: behavioral queries get diluted by semantic noise, semantic queries get cluttered with situational one-offs. `ti` is the concrete resolution of gaps 3 and 4 from [memory_procedural_six_gaps](memory_procedural_memory_grows_on_data) — narrower than the full move-2 plan, human-in-the-loop by design, consistent with log-first intelligence-after.
 
 Implementation note worth keeping: a live smoke test against the real Qdrant on the Rasp (2026-07-21) found three response-shape bugs the mocked suite could not catch — the mocks were written to match the code's assumptions. Mocks prove the code matches itself; only the live service proves it matches the world.
 
@@ -19,7 +19,7 @@ Pending work: a native `--min-score` parameter for `ti search` (and `tb search`)
 
 ## Cross-references
 
-- [memory_procedural_six_gaps](memory_procedural_six_gaps) — the gap analysis `ti` extends
+- [memory_procedural_six_gaps](memory_procedural_memory_grows_on_data) — the gap analysis `ti` extends
 - [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there) — the Qdrant instance `ti` shares with `tb`
 - [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) — how `ti` rules reach the agent before every prompt
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the raw facts `tl` would feed `ti`'s distillation

@@ -45,6 +45,6 @@ Noise is set apart, not thrown away. In active mode every exchange read gets `di
 
 ## Cross-references
 
-- [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_distiller_td_is_fourteen_components_behind_one_entry_point) — component 3
+- [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_td_is_its_own_tool) — component 3
 - [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — phase 0, and the ack it listed
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the rows it reads

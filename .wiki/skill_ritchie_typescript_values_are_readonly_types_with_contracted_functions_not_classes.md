@@ -22,4 +22,4 @@ The general rule in `SKILL.md` changes from "fields are private, always" to "a v
 ## Cross-references
 
 - [skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role](skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role) — the rest of the ritchie workflow
-- [memory_td_episodes_split_a_session_in_one_call_checked_for_full_cover_and_listed_as_json_strings](memory_td_episodes_split_a_session_in_one_call_checked_for_full_cover_and_listed_as_json_strings) — the 170-line case
+- [memory_td_episodes_split_a_session_in_one_call_checked_for_full_cover_and_listed_as_json_strings](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — the 170-line case

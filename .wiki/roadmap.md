@@ -17,18 +17,18 @@ One line per task. The reason and the plan live in the linked decision.
 
 ### memory
 
-- [ ] Learn from outcomes: procedural memory for members and skills. [detail](memory_procedural_six_gaps)
-- [ ] Per-hat metrics, aggregated over time. [detail](memory_procedural_six_gaps)
+- [ ] Learn from outcomes: procedural memory for hats and skills. [detail](memory_procedural_memory_grows_on_data)
+- [ ] Per-hat metrics, aggregated over time. [detail](memory_procedural_memory_grows_on_data)
 - [ ] Career coach: consult memory before each answer. No decision yet.
 - [ ] Episode index over tl (`tl_episodes`, `tl search`), after the extraction pipeline is stable. [detail](memory_episode_summaries_are_a_derived_index_over_tl)
 - [ ] td: read the proposed tags in `extractions` (24 of 293 rows have some) and pick a guard for semantic tag synonyms. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - [ ] ritchie `check_body_diff.py` reads a `return` inside a callback (a `sort` comparator) as one that skips a postcondition. Ignore returns in nested functions.
 - [ ] Put `tests/` in a `tsc` project, so a type error in a test is caught.
-- [ ] Drop the `client.ts?extractions` import trick in `tests/tl_extractions.test.ts`: the client now reads its url on each call. [detail](memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store)
+- [ ] Drop the `client.ts?extractions` import trick in `tests/tl_extractions.test.ts`: the client now reads its url on each call. [detail](memory_clients_read_their_url_per_call)
 - [ ] Pick a home for `requireServices`, still copied in the `tb` and `ti` CLIs. It needs `checkHealth` from `tb`, so it cannot go to `common`. Or leave it. [detail](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags)
 - [ ] `tb refine`: delete a note archived with no signal for a year, log line first. Not before 2027-09-21. [detail](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first)
 - [ ] `tb refine`: read the hit rate, then fix the weights, the half-life and the 0.2 threshold before 2027-01-18. The hook now archives the first wave on its own. [detail](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known)
-- [ ] `tb refine`: tune the decay after 30 days of hits. [detail](memory_tb_refine_hits_count_retrieval_not_use_and_start_on_2026_09_21)
+- [ ] `tb refine`: tune the decay after 30 days of hits. [detail](memory_refine_hits_measure_retrieval)
 - [ ] Import the history in batches with `--max-saved`. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing)
 - [ ] Try the Claude Code `SessionStart` hook and the pi `session_start` event of `tb_refine` in a real session. They are only syntax-checked.
 - [ ] `tb link`: ref candidates by vector, an LLM hat judges pairs, then retire aristotele. Possible design. [detail](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge)
