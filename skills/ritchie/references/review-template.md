@@ -1,6 +1,6 @@
 # Review template
 
-`REVIEW.md` is written in step 3, next to the work, in Italian. Same
+`REVIEW.md` is written in step 3, in the project root, in Italian. Same
 rule as the spec: it is the document the user judges the work by.
 
 Every section is mandatory, and "Nessuno" is a valid entry. The

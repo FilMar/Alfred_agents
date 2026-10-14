@@ -23,6 +23,6 @@
 
 ## Sotto-progetti
 
-- sviluppo: dall'idea al prototipo o al codice che resta. [da discutere]
+- sviluppo: dall'idea al prototipo o al codice che resta, fino al lavoro su GitHub. [da discutere]
 - analisi: da un link o un tema a dati con la fonte. [da discutere]
 - memoria: ciò che si ricorda tra una sessione e l'altra. [da discutere]

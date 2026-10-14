@@ -5,7 +5,7 @@ sources: [conversation, skills/ritchie/references/review-template.md, skills/rit
 
 ## Decision
 
-Ritchie writes `REVIEW.md` in step 3, next to the work, in Italian. Six sections, all mandatory:
+Ritchie writes `REVIEW.md` in step 3, in the project root, in Italian. Six sections, all mandatory:
 
 - `Esito`: the state, plus one line per review round. The last line is the verdict in force.
 - `Copertura della spec`: one line per spec item, pointing at where it landed in the code.

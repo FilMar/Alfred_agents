@@ -19,7 +19,6 @@ One line per task. The reason and the plan live in the linked decision.
 
 - [ ] Learn from outcomes: procedural memory for hats and skills. [detail](memory_procedural_memory_grows_on_data)
 - [ ] Per-hat metrics, aggregated over time. [detail](memory_procedural_memory_grows_on_data)
-- [ ] Career coach: consult memory before each answer. No decision yet.
 - [ ] Episode index over tl (`tl_episodes`, `tl search`), after the extraction pipeline is stable. [detail](memory_episode_summaries_are_a_derived_index_over_tl)
 - [ ] td: read the proposed tags in `extractions` (24 of 293 rows have some) and pick a guard for semantic tag synonyms. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - [ ] ritchie `check_body_diff.py` reads a `return` inside a callback (a `sort` comparator) as one that skips a postcondition. Ignore returns in nested functions.
@@ -41,15 +40,11 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] Run `td distill --active` on its own, with no timer (the trigger is open), then retire platone. [detail](memory_distillation_stays_manual_for_now)
 - [ ] Add a limit to the extractions API, then to `tl extractions`.
 
-### th
-
-- [ ] Add the HTTP entry point to run agents. [detail](th_http_api_scoped_no_db)
-
 ### design
 
 Each line is one sub-project of `.design/main.md`, to be discussed with Piano.
 
-- [ ] sviluppo: write `.design/sviluppo.md`. The flow is built (piano, omero, then ritchie or edison). Only the design is missing. [detail](skill_omero_debates_design_before_decisions)
+- [ ] sviluppo: write `.design/sviluppo.md`. The flow is built (piano, omero, then ritchie or edison), and `linus` (GitHub) belongs here. Only the design is missing. [detail](skill_omero_debates_design_before_decisions)
 - [ ] analisi: discuss `.design/analisi.md`. `polo` reads sources. Missing: the search for official and independent sources, the chart (`atlante` is in git), and the stop when there are none. The expense CSV (`.bank.csv` in the `essays` repo, read with `xan`) is a case too, and the old `draghi` is in git. Decide if it runs on request only or with a monthly summary.
 - [ ] memoria: discuss `.design/memoria.md` and finish the memory. The open work is in the `memory` section above.
 
@@ -58,7 +53,6 @@ Each line is one sub-project of `.design/main.md`, to be discussed with Piano.
 - [ ] Router pass: shrink each multi-direction skill to a dispatch table. [detail](skill_router_pass_planned)
 - [ ] Ritchie: contract messages carry the values, in all four languages, and `contract_report.py` checks the format. [detail](skill_ritchie_contract_messages_carry_values)
 - [ ] Ritchie: add an integration net for code that turns errors into values. [detail](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores)
-- [ ] Ritchie: write `SPEC.md` and `REVIEW.md` in the project root, next to `.wiki/` and `.design/`. [detail](skill_ritchie_spec_is_a_minimal_italian_document)
 - [ ] Annibale: save a viewpoint as a named expert in `.expert/` once it was reused, and call it by `:name`. [detail](skill_annibale_runs_a_debate_of_made_up_viewpoints)
 - [ ] Ritchie: make the mutant run a script, not a hand step.
 - [ ] Ritchie: test runs time out on files with heavy fixtures. Give the run a fixture helper.

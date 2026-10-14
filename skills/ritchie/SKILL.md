@@ -43,7 +43,7 @@ rule that is stricter than this skill wins. Check
 Present the principle that governs the work (usually P1 plus the two
 that bite hardest here) and have the user confirm or amend it.
 
-Then write `SPEC.md` next to the work, never in the code: the domain in
+Then write `SPEC.md` in the project root, next to `.wiki/` and `.design/`, never in the code: the domain in
 the user's words, in Italian, on the shape of
 `references/spec-template.md`. It is committed with the branch. While
 the run is open, it is the decision log the work resumes from.
@@ -82,7 +82,7 @@ scripts/contract_report.py <path>
 Then the project's formatter and linter at their strictest setting,
 then the test suite. All three green before commit.
 
-Write `REVIEW.md` next to the work, in Italian, on the shape of
+Write `REVIEW.md` in the project root, in Italian, on the shape of
 `references/review-template.md`, and present it. The user reads the
 code here — this is the moment the user keeps the ability to judge it.
 The user approves, or sends the work back with one comment; only the
