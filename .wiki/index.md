@@ -123,16 +123,6 @@ updated: 2026-10-13
 | [skill_ritchie_spec_review_pair_is_ephemeral_scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding) | The pair is scaffolding: removed at approval, the wiki page is the record |
 | [skill_census_removed_erodoto_jobs_ulisse](skill_census_removed_erodoto_jobs_ulisse) | Removed 2026-10-12: erodoto, jobs and ulisse |
 
-## graph
-
-| Page | Content |
-|------|---------|
-| [graph_third_os_webapp_wider_than_workbench](graph_third_os_webapp_wider_than_workbench) | third_os: read, write and AI over tb's graph; ti out for now |
-| [graph_third_os_imports_tb_as_library](graph_third_os_imports_tb_as_library) | Runs on the Rasp, imports tb's modules, keeps vectors in RAM |
-| [graph_third_os_canvas_physics_dom_text](graph_third_os_canvas_physics_dom_text) | canvas = physics, DOM = text; fake depth, no framework |
-| [graph_third_os_agent_turns_stay_async](graph_third_os_agent_turns_stay_async) | Phase 3 is async: th spawns under bwrap even as a library |
-| [graph_curation_via_th_agent](graph_curation_via_th_agent) | Curation via a th member, live-streamed, kill-switch not a gate |
-
 ## orchestrator
 
 | Page | Content |

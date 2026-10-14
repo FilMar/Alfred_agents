@@ -47,14 +47,17 @@ One line per task. The reason and the plan live in the linked decision.
 
 ### graph
 
-Design only, no code yet.
+Alfredo has no graphical interface (`.design/main.md`). The design of the graph is deleted, not parked. If it is needed again, it is thought from zero.
 
-- [ ] Build third_os: read the graph, open a note at the centre. [detail](graph_third_os_webapp_wider_than_workbench)
-- [ ] Edit and create notes from the browser. [detail](graph_third_os_webapp_wider_than_workbench)
-- [ ] Add the agent: debates, notes from links, link bubbles. [detail](graph_third_os_agent_turns_stay_async)
-- [ ] Retire tb graph once third_os covers reading. [detail](graph_third_os_canvas_physics_dom_text)
-- [ ] Bring ti back as a separate view. [detail](graph_third_os_webapp_wider_than_workbench)
-- [ ] Run curation through a th member with live streaming. [detail](graph_curation_via_th_agent)
+- [ ] Delete the code of `tb graph`: `tools/tb/src/graph/`, the `graph` command and the `serveGraph` import in `tools/tb/src/cli.ts`, and the two `tb graph` lines in `skills/aristotele/SKILL.md`.
+
+### design
+
+Each line is one sub-project of `.design/main.md`, to be discussed with Piano.
+
+- [ ] sviluppo: write `.design/sviluppo.md`. The flow is built (piano, omero, then ritchie or edison). Only the design is missing. [detail](skill_omero_debates_design_before_decisions)
+- [ ] analisi: discuss `.design/analisi.md`. `polo` reads sources and `atlante` draws a chart. Missing: the search for official and independent sources, and the stop when there are none.
+- [ ] memoria: discuss `.design/memoria.md` and finish the memory. The open work is in the `memory` section above.
 
 ### skills
 
@@ -62,14 +65,16 @@ Design only, no code yet.
 - [ ] Ritchie: contract messages carry the values, in all four languages, and `contract_report.py` checks the format. [detail](skill_ritchie_contract_messages_carry_values)
 - [ ] Ritchie: add an integration net for code that turns errors into values. [detail](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores)
 - [ ] Ritchie: write `SPEC.md` and `REVIEW.md` in the project root, next to `.wiki/` and `.design/`. [detail](skill_ritchie_spec_is_a_minimal_italian_document)
+- [ ] Annibale: remove `--rounds` from `skills/annibale/scripts/debate.sh` and from `SKILL.md`. Agents do not talk. [detail](skill_annibale_runs_a_debate_of_made_up_viewpoints)
 - [ ] Annibale: save a viewpoint as a named expert in `.expert/` once it was reused, and call it by `:name`. [detail](skill_annibale_runs_a_debate_of_made_up_viewpoints)
 - [ ] Ritchie: make the mutant run a script, not a hand step.
 - [ ] Ritchie: test runs time out on files with heavy fixtures. Give the run a fixture helper.
 - [ ] Census: judge the 16 skills not yet judged, one by one.
 - [ ] socrate: write the ti principle, then remove the skill. [detail](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood)
 - [ ] vinci: rework as Typst documents with templates. [detail](skill_vinci_may_become_a_typst_documents_skill_with_templates)
-- [ ] Test omero Ingest on a real `.design/` of a project. [detail](skill_omero_debates_design_before_decisions)
 - [ ] ti: extend the piano rule to new features, with mose. [detail](skill_piano_writes_design_main_md)
+- [ ] Omero: a script `skills/omero/scripts/lint_wiki.py` for the checks a script can do: links, index, 40 lines, sentences over 30 words. Omero runs it and reports. [detail](wiki_edit_in_place_delete_superseded)
+- [ ] Write in the wiki who reads what: `.design/` the user, spec and review the user once, `.wiki/` the agents. [detail](skill_omero_debates_design_before_decisions)
 - [ ] Agree how the roadmap blocks are produced. [detail](skill_omero_debates_design_before_decisions)
 - [ ] Quality guides: print from tb and ti, or keep in skills. [detail](skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills)
 - [ ] platone: before retiring it, give the note quality rules a home. [detail](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it)
