@@ -31,7 +31,6 @@ tb browse --kind <kind> --limit 20 [--since "<ISO date>"]     # scroll notes of 
 tb save --what "<what>" --why "<why>" --kind <kind> [--tags <tag>] [--source "<source>"]
 tb update <id> --add-ref "<target-id>:<reason>"               # add one ref, append-only
 tb tags                                                        # list tags by frequency
-tb graph                                                        # visualise the graph in the browser
 ```
 
 `--tags` is repeatable: pass one `--tags <tag>` flag per tag, not a comma-separated list.
@@ -132,13 +131,7 @@ tb save \
   --kind sintesi
 ```
 
-### 4. Verify and report
-
-If you have executed significant structural interventions (new Hubs, many refs), you can visualise the updated graph:
-
-```bash
-tb graph
-```
+### 4. Report
 
 At the end, list compactly:
 - How many notes you linked

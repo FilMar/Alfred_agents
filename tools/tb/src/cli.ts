@@ -6,7 +6,6 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { checkHealth, EMBED_MODEL } from "./infra.js";
-import { serveGraph, GRAPH_PORT } from "./graph/server.js";
 import { serveApi, API_PORT } from "./api.js";
 import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId, markArchived, clearArchived } from "./notes.js";
 import { getByIds } from "./qdrant.js";
@@ -27,7 +26,7 @@ const QDRANT_POLL_INTERVAL_MS = 1_000;
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
 
-/** Accepts a full id or a unique prefix, the way the graph view prints it. */
+/** Accepts a full id or a unique prefix. */
 async function resolveOrDie(idOrPrefix: string): Promise<string> {
   try {
     return await resolveNoteId(idOrPrefix);
@@ -333,20 +332,6 @@ program
     } catch (err) {
       die(errorMessage(err));
     }
-  });
-
-// ─── graph ────────────────────────────────────────────────────────────────────
-
-program
-  .command("graph")
-  .description("Open the Third Brain graph in the browser")
-  .action(async () => {
-    await requireServices({ needsEmbedding: false });
-    serveGraph();
-    const url = `http://localhost:${GRAPH_PORT}`;
-    process.stdout.write(`Graph: ${url}\n`);
-    spawnSync("xdg-open", [url], { stdio: "ignore" });
-    await new Promise(() => {}); // keep process alive
   });
 
 // ─── serve ────────────────────────────────────────────────────────────────────
