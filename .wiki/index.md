@@ -108,7 +108,6 @@ updated: 2026-10-13
 | [skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role](skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role) | Step 6 is two th runs through th_write.sh: black hat for tests, white for bodies, GLM-5.3 fixed |
 | [skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes](skill_ritchie_typescript_values_are_readonly_types_with_contracted_functions_not_classes) | TS values are Readonly types with contracted functions; brand only for an invariant; class only for a resource |
 | [skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood) | Idea: socrate becomes a ti rule, then the skill is removed |
-| [skill_vinci_may_become_a_typst_documents_skill_with_templates](skill_vinci_may_become_a_typst_documents_skill_with_templates) | Idea: vinci becomes Typst documents with templates; the CV is one |
 | [skill_annibale_runs_a_debate_of_made_up_viewpoints](skill_annibale_runs_a_debate_of_made_up_viewpoints) | annibale runs one agentic debate on a problem, with viewpoints made on the fly |
 | [skill_piano_writes_design_main_md](skill_piano_writes_design_main_md) | piano writes use cases in `.design/`; main.md is the project, one level of sub-projects |
 | [skill_omero_debates_design_before_decisions](skill_omero_debates_design_before_decisions) | Piano, then omero Ingest on `.design/` that writes decisions and roadmap blocks, then edison and ritchie |
@@ -122,6 +121,7 @@ updated: 2026-10-13
 | [skill_ritchie_review_is_the_verdict_packet](skill_ritchie_review_is_the_verdict_packet) | The review: six sections from Esito to Scostamenti, self-contained |
 | [skill_ritchie_spec_review_pair_is_ephemeral_scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding) | The pair is scaffolding: removed at approval, the wiki page is the record |
 | [skill_census_removed_erodoto_jobs_ulisse](skill_census_removed_erodoto_jobs_ulisse) | Removed 2026-10-12: erodoto, jobs and ulisse |
+| [skill_census_removed_ermes_draghi_vinci](skill_census_removed_ermes_draghi_vinci) | Removed 2026-10-14: ermes, draghi and vinci; linus and atlante stay |
 
 ## orchestrator
 

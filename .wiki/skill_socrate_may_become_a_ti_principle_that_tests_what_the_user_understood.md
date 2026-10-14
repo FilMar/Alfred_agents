@@ -21,4 +21,3 @@ The order matters. Write the rule first. Remove the skill after. If the skill go
 
 - [memory_ti_context_action_rules](memory_ti_context_action_rules) — what a `ti` rule is
 - [memory_identity_splits_descriptive_prescriptive](memory_identity_splits_descriptive_prescriptive) — why behaviour belongs in `ti`
-- [skill_vinci_may_become_a_typst_documents_skill_with_templates](skill_vinci_may_become_a_typst_documents_skill_with_templates) — another open skill idea from the same census

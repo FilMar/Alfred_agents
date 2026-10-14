@@ -11,7 +11,7 @@ Every skill in `skills/` is one folder with up to three parts:
 - `scripts/` — optional. One executable file per **deterministic multi-step sequence**, self-described with a `# desc:` header (and `# usage:` when it takes arguments). Bash scripts set `set -euo pipefail` and validate arguments.
 - `references/` — optional. One file per deep-dive topic; the model reads one only when the task needs it.
 
-Efesto owns and lints the convention (`skills/efesto/scripts/lint_skill.py`, whole fleet by default). The threshold cuts both ways: a sequence reused identically belongs in a script; a script wrapping a single command gets inlined. Script lists are computed (`list_scripts.sh`), never hand-written. Some skills need no scripts (piano, omero, vinci — native tools only).
+Efesto owns and lints the convention (`skills/efesto/scripts/lint_skill.py`, whole fleet by default). The threshold cuts both ways: a sequence reused identically belongs in a script; a script wrapping a single command gets inlined. Script lists are computed (`list_scripts.sh`), never hand-written. Some skills need no scripts (piano, omero — native tools only).
 
 **Anti-patterns**: a skill that passes a skill name as the hat of `th run`; a wrapper recipe around a single command; a hand-written script inventory; `pi-just`/`just -f` leftovers.
 

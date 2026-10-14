@@ -7,11 +7,11 @@ sources: [conversation, .wiki/skill_migration.md@b1c408c]
 
 Next skill pass (decided 2026-08-18, deliberately deferred until the direct-CLI convention has seen real use): each multi-direction skill's `SKILL.md` becomes a small router (~50-60 lines) holding only three things:
 
-1. **Identity + trigger** (frontmatter) — the invariants valid on every run (hard behaviour contracts like "ermes never sends", plus the `--help` rule: the CLI's `--help` is the authority on flag syntax, the skill on procedure — read it before trying variants when a command fails). Invariants live only in the router, never copied into branch files.
+1. **Identity + trigger** (frontmatter) — the invariants valid on every run (hard behaviour contracts of the skill, plus the `--help` rule: the CLI's `--help` is the authority on flag syntax, the skill on procedure — read it before trying variants when a command fails). Invariants live only in the router, never copied into branch files.
 2. **A dispatch table** `task direction → references/<task>.md`.
 3. Nothing else. No procedure content in the router.
 
-Work order when it starts: efesto first (rule-1 rewrite + new lint checks: line cap for router skills, dead-reference check). Then the multi-direction skills: aristotele, platone, linus, vinci, indiana, mose. Borderline cases decided in audit.
+Work order when it starts: efesto first (rule-1 rewrite + new lint checks: line cap for router skills, dead-reference check). Then the multi-direction skills: aristotele, platone, linus, indiana, mose. Borderline cases decided in audit.
 
 ## Why
 

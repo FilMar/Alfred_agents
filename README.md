@@ -27,13 +27,10 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 | `indiana` | Code archaeology: diagnoses patterns and technical debt |
 | `efesto` | Creates and improves skills |
 | `omero` | Maintains the local project wiki in `.wiki/` |
-| `ermes` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) |
 | `mose` | Writes atomic context→action rules for the Third Identity |
 | `linus` | Manages GitHub via gh: issues, project board, recaps |
 | `atlante` | Turns data into standalone interactive HTML charts (D3.js) |
-| `vinci` | Generates a Curriculum Vitae in Typst from conversation |
 | `clio` | Backs up Qdrant to MEGA cloud: snapshots, restores, timer |
-| `draghi` | Imports bank export CSVs into an expense ledger, computes trends |
 
 Full, always-current roster (derived from the filesystem at print time):
 

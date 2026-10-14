@@ -5,7 +5,7 @@ sources: [.wiki/agenti.md@f87afd9]
 
 ## Decision
 
-Name a skill after the most famous figure whose iconic trait coincides with the skill's function — any pantheon (myth, history, science, pop), single word, and it must pass the bar test: hearing the name, you guess the function without footnotes. Current names follow this rule (platone, annibale, omero, ermes, mose, ulisse, ...).
+Name a skill after the most famous figure whose iconic trait coincides with the skill's function — any pantheon (myth, history, science, pop), single word, and it must pass the bar test: hearing the name, you guess the function without footnotes. Current names follow this rule (platone, annibale, omero, mose, ...).
 
 ## Why
 

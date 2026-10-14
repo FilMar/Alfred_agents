@@ -56,7 +56,7 @@ Alfredo has no graphical interface (`.design/main.md`). The design of the graph 
 Each line is one sub-project of `.design/main.md`, to be discussed with Piano.
 
 - [ ] sviluppo: write `.design/sviluppo.md`. The flow is built (piano, omero, then ritchie or edison). Only the design is missing. [detail](skill_omero_debates_design_before_decisions)
-- [ ] analisi: discuss `.design/analisi.md`. `polo` reads sources and `atlante` draws a chart. Missing: the search for official and independent sources, and the stop when there are none.
+- [ ] analisi: discuss `.design/analisi.md`. `polo` reads sources and `atlante` draws a chart. Missing: the search for official and independent sources, and the stop when there are none. The expense CSV (`.bank.csv` in the `essays` repo, read with `xan`) is a case too, and the old `draghi` is in git. Decide if it runs on request only or with a monthly summary.
 - [ ] memoria: discuss `.design/memoria.md` and finish the memory. The open work is in the `memory` section above.
 
 ### skills
@@ -69,9 +69,8 @@ Each line is one sub-project of `.design/main.md`, to be discussed with Piano.
 - [ ] Annibale: save a viewpoint as a named expert in `.expert/` once it was reused, and call it by `:name`. [detail](skill_annibale_runs_a_debate_of_made_up_viewpoints)
 - [ ] Ritchie: make the mutant run a script, not a hand step.
 - [ ] Ritchie: test runs time out on files with heavy fixtures. Give the run a fixture helper.
-- [ ] Census: judge the 16 skills not yet judged, one by one.
+- [ ] Census: judge the skills not yet judged, one by one.
 - [ ] socrate: write the ti principle, then remove the skill. [detail](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood)
-- [ ] vinci: rework as Typst documents with templates. [detail](skill_vinci_may_become_a_typst_documents_skill_with_templates)
 - [ ] ti: extend the piano rule to new features, with mose. [detail](skill_piano_writes_design_main_md)
 - [ ] Omero: a script `skills/omero/scripts/lint_wiki.py` for the checks a script can do: links, index, 40 lines, sentences over 30 words. Omero runs it and reports. [detail](wiki_edit_in_place_delete_superseded)
 - [ ] Write in the wiki who reads what: `.design/` the user, spec and review the user once, `.wiki/` the agents. [detail](skill_omero_debates_design_before_decisions)
