@@ -61,6 +61,7 @@ Design only, no code yet.
 - [ ] Router pass: shrink each multi-direction skill to a dispatch table. [detail](skill_router_pass_planned)
 - [ ] Ritchie: contract messages carry the values, in all four languages, and `contract_report.py` checks the format. [detail](skill_ritchie_contract_messages_carry_values)
 - [ ] Ritchie: add an integration net for code that turns errors into values. [detail](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores)
+- [ ] Ritchie: write `SPEC.md` and `REVIEW.md` in the project root, next to `.wiki/` and `.design/`. [detail](skill_ritchie_spec_is_a_minimal_italian_document)
 - [ ] Ritchie: make the mutant run a script, not a hand step.
 - [ ] Ritchie: test runs time out on files with heavy fixtures. Give the run a fixture helper.
 - [ ] Census: judge the 16 skills not yet judged, one by one.
