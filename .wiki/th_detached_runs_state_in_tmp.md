@@ -9,7 +9,7 @@ A detached `th run` keeps its state in files under `/tmp`, named `th-<hat>-<ms>-
 
 ## Why
 
-In-progress state is ephemeral and per-run; files match its lifetime exactly. `th wait` and the planned HTTP API read the same files — see [th_http_api_scoped_no_db](th_http_api_scoped_no_db).
+In-progress state is ephemeral and per-run; files match its lifetime exactly. `th wait` reads the same files.
 
 ## Known issue
 
@@ -17,5 +17,4 @@ Silent death mid-run, observed twice on 2026-07-21, root cause unconfirmed: a `-
 
 ## Cross-references
 
-- [th_http_api_scoped_no_db](th_http_api_scoped_no_db) — the HTTP API reads these same files
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — durable run history moves to `tl`, not these files

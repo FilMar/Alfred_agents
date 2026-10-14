@@ -21,4 +21,3 @@ Both entry points calling the same underlying functions means behavior can never
 ## Cross-references
 
 - [style_tb_ti_layering](style_tb_ti_layering) — the layering this sits on
-- [th_http_api_scoped_no_db](th_http_api_scoped_no_db) — the planned `th` extension, deliberately divergent (async job polling)

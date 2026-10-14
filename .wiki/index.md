@@ -24,7 +24,6 @@ updated: 2026-10-13
 |------|---------|
 | [th_sandbox_bwrap_fixed_binds](th_sandbox_bwrap_fixed_binds) | bwrap profile; run warns, sandbox-exec refuses |
 | [th_detached_runs_state_in_tmp](th_detached_runs_state_in_tmp) | Detached runs keep state in /tmp files |
-| [th_http_api_scoped_no_db](th_http_api_scoped_no_db) | Planned th HTTP API; glob over /tmp, no DB |
 | [th_verification_outside_members](th_verification_outside_members) | Verification never inside a member's run |
 | [th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends](th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends) | A run with --timeout exits when its prompt ends; the old timer kept it up |
 
