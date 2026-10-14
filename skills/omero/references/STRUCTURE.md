@@ -9,7 +9,7 @@ Every wiki starts with these files in `.wiki/`:
 | File | Purpose |
 |------|---------|
 | `index.md` | The catalogue. One `## <topic>` section per topic, a table of its decisions, one row each. Updated on every ingest. |
-| `roadmap.md` | The future task list. One short line per task, no code names, grouped by area; reason and plan in the linked decision. |
+| `roadmap.md` | The future task list. One `## <block>` section per block; short step lines, no code names; reason and plan in the linked decision. Block size follows complexity (see the Roadmap entry in the glossary). |
 | `<topic>_<slug>.md` | Decision files. Exactly one decision, one topic, under 40 lines, edited in place until reversed. A style or code convention is a decision too, under topic `style_<name>`. |
 
 There is no history file. Git holds the history of the wiki. A reversed decision is deleted and named in `replaces`.

@@ -50,7 +50,7 @@ Used on every operation that writes a decision.
   ```
 - `replaces` names the deleted file and the commit that last held it: get the hash with `git log -1 --format=%h -- .wiki/<file>`. The old text is `git show <hash>:.wiki/<file>`. A live link never points at a deleted file: repoint it to the new decision.
 - Internal links: `[Text](decision_file)` — without extension.
-- Special pages, mutable and edited in place: `index` (catalogue of decisions, one `## <topic>` section per topic) and `roadmap` (future task list, `## Tasks` section). There is no log: git history is the log.
+- Special pages, mutable and edited in place: `index` (catalogue of decisions, one `## <topic>` section per topic) and `roadmap` (future work, one `## <block>` section per block: see the Roadmap entry in `references/GLOSSARY.md`). There is no log: git history is the log.
 - English style for page text: see `references/GLOSSARY.md`.
 
 Templates live next to this skill in `templates/` (`page.md`, `index.md`, `roadmap.md`). Copy one and fill it in rather than writing structure from memory.

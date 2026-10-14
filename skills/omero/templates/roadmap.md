@@ -4,13 +4,11 @@ sources: []
 updated: YYYY-MM-DD
 ---
 
-## Tasks
+## <block>
 
-One line per task. The reason and the plan live in the linked page.
+One block is the smallest unit the user must understand and one run can finish. Complex logic: small block. Mechanical, repeated work: big block. The title names the result. [detail](<page>)
 
-### <area>
-
-- [ ] <what to do, ten words or fewer, no code names>. [detail](<page>)
+- [ ] <step, ten words or fewer, no code names>
 
 ## Cross-references
 

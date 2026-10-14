@@ -60,7 +60,18 @@ The catalogue page (`index.md`). One `## <topic>` section per topic, each a tabl
 
 ### Roadmap
 
-The future task list (`roadmap.md`). One line per task, ten words or fewer, no code names. Group tasks under an H3 per area (engine, render, one per game). A group can start with one plain sentence of status. The reason and the plan live in the linked decision, never in the line. Both potential and agreed tasks live here.
+The future work (`roadmap.md`), split into blocks. One `## <block>` section per block. The title names the result and links the decision that holds the design. Under it, one line per step, ten words or fewer, no code names. The reason and the plan live in the linked decision, never in the line. Both potential and agreed work live here.
+
+### Block
+
+The smallest unit the user must understand to keep the project in mind, and that one run of the implementing skill can finish alone. Its size follows its logical complexity, inversely:
+
+- The more complex the logic, the smaller the block: one logical decision, one or two entities.
+- The more mechanical and repetitive the work, the bigger the block: the same shape applied many times, where understanding the first copy is enough for all.
+- Work that repeats is cut in two: a small pilot block that fixes the shape, then one big block that copies it.
+- If the steps of a block have different shapes, it is too big. Cut it.
+
+The user judges the complexity. Omero proposes the cuts and the user agrees them.
 
 ### Cross-Reference
 
