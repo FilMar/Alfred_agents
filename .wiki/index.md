@@ -144,3 +144,4 @@ updated: 2026-10-13
 |------|---------|
 | [wiki_edit_in_place_delete_superseded](wiki_edit_in_place_delete_superseded) | Edit in place; a reversal deletes the old file; git keeps it |
 | [wiki_decision_is_written_when_the_design_ends](wiki_decision_is_written_when_the_design_ends) | A page is written after the design settles, never during it |
+| [wiki_is_read_by_agents_not_the_user](wiki_is_read_by_agents_not_the_user) | Design for the user, spec and review read once, wiki for the agents; plain English is a brake on the writer |

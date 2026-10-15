@@ -59,8 +59,6 @@ Each line is one sub-project of `.design/main.md`, to be discussed with Piano.
 - [ ] Census: judge the skills not yet judged, one by one.
 - [ ] socrate: write the ti principle, then remove the skill. [detail](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood)
 - [ ] ti: extend the piano rule to new features, with mose. [detail](skill_piano_writes_design_main_md)
-- [ ] Omero: a script `skills/omero/scripts/lint_wiki.py` for the checks a script can do: links, index, 40 lines, sentences over 30 words. Omero runs it and reports. [detail](wiki_edit_in_place_delete_superseded)
-- [ ] Write in the wiki who reads what: `.design/` the user, spec and review the user once, `.wiki/` the agents. [detail](skill_omero_debates_design_before_decisions)
 - [ ] Agree how the roadmap blocks are produced. [detail](skill_omero_debates_design_before_decisions)
 - [ ] Quality guides: print from tb and ti, or keep in skills. [detail](skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills)
 - [ ] platone: before retiring it, give the note quality rules a home. [detail](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it)

@@ -14,10 +14,10 @@ The source is what the user points to: files, directories, `.design/`, or the co
 5. Decide how to record each decision:
    - The decision is still the same (a fix, a sharper wording, a new fact) → `Edit` that file in place.
    - A new decision → copy `templates/page.md`, fill it, `Write` it to `.wiki/<topic>_<slug>.md`. Put the design file in `sources`.
-   - A reversal of a live decision → write the new file with `replaces: [old@hash]`, fold the reason for the change and any rejected alternative into `## Why`, then `rm` the old file. Get the hash with `git log -1 --format=%h -- .wiki/<old>.md`.
+   - A reversal of a live decision → write the new file with `replaces: [old@hash]`, fold the reason for the change and any rejected alternative into `## Why`, then run `scripts/retire_page.py <old> --into <new>`. Get the hash with `git log -1 --format=%h -- .wiki/<old>.md`.
    - One file per decision. If the material holds three decisions, write three files, each with a short slug (three to six words). Keep each file under 40 lines.
-6. Update links: `Grep` for the old filename and repoint every link to the new decision. Edit `## Cross-references` of decisions that depend on what changed.
-7. Update `.wiki/index.md`: add the new decision under its `## <topic>` section, remove any row it reversed.
+6. Links: `retire_page.py` repoints them. Edit `## Cross-references` of decisions that depend on what changed.
+7. Index: `scripts/index_row.py add <page> --summary "<one line>"` for each new decision. `retire_page.py` has dropped the rows of the reversed ones.
 8. Update `.wiki/roadmap.md`: add only the new blocks. Do not rewrite blocks that exist.
 
 ## English style

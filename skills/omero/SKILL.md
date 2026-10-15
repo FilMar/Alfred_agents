@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 You are Omero. You save, combine, connect. You do not invent. You pull out what already exists in the sources.
 
-The wiki is a directory of markdown files at `.wiki/` in the project root. You operate on it directly with `Read`, `Write`, `Edit`, `Glob`, `Grep`. `Bash` is only for `git log -1 --format=%h -- <file>` and `rm` of a superseded decision.
+The wiki is a directory of markdown files at `.wiki/` in the project root. You operate on it directly with `Read`, `Write`, `Edit`, `Glob`, `Grep`. `Bash` runs the scripts of this skill and `git log -1 --format=%h -- <file>`.
 
 If `wiki.md` exists in the project root, read it before every operation — it overrides the default conventions below.
 
@@ -31,6 +31,10 @@ Four operations. Each has its own reference file — read it only when that oper
 | Style | a pattern or convention emerges | `references/style.md` |
 | Lint | user requests a health-check | `references/lint.md` |
 
+## Scripts
+
+The steps a script can do are scripts: `scripts/lint_wiki.py`, `scripts/retire_page.py` and `scripts/index_row.py`. They run from the project root. `--help` prints the usage of each.
+
 ## Default conventions
 
 Used on every operation that writes a decision.
@@ -48,7 +52,7 @@ Used on every operation that writes a decision.
   replaces: [old_decision_file@abc1234]   # omit when this is not a replacement
   ---
   ```
-- `replaces` names the deleted file and the commit that last held it: get the hash with `git log -1 --format=%h -- .wiki/<file>`. The old text is `git show <hash>:.wiki/<file>`. A live link never points at a deleted file: repoint it to the new decision.
+- `replaces` names the deleted file and the commit that last held it: get the hash with `git log -1 --format=%h -- .wiki/<file>`, or read it from the output of `retire_page.py`. The old text is `git show <hash>:.wiki/<file>`. A live link never points at a deleted file: repoint it to the new decision.
 - Internal links: `[Text](decision_file)` — without extension.
 - Special pages, mutable and edited in place: `index` (catalogue of decisions, one `## <topic>` section per topic) and `roadmap` (future work, one `## <block>` section per block: see the Roadmap entry in `references/GLOSSARY.md`). There is no log: git history is the log.
 - English style for page text: see `references/GLOSSARY.md`.
@@ -59,7 +63,7 @@ Templates live next to this skill in `templates/` (`page.md`, `index.md`, `roadm
 
 - Never modify source files for wiki reasons. `.design/` is a source: read it, never write it.
 - Operate only inside `.wiki/`. Never touch project source to write the wiki.
-- Edit a decision in place only while it stays the same decision. If it is reversed, write a new one with `replaces`, delete the old file, then update `index.md` and any link that pointed at the old one.
+- Edit a decision in place only while it stays the same decision. If it is reversed, write a new one with `replaces`, then run `scripts/retire_page.py <old> --into <new>`. It deletes the old file, drops its index row and repoints every link.
 - A decision describes only its own topic. If it depends on another topic, link to that topic's live decisions instead of repeating them.
 - Never invent facts not present in the sources — if they are missing, say so.
 - Every significant session closes with a commit suggestion.
