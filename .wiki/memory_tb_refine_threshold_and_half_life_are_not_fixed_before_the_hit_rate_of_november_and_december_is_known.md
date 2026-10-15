@@ -23,7 +23,7 @@ A spike read the 798 real notes on 2026-10-13. The spike folder is not in git, s
 - **A note must be found about every 4 to 5 months.** A note with no hit stays above 0.2 for 119 days. A note with 3 hits stays for about 150 days. A half-life of 90 days is hard on a corpus where 190 of 798 notes have no hit yet.
 - **The rate is unknown.** The counters have 3 weeks of data. How often a note is found in a normal month decides if 90 days is too short and if 0.2 is too high.
 
-Lost: fix the values now from the formula (the weights are guesses, and a wrong half-life archives good notes in a wave); move the floor to make the wave smaller (it hides the problem).
+Lost: fix the values now from the formula. The weights are guesses, and a wrong half-life archives good notes in a wave. Lost: move the floor to make the wave smaller. It hides the problem.
 
 The review is simple. In January 2027, read the hit counts of the 190 notes with no hit. If most got a hit, keep 90 days. If few did, lengthen the half-life or lower the threshold before the wave.
 

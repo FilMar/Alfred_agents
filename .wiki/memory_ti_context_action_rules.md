@@ -13,7 +13,7 @@ sources: [conversation, tools/ti/src/identity.ts, tools/ti/src/qdrant.ts, tests/
 
 `tb` answers "what do I know about X"; it does not answer "what should happen given context X". Mixing the two retrieval patterns in one collection degrades both: behavioral queries get diluted by semantic noise, semantic queries get cluttered with situational one-offs. `ti` is the answer to the gap of a store indexed by situation, named in [memory_procedural_memory_grows_on_data](memory_procedural_memory_grows_on_data) — narrower than the full move-2 plan, human-in-the-loop by design, consistent with log-first intelligence-after.
 
-Implementation note worth keeping: a live smoke test against the real Qdrant on the Rasp (2026-07-21) found three response-shape bugs the mocked suite could not catch — the mocks were written to match the code's assumptions. Mocks prove the code matches itself; only the live service proves it matches the world.
+Implementation note worth keeping: a live smoke test against the real Qdrant on the Rasp (2026-07-21) found three response-shape bugs the mocked suite could not catch. The mocks were written to match the assumptions of the code. Mocks prove the code matches itself; only the live service proves it matches the world.
 
 
 ## Cross-references

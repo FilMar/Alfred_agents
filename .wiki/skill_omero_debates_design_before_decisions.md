@@ -21,7 +21,7 @@ Open: tasks that are not blocks (manual work, waiting on a date).
 
 A new feature used to start as code, and nobody asked how it fits the others. Now the functional question comes first, where it costs less.
 
-A use-case file holds needs, not technical choices, so there is nothing to extract. Someone must propose options and the user must choose. This is `Ingest` with a source that does not decide: the rule is that a decision records what the source says or what the user chose, and `omero` asks where the source is silent. The user's ok before writing is the gate that stops it from inventing. One flow, not two: the only difference is how much the source decides.
+A use-case file holds needs, not technical choices, so there is nothing to extract. Someone must propose options and the user must choose. This is `Ingest` with a source that does not decide. A decision records what the source says or what the user chose, and `omero` asks where the source is silent. The user's ok before writing is the gate that stops it from inventing. One flow, not two: the only difference is how much the source decides.
 
 A spike by `edison` may break a technical decision. Then the decision is edited in place, under the usual rules.
 

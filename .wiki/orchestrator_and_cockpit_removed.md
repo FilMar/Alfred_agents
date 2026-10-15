@@ -16,9 +16,9 @@ Nothing replaces them. Delegated execution is `th`'s job. Scheduling has no user
 
 The two tools were not costing nothing while nobody ran them. They were breaking the test suite for everything else.
 
-Measured on 2026-09-28: the suite had 7 to 8 failures out of 154, and they moved between runs. Every file passed alone — `th` 41 of 41, the two orchestrator suites 35 and 24 — and the failures only appeared when `bun test tests/` ran the files in parallel, because the orchestrator suites and `th`'s share state on the filesystem. Six of the failures surfaced inside `th`, which is why an earlier diagnosis in `ROADMAP_MEMORIA.md` blamed `th`'s own fixtures and was wrong twice: first about the cause, then about which suite held it.
+Measured on 2026-09-28: the suite had 7 to 8 failures out of 154, and they moved between runs. Every file passed alone: `th` 41 of 41, the two orchestrator suites 35 and 24. The failures appeared only when `bun test tests/` ran the files in parallel, because the orchestrator suites and `th` share state on the filesystem. Six of the failures surfaced inside `th`. So an earlier diagnosis in `ROADMAP_MEMORIA.md` blamed the fixtures of `th`, and it was wrong twice: about the cause, then about which suite held it.
 
-Removing the orchestrator made the suite green for the first time: **161 of 161, stable over three consecutive runs**. That is the price of unused code stated as a number. It does not sit in the directory it occupies; it sits in every run of the suite, in every diagnosis that has to route around it, and in the trust the suite loses when its red is permanent.
+Removing the orchestrator made the suite green for the first time: **161 of 161, stable over three consecutive runs**. That is the price of unused code stated as a number. The cost sits in every run of the suite, in every diagnosis that has to route around it, and in the trust the suite loses when its red is permanent.
 
 The code is not gone: git holds it, and the nine superseded pages are in git history. If a recurring task ever appears that needs a machine woken over Wake-on-LAN, the design is there to read. What is gone is the claim that it is current.
 

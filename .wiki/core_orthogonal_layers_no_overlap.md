@@ -21,7 +21,7 @@ The boundary that keeps them apart: the Third Brain holds ideas that have value 
 
 ## Why
 
-A fact with two homes drifts: one copy is updated, the other lies. Each layer answers one question: what do I know (`tb`), what do I do given a context (`ti`), who executes (`th`), why is this project built this way and what is it for (`.wiki/`, `.design/`), what happened (`tl`). One home per kind of fact removes the sync problem by construction.
+A fact with two homes drifts: one copy is updated, the other lies. Each layer answers one question. What do I know (`tb`)? What do I do given a context (`ti`)? Who executes (`th`)? Why is this project built this way, and what is it for (`.wiki/`, `.design/`)? What happened (`tl`)? One home per kind of fact removes the sync problem by construction.
 
 ## Cross-references
 

@@ -13,7 +13,7 @@ sources: [tools/th/src/runner.ts]
 
 **It was read as a slow model.** The first trial of `th_write.sh` wrote its file after 5 minutes and did not exit for 6 more. That wait was blamed on the model. The registry run made the cause plain: it lasted 20:01 with a timeout of 1200 seconds, though the file was written after about 2 minutes. Every run of `th_write.sh` paid the whole timeout.
 
-**What a run of `th_write.sh` costs now.** On the registry (component 2 of `td`), the test run wrote 10 tests in about 2 minutes and the body run took 161 seconds. The minutes in [skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role](skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role) include the timer.
+**What a run of `th_write.sh` costs now.** On the registry (component 2 of `td`), the test run wrote 10 tests in about 2 minutes. The body run took 161 seconds. The minutes in [skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role](skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role) include the timer.
 
 ## Cross-references
 

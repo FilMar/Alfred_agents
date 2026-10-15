@@ -18,7 +18,7 @@ Use CoALA (Cognitive Architectures for Language Agents, Princeton) as the map of
 
 So the hole in the stack was episodic memory. Every memory product surveyed — Hindsight, Mnemosyne, Mem0 — sits in that slot. None of them replaces `tb` or `ti`, and none was adopted as the engine: [memory_hindsight_not_adopted_its_shape_is_copied](memory_hindsight_not_adopted_its_shape_is_copied).
 
-The survey also gives a clean test for the `tb` / `ti` split, from the Hermes stack: knowledge you want to keep and organise across everything you do is world knowledge, so it is `tb`. A fact about how you like to work, or about what you are doing right now, is operational memory, so it is `ti`.
+The survey also gives a clean test for the `tb` / `ti` split, from the Hermes stack. Knowledge you want to keep and organise across everything you do is world knowledge, so it is `tb`. A fact about how you like to work, or about what you are doing right now, is operational memory, so it is `ti`.
 
 ## Why
 

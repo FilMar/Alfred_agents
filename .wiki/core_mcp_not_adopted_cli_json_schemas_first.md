@@ -24,9 +24,9 @@ pi already has what MCP formalizes:
 
 The real risks are independent of MCP. Prompt debt: SKILL.md files are code in natural language with no types, tests or versions. Prompt injection into the shell: the CLI inherits the shell permissions, and MCP does not fix that. On a Raspberry Pi with local LLMs, schema dumps eat the context a small model needs.
 
-The work, in priority order, is in the roadmap: P0 JSON Schemas for the output of the four CLIs, checked in CI; P1 security (a command whitelist, an audit log, the SQLite races in `th`, zombie processes); P2 the MCP stdio shim, when the trigger fires; P3 an optional spike of pi as an MCP client.
+The work is in the roadmap, in priority order. P0: JSON Schemas for the output of the four CLIs, checked in CI. P1: security (a command whitelist, an audit log, the SQLite races in `th`, zombie processes). P2: the MCP stdio shim, when the trigger fires. P3: an optional spike of pi as an MCP client.
 
-Rejected: native MCP servers (no measured benefit); an MCP facade "to be ready" (readiness without consumers is over-engineering); SKILL.md files that simulate MCP (they pollute the source of truth); the belief that MCP stops prompt injection (injection crosses any transport). Gemini advised the migration with a generic framework, without seeing the code.
+Rejected: native MCP servers, for no measured benefit. Also rejected: an MCP facade "to be ready", because readiness without consumers is over-engineering. Also rejected: SKILL.md files that simulate MCP, because they pollute the source of truth. And the belief that MCP stops prompt injection: injection crosses any transport. Gemini advised the migration with a generic framework, without seeing the code.
 
 ## Cross-references
 

@@ -14,8 +14,8 @@ Three skills were removed on 2026-10-12, in the census of the skills (commit `94
 
 ## Why
 
-A skill with no tool under it has no job. The user never used `ulisse`, and there is a structural reason too: the description of every skill is already in the context of the agent, and that is what routes a task to a skill. A navigator skill repeats the work and costs context.
+A skill with no tool under it has no job. The user never used `ulisse`, and there is a structural reason too. The description of every skill is already in the context of the agent, and that is what routes a task to a skill. A navigator skill repeats the work and costs context.
 
 `erodoto` would have been a third path to the same result, beside `platone`, `mose` and `td`. Three paths drift apart.
 
-A lesson from `erodoto`, as an idea and not a rule: an automation replaces a skill only if it also covers the side effects of that skill, not just the main function.
+A lesson from `erodoto`, as an idea and not a rule. An automation replaces a skill only if it also covers the side effects of that skill, and not just the main function.

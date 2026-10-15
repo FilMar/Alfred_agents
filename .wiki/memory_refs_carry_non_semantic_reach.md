@@ -20,7 +20,7 @@ Measured on all 1150 edges of the corpus (2026-09-28). For each edge, the rank o
 
 Only 26% of the links point to a note the vector search already returns in the top 10. 23% point past the 200th neighbour, so no reasonable limit would surface them.
 
-One edge from that last group, as the shape of the value: *Kanban against Scrum* to *throughput against latency*, with the reason "same trade-off shape — buying flexibility costs predictability, like throughput costs latency". The two notes share no term. No embedding model links them.
+One edge from that last group shows the shape of the value. It links *Kanban against Scrum* to *throughput against latency*, with the reason "same trade-off shape — buying flexibility costs predictability, like throughput costs latency". The two notes share no term. No embedding model links them.
 
 Second use of the same data: these edges are free ground truth. A retrieval benchmark can score ref-recall@10 with no labels and no human judgment. The measure is biased toward the model the corpus was built with, so it reads as a conservative test, never as proof a new model is better.
 

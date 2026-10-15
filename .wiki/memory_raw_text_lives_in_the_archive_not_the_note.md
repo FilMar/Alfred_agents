@@ -12,7 +12,7 @@ A note does not carry the raw text it was distilled from. The `source_raw` field
 
 The need is real and the place was wrong. A note must be re-extractable when the distiller improves, and 369 notes of 737 cannot be, because their raw text is gone. That does not mean every note should carry a copy.
 
-The raw text of one exchange feeds many notes. A copy in each pays for the same text several times, and in the worst place: the payload is what a search returns and what a hook puts in a context window that is re-read about 29 times per session. A record that is read rarely does not belong in the object that is read constantly.
+The raw text of one exchange feeds many notes. A copy in each pays for the same text several times, and in the worst place. The payload is what a search returns. A hook puts it in a context window that is re-read about 29 times per session. A record that is read rarely does not belong in the object that is read constantly.
 
 So the note holds a pointer. The rule: point when the target is durable and addressable, copy when it is not. `tl` is durable because it is ours and nothing rotates it. A chat transcript is not, which is why the copy looked necessary.
 

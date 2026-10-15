@@ -10,7 +10,7 @@ The extractor is the v7 pipeline of the extraction spike, with critic F in place
 
 - **0 (code).** Read the pending exchanges of one session. Set the noise apart.
 - **0b (LLM, blue hat, once per session).** Split into episodes, each with a summary of how it ended. Code checks the cover: every exchange, in order, no gap. The split is not deterministic (one session gave 4 episodes, then 9), so episodes are not saved.
-- **1 (LLM, white hat, per exchange).** Notes and rules from the target only, with the episode and the session map as context. The shape of each item is checked first. Then code checks drop: empty field, bad kind, no known tag, quote not in the target, not Italian, project identifier, purity, a rule quote not from the user, one quote per rule.
+- **1 (LLM, white hat, per exchange).** Notes and rules from the target only, with the episode and the session map as context. The shape of each item is checked first. Then code checks drop a candidate for an empty field, a bad kind, no known tag, or a quote not in the target. It also drops one that is not Italian, has a project identifier, or breaks purity. A rule quote must come from the user, with one rule per quote.
 - **1b (LLM, per candidate).** Critic F: [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question).
 - **2a (code).** Top 5 neighbours from `tb` or `ti`. Read only, no hit, no cosine cut.
 - **2b (LLM, black hat, per exchange).** A note is `new`, `duplicate`, `extends` or `contradicts`. A rule is `new`, `duplicate` or `append`. Code checks that `of` is a given id. An `extends` with nothing in `adds` becomes `duplicate`. One whose `adds` is not a new idea becomes `ref_only`, which saves nothing.

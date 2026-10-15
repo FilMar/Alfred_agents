@@ -24,7 +24,7 @@ trust = min(1, 0.5 + 0.05 * min(hits, 10) + 0.02 * min(hits_related, 10))
 
 A derived number needs no rule, moment or owner for a change. The same inputs give the same value, so a new formula is a rerun, not a migration, and the value never drifts.
 
-Lost: a counter that grows on every hit (it drifts and cannot be replayed); promotion at N hits (a cliff, no ageing); `when` as the last signal for every note (130 notes under 0.2 at the first run, made before the counters existed, so the floor gives them 119 days); a stored `trust` (two copies drift, and nobody reads it).
+Lost: a counter that grows on every hit, because it drifts and cannot be replayed. Lost: promotion at N hits, a cliff with no ageing. Lost: `when` as the last signal for every note, because 130 notes sat under 0.2 at the first run, made before the counters existed. The floor gives them 119 days. Lost: a stored `trust`, because two copies drift and nobody reads it.
 
 The weights and the half-life are guesses: [memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known).
 

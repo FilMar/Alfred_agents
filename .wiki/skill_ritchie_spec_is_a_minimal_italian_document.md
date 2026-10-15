@@ -5,7 +5,7 @@ sources: [conversation, skills/ritchie/references/spec-template.md]
 
 ## Decision
 
-Ritchie writes `SPEC.md` in step 1, in the project root, next to `.wiki/` and `.design/`. It is the domain in the words of the user, in Italian, on the shape of the template: a list of entities, each with five fields (`stato`, `fa`, `non fa`, `serve a`, `comanda`), then the flows, then the invariants. One line per field. No prose between the bullets.
+Ritchie writes `SPEC.md` in step 1, in the project root, next to `.wiki/` and `.design/`. It is the domain in the words of the user, in Italian, on the shape of the template. The template has a list of entities, each with five fields (`stato`, `fa`, `non fa`, `serve a`, `comanda`), then the flows, then the invariants. One line per field. No prose between the bullets.
 
 ## Why
 

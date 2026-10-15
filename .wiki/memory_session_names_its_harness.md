@@ -16,7 +16,7 @@ The archive holds two harnesses now, 969 Claude exchanges and 794 `pi` ones over
 - Join to `exchanges` and read a JSON field with `LIKE`. That is a query about rows, used to answer a question about a session.
 - Read the UUID version: `pi` numbers its sessions with v7 and Claude Code with v4, and on today's data that separates 110 from 43 perfectly. It is an accident of two implementations, not a contract. The day either changes its generator, the filter keeps working and starts lying — the same shape of failure as a cutoff applied to a score that changed meaning.
 
-The schema decision already gave the rule that settles where it goes: `sessions` holds what stays constant for a whole session, which is why `model` is on the exchange instead — it changes mid-session. A harness never does.
+The schema decision already gave the rule that settles where it goes. `sessions` holds what stays constant for a whole session. That is why `model` is on the exchange: it changes mid-session. A harness never does.
 
 That rule also says it belongs in **one** place, so the reader stopped writing `meta.harness` on every row when the column arrived. A fact with two homes drifts: one copy gets updated and the other lies.
 

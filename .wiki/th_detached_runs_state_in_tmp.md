@@ -13,7 +13,7 @@ In-progress state is ephemeral and per-run; files match its lifetime exactly. `t
 
 ## Known issue
 
-Silent death mid-run, observed twice on 2026-07-21, root cause unconfirmed: a `--detach` run reported `done` / exit 0 with an empty or truncated `.out` while the `.log` showed the agent stopping mid-reasoning. Until root-caused: treat any suspiciously short `.out` as suspect and check the `.log` tail before trusting it, especially for runs that write files. One incident wiped the old wiki log with a broken shell one-liner before dying, undetected until manually inspected.
+Silent death mid-run, observed twice on 2026-07-21, root cause unconfirmed. A `--detach` run reported `done` / exit 0 with an empty or truncated `.out` while the `.log` showed the agent stopping mid-reasoning. Until root-caused: treat any suspiciously short `.out` as suspect and check the `.log` tail before trusting it, especially for runs that write files. One incident wiped the old wiki log with a broken shell one-liner before dying, undetected until manually inspected.
 
 ## Cross-references
 

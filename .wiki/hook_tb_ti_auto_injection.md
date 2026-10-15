@@ -16,7 +16,7 @@ An empty result or a failed search contributes nothing; if both come up empty, n
 
 ## Why
 
-This turns the "Search Before Answer" discipline from something the agent must remember into something the harness enforces mechanically — the lookup has already run before the first token of the answer. The cutoff is 0.5, measured on the model in use ([memory_score_cutoffs_belong_to_the_model](memory_score_cutoffs_belong_to_the_model)). Archived notes are left out ([memory_refine_archive_hides_from_hook_only](memory_refine_archive_hides_from_hook_only)). The hook is only fast and reliable because both stores are a single always-on source of truth — see [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp).
+This turns the "Search Before Answer" discipline from something the agent must remember into something the harness enforces. The lookup has already run before the first token of the answer. The cutoff is 0.5, measured on the model in use ([memory_score_cutoffs_belong_to_the_model](memory_score_cutoffs_belong_to_the_model)). Archived notes are left out ([memory_refine_archive_hides_from_hook_only](memory_refine_archive_hides_from_hook_only)). The hook is only fast and reliable because both stores are a single always-on source of truth — see [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp).
 
 ## Cross-references
 

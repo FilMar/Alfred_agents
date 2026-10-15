@@ -21,9 +21,7 @@ question "what is the default value of this field" has no answer for a field who
 default is nothing. The reader has to handle a missing key anyway, so writing the key
 buys nothing and costs a lookup per note.
 
-The fields that survive the same test are the ones that carry information on an old
-note: `embed_model` says which model made the vector, `about: mondo` says it describes
-no one in particular, `updated_at` says when it last changed.
+The fields that survive the same test carry information on an old note. `embed_model` says which model made the vector. `about: mondo` says it describes no one in particular. `updated_at` says when it last changed.
 
 ## Cross-references
 

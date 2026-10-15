@@ -22,7 +22,7 @@ The two errors do not cost the same. Keeping a useless note costs almost nothing
 
 The count starts at the last signal. That removes the second clock that ran from `archived_at`.
 
-Lost: six months from `archived_at` (the first delete in July 2027, before one year of measure exists); one month under 0.2 (about 328 old notes with no direct hit would go); never delete (the corpus grows without end); a ref or one old hit saves a note (a link is not a use, and an old hook hit is on an unrelated prompt).
+Lost: six months from `archived_at`, because the first delete would come in July 2027, before one year of measure exists. Lost: one month under 0.2, because about 328 old notes with no direct hit would go. Lost: never delete, because the corpus grows without end. Lost: a ref or one old hit saves a note, because a link is not a use and an old hook hit is on an unrelated prompt.
 
 ## Cross-references
 

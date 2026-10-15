@@ -5,7 +5,7 @@ sources: [tools/tb/src/api.ts, tools/ti/src/api.ts]
 
 ## Decision
 
-`tb` and `ti` each expose the same business logic through two thin entry points: `cli.ts` (commander, for humans and agents shelling out) and `api.ts` (Hono, for HTTP tool integrations, e.g. registering the module as an OpenAPI Tool Server). Added 2026-07-23.
+`tb` and `ti` each expose the same business logic through two thin entry points. `cli.ts` (commander) is for humans and agents shelling out. `api.ts` (Hono) is for HTTP tool integrations, for example registering the module as an OpenAPI Tool Server. Added 2026-07-23.
 
 - One Hono route per CLI command, same option names and semantics.
 - A static, hand-written `GET /openapi.json` — no codegen; kept in sync by hand because the surface is small and changes rarely.

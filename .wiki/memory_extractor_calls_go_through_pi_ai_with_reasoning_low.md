@@ -9,7 +9,7 @@ Every LLM call of the extractor goes through `pi-ai`, with `completeSimple(model
 
 `pi-coding-agent` is a full agent: a system prompt, tools, skills, about 9k tokens before the task. `pi-ai` is one call to one model, with no prompt of its own and no fixed cost.
 
-Each call in the config states three things, because the defaults are wrong for Ollama: the model with `reasoning: true`, the thinking level (`low` for glm-5.3-flash), and the compat flags (`supportsDeveloperRole: false` for Ollama).
+The defaults are wrong for Ollama. So each call in the config states three things. The model, with `reasoning: true`. The thinking level (`low` for glm-5.3-flash). The compat flags (`supportsDeveloperRole: false`).
 
 ## Why
 

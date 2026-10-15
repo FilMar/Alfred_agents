@@ -5,7 +5,7 @@ sources: [skills/annibale/SKILL.md@cac8a87, skills/annibale/references/tdd-codin
 
 ## Decision
 
-Every check or verification in a `th` workflow runs as the controller that launched the run, a deterministic script, or the user — never as an action a `th` member takes on itself, and never as a check delegated to a different member. A member's job stops at producing output; confirming that output is correct is never the member's own call.
+Every check or verification in a `th` workflow runs as the controller that launched the run, a deterministic script, or the user. A check is never an action the run takes on itself, and never a check delegated to another run. A member's job stops at producing output; confirming that output is correct is never the member's own call.
 
 This constrains every workflow built on `th`: it takes the simplest shape — act, stop, hand back — with verification external and visible. It was first written into `annibale` on 2026-09-11. On 2026-10-14 `annibale` became a debate runner and lost its TDD flow (`tdd-coding.md@cac8a87`); the rule now lives in the scripts that drive `th`, such as the one in [skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role](skill_ritchie_step_six_runs_th_through_one_script_with_a_fixed_model_per_role).
 

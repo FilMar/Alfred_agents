@@ -7,8 +7,7 @@ sources: [conversation, skills/ritchie/SKILL.md]
 
 `SPEC.md` and `REVIEW.md` are scaffolding, not artifacts. They live in
 the project root and are committed with the branch during the run. On approval, with a project
-`.wiki/`, omero files the decision as a wiki page and the pair is
-removed from the tree; git keeps the raw text in the branch history.
+`.wiki/`, omero files the decision as a wiki page and the pair is removed from the tree. Git keeps the raw text in the branch history.
 Without a `.wiki/` the pair stays: it is the only record.
 
 ## Why
