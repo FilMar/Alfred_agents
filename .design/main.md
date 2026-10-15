@@ -17,10 +17,9 @@
 
 - Io do un link o un tema, ottengo dati con la fonte in una visualizzazione semplice.
 - Io devo scegliere tra opzioni con compromessi, ottengo più punti di vista indipendenti e una sintesi con le tensioni.
-- Io cambio sessione, ottengo che ciò che ho deciso e imparato non si perde.
 
 ## Sotto-progetti
 
 - [sviluppo](sviluppo.md): dall'idea al prototipo o al codice che resta, fino al lavoro su GitHub.
 - analisi: da un link o un tema a dati con la fonte. [da discutere]
-- memoria: ciò che si ricorda tra una sessione e l'altra. [da discutere]
+- [memory](memory.md): ciò che gli agenti sanno e ricordano tra una sessione e l'altra.

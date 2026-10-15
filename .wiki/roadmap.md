@@ -45,7 +45,7 @@ One line per task. The reason and the plan live in the linked decision.
 Each line is one sub-project of `.design/main.md`, to be discussed with Piano.
 
 - [ ] analisi: discuss `.design/analisi.md`. `polo` reads sources. Missing: the search for official and independent sources, the chart (`atlante` is in git), and the stop when there are none. The expense CSV (`.bank.csv` in the `essays` repo, read with `xan`) is a case too, and the old `draghi` is in git. Decide if it runs on request only or with a monthly summary.
-- [ ] memoria: discuss `.design/memoria.md` and finish the memory. The open work is in the `memory` section above.
+- [ ] memory: discuss `.design/memory.md` and finish the memory. The open work is in the `memory` section above.
 
 ### skills
 
