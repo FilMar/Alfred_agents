@@ -15,14 +15,12 @@
 
 ## Casi d'uso
 
-- Io ho un'idea per un progetto, ottengo domande che mi costringono a decidere cosa voglio, come farlo e perché.
-- Io decido di costruire, ottengo un prototipo veloce per vedere un concetto, o codice che resta e di cui conosco l'architettura.
 - Io do un link o un tema, ottengo dati con la fonte in una visualizzazione semplice.
 - Io devo scegliere tra opzioni con compromessi, ottengo più punti di vista indipendenti e una sintesi con le tensioni.
 - Io cambio sessione, ottengo che ciò che ho deciso e imparato non si perde.
 
 ## Sotto-progetti
 
-- sviluppo: dall'idea al prototipo o al codice che resta, fino al lavoro su GitHub. [da discutere]
+- [sviluppo](sviluppo.md): dall'idea al prototipo o al codice che resta, fino al lavoro su GitHub.
 - analisi: da un link o un tema a dati con la fonte. [da discutere]
 - memoria: ciò che si ricorda tra una sessione e l'altra. [da discutere]
