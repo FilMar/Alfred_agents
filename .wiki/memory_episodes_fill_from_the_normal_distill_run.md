@@ -1,6 +1,6 @@
 ---
 tags: [memory, episodic, td, tl, backfill]
-sources: [.design/memory.md@0e0a366, conversation]
+sources: [.design/memory.md@0e0a366, SPEC.md@6b044c8, REVIEW.md@6b044c8, tools/td/src/distiller.ts, conversation]
 ---
 
 ## Decision
@@ -17,7 +17,9 @@ Figures from 2026-10-16: 313 sessions in `tl`, 238 with exchanges in the queue, 
 
 A rebuild mode is needed anyway when the prompt of phase 0 improves, because the index is derived. That mode will fill the gap as well. Building it now for 112 exchanges is not worth it.
 
-Open: does `td` in shadow mode write episodes? Decide when it is built.
+In shadow mode `td` writes no episode, as it writes no note and no rule. In active mode a failed write leaves the session open in the queue, and the next run writes it again. The episode ids do not change, so the second write gives the same set.
+
+The code is tested on stubs only. No real session has gone through it yet.
 
 ## Cross-references
 

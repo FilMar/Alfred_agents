@@ -19,8 +19,7 @@ One line per task. The reason and the plan live in the linked decision.
 
 - [ ] Learn from outcomes: procedural memory for hats and skills. [detail](memory_procedural_memory_grows_on_data)
 - [ ] Per-hat metrics, aggregated over time. [detail](memory_procedural_memory_grows_on_data)
-- [ ] `tl`: an episodes module with the struct, the embedding with `from` and `to`, and the write functions. [detail](memory_episode_index_belongs_to_tl)
-- [ ] `td`: phase 0 passes the episodes to `tl` on every run. Decide if shadow mode writes them. [detail](memory_episodes_fill_from_the_normal_distill_run)
+- [ ] Run `td distill --active` on one real session and look at `tl_episodes` in the real Qdrant. The code is tested on stubs only. [detail](memory_episodes_fill_from_the_normal_distill_run)
 - [ ] `tl search "<query>"` returns episodes with date and summary. `tl show` opens the exchanges. [detail](memory_episode_summaries_are_a_derived_index_over_tl)
 - [ ] A line in `alfred.md` and a `ti` rule that send the agent to `tl search`, once it exists. [detail](memory_agent_finds_episodes_through_a_ti_rule_and_alfred)
 - [ ] A rebuild mode for the episode index, when the prompt of phase 0 changes. [detail](memory_episodes_fill_from_the_normal_distill_run)
