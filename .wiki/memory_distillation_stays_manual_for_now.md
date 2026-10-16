@@ -9,6 +9,8 @@ Distillation is started by hand. No timer runs it. The user runs `td distill --a
 
 An automatic run waits for a trigger. None is chosen. A reminder at session start, that prints the size of `tl pending`, is the missing piece of the manual flow.
 
+The automatic run comes after phase 0 writes the episodes: [memory_episodes_fill_from_the_normal_distill_run](memory_episodes_fill_from_the_normal_distill_run).
+
 ## Why
 
 An automatic service adds cost and risk and no new capability while the manual flow works. These problems came up when it was first designed on `th run`, and `td` has solved them:

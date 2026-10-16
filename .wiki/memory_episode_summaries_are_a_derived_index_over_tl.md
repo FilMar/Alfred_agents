@@ -1,6 +1,6 @@
 ---
 tags: [memory, tl, episodic, distiller, index]
-sources: [spikes/2026-10-01-extraction-hats/main.py (deleted), spikes/2026-10-01-extraction-hats/extract_v3.jsonl (deleted), tools/tl/README.md]
+sources: [.design/memory.md@0e0a366, spikes/2026-10-01-extraction-hats/main.py (deleted), spikes/2026-10-01-extraction-hats/extract_v3.jsonl (deleted), tools/tl/README.md]
 ---
 
 ## Decision
@@ -11,12 +11,12 @@ An episode is a run of consecutive exchanges about one problem. Each one has a s
 
 The shape, a design target with no code yet:
 
-- A Qdrant collection, `tl_episodes`, on the Rasp next to `tb` and `ti`. The vector is the summary, embedded with the same nomic model. The payload holds `session`, `exchanges[]`, `summary`, `model`, `prompt_version` and `created`.
+- A Qdrant collection, `tl_episodes`, on the Rasp next to `tb` and `ti`. The vector is the summary, embedded with the same nomic model. The payload holds `session`, `exchanges[]`, `from`, `to`, `summary`, `model`, `prompt_version` and `created`. `from` and `to` are the times of the first and the last exchange. `created` is when the summary was made.
 - `tl` stays the only source of truth. An episode holds pointers to exchanges, never their text.
 - The index is derived. It can be dropped and rebuilt from `tl`. A better phase 0 prompt means a full rebuild.
 - `tl search "<query>"` returns episodes. `tl show` opens the exchanges behind them.
 
-It is built after the extraction pipeline is stable. Phase 0 is shared, so the index then costs one embedding per episode.
+Phase 0 of the distiller writes it, so the index costs one embedding per episode. It is built before the automatic run: see [memory_episodes_fill_from_the_normal_distill_run](memory_episodes_fill_from_the_normal_distill_run). `tl` owns it: see [memory_episode_index_belongs_to_tl](memory_episode_index_belongs_to_tl).
 
 ## Why
 
@@ -24,11 +24,13 @@ It is built after the extraction pipeline is stable. Phase 0 is shared, so the i
 
 The summaries hold up. On session `684fbf7a` (38 exchanges), glm-5.3-flash found 9 episodes in one call, and all 9 summaries match the session. One stops early because the split cut the story in two. That is an extraction problem, not an index problem.
 
+`created` is the time of the summary, so a session read weeks later would show today's date. `from` and `to` give the date of the work itself.
+
 They hold project terms such as table names. That is right for an index, because you search it with those names. It is wrong for a `tb` note, so the summaries are not notes. `tl` never distils, so a summary does not go in its tables. It lives beside them, marked with the model and the prompt that made it.
 
 Lost: Hindsight as the engine (it drops the raw text and overlaps `tb`), and a table in the `tl` SQLite with `sqlite-vec` (a second retrieval stack next to Qdrant).
 
-A later use, not decided: the session-start hook could query the last episodes of the current project.
+The agent finds episodes with `tl search` when it needs them: see [memory_episodes_are_neither_pruned_nor_injected](memory_episodes_are_neither_pruned_nor_injected).
 
 ## Cross-references
 

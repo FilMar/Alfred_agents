@@ -102,6 +102,10 @@ updated: 2026-10-16
 | [memory_search_prints_text_blocks_by_default](memory_search_prints_text_blocks_by_default) | search prints text blocks; --json and meta give the rest |
 | [memory_hook_injects_only_the_text_the_agent_uses](memory_hook_injects_only_the_text_the_agent_uses) | The hook injects id, what and why; ti injects only the actions |
 | [memory_ti_ids_accept_a_unique_prefix](memory_ti_ids_accept_a_unique_prefix) | ti meta, delete and append-do take a unique id prefix |
+| [memory_episode_index_belongs_to_tl](memory_episode_index_belongs_to_tl) | The episode collection belongs to tl; td passes the text |
+| [memory_episodes_are_neither_pruned_nor_injected](memory_episodes_are_neither_pruned_nor_injected) | Episodes are never pruned and never injected |
+| [memory_agent_finds_episodes_through_a_ti_rule_and_alfred](memory_agent_finds_episodes_through_a_ti_rule_and_alfred) | A line in alfred.md and a ti rule send the agent to tl search |
+| [memory_episodes_fill_from_the_normal_distill_run](memory_episodes_fill_from_the_normal_distill_run) | Phase 0 of distill fills the episode index |
 
 ## skill
 
