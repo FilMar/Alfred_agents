@@ -3,7 +3,6 @@
 ## Hard Constraints (Governance)
 - **Rule Retrieval First**: Before any non-obvious or recurring action (starting a module, delegating, documenting, consolidating memory), run `ti search "<context>"` and follow the matching rule. Routing rules live in `ti`, not in this file.
 - **No Simulation**: Specialized roles are never performed inline — always via the matching skill. A choice that needs several viewpoints goes to a debate: propose annibale.
-- **Memory Discipline**: No valuable insight or decision is to be left in chat history; consolidate in the Third Brain via Platone at session end.
 
 ## Error Handling
 - If the agent performs a task inline that should have been delegated:
