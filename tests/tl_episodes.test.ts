@@ -6,7 +6,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
-  dayOf,
+  dayOfTime,
   episodeBlock,
   episodeId,
   episodeOf,
@@ -118,24 +118,24 @@ describe("episodeId", () => {
   });
 });
 
-describe("dayOf", () => {
-  test("dayOf: the timestamp is ISO-8601 UTC", () => {
-    expect(() => dayOf("not a timestamp")).toThrow(/dayOf: the timestamp is ISO-8601 UTC/);
+describe("dayOfTime", () => {
+  test("dayOfTime: the timestamp is ISO-8601 UTC", () => {
+    expect(() => dayOfTime("not a timestamp")).toThrow(/dayOfTime: the timestamp is ISO-8601 UTC/);
   });
 
-  test("dayOf: the day has the shape of a day", () => {
-    // A bare call: the postcondition asserts inside dayOf are the oracle.
-    dayOf(T1);
+  test("dayOfTime: the day has the shape of a day", () => {
+    // A bare call: the postcondition asserts inside dayOfTime are the oracle.
+    dayOfTime(T1);
   });
 
-  test("dayOf: the day is the start of the timestamp", () => {
-    dayOf("2026-12-31T23:59:59.999Z");
+  test("dayOfTime: the day is the start of the timestamp", () => {
+    dayOfTime("2026-12-31T23:59:59.999Z");
   });
 
   test("is the day of the timestamp, without the hour", () => {
-    expect(dayOf(T1)).toBe("2026-09-30");
-    expect(dayOf("2026-01-01T00:00:00.000Z")).toBe("2026-01-01");
-    expect(dayOf("2026-12-31T23:59:59.999Z")).toBe("2026-12-31");
+    expect(dayOfTime(T1)).toBe("2026-09-30");
+    expect(dayOfTime("2026-01-01T00:00:00.000Z")).toBe("2026-01-01");
+    expect(dayOfTime("2026-12-31T23:59:59.999Z")).toBe("2026-12-31");
   });
 });
 

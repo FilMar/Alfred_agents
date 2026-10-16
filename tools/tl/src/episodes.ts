@@ -53,12 +53,12 @@ export function episodeId(session: string, firstExchange: string): string {
   return result;
 }
 
-export function dayOf(timestamp: string): string {
-  assert(TIMESTAMP_SHAPE.test(timestamp), "dayOf: the timestamp is ISO-8601 UTC");
+export function dayOfTime(timestamp: string): string {
+  assert(TIMESTAMP_SHAPE.test(timestamp), "dayOfTime: the timestamp is ISO-8601 UTC");
   let result = "";
   result = timestamp.slice(0, 10);
-  assert(DAY_SHAPE.test(result), "dayOf: the day has the shape of a day");
-  assert(timestamp.startsWith(result), "dayOf: the day is the start of the timestamp");
+  assert(DAY_SHAPE.test(result), "dayOfTime: the day has the shape of a day");
+  assert(timestamp.startsWith(result), "dayOfTime: the day is the start of the timestamp");
   return result;
 }
 
@@ -86,7 +86,7 @@ export function episodeOf(input: EpisodeInput): Episode {
 export function episodeBlock(episode: EpisodeHead): string {
   assert(isNonBlank(episode.summary), "episodeBlock: the summary is not blank");
   let result = "";
-  result = `${BLOCK_MARK}${shortId(episode.id)} ${dayOf(episode.from)}\n${episode.summary}`;
+  result = `${BLOCK_MARK}${shortId(episode.id)} ${dayOfTime(episode.from)}\n${episode.summary}`;
   assert(opensDatedBlock(result, episode.id, episode.from), "episodeBlock: the block opens with the short id and the day");
   assert(result.endsWith(episode.summary), "episodeBlock: the block ends with the summary");
   assert(lineCountAtLeast(result, 2), "episodeBlock: the header and the summary each start a line");

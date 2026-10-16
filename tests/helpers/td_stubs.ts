@@ -46,6 +46,9 @@ function matches(payload: Record<string, unknown>, id: string, filter: any): boo
     }
     const raw = payload[c.key];
     const values = Array.isArray(raw) ? raw : [raw];
+    if (c.range) {
+      return values.some((v) => typeof v === "string" && (c.range.gte === undefined || v >= c.range.gte) && (c.range.lte === undefined || v <= c.range.lte) && (c.range.gt === undefined || v > c.range.gt) && (c.range.lt === undefined || v < c.range.lt));
+    }
     if (c.match?.any) return values.some((v) => c.match.any.includes(v));
     if (c.match && "value" in c.match) return values.includes(c.match.value);
     return true;

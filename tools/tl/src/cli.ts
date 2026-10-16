@@ -8,7 +8,10 @@ import * as client from "./client.js";
 import { ingestAll, ingestSession, ingestTranscript } from "./ingest.js";
 import { dayOf, HARNESSES, sumBy, TIMESTAMP_SHAPE } from "./types.js";
 import type { Exchange } from "./types.js";
-import { die, errorMessage, out } from "../../common/cli.js";
+import { die, errorMessage, out, outText } from "../../common/cli.js";
+import { blocksOf } from "../../common/render.js";
+import { episodeById, searchEpisodes } from "./episode_store.js";
+import { DAY_SHAPE, episodeBlock } from "./episodes.js";
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
 
@@ -57,6 +60,48 @@ program
     }
     try {
       out(await client.fetchSessions({ harness: opts.harness, limit: parseInt(opts.limit, 10) }));
+    } catch (err) {
+      die(errorMessage(err));
+    }
+  });
+
+// ─── search ───────────────────────────────────────────────────────────────────
+
+program
+  .command("search <query>")
+  .description("Search the episodes by meaning")
+  .option("--limit <n>", "Maximum number of results", "10")
+  .option("--min-score <n>", "Minimum score to keep a result", "0.35")
+  .option("--since <day>", "Only episodes that end on or after this day (YYYY-MM-DD)")
+  .option("--until <day>", "Only episodes that begin on or before this day (YYYY-MM-DD)")
+  .option("--json", "Print the full results as JSON instead of text blocks")
+  .action(async (query: string, opts) => {
+    const limit = parseInt(opts.limit, 10);
+    const minScore = parseFloat(opts.minScore);
+    if (!Number.isInteger(limit) || limit < 1) die("--limit must be a positive integer.");
+    if (!Number.isFinite(minScore)) die("--min-score must be a number.");
+    for (const [flag, day] of [["--since", opts.since], ["--until", opts.until]] as const) {
+      if (day !== undefined && !DAY_SHAPE.test(day)) die(`${flag} must be a day like 2026-09-30.`);
+    }
+    const period = { since: opts.since ?? null, until: opts.until ?? null };
+    if (period.since !== null && period.until !== null && period.since > period.until) die("--since is after --until.");
+    try {
+      const hits = await searchEpisodes(query, { limit, minScore, period });
+      if (opts.json) out(hits);
+      else outText(blocksOf(hits.map((hit) => episodeBlock(hit.episode))));
+    } catch (err) {
+      die(errorMessage(err));
+    }
+  });
+
+// ─── episode ──────────────────────────────────────────────────────────────────
+
+program
+  .command("episode <id>")
+  .description("Print the whole episode as JSON. Accepts a full id or a unique prefix.")
+  .action(async (id: string) => {
+    try {
+      out(await episodeById(id));
     } catch (err) {
       die(errorMessage(err));
     }
