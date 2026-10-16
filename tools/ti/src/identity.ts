@@ -1,4 +1,7 @@
 import { embedDocument, embedQuery, EMBED_MODEL } from "../../tb/src/infra.js";
+import { NOTE_ID_SHAPE } from "../../tb/src/qdrant.js";
+import { matchPrefix } from "../../tb/src/types.js";
+import { assert } from "../../common/contract.js";
 import * as qdrant from "./qdrant.js";
 import type { IdentityEntry, SearchOptions } from "./types.js";
 
@@ -129,4 +132,32 @@ export async function appendDo(id: string, doText: string): Promise<IdentityEntr
     do: updatedDo,
     tags: existingEntry.tags,
   };
+}
+
+const ID_CANDIDATES_SHOWN = 5;
+
+/** Resolves a full id, or the one id that starts with `prefix`. */
+export async function resolveEntryId(idOrPrefix: string): Promise<string> {
+  assert(idOrPrefix.trim().length > 0, "resolveEntryId: the id is not blank");
+  if (NOTE_ID_SHAPE.test(idOrPrefix)) return idOrPrefix;
+
+  const matches = matchPrefix(idOrPrefix, (await listEntries()).map((entry) => entry.id));
+  if (matches.length === 0) throw new Error(`No rule id starts with "${idOrPrefix}"`);
+  if (matches.length > 1) {
+    const shown = matches.slice(0, ID_CANDIDATES_SHOWN).join(", ");
+    throw new Error(`Ambiguous id "${idOrPrefix}": ${matches.length} rules match (${shown})`);
+  }
+
+  assert(NOTE_ID_SHAPE.test(matches[0]), "resolveEntryId: a resolved id is a full id");
+  return matches[0];
+}
+
+/** Returns the whole rule for a full id or the one prefix that matches it. */
+export async function entryById(idOrPrefix: string): Promise<IdentityEntry> {
+  const id = await resolveEntryId(idOrPrefix);
+  await qdrant.ensureCollection();
+  const res = await qdrant.getPointById(id);
+  if (!res.result) throw new Error(`No rule found with id: ${id}`);
+  assert(res.result.id === id, "entryById: the rule found carries the id asked");
+  return { id, vector: res.result.vector ?? [], ...res.result.payload };
 }

@@ -15,7 +15,8 @@ Call the `tb` CLI directly. Never wrap it in another layer.
 ## Available commands
 
 ```bash
-tb search "<query>" --min-score <n> [--limit <n>] [--depth <n>] [--related-limit <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--evidence-only] [--include-hubs]
+tb search "<query>" --json --min-score <n> [--limit <n>] [--depth <n>] [--related-limit <n>] [--hybrid] [--tags <tag>] [--kind <kind>] [--evidence-only] [--include-hubs]
+tb meta <id>                     # the whole note as JSON; <id> is a full id or the 8-character id from a text block
 tb browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
 tb random                        # random note — for unguided lateral exploration
 tb tags                          # list tags by frequency — maps the conceptual territory
@@ -26,7 +27,7 @@ is omitted.
 
 ### Output format
 
-- **`tb search`** → array of objects `{ note, score, via, citation }`. `via` is `search` for a note the query matched and `related` for one reached through an edge; only a match carries a `citation`. Both scores are the same quantity, the cosine against the query. The note fields (`what`, `why`, `tags`, `kind`, `refs`, `backrefs`) are **nested under `.note`**, not at the top level.
+- **`tb search`** prints text blocks (`-- <id8>`, then `what`, then `why`) when called without `--json`. With `--json` it prints an array of objects `{ note, score, via, citation }`. `via` is `search` for a note the query matched and `related` for one reached through an edge; only a match carries a `citation`. Both scores are the same quantity, the cosine against the query. The note fields (`what`, `why`, `tags`, `kind`, `refs`, `backrefs`) are **nested under `.note`**, not at the top level.
 - **`tb browse`** and **`tb random`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
 - **`tb tags`** → array of `{ value, count }` ordered by frequency.
 

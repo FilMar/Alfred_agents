@@ -12,44 +12,12 @@ export default function (pi: ExtensionAPI): void {
 
     let context = "";
 
-    // Third Identity results
     if (tiResult.status === "fulfilled" && tiResult.value.trim()) {
-      try {
-        const tiData = JSON.parse(tiResult.value);
-        const tiFormatted = tiData
-          .slice(0, 2)
-          .map((r: { if?: string; do?: string; tags?: string[] }) => {
-            const ifPart = r.if || "—";
-            const doPart = r.do || "—";
-            const tags = r.tags?.length ? `\nTags: ${r.tags.join(", ")}` : "";
-            return `**If**: ${ifPart}\n**Do**: ${doPart}${tags}`;
-          })
-          .join("\n\n");
-        context += `## Third Identity (ti) matches\n\n${tiFormatted}\n\n`;
-      } catch {
-        context += `## Third Identity (ti) matches\n\n${tiResult.value.trim()}\n\n`;
-      }
+      context += `## Third Identity (ti) matches\n\n${tiResult.value.trim()}\n\n`;
     }
 
-    // Third Brain results
     if (tbResult.status === "fulfilled" && tbResult.value.trim()) {
-      try {
-        const tbData = JSON.parse(tbResult.value);
-        const tbFormatted = tbData
-          .slice(0, 2)
-          .map((r: { note?: { what?: string; why?: string; tags?: string[]; kind?: string }; what?: string; why?: string; kind?: string; via?: string }) => {
-            const what = r.note?.what || r.what || "—";
-            const why = r.note?.why || r.why || "—";
-            const tags = r.note?.tags?.length ? `\nTags: ${r.note.tags.join(", ")}` : "";
-            const kind = r.note?.kind || r.kind ? `\nKind: ${r.note?.kind || r.kind}` : "";
-            const via = r.via === "related" ? "\nReached through an edge, not matched by the prompt" : "";
-            return `**What**: ${what}\n**Why**: ${why}${tags}${kind}${via}`;
-          })
-          .join("\n\n");
-        context += `## Third Brain (tb) matches\n\n${tbFormatted}`;
-      } catch {
-        context += `## Third Brain (tb) matches\n\n${tbResult.value.trim()}`;
-      }
+      context += `## Third Brain (tb) matches\n\n${tbResult.value.trim()}`;
     }
 
     if (!context.trim()) return;
@@ -69,6 +37,11 @@ export default function (pi: ExtensionAPI): void {
 // The cutoff belongs to the model: on nomic-embed-text-v2-moe a real prompt tops out
 // near 0.53 and an off-topic one never passes 0.25. The old 0.8 fired on no prompt at all.
 const HOOK_MIN_SCORE = 0.5;
+
+// Eight characters are enough: tb and ti accept a unique prefix of an id.
+function shortId(id: string | undefined): string {
+  return (id ?? "").slice(0, 8);
+}
 
 async function execSearch(
   cmd: string,

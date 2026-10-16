@@ -47,7 +47,7 @@ Search first. Read the rules that come back, not only their scores.
 
 ```bash
 ti list                                            # once per window: the tag vocabulary
-ti search "<draft context>" --limit 5 --min-score 0.5
+ti search "<draft context>" --json --limit 5 --min-score 0.5
 ```
 
 For each close rule, decide:

@@ -188,6 +188,16 @@ export async function resolveNoteId(idOrPrefix: string): Promise<string> {
   return matches[0];
 }
 
+/** Returns the whole note for a full id or the one prefix that matches it. */
+export async function noteById(idOrPrefix: string): Promise<Note> {
+  assert(idOrPrefix.trim().length > 0, "noteById: the id is not blank");
+  const id = await resolveNoteId(idOrPrefix);
+  const found = await getByIds([id]);
+  if (found.length === 0) throw new Error(`Note not found: ${id}`);
+  assert(found[0].id === id, "noteById: the note found carries the id asked");
+  return found[0];
+}
+
 export interface DeleteSummary {
   id: string;
   deleted: true;

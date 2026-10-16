@@ -4,7 +4,8 @@ import { Command } from "commander";
 import { checkHealth, EMBED_MODEL } from "../../tb/src/infra.js";
 import * as identity from "./identity.js";
 import { serveApi, API_PORT } from "./api.js";
-import { collect, die, errorMessage, out } from "../../common/cli.js";
+import { collect, die, errorMessage, out, outText } from "../../common/cli.js";
+import { blocksOf, ruleBlock, ruleView } from "../../common/render.js";
 import { normalizeTags } from "../../common/tags.js";
 
 
@@ -57,6 +58,7 @@ program
   .option("--limit <n>", "Maximum number of results", "10")
   .option("--tags <tag>", "Filter by tag (repeatable)", collect, [] as string[])
   .option("--min-score <n>", "Minimum similarity score (0-1) to keep a result")
+  .option("--json", "Print the full results as JSON instead of text blocks")
   .action(async (query: string, opts) => {
     await requireServices({ needsEmbedding: true });
     const results = await identity.searchEntries(query, {
@@ -64,7 +66,16 @@ program
       tags: opts.tags.length ? normalizeTags(opts.tags) : undefined,
       min_score: opts.minScore !== undefined ? parseFloat(opts.minScore) : undefined,
     });
-    out(results);
+    if (opts.json) out(results.map(ruleView));
+    else outText(blocksOf(results.map(ruleBlock)));
+  });
+
+program
+  .command("meta <id>")
+  .description("Print the whole rule as JSON, without the vector. Accepts a full id or a unique prefix.")
+  .action(async (id: string) => {
+    await requireServices({ needsEmbedding: false });
+    out(ruleView(await identity.entryById(id)));
   });
 
 program
@@ -82,8 +93,9 @@ program
   .description("Remove a rule by ID")
   .action(async (id: string) => {
     await requireServices({ needsEmbedding: false });
-    await identity.deleteEntry(id);
-    out({ id, deleted: true });
+    const full = await identity.resolveEntryId(id);
+    await identity.deleteEntry(full);
+    out({ id: full, deleted: true });
   });
 
 program
@@ -92,7 +104,7 @@ program
   .requiredOption("--do <string>", "Action to append")
   .action(async (id: string, opts) => {
     await requireServices({ needsEmbedding: false });
-    const entry = await identity.appendDo(id, opts.do);
+    const entry = await identity.appendDo(await identity.resolveEntryId(id), opts.do);
     out(entry);
   });
 

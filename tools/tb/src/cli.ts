@@ -7,13 +7,14 @@ import { fileURLToPath } from "node:url";
 
 import { checkHealth, EMBED_MODEL } from "./infra.js";
 import { serveApi, API_PORT } from "./api.js";
-import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId, markArchived, clearArchived } from "./notes.js";
+import { noteById, createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId, markArchived, clearArchived } from "./notes.js";
 import { getByIds } from "./qdrant.js";
 import { refineReport, COUNTERS_START, REFINE_NOTES_LIMIT } from "./refine.js";
 import type { NoteType, SearchOptions, Link } from "./types.js";
 import { ContractError } from "../../common/contract.js";
 import { NOTE_TYPES, isValidKind } from "./types.js";
-import { collect, die, errorMessage, out } from "../../common/cli.js";
+import { collect, die, errorMessage, out, outText } from "../../common/cli.js";
+import { blocksOf, noteBlock } from "../../common/render.js";
 import { normalizeTags } from "../../common/tags.js";
 
 // ─── Compose path ─────────────────────────────────────────────────────────────
@@ -185,6 +186,7 @@ program
   .option("--related-limit <n>", "Maximum related notes kept, best score first")
   .option("--no-hits", "Do not count this search as a hit on the returned notes")
   .option("--no-archived", "Leave out the archived notes, related ones included")
+  .option("--json", "Print the full results as JSON instead of text blocks")
   .action(async (query: string, opts) => {
     await requireServices({ needsEmbedding: true });
 
@@ -203,7 +205,23 @@ program
     };
 
     const results = await searchNotes(query, options);
-    out(results);
+    if (opts.json) out(results);
+    else outText(blocksOf(results.map((result) => noteBlock(result.note))));
+  });
+
+// ─── meta ─────────────────────────────────────────────────────────────────────
+
+program
+  .command("meta <id>")
+  .description("Print the whole note as JSON. Accepts a full id or a unique prefix.")
+  .action(async (id: string) => {
+    await requireServices({ needsEmbedding: false });
+
+    try {
+      out(await noteById(id));
+    } catch (err) {
+      die(errorMessage(err));
+    }
   });
 
 // ─── update ───────────────────────────────────────────────────────────────────

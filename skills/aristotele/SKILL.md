@@ -25,19 +25,20 @@ These roles do not change over time. You never "promote" a `dato` to `sintesi`, 
 ## Available commands
 
 ```bash
-tb search "<query>" --limit 10 --depth 1 --no-hits           # semantic search (curation: no usage hit)
-tb search "<query>" --limit 10 --depth 2 --include-hubs --no-hits  # deep cluster scan: hubs included
+tb search "<query>" --json --limit 10 --depth 1 --no-hits           # semantic search (curation: no usage hit)
+tb search "<query>" --json --limit 10 --depth 2 --include-hubs --no-hits  # deep cluster scan: hubs included
 tb browse --kind <kind> --limit 20 [--since "<ISO date>"]     # scroll notes of one kind
 tb save --what "<what>" --why "<why>" --kind <kind> [--tags <tag>] [--source "<source>"]
 tb update <id> --add-ref "<target-id>:<reason>"               # add one ref, append-only
 tb tags                                                        # list tags by frequency
+tb meta <id>                                                   # the whole note as JSON; <id> is a full id or an 8-character prefix
 ```
 
 `--tags` is repeatable: pass one `--tags <tag>` flag per tag, not a comma-separated list.
 
 ### Output format
 
-- **`tb search`** (plain or deep-scan) → array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `refs`, `backrefs` are **under `.note`**.
+- **`tb search --json`** (plain or deep-scan) → array of `{ note, score, via, citation }`. Without `--json` it prints text blocks (`-- <id8>`, `what`, `why`). The fields `what`, `why`, `kind`, `refs`, `backrefs` are **under `.note`**.
 - **`tb browse`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
 
 ---
@@ -66,7 +67,7 @@ Map existing Hubs — plain `search` does not return them:
 tb browse --kind indice --limit 50
 ```
 
-Finally use `tb search "<query>" --depth 2 --include-hubs --no-hits` (depth-2 search with hubs included) to see existing connections and already-formed clusters.
+Finally use `tb search "<query>" --json --depth 2 --include-hubs --no-hits` (depth-2 search with hubs included) to see existing connections and already-formed clusters.
 
 Look for:
 - **Dense clusters**: groups of notes with many refs/backrefs in common — Hub candidates

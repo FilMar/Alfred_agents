@@ -19,7 +19,7 @@ If a command fails or a flag is in doubt, read its `--help`.
 ## Commands
 
 ```bash
-ti search "<draft context>" --limit 5 --min-score 0.5
+ti search "<draft context>" --json --limit 5 --min-score 0.5
 ti add --if "<context>" --do "<action>" --tags <tag> --tags <tag> [--exchange "<tl exchange id>"]
 ti append-do <id> --do "<new action>"
 ti delete <id>

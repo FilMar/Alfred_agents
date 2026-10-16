@@ -44,7 +44,7 @@ describe("searchNotes without exclude_archived", () => {
 
 describe("tb search as a process", () => {
   const run = async (...extra: string[]): Promise<string[]> => {
-    const proc = Bun.spawn(["bun", "tools/tb/src/cli.ts", "search", "zebra quagga okapi savana", "--limit", "1", "--depth", "1", "--no-hits", ...extra], {
+    const proc = Bun.spawn(["bun", "tools/tb/src/cli.ts", "search", "zebra quagga okapi savana", "--limit", "1", "--depth", "1", "--no-hits", "--json", ...extra], {
       env: process.env,
       stdout: "pipe",
       stderr: "pipe",
