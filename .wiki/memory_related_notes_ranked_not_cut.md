@@ -23,7 +23,7 @@ At the cutoff of the hook, a threshold does not trim the block, it deletes it, a
 
 A cap by rank bounds the payload without that bias, and it is deterministic. The old bound, 500 visited notes, was 67% of the corpus and cut in the order Qdrant answered.
 
-`via` matters because the hook injects into a context nobody reviews. Before, `score: null` was the only marker of a related note, and the jq of the hook did not project it.
+`via` is in the `--json` output. The text of the hook has no `via`: direct notes come first and related notes follow, in the order of the result.
 
 ## Cross-references
 

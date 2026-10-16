@@ -1,7 +1,7 @@
 ---
 tags: [pi, index]
 sources: []
-updated: 2026-10-13
+updated: 2026-10-16
 ---
 
 ## roadmap
@@ -99,6 +99,9 @@ updated: 2026-10-13
 | [memory_refine_apply_runs_at_session_start](memory_refine_apply_runs_at_session_start) | tb refine --apply runs at session start, with no write cap |
 | [memory_refine_hits_measure_retrieval](memory_refine_hits_measure_retrieval) | A hit is retrieval, not use; trust measures vitality, so archive comes before delete |
 | [memory_tl_timestamps_are_iso_8601_utc_text](memory_tl_timestamps_are_iso_8601_utc_text) | Times in tl are ISO-8601 UTC text, fixed width, with the Z |
+| [memory_search_prints_text_blocks_by_default](memory_search_prints_text_blocks_by_default) | search prints text blocks; --json and meta give the rest |
+| [memory_hook_injects_only_the_text_the_agent_uses](memory_hook_injects_only_the_text_the_agent_uses) | The hook injects id, what and why; ti injects only the actions |
+| [memory_ti_ids_accept_a_unique_prefix](memory_ti_ids_accept_a_unique_prefix) | ti meta, delete and append-do take a unique id prefix |
 
 ## skill
 

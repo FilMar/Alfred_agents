@@ -16,7 +16,7 @@ MCP solves a multi-agent, multi-tenant problem. pi is single-user, single-agent 
 
 pi already has what MCP formalizes:
 
-- The CLI tools emit JSON on stdout.
+- The CLI tools emit JSON on stdout. `tb search` and `ti search` print text blocks and give the full JSON with `--json`.
 - `--help` gives discovery for about 200 tokens, against about 55k for an MCP schema dump.
 - Skills are a human-readable layer injected into the prompt. They do what MCP discovery does, cheaper.
 - `extensions/tb_ti` and `extensions/tl` are hooks that act as an MCP server welded to one client.

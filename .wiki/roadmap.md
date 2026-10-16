@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-10-14
+updated: 2026-10-16
 ---
 
 ## Tasks
@@ -39,6 +39,10 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] td phase 3: bridges between saved notes. [detail](memory_bridges_by_shape_are_judged_by_reading)
 - [ ] Run `td distill --active` on its own, with no timer (the trigger is open), then retire platone. [detail](memory_distillation_stays_manual_for_now)
 - [ ] Add a limit to the extractions API, then to `tl extractions`.
+- [ ] Run the judge and the decay spikes again after a week of use with the new hook text. Compare the 4.4% of clear dependence with the old format. [detail](memory_hook_injects_only_the_text_the_agent_uses)
+- [ ] Give `browse` and `random` the text output and `--json` of `search`, if agents read them by eye. [detail](memory_search_prints_text_blocks_by_default)
+- [ ] Use a short id of 12 characters when the notes pass 10 000. [detail](memory_search_prints_text_blocks_by_default)
+- [ ] Try `extensions/tb_ti/pi.ts` in a real pi session. It is only type-checked.
 
 ### design
 

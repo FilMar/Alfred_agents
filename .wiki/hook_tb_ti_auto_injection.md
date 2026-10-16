@@ -12,6 +12,8 @@ ti search "<prompt>" --limit 2 --min-score 0.5
 tb search "<prompt>" --depth 1 --limit 2 --min-score 0.5 --related-limit 3 --no-archived
 ```
 
+Both CLIs print text blocks, and the hook adds a header for each store and injects the text as it is. What the blocks hold is in [memory_hook_injects_only_the_text_the_agent_uses](memory_hook_injects_only_the_text_the_agent_uses).
+
 An empty result or a failed search contributes nothing; if both come up empty, no block is injected.
 
 ## Why
