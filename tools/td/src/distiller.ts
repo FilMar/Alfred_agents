@@ -15,6 +15,9 @@ import { Outcome, Recorder } from "./recorder.js";
 import type { Version } from "./registry.js";
 import { actionOf, Budget, closeExchanges, saveItem, worldFailure } from "./save.js";
 import type { Mode, SaveResult } from "./save.js";
+import { writeEpisodes } from "../../tl/src/episode_store.js";
+import { episodeOf } from "../../tl/src/episodes.js";
+import type { Episode as StoredEpisode } from "../../tl/src/episodes.js";
 import { SessionRead } from "./session.js";
 import type { Turn } from "./session.js";
 
@@ -239,9 +242,9 @@ export async function decideTarget(distiller: Distiller, target: Target, report:
   return result;
 }
 
-export async function closeSession(distiller: Distiller, read: SessionRead, split: SessionSplit, exchanges: readonly ExchangeReport[]): Promise<Readonly<{ closed: readonly string[]; failures: readonly string[] }>> {
+export async function closeSession(distiller: Distiller, read: SessionRead, split: SessionSplit, exchanges: readonly ExchangeReport[], episodeFailure: string | null = null): Promise<Readonly<{ closed: readonly string[]; failures: readonly string[] }>> {
   let result: Readonly<{ closed: readonly string[]; failures: readonly string[] }>;
-  const failures = sessionFailures(split, exchanges);
+  const failures = [...sessionFailures(split, exchanges), ...(episodeFailure === null ? [] : [`episodes: ${episodeFailure}`])];
   let closed: readonly string[] = [];
   let closeFailures: readonly string[] = failures;
   if (distiller.mode === "active" && failures.length === 0) {
@@ -262,9 +265,27 @@ export async function closeSession(distiller: Distiller, read: SessionRead, spli
   return result;
 }
 
+export function episodesToWrite(distiller: Distiller, map: SessionMap): readonly StoredEpisode[] {
+  assert(map.episodes().length > 0, "episodesToWrite: the map has an episode");
+  const model = distiller.extractor.episodes().connection().toPiModel().id;
+  const result = map.episodes().map((episode) =>
+    episodeOf({
+      session: map.session(),
+      refs: episode.turns().map((turn) => ({ id: turn.id(), timestamp: turn.timestamp() })),
+      summary: episode.summary(),
+      extractor: distiller.recorder.extractorId(),
+      model,
+      created: distiller.recorder.run(),
+    }),
+  );
+  assert(result.length === map.episodes().length, "episodesToWrite: one stored episode per episode of the map");
+  return result;
+}
+
 export async function distillSession(distiller: Distiller, read: SessionRead): Promise<SessionReport> {
   let result: SessionReport;
   const split = await SessionMap.split(read, distiller.extractor);
+  const episodeFailure = split.map !== null && distiller.mode === "active" ? await writeEpisodes(read.session(), episodesToWrite(distiller, split.map)) : null;
   const exchanges: ExchangeReport[] = [];
   const list = SessionList.empty();
   const map = split.map;
@@ -278,7 +299,7 @@ export async function distillSession(distiller: Distiller, read: SessionRead): P
       }
     }
   }
-  const closing = await closeSession(distiller, read, split, exchanges);
+  const closing = await closeSession(distiller, read, split, exchanges, episodeFailure);
   result = { read, split, exchanges, ...closing };
   assert(result.read === read, "distillSession: the report is of the session read");
   assert(result.split.map !== null || result.exchanges.length === 0, "distillSession: a failed split reports no exchange");

@@ -48,7 +48,7 @@ let seq = 0;
 let sessionNo = 0;
 function freshSession() {
   sessionNo += 1;
-  const session = `e2e-${sessionNo}`;
+  const session = `e2e00000-0000-4000-8000-${String(sessionNo).padStart(12, "0")}`;
   db.upsertSession(tl.handle, { id: session, started: NOW.toISOString() });
   const turns = ["ciao|Ciao.", `${USER}|${AGENT}`].map((pair) => {
     const [input, output] = pair.split("|");
@@ -157,6 +157,47 @@ describe("active mode on stubs", () => {
     expect(distiller.budget.spent()).toBe(1);
     expect(report.failures.some((f: string) => f.startsWith("cap:"))).toBe(true);
     expect(distilledOf(turns)).toEqual([null, null]);
+  });
+
+  test("active writes the episodes of the session with their dates and exchanges", async () => {
+    const { read, turns } = freshSession();
+    const distiller = await D.distillerOf(version, NOW, "active");
+    enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
+    await D.distillSession(distiller, read);
+    const stored = [...(memory.collections.get("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[]; from: string; to: string; summary: string });
+    const mine = stored.filter((e) => e.session === read.session());
+    expect(mine.length).toBe(1);
+    expect(mine[0]).toMatchObject({ exchanges: turns.map((t) => t.id()), from: turns[0].timestamp(), to: turns[1].timestamp(), summary: "saluto e regola sul log" });
+  });
+
+  test("shadow writes no episode", async () => {
+    const { read } = freshSession();
+    const before = memory.collections.get("tl_episodes")?.size ?? 0;
+    const distiller = await D.distillerOf(version, NOW, "shadow");
+    enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
+    await D.distillSession(distiller, read);
+    expect(memory.collections.get("tl_episodes")?.size ?? 0).toBe(before);
+  });
+
+  test("an episode store that is down is a failure and the session stays open", async () => {
+    const { read, turns } = freshSession();
+    const distiller = await D.distillerOf(version, NOW, "active");
+    enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
+    memory.failPath("/collections/tl_episodes");
+    const report = await D.distillSession(distiller, read);
+    expect(report.failures.some((f: string) => f.startsWith("episodes: "))).toBe(true);
+    expect(distilledOf(turns)).toEqual([null, null]);
+  });
+
+  test("distilling the same session again leaves the same episodes", async () => {
+    const { read } = freshSession();
+    for (let round = 0; round < 2; round++) {
+      const distiller = await D.distillerOf(version, NOW, "active");
+      enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
+      await D.distillSession(distiller, read);
+    }
+    const stored = [...(memory.collections.get("tl_episodes")?.values() ?? [])].filter((p) => (p.payload as { session: string }).session === read.session());
+    expect(stored.length).toBe(1);
   });
 
   test("a store that is down is a failure and the session stays open", async () => {

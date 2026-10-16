@@ -168,6 +168,10 @@ export class Recorder {
     return this.#s.run;
   }
 
+  extractorId(): number {
+    return this.#s.extractorId;
+  }
+
   rows(exchangeId: string, outcomes: readonly Outcome[], now: Date): NewExtraction[] {
     assert(ID_SHAPE.test(exchangeId), () => `Recorder.rows: exchangeId is an exchange id, got=${exchangeId}`);
     assert(!Number.isNaN(now.getTime()), "Recorder.rows: now is a valid date");
