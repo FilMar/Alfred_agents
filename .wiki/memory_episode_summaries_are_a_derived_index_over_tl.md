@@ -14,7 +14,7 @@ The shape:
 - A Qdrant collection, `tl_episodes`, on the Rasp next to `tb` and `ti`. The vector is the summary, embedded with the same nomic model. The payload holds `session`, `exchanges[]`, `from`, `to`, `summary`, `extractor`, `model` and `created`. `from` and `to` are the times of the first and the last exchange. `extractor` is the id of the configuration row that made the summary, and that row holds the prompt and the model. `created` is when the summary was made. The point id is the SHA-256 of `session:first exchange`, written like a `tb` note id. Writing a session replaces all of its episodes.
 - `tl` stays the only source of truth. An episode holds pointers to exchanges, never their text.
 - The index is derived. It can be dropped and rebuilt from `tl`. A better phase 0 prompt means a full rebuild.
-- `tl search "<query>"` returns episodes. `tl show` opens the exchanges behind them.
+- `tl search "<query>"` returns episodes. `tl episode <id>` opens one, and `tl show` opens an exchange of it.
 
 Phase 0 of the distiller writes it, so the index costs one embedding per episode. It is built before the automatic run: see [memory_episodes_fill_from_the_normal_distill_run](memory_episodes_fill_from_the_normal_distill_run). `tl` owns it: see [memory_episode_index_belongs_to_tl](memory_episode_index_belongs_to_tl).
 

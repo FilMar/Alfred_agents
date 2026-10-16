@@ -106,6 +106,8 @@ updated: 2026-10-16
 | [memory_episodes_are_neither_pruned_nor_injected](memory_episodes_are_neither_pruned_nor_injected) | Episodes are never pruned and never injected |
 | [memory_agent_finds_episodes_through_a_ti_rule_and_alfred](memory_agent_finds_episodes_through_a_ti_rule_and_alfred) | A line in alfred.md and a ti rule send the agent to tl search |
 | [memory_episodes_fill_from_the_normal_distill_run](memory_episodes_fill_from_the_normal_distill_run) | Phase 0 of distill fills the episode index |
+| [memory_episode_search_filters_the_period_in_qdrant](memory_episode_search_filters_the_period_in_qdrant) | tl search filters the period in Qdrant; the default score is 0.35 |
+| [memory_episode_reads_check_every_payload](memory_episode_reads_check_every_payload) | Every episode payload is checked on read; a bad one names the field |
 
 ## skill
 

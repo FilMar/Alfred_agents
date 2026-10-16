@@ -1,6 +1,6 @@
 ---
 tags: [memory, episodic, ti, alfred, routing]
-sources: [.design/memory.md@0e0a366, conversation]
+sources: [.design/memory.md@0e0a366, SPEC.md@cbce0c9, conversation]
 ---
 
 ## Decision
@@ -8,9 +8,9 @@ sources: [.design/memory.md@0e0a366, conversation]
 Two pieces tell the agent to search the episodes.
 
 - A line in `alfred.md` says that `tl search "<topic>"` finds past episodes of every project.
-- A `ti` rule gives the steps when the user asks what was done in the past. First search. Then open the exchanges with `tl show` if the summary is not enough. Give the date.
+- A `ti` rule gives the steps when the user asks what was done in the past. First search. Then open the episode with `tl episode <id>` to get its exchanges. Then read an exchange with `tl show <id>` if the summary is not enough. Give the date.
 
-Both are written after `tl search` exists.
+`tl search` and `tl episode` exist. The line and the rule are still to be written.
 
 ## Why
 

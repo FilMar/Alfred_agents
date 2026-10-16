@@ -20,8 +20,9 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] Learn from outcomes: procedural memory for hats and skills. [detail](memory_procedural_memory_grows_on_data)
 - [ ] Per-hat metrics, aggregated over time. [detail](memory_procedural_memory_grows_on_data)
 - [ ] Run `td distill --active` on one real session and look at `tl_episodes` in the real Qdrant. The code is tested on stubs only. [detail](memory_episodes_fill_from_the_normal_distill_run)
-- [ ] `tl search "<query>"` returns episodes with date and summary. `tl show` opens the exchanges. [detail](memory_episode_summaries_are_a_derived_index_over_tl)
-- [ ] A line in `alfred.md` and a `ti` rule that send the agent to `tl search`, once it exists. [detail](memory_agent_finds_episodes_through_a_ti_rule_and_alfred)
+- [ ] Check the minimum score 0.35 of `tl search` on real episodes. [detail](memory_episode_search_filters_the_period_in_qdrant)
+- [ ] Add a `datetime` payload index on `from` and `to` of `tl_episodes`, if the search gets slow. [detail](memory_episode_search_filters_the_period_in_qdrant)
+- [ ] A line in `alfred.md` and a `ti` rule that send the agent to `tl search`. [detail](memory_agent_finds_episodes_through_a_ti_rule_and_alfred)
 - [ ] A rebuild mode for the episode index, when the prompt of phase 0 changes. [detail](memory_episodes_fill_from_the_normal_distill_run)
 - [ ] td: read the proposed tags in `extractions` (24 of 293 rows have some) and pick a guard for semantic tag synonyms. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - [ ] ritchie `check_body_diff.py` reads a `return` inside a callback (a `sort` comparator) as one that skips a postcondition. Ignore returns in nested functions.

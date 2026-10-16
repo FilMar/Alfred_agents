@@ -13,7 +13,7 @@ sources: [SPEC.md@c22c073, REVIEW.md@c22c073, SPEC.md@6b044c8, tools/tl/src/epis
 
 `tools/common/render.ts` is the one module that knows the text format. The hooks call the CLI and add a header.
 
-An episode block is `-- <id8> <day>` and then the summary. The day is the day of `from` in UTC, with no hour. `tl search` will print it.
+`tl search` prints episode blocks: `-- <id8> <day>` and then the summary. The day is the day of `from` in UTC, with no hour. `--json` gives each episode with its score. `tl episode <id>` prints one whole episode as JSON.
 
 `browse`, `random`, `tags`, `list`, `refine` and the HTTP API keep their JSON output.
 
