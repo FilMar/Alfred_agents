@@ -12,6 +12,9 @@
 #   --expert "<hat>:<stance>"               one voice; repeat 2 to 5 times.
 #                                           The first colon splits hat from stance.
 #   --synth <hat>                           default blue-core
+#   --model "<hat>=<provider/id>"           model for every run under that hat,
+#                                           synthesis included. Repeat per hat.
+#                                           Without it, th picks the model.
 #   --run-id ID                             reuse to resume a crashed run
 #   --timeout SEC                           per run, default 600
 #   --dry-run                               validate without spending any call
@@ -27,6 +30,7 @@ TASK=""
 TASK_FILE=""
 HATS=()
 STANCES=()
+declare -A MODELS=()
 SYNTH="blue-core"
 RUN_ID=""
 TIMEOUT=600
@@ -35,11 +39,13 @@ MAX_EXPERTS="${DEBATE_MAX_EXPERTS:-5}"
 FLOW_BASE="${TH_FLOW_DIR:-/tmp/th-flow}"
 
 usage() {
-  sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'
   exit 2
 }
 
 die() { echo "error: $*" >&2; exit 1; }
+
+model_args() { [[ -n "${MODELS[$1]:-}" ]] && printf -- '--model\n%s\n' "${MODELS[$1]}" || true; }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -50,6 +56,12 @@ while [[ $# -gt 0 ]]; do
       [[ "$spec" == *:* ]] || die "--expert needs '<hat>:<stance>' (got: $spec)"
       HATS+=("${spec%%:*}")
       STANCES+=("${spec#*:}")
+      shift 2 ;;
+    --model)
+      spec="${2:?--model needs a value}"
+      [[ "$spec" == *=* && -n "${spec%%=*}" && -n "${spec#*=}" ]] \
+        || die "--model needs '<hat>=<provider/id>' (got: $spec)"
+      MODELS["${spec%%=*}"]="${spec#*=}"
       shift 2 ;;
     --synth)     SYNTH="${2:?--synth needs a value}"; shift 2 ;;
     --run-id)    RUN_ID="${2:?--run-id needs a value}"; shift 2 ;;
@@ -142,7 +154,8 @@ Position: one sentence.
 Why: up to five lines. Be specific.
 What would change my mind: one line."
 
-  (cd "$RUN_DIR" && th run --hat "${HATS[$i]}" --system "$system" --task "$prompt" \
+  mapfile -t model_flags < <(model_args "${HATS[$i]}")
+  (cd "$RUN_DIR" && th run --hat "${HATS[$i]}" "${model_flags[@]}" --system "$system" --task "$prompt" \
       --detach --timeout "$TIMEOUT") > "$job"
   pending_status+=("$(jq -r .status "$job")")
   pending_ids+=("$id")
@@ -194,7 +207,8 @@ Agreement: what the voices share.
 Tensions: where they truly disagree, and why. Do not flatten them.
 Recommendation: one concrete decision.
 Tripwires: what would make the recommendation wrong, as seen in the voices."
-  (cd "$RUN_DIR" && th run --hat "$SYNTH" --task "$synth_prompt" --timeout "$TIMEOUT") > "$synth_md"
+  mapfile -t model_flags < <(model_args "$SYNTH")
+  (cd "$RUN_DIR" && th run --hat "$SYNTH" "${model_flags[@]}" --task "$synth_prompt" --timeout "$TIMEOUT") > "$synth_md"
   step_done "$synth_md" || die "synthesis produced no output — resume with: --run-id $RUN_ID"
 fi
 
