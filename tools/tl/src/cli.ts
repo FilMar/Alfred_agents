@@ -71,7 +71,7 @@ program
   .command("search <query>")
   .description("Search the episodes by meaning")
   .option("--limit <n>", "Maximum number of results", "10")
-  .option("--min-score <n>", "Minimum score to keep a result", "0.35")
+  .option("--min-score <n>", "Minimum score to keep a result", "0.30")
   .option("--since <day>", "Only episodes that end on or after this day (YYYY-MM-DD)")
   .option("--until <day>", "Only episodes that begin on or before this day (YYYY-MM-DD)")
   .option("--json", "Print the full results as JSON instead of text blocks")

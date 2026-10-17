@@ -9,7 +9,7 @@ sources: [SPEC.md@cbce0c9, REVIEW.md@cbce0c9, tools/tl/src/episode_store.ts]
 
 The code checks every hit again with `periodOverlaps`. A hit outside the period is an error.
 
-The default minimum score is 0.35, the value used for `tb`.
+The default minimum score is 0.30.
 
 ## Why
 
@@ -19,7 +19,7 @@ The check was made on the `third-brain` collection, read only. A `range` on the 
 
 The filter on `tl_episodes` is not tried on the real store, because the collection does not exist yet. A payload index of type `datetime` on `from` and `to` is for later, if the search gets slow.
 
-The score 0.35 was measured on `tb` notes. Summaries are shorter than notes, so the value is to be checked on real episodes.
+The score 0.30 comes from one real episode in the store of the Rasp. Questions that make sense scored 0.35 to 0.48. Off-topic questions scored 0.12 to 0.17. The band between is empty, and 0.30 keeps a generic question that scored 0.348. One episode is a small sample, so the value is to be checked on more.
 
 ## Cross-references
 
