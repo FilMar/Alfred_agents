@@ -19,7 +19,7 @@ A rebuild mode is needed anyway when the prompt of phase 0 improves, because the
 
 In shadow mode `td` writes no episode, as it writes no note and no rule. In active mode a failed write leaves the session open in the queue, and the next run writes it again. The episode ids do not change, so the second write gives the same set.
 
-The code is tested on stubs only. No real session has gone through it yet.
+Five real sessions have gone through it, with 62 exchanges. The store of the Rasp holds 24 episodes, one of them made by hand for a test. The summaries say how each part ended, and `tl search` finds them. A run takes about 11 seconds per exchange.
 
 ## Cross-references
 

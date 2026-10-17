@@ -19,7 +19,11 @@ One line per task. The reason and the plan live in the linked decision.
 
 - [ ] Learn from outcomes: procedural memory for hats and skills. [detail](memory_procedural_memory_grows_on_data)
 - [ ] Per-hat metrics, aggregated over time. [detail](memory_procedural_memory_grows_on_data)
-- [ ] Run `td distill --active` on one real session and look at `tl_episodes` in the real Qdrant. The code is tested on stubs only. [detail](memory_episodes_fill_from_the_normal_distill_run)
+- [ ] Distil the rest of the queue in batches of about 50 items, and read each batch. About 2 000 exchanges, about 6 hours, about 3 to 5 dollars. The 33 mail sessions are held back. [detail](memory_distiller_has_no_personal_data_filter)
+- [ ] Try a vector cutoff of 0.75 before the novelty judge, on more candidates. [detail](memory_novelty_stays_with_the_judge_not_a_vector_cutoff)
+- [ ] Find the clusters of near notes in one session, for example by counting the siblings above 0.55. [detail](memory_td_session_cap_limits_one_session)
+- [ ] Scale the cap of a session with its number of exchanges. [detail](memory_td_session_cap_limits_one_session)
+- [ ] Record the exchanges that a full session skips. [detail](memory_td_session_cap_limits_one_session)
 - [ ] Check the minimum score 0.30 of `tl search` on more real episodes. [detail](memory_episode_search_filters_the_period_in_qdrant)
 - [ ] Add a `datetime` payload index on `from` and `to` of `tl_episodes`, if the search gets slow. [detail](memory_episode_search_filters_the_period_in_qdrant)
 - [ ] A line in `alfred.md` and a `ti` rule that send the agent to `tl search`. [detail](memory_agent_finds_episodes_through_a_ti_rule_and_alfred)
