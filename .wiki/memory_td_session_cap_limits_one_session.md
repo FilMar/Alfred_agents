@@ -22,7 +22,7 @@ The first real batch, 5 sessions and 62 exchanges, saved 21 items: 1, 1, 0, 7 an
 
 A cap of 4 was tried on paper and rejected: it would cut three of the five sessions, and good ideas with them. A cap of 10 cuts only the extreme one.
 
-A cap does not stop a cluster of near notes. The five notes of that theme were 0.57 to 0.67 close to each other, so no similarity cutoff finds them either: [memory_novelty_stays_with_the_judge_not_a_vector_cutoff](memory_novelty_stays_with_the_judge_not_a_vector_cutoff). The cap saves model calls and bounds a generous session.
+A cap does not stop a cluster of near notes. The five notes of that theme were 0.57 to 0.67 close to each other, so no similarity cutoff finds them either: [memory_novelty_stays_with_the_judge_not_a_vector_cutoff](memory_novelty_stays_with_the_judge_not_a_vector_cutoff). The cap saves model calls and bounds a generous session. A paraphrase inside a session is the work of [memory_td_same_session_cutoff_drops_twins](memory_td_same_session_cutoff_drops_twins).
 
 Choosing the best `n` would need all the extractions first, and the saving would be gone.
 

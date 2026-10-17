@@ -7,7 +7,7 @@ sources: [conversation, spikes/ (local, not in git)]
 
 The novelty step of the distiller stays a judgment by the model. No cosine cutoff replaces it, and a cutoff of 0.9 is not used.
 
-A cutoff may sit in front of the judge to save calls. Its value is to be fixed on more candidates. On the first 31, 0.75 caught 5 of 11 duplicates and no new note.
+A cutoff sits in front of the judge only inside one session: [memory_td_same_session_cutoff_drops_twins](memory_td_same_session_cutoff_drops_twins). Against the whole of `tb`, 0.75 caught 5 of 11 duplicates and no new note on the first 31 candidates, a sample too small to fix a value.
 
 ## Why
 

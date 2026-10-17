@@ -19,8 +19,8 @@ One line per task. The reason and the plan live in the linked decision.
 
 - [ ] Learn from outcomes: procedural memory for hats and skills. [detail](memory_procedural_memory_grows_on_data)
 - [ ] Per-hat metrics, aggregated over time. [detail](memory_procedural_memory_grows_on_data)
-- [ ] Distil the rest of the queue in batches of about 50 items, and read each batch. About 2 000 exchanges, about 6 hours, about 3 to 5 dollars. The 33 mail sessions are held back. [detail](memory_distiller_has_no_personal_data_filter)
-- [ ] Try a vector cutoff of 0.75 before the novelty judge, on more candidates. [detail](memory_novelty_stays_with_the_judge_not_a_vector_cutoff)
+- [ ] Distil the rest of the queue in batches of about 50 items, and read each batch. About 1 900 exchanges. The batch of 17 October ran at 5.5 seconds per exchange, so about 3 hours. [detail](memory_distiller_has_no_personal_data_filter)
+- [ ] Check the cutoff of 0.8 for twins in a session on more batches. Lower it to 0.72 if twins pass. [detail](memory_td_same_session_cutoff_drops_twins)
 - [ ] Find the clusters of near notes in one session, for example by counting the siblings above 0.55. [detail](memory_td_session_cap_limits_one_session)
 - [ ] Scale the cap of a session with its number of exchanges. [detail](memory_td_session_cap_limits_one_session)
 - [ ] Record the exchanges that a full session skips. [detail](memory_td_session_cap_limits_one_session)

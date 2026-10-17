@@ -111,6 +111,8 @@ updated: 2026-10-16
 | [memory_td_session_cap_limits_one_session](memory_td_session_cap_limits_one_session) | td distill --max-per-session: a maximum of items one session decides, default 10 |
 | [memory_novelty_stays_with_the_judge_not_a_vector_cutoff](memory_novelty_stays_with_the_judge_not_a_vector_cutoff) | Novelty stays with the model judge; a 0.9 cosine cutoff finds no duplicate |
 | [memory_distiller_has_no_personal_data_filter](memory_distiller_has_no_personal_data_filter) | The distiller has no personal-data filter; the memory is private to one user |
+| [memory_td_same_session_cutoff_drops_twins](memory_td_same_session_cutoff_drops_twins) | td drops a candidate that repeats an item of the session, cosine 0.8 by default |
+| [memory_td_verdicts_keep_their_kind](memory_td_verdicts_keep_their_kind) | A verdict links only items of the kind of the candidate, else it is new |
 
 ## skill
 

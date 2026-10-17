@@ -7,7 +7,9 @@ sources: [conversation, https://ollama.com/privacy]
 
 The distiller has no filter for personal data or secrets. A filter in three layers was designed and not built: a session filter before any model call, a pattern check on the candidates, and a critic question.
 
-For the first batches, sessions that read email are held back by hand. The reason is use, not privacy: they give little to remember.
+Sessions that read email are marked as distilled by hand, with the time `1970-01-01T00:00:00.000Z`. The reason is use, not privacy: they give little to remember. They are 9 sessions with 37 exchanges, and 4 debate runs of `th` with 4 exchanges. They have no episodes. Setting `distilled` back to null puts them in the queue again.
+
+The scan had marked 33 sessions. Twenty-four of them were development work with one stray email address, and they are distilled like the rest.
 
 ## Why
 
