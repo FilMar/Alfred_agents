@@ -18,8 +18,8 @@ import {
 } from "../tools/td/src/twin.ts";
 
 describe("SAME_SESSION_CUTOFF_DEFAULT", () => {
-  it("is 0.8, the default of the CLI", () => {
-    expect(SAME_SESSION_CUTOFF_DEFAULT).toBe(0.8);
+  it("is 0.75, the default of the CLI", () => {
+    expect(SAME_SESSION_CUTOFF_DEFAULT).toBe(0.75);
   });
 });
 

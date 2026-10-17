@@ -7,6 +7,8 @@ import type { SessionList, Verdict } from "./novelty.js";
 import { isCutoffOrNull, twinOf } from "./twin.js";
 import type { SessionVector } from "./twin.js";
 
+export const TWIN_REASON = "same idea as an item of this session";
+
 const vectors = new Map<string, readonly number[]>();
 
 async function vectorOf(text: string): Promise<readonly number[]> {
@@ -36,7 +38,7 @@ export async function twinVerdicts(candidates: readonly Candidate[], list: Sessi
       if (items.length > 0) {
         const twin = twinOf(await vectorOf(savedText(candidates[at])), items, cutoff);
         if (twin !== null) {
-          found.set(at, { cand: at, verdict: "duplicate", of: twin.key, adds: null, reason: "same idea as an item of this session", do: null });
+          found.set(at, { cand: at, verdict: "duplicate", of: twin.key, adds: null, reason: TWIN_REASON, do: null });
         }
       }
     }

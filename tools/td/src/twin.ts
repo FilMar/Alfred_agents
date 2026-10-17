@@ -1,6 +1,6 @@
 import { assert } from "../../common/contract.js";
 
-export const SAME_SESSION_CUTOFF_DEFAULT = 0.8;
+export const SAME_SESSION_CUTOFF_DEFAULT = 0.75;
 
 export type SessionVector = Readonly<{ key: string; vector: readonly number[] }>;
 export type Twin = Readonly<{ key: string; score: number }>;

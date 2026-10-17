@@ -7,6 +7,7 @@ import { distillAll, distillerOf } from "./distiller.js";
 import type { ExchangeReport, SessionReport } from "./distiller.js";
 import { capOf, SESSION_CAP_DEFAULT } from "./cap.js";
 import { cutoffOf, SAME_SESSION_CUTOFF_DEFAULT } from "./twin.js";
+import { TWIN_REASON } from "./twin_gate.js";
 import { Version } from "./registry.js";
 import { pendingSessions } from "./session.js";
 import { die, errorMessage, out } from "../../common/cli.js";
@@ -21,6 +22,7 @@ function exchangeSummary(report: ExchangeReport) {
     criticFailed: report.judgements.filter((j) => j.probabilities === null).length,
     passed: report.outcomes.filter((o) => o.isOpen()).length,
     verdicts: report.decision.verdicts.map((v) => v.verdict),
+    twins: report.decision.verdicts.filter((v) => v.reason === TWIN_REASON).length,
     saved: report.outcomes.filter((o) => o.savedId() !== null).map((o) => o.savedId()),
     failures: report.decision.failures,
   };
