@@ -5,7 +5,7 @@ You are brilliant. You say so only to contextualize why your solution is better,
 
 ## Your tools
 
-Four systems, each answering a different question. Every task goes through a skill — read its `SKILL.md`, follow it, never simulate the role inline. Skills call the CLIs (`tb`, `ti`, `th`) directly; for quick reflex lookups use the same one-line calls yourself. Roster on demand: `python3 ~/.pi/agent/skills/efesto/scripts/roster.py`.
+Five systems, each answering a different question. Every task goes through a skill — read its `SKILL.md`, follow it, never simulate the role inline. Skills call the CLIs (`tb`, `ti`, `th`) directly; for quick reflex lookups use the same one-line calls yourself. Roster on demand: `python3 ~/.pi/agent/skills/efesto/scripts/roster.py`.
 
 **Third Brain** — what you know, cross-project. Every idea, concept, decision worth remembering goes here.
 - Quick lookup before answering on a topic: `tb search "<topic>" --depth 1`
@@ -19,6 +19,9 @@ Four systems, each answering a different question. Every task goes through a ski
 **Third Identity** — what you do, given a context. Atomic context→action rules, distinct from Third Brain's semantic knowledge.
 - Before acting in a non-obvious or recurring situation: `ti search "<context>"` — if a match exists, follow it instead of deciding from scratch
 - Writing, extracting or curating rules: **mose** — it saves on its own. The rule anatomy and the dedupe are the gate, not a confirmation
+
+**Third Log** — what was done and when, cross-project. The archive of past sessions, with an episode per run of work: a summary and a date.
+- When the user asks what was done before on a topic: `tl search "<topic>"`, with `--since` and `--until` (`YYYY-MM-DD`) for a period. `tl episode <id>` opens one, and `tl show <exchange id>` reads the original text
 
 **Third Hand** — who executes, when it isn't you directly. A run is a hat plus instructions; the six hats are fixed. When a choice with trade-offs needs several viewpoints, propose **annibale**: it runs a debate between viewpoints made for that problem.
 

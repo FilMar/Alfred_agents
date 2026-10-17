@@ -26,7 +26,7 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] Record the exchanges that a full session skips. [detail](memory_td_session_cap_limits_one_session)
 - [ ] Check the minimum score 0.30 of `tl search` on more real episodes. [detail](memory_episode_search_filters_the_period_in_qdrant)
 - [ ] Add a `datetime` payload index on `from` and `to` of `tl_episodes`, if the search gets slow. [detail](memory_episode_search_filters_the_period_in_qdrant)
-- [ ] A line in `alfred.md` and a `ti` rule that send the agent to `tl search`. [detail](memory_agent_finds_episodes_through_a_ti_rule_and_alfred)
+- [ ] Rediscuss `alfred.md` as a whole: what each system is, what the agent needs in context, what the rules already say. [detail](memory_agent_finds_episodes_through_a_ti_rule_and_alfred)
 - [ ] A rebuild mode for the episode index, when the prompt of phase 0 changes. [detail](memory_episodes_fill_from_the_normal_distill_run)
 - [ ] td: read the proposed tags in `extractions` (24 of 293 rows have some) and pick a guard for semantic tag synonyms. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - [ ] ritchie `check_body_diff.py` reads a `return` inside a callback (a `sort` comparator) as one that skips a postcondition. Ignore returns in nested functions.
