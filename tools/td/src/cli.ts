@@ -6,6 +6,7 @@ import { ContractError } from "../../common/contract.js";
 import { distillAll, distillerOf } from "./distiller.js";
 import type { ExchangeReport, SessionReport } from "./distiller.js";
 import { capOf, SESSION_CAP_DEFAULT } from "./cap.js";
+import { cutoffOf, SAME_SESSION_CUTOFF_DEFAULT } from "./twin.js";
 import { Version } from "./registry.js";
 import { pendingSessions } from "./session.js";
 import { die, errorMessage, out } from "../../common/cli.js";
@@ -49,6 +50,7 @@ program
   .option("--active", "Save to tb and ti, and set distilled in tl")
   .option("--max-saved <n>", "Stop writing after n items in this run")
   .option("--max-per-session <n>", "Decide at most n items in one session; the rest of the session goes to no model", String(SESSION_CAP_DEFAULT))
+  .option("--same-session-cutoff <x>", "Drop a candidate whose similarity to an item already decided in the session is at least x (above 0, at most 1)", String(SAME_SESSION_CUTOFF_DEFAULT))
   .action(async (session: string | undefined, opts) => {
     try {
       const id = opts.extractor === "active" ? "active" : parseInt(opts.extractor, 10);
@@ -57,10 +59,12 @@ program
       if (maxSaved !== null && !(Number.isInteger(maxSaved) && maxSaved > 0)) die("--max-saved must be a positive integer.");
       const perSession = capOf(String(opts.maxPerSession));
       if (perSession === null) die("--max-per-session must be a positive integer.");
+      const sameSessionCutoff = cutoffOf(String(opts.sameSessionCutoff));
+      if (sameSessionCutoff === null) die("--same-session-cutoff must be a number above 0 and at most 1.");
       const version = await Version.read(id);
       if (version === null) die(`No extractor ${opts.extractor}.`);
       const sessions = session === undefined ? await pendingSessions() : [session];
-      const distiller = await distillerOf(version, new Date(), opts.active ? "active" : "shadow", maxSaved, perSession);
+      const distiller = await distillerOf(version, new Date(), opts.active ? "active" : "shadow", maxSaved, perSession, sameSessionCutoff);
       const reports = await distillAll(distiller, sessions);
       if (session !== undefined && reports.length === 0) die(`Session ${session} has no pending exchange.`);
       out({

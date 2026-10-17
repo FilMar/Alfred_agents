@@ -46,11 +46,13 @@ const version = await Version.add(extractor, null, "first", NOW);
 
 let seq = 0;
 let sessionNo = 0;
-function freshSession(count = 2) {
+function freshSession(count = 2, repeatUser = false) {
   sessionNo += 1;
   const session = `e2e00000-0000-4000-8000-${String(sessionNo).padStart(12, "0")}`;
   db.upsertSession(tl.handle, { id: session, started: NOW.toISOString() });
-  const pairs = ["ciao|Ciao.", `${USER}|${AGENT}`, ...Array.from({ length: Math.max(0, count - 2) }, (_, k) => `altro${k}|Altro${k}.`)];
+  const pairs = repeatUser
+    ? Array.from({ length: count }, () => `${USER}|${AGENT}`)
+    : ["ciao|Ciao.", `${USER}|${AGENT}`, ...Array.from({ length: Math.max(0, count - 2) }, (_, k) => `altro${k}|Altro${k}.`)];
   const turns = pairs.slice(0, Math.max(count, 2)).map((pair) => {
     const [input, output] = pair.split("|");
     seq += 1;
@@ -222,6 +224,42 @@ function verdictOf(verdict: string) {
 
 const NOTE_ONLY_JSON = JSON.stringify({ notes: [note], rules: [] });
 const SPLIT_ALL = (last: number) => `{"episodes":[{"from":0,"to":${last},"summary":"saluto e regola sul log"}]}`;
+
+describe("the same-session cutoff", () => {
+  test("a candidate that says again a saved item is a duplicate and the judge is not asked", async () => {
+    const { read, turns } = freshSession(2, true);
+    const notesBefore = notesStored().length;
+    const distiller = await D.distillerOf(version, NOW, "active", null, null, 0.8);
+    enqueue(SPLIT, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY, NOTE_ONLY_JSON, KEEPS_NOTE);
+    const report = await D.distillSession(distiller, read);
+    expect(report.failures).toEqual([]);
+    expect(model.queue.length).toBe(0);
+    expect(notesStored().length).toBe(notesBefore + 1);
+    const second = report.exchanges[1].decision.verdicts[0];
+    expect(second.verdict).toBe("duplicate");
+    expect(second.of).toBe(report.exchanges[0].decision.saves[0].savedId);
+    expect(distilledOf(turns)).toEqual([distiller.recorder.run(), distiller.recorder.run()]);
+  });
+
+  test("without a cutoff the judge is asked and the note is saved again", async () => {
+    const { read } = freshSession(2, true);
+    const notesBefore = notesStored().length;
+    const distiller = await D.distillerOf(version, NOW, "active", null, null, null);
+    enqueue(SPLIT, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY);
+    await D.distillSession(distiller, read);
+    expect(model.queue.length).toBe(0);
+    expect(notesStored().length).toBe(notesBefore + 2);
+  });
+
+  test("a twin does not take a place of the cap per session", async () => {
+    const { read } = freshSession(3, true);
+    const distiller = await D.distillerOf(version, NOW, "active", null, 2, 0.8);
+    enqueue(SPLIT_ALL(2), NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY, NOTE_ONLY_JSON, KEEPS_NOTE, NOTE_ONLY_JSON, KEEPS_NOTE);
+    const report = await D.distillSession(distiller, read);
+    expect(report.failures).toEqual([]);
+    expect(model.queue.length).toBe(0);
+  });
+});
 
 describe("the cap per session", () => {
   test("a full session sends no later exchange to the model and still closes", async () => {

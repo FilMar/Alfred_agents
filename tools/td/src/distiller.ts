@@ -19,6 +19,7 @@ import { writeEpisodes } from "../../tl/src/episode_store.js";
 import { episodeOf } from "../../tl/src/episodes.js";
 import type { Episode as StoredEpisode } from "../../tl/src/episodes.js";
 import { emptyExtraction, listWithinCap, sessionIsFull } from "./cap.js";
+import { twinVerdicts } from "./twin_gate.js";
 import { SessionRead } from "./session.js";
 import type { Turn } from "./session.js";
 
@@ -54,14 +55,15 @@ export type Distiller = Readonly<{
   mode: Mode;
   budget: Budget;
   perSession: number | null;
+  sameSessionCutoff: number | null;
 }>;
 
-export async function distillerOf(version: Version, now: Date, mode: Mode = "shadow", maxSaved: number | null = null, perSession: number | null = null): Promise<Distiller> {
+export async function distillerOf(version: Version, now: Date, mode: Mode = "shadow", maxSaved: number | null = null, perSession: number | null = null, sameSessionCutoff: number | null = null): Promise<Distiller> {
   let result: Distiller;
   const recorder = Recorder.start(version.id(), now);
   const extractor = version.extractor();
   const vocabulary = await loadVocabulary(extractor.vocabularySize());
-  result = { extractor, vocabulary, recorder, mode, budget: Budget.of(maxSaved), perSession };
+  result = { extractor, vocabulary, recorder, mode, budget: Budget.of(maxSaved), perSession, sameSessionCutoff };
   assert(result.extractor === version.extractor(), "distillerOf: the extractor is the one of the version");
   assert(result.recorder.run() === now.toISOString(), "distillerOf: the run is the time given");
   return result;
@@ -218,11 +220,13 @@ export async function decideTarget(distiller: Distiller, target: Target, report:
   let verdicts: readonly Verdict[] = [];
   let saves: readonly SaveResult[] = [];
   if (judgeables.length > 0) {
+    const twins = await twinVerdicts(judgeables.map((j) => j.candidate), list, distiller.sameSessionCutoff);
+    const rest = judgeables.map((j, at) => ({ j, at })).filter(({ at }) => !twins.has(at));
     const neighbours: Neighbour[] = [];
     let searchFailure: string | null = null;
-    for (let k = 0; k < judgeables.length && searchFailure === null; k += 1) {
+    for (let k = 0; k < rest.length && searchFailure === null; k += 1) {
       try {
-        neighbours.push(...(await neighboursOf(judgeables[k].candidate, distiller.extractor.topK())));
+        neighbours.push(...(await neighboursOf(rest[k].j.candidate, distiller.extractor.topK())));
       } catch (error) {
         searchFailure = worldFailure(error);
       }
@@ -231,13 +235,14 @@ export async function decideTarget(distiller: Distiller, target: Target, report:
       failures.push(`neighbours: ${searchFailure}`);
     } else {
       const known = knownFor(neighbours, list.items());
-      const judged = await judgeNovelty(judgeables.map((j) => j.candidate), known, distiller.extractor);
+      const judged = await judgeNovelty(rest.map((r) => r.j.candidate), known, distiller.extractor);
       answer = judged.answer;
-      verdicts = judged.verdicts;
       if (judged.answer !== null && !judged.answer.isOk()) {
+        verdicts = judged.verdicts;
         failures.push(`novelty: ${judged.answer.failure()}`);
       } else {
-        const decided = await decideItems(distiller, report.turn.id(), report.outcomes, judgeables, judged.verdicts, list);
+        verdicts = judgeables.map((_, at) => twins.get(at) ?? { ...judged.verdicts[rest.findIndex((r) => r.at === at)], cand: at });
+        const decided = await decideItems(distiller, report.turn.id(), report.outcomes, judgeables, verdicts, list);
         outcomes = decided.outcomes;
         saves = decided.saves;
         failures.push(...decided.failures);
