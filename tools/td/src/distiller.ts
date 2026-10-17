@@ -18,6 +18,7 @@ import type { Mode, SaveResult } from "./save.js";
 import { writeEpisodes } from "../../tl/src/episode_store.js";
 import { episodeOf } from "../../tl/src/episodes.js";
 import type { Episode as StoredEpisode } from "../../tl/src/episodes.js";
+import { emptyExtraction, listWithinCap, sessionIsFull } from "./cap.js";
 import { SessionRead } from "./session.js";
 import type { Turn } from "./session.js";
 
@@ -52,14 +53,15 @@ export type Distiller = Readonly<{
   recorder: Recorder;
   mode: Mode;
   budget: Budget;
+  perSession: number | null;
 }>;
 
-export async function distillerOf(version: Version, now: Date, mode: Mode = "shadow", maxSaved: number | null = null): Promise<Distiller> {
+export async function distillerOf(version: Version, now: Date, mode: Mode = "shadow", maxSaved: number | null = null, perSession: number | null = null): Promise<Distiller> {
   let result: Distiller;
   const recorder = Recorder.start(version.id(), now);
   const extractor = version.extractor();
   const vocabulary = await loadVocabulary(extractor.vocabularySize());
-  result = { extractor, vocabulary, recorder, mode, budget: Budget.of(maxSaved) };
+  result = { extractor, vocabulary, recorder, mode, budget: Budget.of(maxSaved), perSession };
   assert(result.extractor === version.extractor(), "distillerOf: the extractor is the one of the version");
   assert(result.recorder.run() === now.toISOString(), "distillerOf: the run is the time given");
   return result;
@@ -137,13 +139,19 @@ export async function decideItems(distiller: Distiller, exchangeId: string, outc
   const saves: SaveResult[] = [];
   const failures: string[] = [];
   let capped = false;
+  let skippedByCap = 0;
   for (let k = 0; k < judgeables.length; k += 1) {
     const judgeable = judgeables[k];
     const verdict = verdicts[k];
     const kind = kindOf(judgeable.candidate);
     let outcome = outcomes[judgeable.at].decided(verdict.verdict, verdict.of);
     let savedId: string | null = null;
-    if (distiller.mode === "active" && actionOf(kind, verdict.verdict) !== "nothing") {
+    const keeps = (kind === "note" && ["new", "extends", "contradicts"].includes(verdict.verdict)) || (kind === "rule" && verdict.verdict === "new");
+    const overCap = keeps && sessionIsFull(list.size(), distiller.perSession);
+    if (overCap && actionOf(kind, verdict.verdict) !== "nothing") {
+      skippedByCap += 1;
+    }
+    if (!overCap && distiller.mode === "active" && actionOf(kind, verdict.verdict) !== "nothing") {
       if (distiller.budget.take()) {
         const save = await saveItem(judgeable.candidate, verdict, exchangeId, distiller.mode);
         saves.push(save);
@@ -159,7 +167,7 @@ export async function decideItems(distiller: Distiller, exchangeId: string, outc
         capped = true;
       }
     }
-    if ((kind === "note" && ["new", "extends", "contradicts"].includes(verdict.verdict)) || (kind === "rule" && verdict.verdict === "new")) {
+    if (keeps && !overCap) {
       list.add(kind, savedText(judgeable.candidate), savedId);
     }
     decidedOutcomes[judgeable.at] = outcome;
@@ -168,7 +176,7 @@ export async function decideItems(distiller: Distiller, exchangeId: string, outc
   assert(recordsVerdicts(result.outcomes, judgeables, verdicts), "decideItems: a judgeable outcome records its verdict");
   assert(othersUnchanged(outcomes, result.outcomes, judgeables), "decideItems: any other outcome stays as it was, and none is added");
   assert(distiller.mode === "active" || savesNothing(result), "decideItems: shadow saves nothing");
-  assert(distiller.mode === "shadow" || result.saves.length === writeCount(judgeables, verdicts) || result.failures.length > 0, "decideItems: every write is saved, or a failure says why not");
+  assert(distiller.mode === "shadow" || result.saves.length + skippedByCap === writeCount(judgeables, verdicts) || result.failures.length > 0, "decideItems: every write is saved, held back by the cap, or a failure says why not");
   return result;
 }
 
@@ -282,6 +290,13 @@ export function episodesToWrite(distiller: Distiller, map: SessionMap): readonly
   return result;
 }
 
+export function skippedReport(target: Target): ExchangeReport {
+  const result: ExchangeReport = { turn: targetTurn(target), extraction: emptyExtraction(), judgements: [], outcomes: [], decision: UNDECIDED };
+  assert(result.turn === targetTurn(target), "skippedReport: the report is of the target turn");
+  assert(recordsNothing(result), "skippedReport: a skipped exchange judges and records nothing");
+  return result;
+}
+
 export async function distillSession(distiller: Distiller, read: SessionRead): Promise<SessionReport> {
   let result: SessionReport;
   const split = await SessionMap.split(read, distiller.extractor);
@@ -293,7 +308,9 @@ export async function distillSession(distiller: Distiller, read: SessionRead): P
     for (const episode of map.episodes()) {
       for (let index = 0; index < episode.turns().length; index++) {
         const target = targetOf(map, episode, index);
-        const report = await decideTarget(distiller, target, await distillTarget(distiller, target), list);
+        const report = sessionIsFull(list.size(), distiller.perSession)
+          ? skippedReport(target)
+          : await decideTarget(distiller, target, await distillTarget(distiller, target), list);
         await distiller.recorder.write(report.turn.id(), report.outcomes);
         exchanges.push(report);
       }
@@ -302,6 +319,7 @@ export async function distillSession(distiller: Distiller, read: SessionRead): P
   const closing = await closeSession(distiller, read, split, exchanges, episodeFailure);
   result = { read, split, exchanges, ...closing };
   assert(result.read === read, "distillSession: the report is of the session read");
+  assert(listWithinCap(list.size(), distiller.perSession), "distillSession: the session list never passes the cap");
   assert(result.split.map !== null || result.exchanges.length === 0, "distillSession: a failed split reports no exchange");
   assert(result.split.map === null || reportsEveryTurn(result, read), "distillSession: an ok split reports every turn, in order");
   return result;

@@ -46,11 +46,12 @@ const version = await Version.add(extractor, null, "first", NOW);
 
 let seq = 0;
 let sessionNo = 0;
-function freshSession() {
+function freshSession(count = 2) {
   sessionNo += 1;
   const session = `e2e00000-0000-4000-8000-${String(sessionNo).padStart(12, "0")}`;
   db.upsertSession(tl.handle, { id: session, started: NOW.toISOString() });
-  const turns = ["ciao|Ciao.", `${USER}|${AGENT}`].map((pair) => {
+  const pairs = ["ciao|Ciao.", `${USER}|${AGENT}`, ...Array.from({ length: Math.max(0, count - 2) }, (_, k) => `altro${k}|Altro${k}.`)];
+  const turns = pairs.slice(0, Math.max(count, 2)).map((pair) => {
     const [input, output] = pair.split("|");
     seq += 1;
     const id = exchangeId(session, `message-${seq}`);
@@ -218,6 +219,55 @@ const NEW_ONLY = `{"verdicts":[{"cand":0,"verdict":"new"}]}`;
 function verdictOf(verdict: string) {
   return { cand: 0, verdict, of: verdict === "new" ? null : "x", adds: null, reason: null, do: verdict === "append" ? "x" : null };
 }
+
+const NOTE_ONLY_JSON = JSON.stringify({ notes: [note], rules: [] });
+const SPLIT_ALL = (last: number) => `{"episodes":[{"from":0,"to":${last},"summary":"saluto e regola sul log"}]}`;
+
+describe("the cap per session", () => {
+  test("a full session sends no later exchange to the model and still closes", async () => {
+    const { read, turns } = freshSession(3);
+    const notesBefore = notesStored().length;
+    const distiller = await D.distillerOf(version, NOW, "active", null, 1);
+    enqueue(SPLIT_ALL(2), NOTHING, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY);
+    const report = await D.distillSession(distiller, read);
+    expect(report.failures).toEqual([]);
+    expect(notesStored().length).toBe(notesBefore + 1);
+    expect(model.queue.length).toBe(0);
+    expect(distilledOf(turns)).toEqual([distiller.recorder.run(), distiller.recorder.run(), distiller.recorder.run()]);
+  });
+
+  test("inside one exchange the candidates over the cap keep their verdict and are not saved", async () => {
+    const { read, turns } = freshSession();
+    const notesBefore = notesStored().length;
+    const entriesBefore = entriesStored().length;
+    const distiller = await D.distillerOf(version, NOW, "active", null, 1);
+    enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
+    const report = await D.distillSession(distiller, read);
+    expect(report.failures).toEqual([]);
+    expect(notesStored().length).toBe(notesBefore + 1);
+    expect(entriesStored().length).toBe(entriesBefore);
+    expect(distilledOf(turns)).toEqual([distiller.recorder.run(), distiller.recorder.run()]);
+  });
+
+  test("shadow simulates the cap and writes nothing", async () => {
+    const { read, turns } = freshSession(3);
+    const notesBefore = notesStored().length;
+    const distiller = await D.distillerOf(version, NOW, "shadow", null, 1);
+    enqueue(SPLIT_ALL(2), NOTHING, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY);
+    await D.distillSession(distiller, read);
+    expect(model.queue.length).toBe(0);
+    expect(notesStored().length).toBe(notesBefore);
+    expect(distilledOf(turns)).toEqual([null, null, null]);
+  });
+
+  test("no cap sends every exchange to the model", async () => {
+    const { read } = freshSession(3);
+    const distiller = await D.distillerOf(version, NOW, "shadow", null, null);
+    enqueue(SPLIT_ALL(2), NOTHING, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY, NOTHING);
+    await D.distillSession(distiller, read);
+    expect(model.queue.length).toBe(0);
+  });
+});
 
 describe("the gaps the mutants found", () => {
   test("the neighbour search leaves no hit on the notes it reads", async () => {
