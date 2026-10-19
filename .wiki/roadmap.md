@@ -45,7 +45,11 @@ One line per task. The reason and the plan live in the linked decision.
 - [ ] td: the critic lets a generic rule pass. Add a too-generic check for rules.
 - [ ] td: one session saved two near-equal notes. The session list is not enough.
 - [ ] td phase 3: bridges between saved notes. [detail](memory_bridges_by_shape_are_judged_by_reading)
-- [ ] Run `td distill --active` on its own, with no timer (the trigger is open), after phase 0 writes the episodes, then retire platone. [detail](memory_distillation_stays_manual_for_now)
+- [ ] Retire platone, once the automatic run is trusted and its quality rules have a home. [detail](memory_td_distills_by_itself_at_session_start)
+- [ ] Try the pi extension of the distiller in a real pi session. [detail](memory_td_distills_by_itself_at_session_start)
+- [ ] Add a timeout to the model calls of `td`. [detail](memory_td_distills_by_itself_at_session_start)
+- [ ] Run the distiller on the Rasp, so a long job survives a switched-off PC. It needs Ollama for the embeddings there. [detail](memory_td_distills_by_itself_at_session_start)
+- [ ] Test the hook script of the distiller in the repo. [detail](memory_td_distills_by_itself_at_session_start)
 - [ ] Add a limit to the extractions API, then to `tl extractions`.
 - [ ] Run the judge and the decay spikes again after a week of use with the new hook text. Compare the 4.4% of clear dependence with the old format. [detail](memory_hook_injects_only_the_text_the_agent_uses)
 - [ ] Give `browse` and `random` the text output and `--json` of `search`, if agents read them by eye. [detail](memory_search_prints_text_blocks_by_default)

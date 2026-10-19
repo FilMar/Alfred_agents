@@ -9,7 +9,7 @@ Hindsight does not replace `tl`, and it is not the engine of the distiller. `tb`
 
 What is taken from Hindsight and mem0 is their shape, not their code: one structured LLM call with no tools, and code for every other step. The distiller is built in place on that shape. See [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first).
 
-This closes the open question "Hindsight as the engine" in [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) and in `tools/tl/ROADMAP.md`.
+This closes the open question "Hindsight as the engine" in [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) and in `tools/tl/ROADMAP.md`.
 
 ## Why
 

@@ -65,7 +65,7 @@ updated: 2026-10-16
 | [memory_delegated_run_is_a_pi_subtask](memory_delegated_run_is_a_pi_subtask) | A th run archives itself: a pi session that kind marks as a subtask |
 | [memory_run_spool_survives_reboot](memory_run_spool_survives_reboot) | A run the archive cannot take is spooled outside /tmp and drained by every run and wait |
 | [memory_hook_query_not_rewritten](memory_hook_query_not_rewritten) | The hook sends the prompt as it is: a 9B rewrite lowered recall in the spike |
-| [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) | Manual distillation with platone; the automatic service waits on five open problems |
+| [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) | The start of a session runs the distiller; replaces the manual-only decision |
 | [memory_episode_summaries_are_a_derived_index_over_tl](memory_episode_summaries_are_a_derived_index_over_tl) | Phase 0 episode summaries become a derived, rebuildable search index over tl |
 | [memory_hindsight_not_adopted_its_shape_is_copied](memory_hindsight_not_adopted_its_shape_is_copied) | No Hindsight; copy its shape: one structured call, code for the rest |
 | [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) | The extractor is the v7 pipeline with critic F, no tools, built in shadow first; in-session repeats still open, the 0.95 cut is dropped and `distilled` is a run time (see the td rows below) |
@@ -113,6 +113,7 @@ updated: 2026-10-16
 | [memory_distiller_has_no_personal_data_filter](memory_distiller_has_no_personal_data_filter) | The distiller has no personal-data filter; the memory is private to one user |
 | [memory_td_same_session_cutoff_drops_twins](memory_td_same_session_cutoff_drops_twins) | td drops a candidate that repeats an item of the session, cosine 0.8 by default |
 | [memory_td_verdicts_keep_their_kind](memory_td_verdicts_keep_their_kind) | A verdict links only items of the kind of the candidate, else it is new |
+| [memory_td_episodes_are_built_from_the_whole_session](memory_td_episodes_are_built_from_the_whole_session) | Phase 0 reads the whole session so a returning session keeps its episodes |
 
 ## skill
 

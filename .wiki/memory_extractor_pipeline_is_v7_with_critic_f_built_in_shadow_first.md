@@ -34,4 +34,4 @@ Open: the same idea was saved twice from two exchanges of one session. Phase 1 v
 - [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) — how every call reaches the model
 - [memory_td_is_its_own_tool](memory_td_is_its_own_tool) — where the pipeline lives
 - [memory_hindsight_not_adopted_its_shape_is_copied](memory_hindsight_not_adopted_its_shape_is_copied) — where the shape comes from
-- [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) — manual distillation goes on until a trigger is chosen
+- [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) — the trigger is the start of a session

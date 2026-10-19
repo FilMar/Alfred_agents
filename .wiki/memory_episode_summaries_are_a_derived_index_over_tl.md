@@ -36,5 +36,5 @@ The agent finds episodes with `tl search` when it needs them: see [memory_episod
 
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — what `tl` holds, and why it never distils
 - [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) — episodic memory is the hole
-- [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) — the distiller this phase 0 belongs to
+- [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) — the distiller this phase 0 belongs to
 - [memory_embedding_model_follows_the_corpus_language](memory_embedding_model_follows_the_corpus_language) — the embedding model the index reuses

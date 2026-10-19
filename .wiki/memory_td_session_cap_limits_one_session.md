@@ -13,6 +13,7 @@ sources: [SPEC.md@e152ae3, REVIEW.md@e152ae3, tools/td/src/cap.ts, tools/td/src/
 - The session closes. This differs from `--max-saved`, where a capped session stays pending.
 - It works in shadow too, so a shadow run shows what the active run would do.
 - The library has no cap unless it is passed one. The CLI passes 10.
+- The cap is per run, not per life of the session. A session that comes back can save up to `n` more.
 
 The first `n` items are kept, in the order of the exchanges. The best `n` are not chosen. Skipped exchanges leave no row in `tl extractions`.
 

@@ -33,5 +33,5 @@ Where it can break: the similarity threshold. Too low gives trivial bridges, too
 
 - [memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading) — phase 3 of the distiller, new notes only
 - [memory_refs_carry_non_semantic_reach](memory_refs_carry_non_semantic_reach) — why near is not enough
-- [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) — the distiller that replaces `platone` and `erodoto`
+- [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) — the distiller that replaces `platone` and `erodoto`
 - [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing) — the pattern `tb link` copies

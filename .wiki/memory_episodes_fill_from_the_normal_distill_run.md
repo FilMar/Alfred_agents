@@ -7,7 +7,7 @@ sources: [.design/memory.md@0e0a366, SPEC.md@6b044c8, REVIEW.md@6b044c8, tools/t
 
 Phase 0 of `td distill` writes the episodes of every session it reads. Nothing else fills the index. The past queue is read by running `distill` in batches with `--max-saved`.
 
-The index is built before the automatic run exists, so the automatic run writes into it from its first day.
+The automatic run at the start of a session writes into the index from its first day: [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start). A session that comes back is read whole for phase 0: [memory_td_episodes_are_built_from_the_whole_session](memory_td_episodes_are_built_from_the_whole_session).
 
 Sessions already distilled are not read again. They have no episodes. A rebuild mode is for later.
 
@@ -24,4 +24,4 @@ Five real sessions have gone through it, with 62 exchanges. The store of the Ras
 ## Cross-references
 
 - [memory_episode_summaries_are_a_derived_index_over_tl](memory_episode_summaries_are_a_derived_index_over_tl) — the index and its rebuild
-- [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) — the automatic run waits for this
+- [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) — the run that fills the index at the start of a session
