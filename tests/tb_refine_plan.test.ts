@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { LOW_WHAT_CHARS, TRUST_FLOOR, planOf, restoredNoteOf } from "../tools/tb/src/refine.ts";
+import { LOW_TEXT_CHARS, TRUST_FLOOR, planOf, restoredNoteOf } from "../tools/tb/src/refine.ts";
 import type { Scored } from "../tools/tb/src/refine.ts";
 import type { Note } from "../tools/tb/src/types.ts";
 
@@ -11,7 +11,7 @@ const AT_FLOOR = TRUST_FLOOR;
 const UNDER_FLOOR = TRUST_FLOOR - 0.01;
 const OVER_FLOOR = TRUST_FLOOR + 0.01;
 const BASE_WHAT = "0123456789".repeat(20);
-const AT_LIMIT_WHAT = BASE_WHAT.slice(0, LOW_WHAT_CHARS);
+const AT_LIMIT_WHAT = BASE_WHAT.slice(0, LOW_TEXT_CHARS);
 const OVER_LIMIT_WHAT = `${AT_LIMIT_WHAT}!`;
 
 // Partial notes with a cast, as in the other refine tests.
@@ -51,10 +51,10 @@ test("planOf classifies every note by the table", () => {
   ];
   assert.deepStrictEqual(planOf(scored), {
     archive: [
-      { id: "under-absent", trust: UNDER_FLOOR, what: AT_LIMIT_WHAT, when: WHEN, hits: 3, hits_related: 4 },
+      { id: "under-absent", trust: UNDER_FLOOR, text: AT_LIMIT_WHAT, when: WHEN, hits: 3, hits_related: 4 },
     ],
     restore: [
-      { id: "above-archived", trust: 0.5, what: "what of above-archived", when: WHEN, hits: 0, hits_related: 0 },
+      { id: "above-archived", trust: 0.5, text: "what of above-archived", when: WHEN, hits: 0, hits_related: 0 },
     ],
   });
 });
@@ -69,11 +69,11 @@ test("planOf puts a trust exactly at the floor on the restore side", () => {
   ];
   assert.deepStrictEqual(planOf(scored), {
     archive: [
-      { id: "under-free", trust: UNDER_FLOOR, what: "what of under-free", when: WHEN, hits: 0, hits_related: 0 },
+      { id: "under-free", trust: UNDER_FLOOR, text: "what of under-free", when: WHEN, hits: 0, hits_related: 0 },
     ],
     restore: [
-      { id: "at-floor-archived", trust: AT_FLOOR, what: "what of at-floor-archived", when: WHEN, hits: 0, hits_related: 0 },
-      { id: "just-above-archived", trust: OVER_FLOOR, what: "what of just-above-archived", when: WHEN, hits: 0, hits_related: 0 },
+      { id: "at-floor-archived", trust: AT_FLOOR, text: "what of at-floor-archived", when: WHEN, hits: 0, hits_related: 0 },
+      { id: "just-above-archived", trust: OVER_FLOOR, text: "what of just-above-archived", when: WHEN, hits: 0, hits_related: 0 },
     ],
   });
 });
@@ -89,12 +89,12 @@ test("planOf accepts the ends of the unit range", () => {
   ];
   assert.deepStrictEqual(planOf(scored), {
     archive: [
-      { id: "bottom-free", trust: 0, what: "what of bottom-free", when: WHEN, hits: 0, hits_related: 0 },
-      { id: "just-in-bottom", trust: 0.01, what: "what of just-in-bottom", when: WHEN, hits: 0, hits_related: 0 },
+      { id: "bottom-free", trust: 0, text: "what of bottom-free", when: WHEN, hits: 0, hits_related: 0 },
+      { id: "just-in-bottom", trust: 0.01, text: "what of just-in-bottom", when: WHEN, hits: 0, hits_related: 0 },
     ],
     restore: [
-      { id: "just-in-top", trust: 0.99, what: "what of just-in-top", when: WHEN, hits: 0, hits_related: 0 },
-      { id: "top-archived", trust: 1, what: "what of top-archived", when: WHEN, hits: 0, hits_related: 0 },
+      { id: "just-in-top", trust: 0.99, text: "what of just-in-top", when: WHEN, hits: 0, hits_related: 0 },
+      { id: "top-archived", trust: 1, text: "what of top-archived", when: WHEN, hits: 0, hits_related: 0 },
     ],
   });
 });
@@ -158,7 +158,7 @@ test("restoredNoteOf builds the low note shape", () => {
   assert.deepStrictEqual(restoredNoteOf(note, 0.8), {
     id: "shaped",
     trust: 0.8,
-    what: AT_LIMIT_WHAT,
+    text: AT_LIMIT_WHAT,
     when: WHEN,
     hits: 3,
     hits_related: 4,
@@ -170,7 +170,7 @@ test("restoredNoteOf keeps a what at the limit unchanged", () => {
   assert.deepStrictEqual(restoredNoteOf(note, AT_FLOOR), {
     id: "at-limit",
     trust: AT_FLOOR,
-    what: AT_LIMIT_WHAT,
+    text: AT_LIMIT_WHAT,
     when: WHEN,
     hits: 0,
     hits_related: 0,

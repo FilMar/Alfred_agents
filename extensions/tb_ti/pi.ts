@@ -6,7 +6,7 @@ export default function (pi: ExtensionAPI): void {
     if (!event.prompt?.trim()) return;
 
     const [tiResult, tbResult] = await Promise.allSettled([
-      execSearch("ti", event.prompt, { limit: 2, minScore: HOOK_MIN_SCORE }),
+      execSearch("ti", event.prompt, { limit: 2, minScore: HOOK_MIN_SCORE, noArchived: true }),
       execSearch("tb", event.prompt, { depth: 1, limit: 2, minScore: HOOK_MIN_SCORE, relatedLimit: 3, noArchived: true }),
     ]);
 

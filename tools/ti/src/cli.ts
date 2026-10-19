@@ -7,6 +7,9 @@ import { serveApi, API_PORT } from "./api.js";
 import { collect, die, errorMessage, out, outText, readGuide } from "../../common/cli.js";
 import { blocksOf, ruleBlock, ruleView } from "../../common/render.js";
 import { normalizeTags } from "../../common/tags.js";
+import { ContractError } from "../../common/contract.js";
+import { refineReport } from "../../tb/src/refine.js";
+import { countedOf, COUNTERS_START } from "./refine.js";
 
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
@@ -59,12 +62,16 @@ program
   .option("--tags <tag>", "Filter by tag (repeatable)", collect, [] as string[])
   .option("--min-score <n>", "Minimum similarity score (0-1) to keep a result")
   .option("--json", "Print the full results as JSON instead of text blocks")
+  .option("--no-hits", "Do not count this search as a hit on the returned rules")
+  .option("--no-archived", "Leave out the archived rules")
   .action(async (query: string, opts) => {
     await requireServices({ needsEmbedding: true });
     const results = await identity.searchEntries(query, {
       limit: parseInt(opts.limit, 10),
       tags: opts.tags.length ? normalizeTags(opts.tags) : undefined,
       min_score: opts.minScore !== undefined ? parseFloat(opts.minScore) : undefined,
+      record_hits: opts.hits,
+      exclude_archived: opts.archived === false,
     });
     if (opts.json) out(results.map(ruleView));
     else outText(blocksOf(results.map(ruleBlock)));
@@ -109,6 +116,26 @@ program
   });
 
 program
+  .command("refine")
+  .description("Print the trust spread, the rules under the floor and the plan. Writes only with --apply.")
+  .option("--apply", "Write archived_at on the rules to archive, and remove it from the rules to restore")
+  .action(async (opts) => {
+    await requireServices({ needsEmbedding: false });
+    const now = new Date();
+    const rules = await identity.listEntries();
+    const report = refineReport(rules.map((rule) => countedOf(rule, COUNTERS_START)), now, COUNTERS_START);
+
+    if (!opts.apply) {
+      out(report);
+      return;
+    }
+
+    await identity.markArchived(report.plan.archive.map((entry) => entry.id), now);
+    await identity.clearArchived(report.plan.restore.map((entry) => entry.id));
+    out({ ...report, applied: { archived: report.plan.archive.length, restored: report.plan.restore.length } });
+  });
+
+program
   .command("guide")
   .description("Print the quality rules of a rule")
   .action(() => {
@@ -126,5 +153,6 @@ program
   });
 
 program.parseAsync(process.argv).catch((err) => {
+  if (err instanceof ContractError) die(`ti bug, please report: ${err.message}\n${err.stack ?? ""}`);
   die(errorMessage(err));
 });

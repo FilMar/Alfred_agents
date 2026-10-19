@@ -183,7 +183,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
   });
 
   describe("appendDo", () => {
-    it("should fetch existing entry, append to do array, and persist without modifying if or vector", async () => {
+    it("should fetch existing entry, append to do array, and write only do", async () => {
       const id = "entry-123";
       const newDo = "new action";
       const existingEntry: IdentityEntry = {
@@ -196,7 +196,7 @@ describe("Third Identity (ti) Behavioral Tests", () => {
 
       spyOn(qdrantClient, "request")
         .mockResolvedValueOnce({ result: { id, payload: existingEntry, vector: existingEntry.vector } } as any) // GET
-        .mockResolvedValueOnce({ status: "ok" } as any); // PUT
+        .mockResolvedValueOnce({ status: "ok" } as any); // POST payload
 
       const result = await appendDo(id, newDo);
 
@@ -207,21 +207,9 @@ describe("Third Identity (ti) Behavioral Tests", () => {
       );
 
       expect(qdrantClient.request).toHaveBeenCalledWith(
-        "PUT",
-        expect.stringContaining("/collections/pi_identity/points"),
-        expect.objectContaining({
-          points: [
-            expect.objectContaining({
-              id: id,
-              payload: expect.objectContaining({
-                if: "original if",
-                do: ["original do", "new action"],
-                tags: ["tag1"],
-              }),
-              vector: [0.1, 0.2],
-            }),
-          ],
-        })
+        "POST",
+        expect.stringContaining("/collections/pi_identity/points/payload"),
+        { payload: { do: ["original do", "new action"] }, points: [id] }
       );
 
       expect(result.do).toEqual(["original do", "new action"]);

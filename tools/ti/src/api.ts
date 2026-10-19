@@ -54,6 +54,8 @@ const OPENAPI_SPEC = {
                   query: { type: "string" },
                   limit: { type: "integer", default: 10 },
                   tags: { type: "array", items: { type: "string" } },
+                  record_hits: { type: "boolean", default: true },
+                  exclude_archived: { type: "boolean", default: false },
                 },
               },
             },
@@ -116,6 +118,8 @@ app.post("/search", async (c) => {
   const results = await identity.searchEntries(body.query, {
     limit: body.limit,
     tags: body.tags?.length ? normalizeTags(body.tags) : undefined,
+    record_hits: body.record_hits ?? true,
+    exclude_archived: body.exclude_archived ?? false,
   });
   return c.json(results);
 });

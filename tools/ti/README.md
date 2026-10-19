@@ -25,6 +25,15 @@ This makes `ti` a general context router, not just a behavior log — the value 
 
 `ti` is a thin client, not a decision-maker: it does not judge similarity or auto-merge. The caller (typically an agent, at session end or on demand) runs `ti search` against a candidate `if`, evaluates the returned matches, decides whether to append to an existing entry's `do` array or create a new one, and confirms before writing — same division of responsibility already used with `tb search` → `tb add`.
 
+## Hits and refine
+
+`ti` counts hits and computes trust the same way as `tb`:
+
+- `ti search` adds one hit to every rule it returns (`hits`, `last_hit`). `--no-hits` skips the write.
+- `ti refine` prints the trust spread, the rules under 0.2 and the plan. `--apply` writes `archived_at`, or removes it when trust is back.
+- `ti search --no-archived` leaves out the archived rules. The prompt hook uses it.
+- The formula lives in `tools/tb/src/refine.ts`. `ti` maps a rule onto it: the `if` is the text, and a rule has no related hits.
+
 Reuses `tools/tb/src/infra.ts` as a library (`HttpClient`, `QDRANT_URL`, `OLLAMA_URL`, `EMBED_MODEL`) — no duplication, no changes to `tb`.
 
 ## Stack

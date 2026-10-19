@@ -18,6 +18,16 @@ export async function upsertPoint(id: string, vector: number[], payload: any): P
   });
 }
 
+export async function setPayloadMany(ids: string[], payload: Record<string, unknown>): Promise<void> {
+  if (ids.length === 0) return;
+  await qdrantClient.request("POST", "/collections/pi_identity/points/payload?wait=true", { payload, points: ids });
+}
+
+export async function deletePayloadKeys(ids: string[], keys: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  await qdrantClient.request("POST", "/collections/pi_identity/points/payload/delete?wait=true", { keys, points: ids });
+}
+
 export async function queryPoints(
   vector: number[],
   options: { limit?: number; filter?: any; score_threshold?: number },

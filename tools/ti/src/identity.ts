@@ -1,6 +1,7 @@
 import { embedDocument, embedQuery, EMBED_MODEL } from "../../tb/src/infra.js";
 import { NOTE_ID_SHAPE } from "../../tb/src/qdrant.js";
-import { matchPrefix } from "../../tb/src/types.js";
+import { matchPrefix, nextHit, groupByPayload } from "../../tb/src/types.js";
+import type { PayloadWrite } from "../../tb/src/types.js";
 import { assert } from "../../common/contract.js";
 import * as qdrant from "./qdrant.js";
 import type { IdentityEntry, SearchOptions } from "./types.js";
@@ -17,12 +18,14 @@ export async function addEntry(ifText: string, doText: string, tags: string[], e
   const vector = await embedDocument(ifText);
 
   const id = crypto.randomUUID();
+  const when = new Date().toISOString();
   await qdrant.upsertPoint(id, vector, {
     if: ifText,
     do: [doText],
     tags,
     ...(exchange && { exchange }),
     embed_model: EMBED_MODEL,
+    when,
   });
 
   return {
@@ -32,6 +35,7 @@ export async function addEntry(ifText: string, doText: string, tags: string[], e
     do: [doText],
     tags,
     ...(exchange && { exchange }),
+    when,
   };
 }
 
@@ -47,20 +51,53 @@ export async function searchEntries(query: string, options: SearchOptions): Prom
   await qdrant.ensureCollection();
   const vector = await embedQuery(query);
 
-  
-  const filter = options.tags?.length ? { must: [{ key: "tags", match: { any: options.tags } }] } : undefined;
+  const must: unknown[] = [];
+  if (options.tags?.length) must.push({ key: "tags", match: { any: options.tags } });
+  if (options.exclude_archived) must.push({ is_empty: { key: "archived_at" } });
+  const filter = must.length > 0 ? { must } : undefined;
   const res = await qdrant.queryPoints(vector, {
     limit: options.limit ?? 10,
     filter,
     ...(options.min_score !== undefined && { score_threshold: options.min_score }),
   });
 
-  return (res.result?.points ?? []).map((hit: any) => ({
+  const results = (res.result?.points ?? []).map((hit: any) => ({
     id: hit.id,
     vector: hit.vector ?? [],
     ...hit.payload,
     score: hit.score,
   })) as any[];
+  if (options.record_hits !== false) await recordHits(results);
+  return results;
+}
+
+/**
+ * Counts one hit on every rule returned.
+ * A failed write never fails the search.
+ */
+async function recordHits(results: IdentityEntry[]): Promise<void> {
+  const now = new Date().toISOString();
+  const writes: PayloadWrite[] = results.map((entry) => {
+    const hit = nextHit(entry, now);
+    Object.assign(entry, hit);
+    return { id: entry.id, payload: hit };
+  });
+
+  const settled = await Promise.allSettled(
+    groupByPayload(writes).map((group) => qdrant.setPayloadMany(group.ids, group.payload)),
+  );
+  const failed = settled.filter((s) => s.status === "rejected").length;
+  if (failed > 0) process.stderr.write(`Warning: ${failed} hit counter update(s) failed.\n`);
+}
+
+export async function markArchived(ids: string[], at: Date): Promise<void> {
+  await qdrant.ensureCollection();
+  await qdrant.setPayloadMany(ids, { archived_at: at.toISOString() });
+}
+
+export async function clearArchived(ids: string[]): Promise<void> {
+  await qdrant.ensureCollection();
+  await qdrant.deletePayloadKeys(ids, ["archived_at"]);
 }
 
 /**
@@ -102,7 +139,7 @@ export async function deleteEntry(id: string): Promise<void> {
  * - Must retrieve the existing entry by ID.
  * - Must append the provided `do` string to the existing `do` array.
  * - Must persist the updated array back to Qdrant.
- * - Must not modify the `if` or `vector` fields.
+ * - Must write only `do`: the other payload fields and the vector stay.
  */
 export async function appendDo(id: string, doText: string): Promise<IdentityEntry> {
   await qdrant.ensureCollection();
@@ -114,23 +151,15 @@ export async function appendDo(id: string, doText: string): Promise<IdentityEntr
   }
   
   const existingEntry = point.payload;
-  const vector = point.vector;
   const updatedDo = [...existingEntry.do, doText];
-  
-  await qdrant.upsertPoint(id, vector, {
-    if: existingEntry.if,
-    do: updatedDo,
-    tags: existingEntry.tags,
-    ...(existingEntry.exchange && { exchange: existingEntry.exchange }),
-    ...(existingEntry.embed_model && { embed_model: existingEntry.embed_model }),
-  });
-  
+
+  await qdrant.setPayloadMany([id], { do: updatedDo });
+
   return {
+    ...existingEntry,
     id,
     vector: [],
-    if: existingEntry.if,
     do: updatedDo,
-    tags: existingEntry.tags,
   };
 }
 
