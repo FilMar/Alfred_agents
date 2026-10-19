@@ -89,6 +89,10 @@ program
       const hits = await searchEpisodes(query, { limit, minScore, period });
       if (opts.json) out(hits);
       else outText(blocksOf(hits.map((hit) => episodeBlock(hit.episode))));
+      if (hits.length === 0 && minScore > 0) {
+        const [best] = await searchEpisodes(query, { limit: 1, minScore: 0, period });
+        if (best !== undefined) console.error(`No episode scores ${minScore} or more. The best is ${best.score.toFixed(3)}: try --min-score ${(Math.floor(best.score * 10) / 10).toFixed(1)}.`);
+      }
     } catch (err) {
       die(errorMessage(err));
     }

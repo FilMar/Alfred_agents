@@ -118,6 +118,12 @@ describe("tl search as a process", () => {
     expect(result.out).toBe(`-- ${zebra.id.slice(0, 8)} 2026-09-28\nzebra quagga okapi savana\n`);
   });
 
+  test("with no hit over the minimum score, tells the best score on stderr", async () => {
+    const result = await run("search", "zebra quagga okapi savana", "--min-score", "0.99", "--since", "2026-10-10");
+    expect(result.out).toBe("");
+    expect(result.err).toMatch(/^No episode scores 0\.99 or more\. The best is 0\.\d{3}: try --min-score 0\.\d\.\n$/);
+  });
+
   test("with --json prints the hits with a score and no vector", async () => {
     const result = await run("search", "zebra quagga okapi savana", "--json", "--min-score", "0.5");
     const parsed = JSON.parse(result.out);
