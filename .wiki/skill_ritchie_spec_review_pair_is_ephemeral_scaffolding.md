@@ -18,8 +18,7 @@ than code in the tree. The tree stays code.
 Nothing durable is lost. The permanent record is the wiki page: the
 why, in English, linked from the roadmap task it closes.
 The raw pair stays in git history for the rare case it is needed. The
-lesson that survives the project goes to tb, via platone, with the page
-path as its source.
+lesson that survives the project reaches tb through the distiller.
 
 The wiki page is written after the design settles, and the pair fills
 the gap before that moment. The pair is provisional by nature — the

@@ -23,7 +23,7 @@ There is a second gain, in the shape of a rule. The old rule was a prohibition: 
 
 The mechanism is pi's own. `loadSkills` finds every skill this machine and this project offer, the same way the interactive agent does. So the names accepted here are exactly the names that work elsewhere. A wrong name is answered with the full list.
 
-One hazard stays, and code does not solve it. A skill that writes becomes unattended when forced into a detached run. `mose` needs explicit confirmation, `platone` consolidates, and `clio` moves backups. The gate those skills describe lives in their text, not in `th`.
+One hazard stays, and code does not solve it. A skill that writes becomes unattended when forced into a detached run. `clio` moves backups. The gate those skills describe lives in their text, not in `th`.
 
 ## Cross-references
 

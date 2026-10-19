@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, ti, embedding, measurement, hook]
-sources: [spikes/2026-09-28-tb-corpus/tb_threshold.py (deleted), spikes/2026-09-28-tb-corpus/reports/fase0_threshold.json (deleted), extensions/tb_ti/claude.sh, skills/christopher/SKILL.md, skills/mose/SKILL.md]
+sources: [spikes/2026-09-28-tb-corpus/tb_threshold.py (deleted), spikes/2026-09-28-tb-corpus/reports/fase0_threshold.json (deleted), extensions/tb_ti/claude.sh, skills/christopher/SKILL.md, skills/mose/SKILL.md (deleted)]
 ---
 
 ## Decision
@@ -12,7 +12,6 @@ On `nomic-embed-text-v2-moe`, over the 120-paraphrase set: a right answer scores
 | consumer | was | is | job |
 |---|---|---|---|
 | `skills/christopher` | 0.6 | 0.35 | deliberate retrieval wants reach; the agent judges |
-| `skills/mose` | 0.6 | 0.5 | dedupe wants candidates to compare |
 | `extensions/tb_ti/claude.sh` | 0.8 | 0.5 | automatic injection, nobody to judge |
 
 ## Why

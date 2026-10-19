@@ -125,8 +125,8 @@ updated: 2026-10-16
 | [skill_annibale_runs_a_debate_of_made_up_viewpoints](skill_annibale_runs_a_debate_of_made_up_viewpoints) | annibale runs one agentic debate on a problem, with viewpoints made on the fly |
 | [skill_piano_writes_design_main_md](skill_piano_writes_design_main_md) | piano writes use cases in `.design/`; main.md is the project, one level of sub-projects |
 | [skill_omero_debates_design_before_decisions](skill_omero_debates_design_before_decisions) | Piano, then omero Ingest on `.design/` that writes decisions and roadmap blocks, then edison and ritchie |
-| [skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it) | Idea: retire platone with the timer; keep the note quality rules |
-| [skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills](skill_quality_guides_may_be_printed_by_tb_and_ti_instead_of_kept_in_skills) | Idea: tb guide and ti guide print the quality rules; skills keep none |
+| [skill_census_platone_and_mose_removed_td_writes](skill_census_platone_and_mose_removed_td_writes) | platone and mose removed; td is the only path that writes tb and ti from sessions |
+| [skill_quality_guides_are_printed_by_tb_guide_and_ti_guide](skill_quality_guides_are_printed_by_tb_guide_and_ti_guide) | tb guide and ti guide print the quality rules; skills call the command, not the file |
 | [skill_convention_direct_cli](skill_convention_direct_cli) | Skills: router + scripts + references |
 | [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) | Contract messages: stable prefix, then the values the assert reads |
 | [skill_ritchie_classifiers_get_an_outcome_table](skill_ritchie_classifiers_get_an_outcome_table) | A classifier gets an outcome table: the one test with an assert of its own |
