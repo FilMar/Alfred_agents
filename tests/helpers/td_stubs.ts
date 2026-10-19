@@ -11,6 +11,8 @@ type Collections = Map<string, Map<string, Point>>;
 
 export type MemoryStubs = Readonly<{
   collections: Collections;
+  aliases: Map<string, string>;
+  collection(name: string): Map<string, Point> | undefined;
   failPath(fragment: string | null): void;
   stop(): void;
 }>;
@@ -62,6 +64,7 @@ function json(body: unknown, status = 200): Response {
 
 export function startMemoryStubs(): MemoryStubs {
   const collections: Collections = new Map();
+  const aliases = new Map<string, string>();
   let failing: string | null = null;
 
   const qdrant = Bun.serve({
@@ -71,9 +74,19 @@ export function startMemoryStubs(): MemoryStubs {
       const path = url.pathname;
       if (failing !== null && path.includes(failing)) return json({ error: "stub failure" }, 500);
       if (path === "/") return json({ title: "memory stub" });
+      if (path === "/collections/aliases" && req.method === "POST") {
+        const body: any = await req.json();
+        for (const action of body.actions) {
+          const { alias_name, collection_name } = action.create_alias;
+          if (aliases.has(alias_name) || collections.has(alias_name) || !collections.has(collection_name)) return json({ error: "conflict" }, 409);
+          aliases.set(alias_name, collection_name);
+        }
+        return json({ result: true });
+      }
       const m = /^\/collections\/([^/]+)(\/.*)?$/.exec(path);
       if (m === null) return new Response("not found", { status: 404 });
-      const [, name, rest = ""] = m;
+      const [, called, rest = ""] = m;
+      const name = aliases.get(called) ?? called;
       const body: any = req.method === "GET" ? {} : await req.json().catch(() => ({}));
       if (rest === "") {
         if (req.method === "GET") {
@@ -149,6 +162,8 @@ export function startMemoryStubs(): MemoryStubs {
   process.env.OLLAMA_URL = `http://localhost:${ollama.port}`;
   return {
     collections,
+    aliases,
+    collection: (name) => collections.get(aliases.get(name) ?? name),
     failPath: (fragment) => { failing = fragment; },
     stop: () => { qdrant.stop(); ollama.stop(); },
   };

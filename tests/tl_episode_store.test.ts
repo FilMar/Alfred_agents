@@ -6,7 +6,7 @@ import { embed, startMemoryStubs } from "./helpers/td_stubs.ts";
 const memory = startMemoryStubs();
 afterAll(() => memory.stop());
 
-const { writeEpisodes, EPISODES_COLLECTION } = await import("../tools/tl/src/episode_store.ts");
+const { writeEpisodes, EPISODES_COLLECTION, EPISODES_REAL_COLLECTION } = await import("../tools/tl/src/episode_store.ts");
 const { episodeOf } = await import("../tools/tl/src/episodes.ts");
 const { DOCUMENT_PREFIX } = await import("../tools/tb/src/infra.ts");
 
@@ -22,10 +22,18 @@ const T3 = "2026-09-30T16:57:15.109Z";
 const made = (session: string, refs: Array<[string, string]>, summary: string) =>
   episodeOf({ session, refs: refs.map(([id, timestamp]) => ({ id, timestamp })), summary, extractor: 2, model: "glm-5.3-flash", created: "2026-10-16T14:00:00.000Z" });
 
-const stored = () => memory.collections.get(EPISODES_COLLECTION) ?? new Map();
+const stored = () => memory.collection(EPISODES_COLLECTION) ?? new Map();
 const idsOf = (session: string) => [...stored().entries()].filter(([, p]) => (p.payload as { session: string }).session === session).map(([id]) => id).sort();
 
 describe("writeEpisodes", () => {
+  test("keeps the episodes in a collection named after the model, behind an alias", async () => {
+    await writeEpisodes(SESSION, [made(SESSION, [[X1, T1]], "Uno")]);
+    expect(EPISODES_REAL_COLLECTION).toBe("tl_episodes__v2moe-768");
+    expect(memory.aliases.get(EPISODES_COLLECTION)).toBe(EPISODES_REAL_COLLECTION);
+    expect(memory.collections.has(EPISODES_COLLECTION)).toBe(false);
+    expect(memory.collections.get(EPISODES_REAL_COLLECTION)?.size).toBe(1);
+  });
+
   test("stores the payload and a vector, and no text of the exchanges", async () => {
     const episode = made(SESSION, [[X1, T1], [X2, T2], [X3, T3]], "Tre video estratti e spiegati");
     expect(await writeEpisodes(SESSION, [episode])).toBeNull();

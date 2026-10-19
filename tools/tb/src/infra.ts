@@ -121,6 +121,16 @@ export async function createCollection(name: string, body: unknown): Promise<voi
   }
 }
 
+// POST /collections/aliases. 409 (alias already exists) is not an error — anything else is.
+export async function createAlias(alias: string, collection: string): Promise<void> {
+  const body = { actions: [{ create_alias: { collection_name: collection, alias_name: alias } }] };
+  const create = await qdrantClient.fetch("POST", "/collections/aliases", body);
+  if (!create.ok && create.status !== 409) {
+    const text = await create.text();
+    throw new Error(`Qdrant: impossibile creare l'alias — ${create.status} ${text}`);
+  }
+}
+
 // ─── Health ──────────────────────────────────────────────────────────────────
 
 export interface HealthStatus {

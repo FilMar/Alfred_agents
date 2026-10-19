@@ -87,7 +87,7 @@ describe("the store with episodes", () => {
   });
 
   test("a payload that is not an episode is an error that names the field", async () => {
-    const points = memory.collections.get(EPISODES_COLLECTION)!;
+    const points = memory.collection(EPISODES_COLLECTION)!;
     const bad = points.get(cactus.id)!;
     const saved = bad.payload.summary;
     bad.payload.summary = "";

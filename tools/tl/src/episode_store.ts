@@ -1,6 +1,6 @@
 import { assert, isNonBlank, isPositiveInt } from "../../common/contract.js";
 import { errorMessage } from "../../common/cli.js";
-import { createCollection, embedDocument, embedQuery, getCollectionInfo, qdrantClient, VECTOR_SIZE } from "../../tb/src/infra.js";
+import { createAlias, createCollection, embedDocument, embedQuery, getCollectionInfo, qdrantClient, VECTOR_SIZE } from "../../tb/src/infra.js";
 import { matchPrefix } from "../../tb/src/types.js";
 import { episodeFromPayload, periodOverlaps } from "./episode_read.js";
 import type { Period } from "./episode_read.js";
@@ -8,12 +8,14 @@ import type { Episode } from "./episodes.js";
 import { ID_SHAPE } from "./types.js";
 
 export const EPISODES_COLLECTION = "tl_episodes";
+export const EPISODES_REAL_COLLECTION = `${EPISODES_COLLECTION}__v2moe-${VECTOR_SIZE}`;
 export const EPISODES_PER_SESSION_MAX = 1000;
 
 async function ensureCollection(): Promise<void> {
   const check = await getCollectionInfo(EPISODES_COLLECTION);
   if (check.exists) return;
-  await createCollection(EPISODES_COLLECTION, { vectors: { size: VECTOR_SIZE, distance: "Cosine" } });
+  await createCollection(EPISODES_REAL_COLLECTION, { vectors: { size: VECTOR_SIZE, distance: "Cosine" } });
+  await createAlias(EPISODES_COLLECTION, EPISODES_REAL_COLLECTION);
 }
 
 async function idsOfSession(session: string): Promise<string[]> {

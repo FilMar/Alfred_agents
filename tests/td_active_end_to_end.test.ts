@@ -167,7 +167,7 @@ describe("active mode on stubs", () => {
     const distiller = await D.distillerOf(version, NOW, "active");
     enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
     await D.distillSession(distiller, read);
-    const stored = [...(memory.collections.get("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[]; from: string; to: string; summary: string });
+    const stored = [...(memory.collection("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[]; from: string; to: string; summary: string });
     const mine = stored.filter((e) => e.session === read.session());
     expect(mine.length).toBe(1);
     expect(mine[0]).toMatchObject({ exchanges: turns.map((t) => t.id()), from: turns[0].timestamp(), to: turns[1].timestamp(), summary: "saluto e regola sul log" });
@@ -175,11 +175,11 @@ describe("active mode on stubs", () => {
 
   test("shadow writes no episode", async () => {
     const { read } = freshSession();
-    const before = memory.collections.get("tl_episodes")?.size ?? 0;
+    const before = memory.collection("tl_episodes")?.size ?? 0;
     const distiller = await D.distillerOf(version, NOW, "shadow");
     enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
     await D.distillSession(distiller, read);
-    expect(memory.collections.get("tl_episodes")?.size ?? 0).toBe(before);
+    expect(memory.collection("tl_episodes")?.size ?? 0).toBe(before);
   });
 
   test("an episode store that is down is a failure and the session stays open", async () => {
@@ -199,7 +199,7 @@ describe("active mode on stubs", () => {
       enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
       await D.distillSession(distiller, read);
     }
-    const stored = [...(memory.collections.get("tl_episodes")?.values() ?? [])].filter((p) => (p.payload as { session: string }).session === read.session());
+    const stored = [...(memory.collection("tl_episodes")?.values() ?? [])].filter((p) => (p.payload as { session: string }).session === read.session());
     expect(stored.length).toBe(1);
   });
 
@@ -402,7 +402,7 @@ describe("a session that comes back with more exchanges", () => {
     const distiller = await D.distillerOf(version, NOW, "active");
     enqueue(SPLIT_ALL(3), NOTHING, NOTHING);
     const report = await D.distillSession(distiller, read);
-    const stored = [...(memory.collections.get("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] });
+    const stored = [...(memory.collection("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] });
     expect(report.failures).toEqual([]);
     expect(model.queue.length).toBe(0);
     expect(stored.filter((e) => e.session === read.session()).flatMap((e) => e.exchanges)).toEqual(turns.map((t) => t.id()));
@@ -415,7 +415,7 @@ describe("a session that comes back with more exchanges", () => {
     await D.distillSession(await D.distillerOf(version, NOW, "active"), (enqueue(SPLIT_ALL(1), NOTHING, NOTHING), first));
     const second = SessionRead.of(session, turns.slice(2), turns.slice(0, 2));
     await D.distillSession(await D.distillerOf(version, NOW, "active"), (enqueue(SPLIT_ALL(3), NOTHING, NOTHING), second));
-    const mine = [...(memory.collections.get("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] }).filter((e) => e.session === session);
+    const mine = [...(memory.collection("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] }).filter((e) => e.session === session);
     expect(mine.map((e) => e.exchanges)).toEqual([turns.map((t) => t.id())]);
   });
 
@@ -427,7 +427,7 @@ describe("a session that comes back with more exchanges", () => {
     enqueue(NOT_JSON, NOT_JSON, NOT_JSON);
     await D.distillSession(await D.distillerOf(version, NOW, "active"), second);
     model.queue.length = 0;
-    const mine = [...(memory.collections.get("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] }).filter((e) => e.session === session);
+    const mine = [...(memory.collection("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] }).filter((e) => e.session === session);
     expect(mine.map((e) => e.exchanges)).toEqual([turns.slice(0, 2).map((t) => t.id())]);
   });
 });
