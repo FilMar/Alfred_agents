@@ -1,6 +1,6 @@
 # Rule quality
 
-The bar for a rule in Third Identity (`ti`). Every skill that saves a rule follows this file. The text of a rule is written in Italian. This file is in English.
+The bar for a rule in Third Identity (`ti`). Anyone who saves a rule follows this guide. The text of a rule is written in Italian. This file is in English.
 
 `tb` answers "what is true?". `ti` answers "what do I do now?". A rule is procedure. Knowledge goes to `tb`.
 
@@ -36,7 +36,6 @@ The `if` is a situation the agent can notice itself in, in the middle of a task.
 | a one-off project decision | `.wiki/` |
 | a personal-life protocol | stays in `tb` |
 | vague advice ("considera i trade-off") | drop |
-| a rule that names a specific `th` member | route the delegation through the orchestrator instead: members are project roster, not identity |
 | a real "in situation X, do Y" that recurs across projects | `ti` |
 
 Final test: doing it and not doing it must look different. If they look the same, it is not a rule.
@@ -46,7 +45,7 @@ Final test: doing it and not doing it must look different. If they look the same
 Search first. Read the rules that come back, not only their scores.
 
 ```bash
-ti list                                            # once per window: the tag vocabulary
+ti list                                            # once per run: the tag vocabulary
 ti search "<draft context>" --json --limit 5 --min-score 0.5
 ```
 
@@ -57,13 +56,15 @@ For each close rule, decide:
 - **Overlapping contexts.** Sharpen the new `if` until the two situations differ, or merge them. Merge only when the two are one situation. Split when the `if` holds two.
 - **The new rule denies the old one.** Same situation, opposite order. Replace it, see section 6.
 
+No rule from silence. A rule comes from a correction or from an explicit request, never from a pattern guessed from plain work.
+
 No confirmation step. The anatomy and the checks are the gate. A rule that fails is dropped, not held for review. When in doubt, drop it: a wrong rule steers every later retrieval.
 
 ## 6. A rule that denies an older one
 
 The newer correction wins. Do this, in order:
 
-1. **Write the lesson to `tb`, first.** The old rule is about to be deleted, and its text goes with it. Save one note that says what the old rule ordered, what the new rule orders, and why the old one was wrong. Give it the origin exchange. The note follows `note_quality.md` in full.
+1. **Write the lesson to `tb`, first.** The old rule is about to be deleted, and its text goes with it. Save one note that says what the old rule ordered, what the new rule orders, and why the old one was wrong. Give it the origin exchange. The note follows `tb guide` in full.
    ```bash
    tb save --what "<old order vs new order, as a general lesson>" --why "<why the old one failed>" \
      --kind attrito --tags <tag> --exchange "<id of the correcting exchange>"
@@ -86,16 +87,3 @@ ti add --if "<context>" --do "<action>" --tags <tag> --tags <tag> [--exchange "<
 - **Language.** `if` and `do` in Italian.
 - **Tags.** `--tags` is a repeatable flag, one tag per flag. Lowercase singular nouns. At most 3. Reuse the vocabulary of `ti list` before inventing. A tag is a filter, not a taxonomy: pick the ones someone would filter by.
 - **`exchange`.** The id of the `tl` exchange that holds the evidence. It is the way back to the raw text.
-
-## 8. Rules from `tl`
-
-The only way in is a correction. The user rejects what the agent did and says what to do instead: "no, fai così", "non farlo più", "sempre X quando Y". One clear correction is enough.
-
-- **No rule from silence.** Do not infer a rule from repeated plain work. A pattern with no correction stays in `tl`. `ti` has no usage counter, so a rule saved on a guess cannot fade by itself.
-- **The `if`** is the situation the agent was in when it was corrected.
-- **The `do`** is the correct action.
-- **Cross-project only.** A project-specific correction is not a rule.
-- **A repeated correction** of an existing rule is not new. Add the action with `append-do` if it is new. Do nothing if it is the same.
-- **A correction that denies a rule** follows section 6.
-
-Nothing to save is the normal result of a window.
