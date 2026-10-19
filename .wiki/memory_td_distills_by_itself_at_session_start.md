@@ -15,7 +15,7 @@ The script does four things:
 - It runs `td distill --active --max-saved 100`.
 - It writes a line at the start and a line at the end, with the exit code, to `~/.local/state/alfredo/td-distill.log`.
 
-There is no timer and no service. The user can still run `td distill` by hand, or `platone` on a window of `tl pending`. Both empty the queue the same way.
+There is no timer and no service. The user can still run `td distill` by hand. It empties the queue the same way.
 
 ## Why
 
@@ -34,4 +34,4 @@ Known limits:
 
 - [memory_td_episodes_are_built_from_the_whole_session](memory_td_episodes_are_built_from_the_whole_session) — why a returning session is safe to distill
 - [memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending](memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending) — the cap of 100
-- [skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it](skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it) — platone, once the run is trusted
+- [skill_platone_may_retire_when_td_distill_runs_on_a_timer_and_its_quality_rules_must_outlive_it](skill_census_platone_and_mose_removed_td_writes) — platone, once the run is trusted

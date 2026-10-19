@@ -1,8 +1,8 @@
 # Note quality
 
-The bar for a note in the Third Brain (`tb`). Every skill that saves a note follows this file. The text of a note is written in Italian. This file is in English.
+The bar for a note in the Third Brain (`tb`). Anyone who saves a note follows this guide. The text of a note is written in Italian. This file is in English.
 
-The sections run in order: worth, write, check, fields, purity.
+The sections run in order: worth, write, check, fields, source, purity.
 
 ## 1. Worth saving
 
@@ -22,7 +22,7 @@ A concept is valid only if it meets all three:
 
 ## 3. Check before saving
 
-Run these once per window, then per note:
+Run these once per run, then per note:
 
 ```bash
 tb tags                                          # once: the tag vocabulary
@@ -56,7 +56,7 @@ tb save --what "<idea>" --why "<reason>" --kind <kind> \
 
 - **`what`.** The idea as a puzzle piece, in Italian. A reader must understand it in ten years, without the session logs.
 - **`why`.** Why the idea matters, apart from the current debate. Italian.
-- **`kind`.** Exactly one. `indice` is a curation node, not an atomic note: only a curation pass creates it, never a skill that extracts notes. `tb save` defaults to `dato`, so always pass the kind.
+- **`kind`.** Exactly one. `indice` is a curation node, not an atomic note: only a curation pass creates it, never an extraction. `tb save` defaults to `dato`, so always pass the kind.
   - `dato`: a finding, observed mechanism or fact, from a study, a systematic observation or a measurement. It can be narrative. It must have an origin (see `source`).
   - `protocollo`: something you can do. An "if A then B" procedure or a routine.
   - `sintesi`: a bridge between at least two different domains that the source did not make. If the source already says it, it is not a synthesis.
@@ -98,15 +98,3 @@ Zero tolerance. A note holds none of these:
 - hats, colors or roles;
 - process fragments: "sintesi del dibattito", "dopo la discussione è emerso", "risultato dello scontro tra X e Y";
 - references to the user: "come richiesto", "in risposta a Filippo".
-
-## 7. The bridge
-
-After the last save of a window, run `tb random`. It returns a random note. Ask if a real connection exists between it and the note you saved. Look for the truth, not for an answer that fits.
-
-- **A connection exists.** Write it in one precise sentence and add the ref, with no confirmation:
-  ```bash
-  tb update <new-note-id> --add-ref "<random-id>:<reason>"
-  ```
-- **None exists.** Do not force it. Move on.
-
-The content of both notes must support the bridge. Free association is not enough.

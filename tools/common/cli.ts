@@ -1,3 +1,7 @@
+import { readFileSync } from "node:fs";
+
+import { assert, isNonBlank } from "./contract.js";
+
 export function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
@@ -18,4 +22,13 @@ export function die(message: string): never {
 export function collect(val: string, acc: string[]): string[] {
   acc.push(val);
   return acc;
+}
+
+export function readGuide(url: URL): string {
+  assert(url.protocol === "file:", "readGuide: the guide is a local file");
+  let result: string;
+  result = readFileSync(url, "utf8").trimEnd();
+  assert(isNonBlank(result), "readGuide: the guide is not empty");
+  assert(result === result.trimEnd(), "readGuide: the guide ends without trailing whitespace");
+  return result;
 }

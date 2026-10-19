@@ -18,7 +18,6 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 |-------|------|
 | `annibale` | Agentic debate: viewpoints made on the fly, one synthesis |
 | `piano` | Debates what a project or feature is for: writes `.design/main.md` |
-| `platone` | Sediments ideas in the TB atomically and connectedly |
 | `feynman` | Teaches the TB corpus with the Feynman technique |
 | `socrate` | Generates cognitive friction: finds contradictions and gaps, never closes |
 | `aristotele` | Curates TB syntheses: hubs, missing connections, clusters |
@@ -27,7 +26,6 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 | `indiana` | Code archaeology: diagnoses patterns and technical debt |
 | `efesto` | Creates and improves skills |
 | `omero` | Maintains the local project wiki in `.wiki/` |
-| `mose` | Writes atomic context→action rules for the Third Identity |
 | `linus` | Manages GitHub via gh: issues, project board, recaps |
 | `clio` | Backs up Qdrant to MEGA cloud: snapshots, restores, timer |
 
@@ -66,12 +64,10 @@ To extract content from URLs or videos: Polo.
 
 Omero maintains the local wiki in `.wiki/` — plain markdown pages, style guides and code conventions. Delegate to Omero to ingest material, ask about the project, or document how the code is written. The skill operates on the files directly.
 
-### End of session — Platone (10 min)
+### End of session
 
-If there has been valuable output (a decision, an idea, a pattern): Platone sediments into the TB.
+`td` distils the session into `tb` and `ti` at the start of a later session. Nothing to do by hand.
 If the work was on a project with a wiki: Omero updates `.wiki/`.
-
-The rule: if you do not sediment it now, it does not exist tomorrow.
 
 ### Periodically — Aristotele
 

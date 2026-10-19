@@ -4,7 +4,7 @@ import { Command } from "commander";
 import { checkHealth, EMBED_MODEL } from "../../tb/src/infra.js";
 import * as identity from "./identity.js";
 import { serveApi, API_PORT } from "./api.js";
-import { collect, die, errorMessage, out, outText } from "../../common/cli.js";
+import { collect, die, errorMessage, out, outText, readGuide } from "../../common/cli.js";
 import { blocksOf, ruleBlock, ruleView } from "../../common/render.js";
 import { normalizeTags } from "../../common/tags.js";
 
@@ -106,6 +106,13 @@ program
     await requireServices({ needsEmbedding: false });
     const entry = await identity.appendDo(await identity.resolveEntryId(id), opts.do);
     out(entry);
+  });
+
+program
+  .command("guide")
+  .description("Print the quality rules of a rule")
+  .action(() => {
+    outText(readGuide(new URL("../guide.md", import.meta.url)));
   });
 
 program

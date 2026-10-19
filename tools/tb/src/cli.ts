@@ -13,7 +13,7 @@ import { refineReport, COUNTERS_START, REFINE_NOTES_LIMIT } from "./refine.js";
 import type { NoteType, SearchOptions, Link } from "./types.js";
 import { ContractError } from "../../common/contract.js";
 import { NOTE_TYPES, isValidKind } from "./types.js";
-import { collect, die, errorMessage, out, outText } from "../../common/cli.js";
+import { collect, die, errorMessage, out, outText, readGuide } from "../../common/cli.js";
 import { blocksOf, noteBlock } from "../../common/render.js";
 import { normalizeTags } from "../../common/tags.js";
 
@@ -353,6 +353,13 @@ program
   });
 
 // ─── serve ────────────────────────────────────────────────────────────────────
+
+program
+  .command("guide")
+  .description("Print the quality rules of a note")
+  .action(() => {
+    outText(readGuide(new URL("../guide.md", import.meta.url)));
+  });
 
 program
   .command("serve")

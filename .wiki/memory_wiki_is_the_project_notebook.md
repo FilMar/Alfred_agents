@@ -29,7 +29,7 @@ Keeping the wiki in the repo was never the problem. Moving it out would cost thr
 
 Rejected: indexing `.wiki/` into Qdrant so it is searchable across projects. It looks like the shortcut and it fills `tb` with forty projects' conventions, which kills the rule that makes the wiki cheap. Distillation is supposed to lose information — that is the work.
 
-What this also means: the extraction is the job of the distiller and of Platone. Without that pump, knowledge does not leave the project's fence for the cross-project store.
+What this also means: the extraction is the job of the distiller. Without that pump, knowledge does not leave the project's fence for the cross-project store.
 
 ## Cross-references
 
