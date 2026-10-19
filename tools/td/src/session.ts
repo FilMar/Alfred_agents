@@ -70,6 +70,7 @@ type SessionReadState = {
   readonly session: string;
   readonly turns: readonly Turn[];
   readonly noise: readonly Turn[];
+  readonly earlier: readonly Turn[];
 };
 
 export class SessionRead {
@@ -86,20 +87,25 @@ export class SessionRead {
     for (const exchange of pending) {
       turns.push(await SessionRead.#turn(exchange));
     }
-    const result = SessionRead.of(session, turns);
+    const earlier: Turn[] = [];
+    for (const exchange of await SessionRead.#distilled(session)) {
+      const turn = await SessionRead.#turn(exchange);
+      if (turn.noise() === null) earlier.push(turn);
+    }
+    const result = SessionRead.of(session, turns, earlier);
     assert(result.session() === session, "SessionRead.read: the result is the session asked");
     return result;
   }
 
-  static of(session: string, turns: readonly Turn[]): SessionRead {
+  static of(session: string, turns: readonly Turn[], earlier: readonly Turn[] = []): SessionRead {
     assert(SessionRead.#belong(turns, session), () => `SessionRead.of: every turn belongs to the session, session=${session}`);
-    assert(SessionRead.#unique(turns), "SessionRead.of: turn ids are unique");
-    const key = (t: Turn): string => `${t.timestamp()} ${t.id()}`;
-    const sorted = [...turns].sort((a, b) => (key(a) < key(b) ? -1 : 1));
+    const earlierInTime = SessionRead.#earlierOf(session, turns, earlier);
+    const sorted = SessionRead.#inTime(turns);
     const result = new SessionRead({
       session,
       turns: sorted.filter((t) => t.noise() === null),
       noise: sorted.filter((t) => t.noise() !== null),
+      earlier: earlierInTime,
     });
     assert(result.#s.turns.length + result.#s.noise.length === turns.length, "SessionRead.of: each turn lands in one list");
     assert(result.#splitByNoise(), "SessionRead.of: a turn is kept exactly when it is not noise");
@@ -119,11 +125,58 @@ export class SessionRead {
     return this.#s.noise;
   }
 
+  earlier(): readonly Turn[] {
+    return this.#s.earlier;
+  }
+
+  whole(): readonly Turn[] {
+    const result = SessionRead.#inTime([...this.#s.earlier, ...this.#s.turns]);
+    assert(result.length === this.#s.earlier.length + this.#s.turns.length, "SessionRead.whole: every earlier and pending turn, once");
+    assert(SessionRead.#sorted(result), "SessionRead.whole: the turns are sorted by time");
+    return result;
+  }
+
+  isPending(turn: Turn): boolean {
+    const result = this.#s.turns.includes(turn);
+    assert(result || this.#s.earlier.includes(turn), "SessionRead.isPending: a turn not pending is an earlier turn of the session");
+    return result;
+  }
+
   static async #pending(session: string): Promise<readonly Exchange[]> {
     const result = await fetchExchanges({ session, distilled: false, limit: PENDING_CAP });
     assert(result.length < PENDING_CAP, () => `SessionRead.#pending: the session holds fewer pending exchanges than the cap, got=${result.length}`);
     assert(SessionRead.#ofSession(result, session), "SessionRead.#pending: every exchange belongs to the session");
     assert(SessionRead.#undistilled(result), "SessionRead.#pending: every exchange is still pending");
+    return result;
+  }
+
+  static #earlierOf(session: string, turns: readonly Turn[], earlier: readonly Turn[]): readonly Turn[] {
+    assert(SessionRead.#belong(earlier, session), () => `SessionRead.of: every turn belongs to the session, session=${session}`);
+    assert(SessionRead.#unique([...turns, ...earlier]), "SessionRead.of: turn ids are unique, earlier turns included");
+    assert(SessionRead.#noNoise(earlier), "SessionRead.of: an earlier turn is not noise");
+    return SessionRead.#inTime(earlier);
+  }
+
+  static #noNoise(turns: readonly Turn[]): boolean {
+    return turns.every((t) => t.noise() === null);
+  }
+
+  static #allDistilled(exchanges: readonly Exchange[]): boolean {
+    return exchanges.every((e) => e.distilled !== undefined);
+  }
+
+  static async #distilled(session: string): Promise<readonly Exchange[]> {
+    const result = await fetchExchanges({ session, distilled: true, limit: PENDING_CAP });
+    assert(result.length < PENDING_CAP, () => `SessionRead.#distilled: the session holds fewer distilled exchanges than the cap, got=${result.length}`);
+    assert(SessionRead.#ofSession(result, session), "SessionRead.#distilled: every exchange belongs to the session");
+    assert(SessionRead.#allDistilled(result), "SessionRead.#distilled: every exchange is already distilled");
+    return result;
+  }
+
+  static #inTime(turns: readonly Turn[]): readonly Turn[] {
+    const key = (t: Turn): string => `${t.timestamp()} ${t.id()}`;
+    const result = [...turns].sort((a, b) => (key(a) < key(b) ? -1 : 1));
+    assert(result.length === turns.length, "SessionRead.#inTime: no turn lost");
     return result;
   }
 

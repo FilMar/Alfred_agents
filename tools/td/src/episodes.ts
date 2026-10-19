@@ -73,9 +73,9 @@ export class SessionMap {
   }
 
   static async split(read: SessionRead, extractor: Extractor): Promise<SessionSplit> {
-    assert(read.turns().length > 0, () => `SessionMap.split: the session has turns, session=${read.session()}`);
-    const prompt = SessionMap.listing(read.turns(), extractor.listingChars());
-    const answer = await ModelCaller.ask(extractor.episodes(), prompt, SessionMap.check(read.turns().length));
+    assert(read.whole().length > 0, () => `SessionMap.split: the session has turns, session=${read.session()}`);
+    const prompt = SessionMap.listing(read.whole(), extractor.listingChars());
+    const answer = await ModelCaller.ask(extractor.episodes(), prompt, SessionMap.check(read.whole().length));
     const map = answer.isOk() ? SessionMap.fromJson(answer.json(), read) : null;
     const result: SessionSplit = { answer, map };
     assert((result.map !== null) === result.answer.isOk(), "SessionMap.split: a map exactly when the answer is ok");
@@ -102,15 +102,15 @@ export class SessionMap {
   }
 
   static fromJson(json: unknown, read: SessionRead): SessionMap {
-    assert(read.turns().length > 0, () => `SessionMap.fromJson: the session has turns, session=${read.session()}`);
-    assert(SessionMap.check(read.turns().length)(json) === null, "SessionMap.fromJson: the json passes the check");
+    assert(read.whole().length > 0, () => `SessionMap.fromJson: the session has turns, session=${read.session()}`);
+    assert(SessionMap.check(read.whole().length)(json) === null, "SessionMap.fromJson: the json passes the check");
     const episodes = (json as { episodes: readonly { from: number; to: number; summary: string }[] }).episodes;
     const result = new SessionMap({
       session: read.session(),
-      episodes: episodes.map((e) => Episode.of(e.from, e.to, e.summary, read.turns().slice(e.from, e.to + 1))),
+      episodes: episodes.map((e) => Episode.of(e.from, e.to, e.summary, read.whole().slice(e.from, e.to + 1))),
     });
     assert(result.session() === read.session(), "SessionMap.fromJson: the map is of the session read");
-    assert(SessionMap.#covers(result.episodes(), read.turns().length), "SessionMap.fromJson: the episodes cover every turn in order");
+    assert(SessionMap.#covers(result.episodes(), read.whole().length), "SessionMap.fromJson: the episodes cover every turn in order");
     return result;
   }
 

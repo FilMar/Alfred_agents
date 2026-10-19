@@ -389,3 +389,45 @@ describe("what joins the session list", () => {
     });
   }
 });
+
+
+describe("a session that comes back with more exchanges", () => {
+  function reopenedSession() {
+    const { session, turns } = freshSession(4);
+    return { session, turns, read: SessionRead.of(session, turns.slice(2), turns.slice(0, 2)) };
+  }
+
+  test("the episodes cover the whole session and only the pending exchanges are extracted", async () => {
+    const { read, turns } = reopenedSession();
+    const distiller = await D.distillerOf(version, NOW, "active");
+    enqueue(SPLIT_ALL(3), NOTHING, NOTHING);
+    const report = await D.distillSession(distiller, read);
+    const stored = [...(memory.collections.get("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] });
+    expect(report.failures).toEqual([]);
+    expect(model.queue.length).toBe(0);
+    expect(stored.filter((e) => e.session === read.session()).flatMap((e) => e.exchanges)).toEqual(turns.map((t) => t.id()));
+    expect(report.exchanges.map((e: { turn: { id(): string } }) => e.turn.id())).toEqual(turns.slice(2).map((t) => t.id()));
+  });
+
+  test("a second run replaces the episodes of the first with the whole session", async () => {
+    const { session, turns } = freshSession(4);
+    const first = SessionRead.of(session, turns.slice(0, 2));
+    await D.distillSession(await D.distillerOf(version, NOW, "active"), (enqueue(SPLIT_ALL(1), NOTHING, NOTHING), first));
+    const second = SessionRead.of(session, turns.slice(2), turns.slice(0, 2));
+    await D.distillSession(await D.distillerOf(version, NOW, "active"), (enqueue(SPLIT_ALL(3), NOTHING, NOTHING), second));
+    const mine = [...(memory.collections.get("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] }).filter((e) => e.session === session);
+    expect(mine.map((e) => e.exchanges)).toEqual([turns.map((t) => t.id())]);
+  });
+
+  test("a failed split leaves the episodes of the first run where they are", async () => {
+    const { session, turns } = freshSession(4);
+    const first = SessionRead.of(session, turns.slice(0, 2));
+    await D.distillSession(await D.distillerOf(version, NOW, "active"), (enqueue(SPLIT_ALL(1), NOTHING, NOTHING), first));
+    const second = SessionRead.of(session, turns.slice(2), turns.slice(0, 2));
+    enqueue(NOT_JSON, NOT_JSON, NOT_JSON);
+    await D.distillSession(await D.distillerOf(version, NOW, "active"), second);
+    model.queue.length = 0;
+    const mine = [...(memory.collections.get("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] }).filter((e) => e.session === session);
+    expect(mine.map((e) => e.exchanges)).toEqual([turns.slice(0, 2).map((t) => t.id())]);
+  });
+});

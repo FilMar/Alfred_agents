@@ -313,11 +313,13 @@ export async function distillSession(distiller: Distiller, read: SessionRead): P
     for (const episode of map.episodes()) {
       for (let index = 0; index < episode.turns().length; index++) {
         const target = targetOf(map, episode, index);
-        const report = sessionIsFull(list.size(), distiller.perSession)
-          ? skippedReport(target)
-          : await decideTarget(distiller, target, await distillTarget(distiller, target), list);
-        await distiller.recorder.write(report.turn.id(), report.outcomes);
-        exchanges.push(report);
+        if (read.isPending(targetTurn(target))) {
+          const report = sessionIsFull(list.size(), distiller.perSession)
+            ? skippedReport(target)
+            : await decideTarget(distiller, target, await distillTarget(distiller, target), list);
+          await distiller.recorder.write(report.turn.id(), report.outcomes);
+          exchanges.push(report);
+        }
       }
     }
   }
