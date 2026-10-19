@@ -1,19 +1,18 @@
 ---
 tags: [memory, ti, refine, hits, trust]
-sources: [conversation, tools/tb/src/notes.ts, tools/tb/src/refine.ts, extensions/tb_refine/claude.sh, extensions/tb_refine/pi.ts]
+sources: [conversation, SPEC.md@47c86ac, REVIEW.md@47c86ac, tools/ti/src/refine.ts, tools/ti/src/identity.ts, tools/tb/src/refine.ts]
 ---
 
 ## Decision
 
-This is a design target. No code exists yet.
+`ti` has hit counters and `ti refine`, exactly as `tb` has them. Same fields, same formula, same 0.2 threshold, same 90-day half-life, same archive.
 
-`ti` gets hit counters and `ti refine`, exactly as `tb` has them. Same fields, same formula, same 0.2 threshold, same 90-day half-life, same archive.
-
-- `ti search` writes a hit on every rule it returns. `--no-hits` skips the write, for curation.
+- `ti search` writes a hit on every rule it returns. `--no-hits` skips the write, for curation. `td` searches `ti` with no hit.
 - `ti refine` computes `trust` from the counters on every run and stores nothing but `archived_at`. Without `--apply` it is a dry run.
-- The hook passes `--no-archived` to `ti search`.
-- The session start runs `ti refine --apply` next to `tb refine --apply`.
-- `COUNTERS_START` of `ti` is the day the first hit is written, not the date of `tb`.
+- One formula, one file: `tb/src/refine.ts` takes a small `Counted` shape. `countedOf` maps a rule onto it: the `if` is the text, and there are no related hits.
+- A new rule stores `when`. An old rule has none: its floor is `COUNTERS_START` of `ti`, 2026-10-20, not the date of `tb`.
+- A hit and `append-do` write only their own fields. Before, `append-do` rewrote the whole payload and would have wiped the counters.
+- The hook passes `--no-archived` to `ti search`. The session start runs `ti refine --apply` next to `tb refine --apply`.
 
 ## Why
 
@@ -27,7 +26,7 @@ Where it will likely break:
 - An archived rule is close to dead. A note is still found by a deliberate `tb search`. A rule reaches the agent almost only through the hook, and the hook hides it.
 - A hit means "returned", not "followed". The same holds for notes.
 
-Watch the list of archived rules in the first runs. If right rules leave, give `ti` its own half-life.
+A rule never returned falls under 0.2 after about 119 days. The first real archive comes around mid-February 2027. Watch the list of archived rules in the first runs. If right rules leave, give `ti` its own half-life.
 
 ## Cross-references
 
