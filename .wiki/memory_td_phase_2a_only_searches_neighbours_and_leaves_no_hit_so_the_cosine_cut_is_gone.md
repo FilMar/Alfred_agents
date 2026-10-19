@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, neighbours]
-sources: [tools/td/SPEC_ACTIVE.md, tools/td/src/neighbours.ts, tests/td_active_end_to_end.test.ts]
+sources: [tools/td/SPEC_ACTIVE.md@61d5a9f, tools/td/src/neighbours.ts, tests/td_active_end_to_end.test.ts]
 ---
 
 ## Decision
@@ -25,6 +25,5 @@ Importing the modules keeps one process and no shell calls. The tools stay the o
 ## Cross-references
 
 - [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — the open point on the 0.95 cut that this closes
-- [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_distiller_td_is_fourteen_components_behind_one_entry_point) — component 9
-- [memory_td_extraction_checks_each_candidate_shape_in_the_json_check_and_runs_the_code_checks_inside_phase_one](memory_td_extraction_checks_each_candidate_shape_in_the_json_check_and_runs_the_code_checks_inside_phase_one) — `tb` imported as a module
+- [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_td_is_its_own_tool) — component 9
 - [memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores) — the test that checks the hits

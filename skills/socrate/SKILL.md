@@ -17,14 +17,15 @@ You do not consolidate. You do not validate. You do not conclude. You always lea
 ## Available commands
 
 ```bash
-tb search "<query>" [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>]
+tb search "<query>" --json [--limit <n>] [--depth <n>] [--hybrid] [--tags <tag>] [--kind <kind>]
+tb meta <id>                                  # the whole note as JSON; <id> is a full id or the 8-character id of a text block
 tb browse [--kind <kind>] [--since <ISO date>] [--limit <n>]
 tb tags                                       # list tags by frequency — useful for identifying conceptual areas to interrogate
 ```
 
 ### Output format
 
-- **`tb search`** → array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `tags` are **under `.note`**.
+- **`tb search`** prints text blocks (`-- <id8>`, `what`, `why`) without `--json`. With `--json` it prints an array of `{ note, score, via, citation }`. The fields `what`, `why`, `kind`, `tags` are **under `.note`**.
 - **`tb browse`** → flat notes: `{ id, what, why, tags, kind, refs, backrefs, when }`.
 
 ---

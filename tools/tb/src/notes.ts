@@ -1,10 +1,10 @@
 import { embedDocument, embedQuery, EMBED_MODEL } from "./infra.js";
-import { ensureCollection, upsert, setPayload, setPayloadMany, getByIds, search, scroll, scrollLinkedTo, scrollAllIds, deletePoints, randomNoteId, noteId, listTags, NOTE_ID_SHAPE } from "./qdrant.js";
+import { ensureCollection, upsert, setPayload, setPayloadMany, deletePayloadKeys, getByIds, search, scroll, scrollLinkedTo, scrollAllIds, deletePoints, randomNoteId, noteId, listTags, NOTE_ID_SHAPE } from "./qdrant.js";
 import type { ScrollOptions, TagFacet } from "./qdrant.js";
 import { REFS_LIMIT } from "./infra.js";
-import { assert } from "../../contract/contract.js";
+import { assert } from "../../common/contract.js";
 import { noteToText, withoutLink, nextHit, nextRelatedHit, matchPrefix, groupByPayload, validateSearchOptions, ABOUT_NOBODY } from "./types.js";
-import type { Note, NoteType, NoteStatus, Link, SearchOptions, SearchResult, DirectResult, RelatedResult, PayloadWrite } from "./types.js";
+import type { Note, NoteType, Link, SearchOptions, SearchResult, DirectResult, RelatedResult, PayloadWrite } from "./types.js";
 
 // ─── Serendipity ──────────────────────────────────────────────────────────────
 
@@ -36,7 +36,6 @@ export interface CreateNoteParams {
   tags?: string[];
   source?: string;
   exchange?: string;
-  status?: NoteStatus;
 }
 
 export async function createNote(params: CreateNoteParams): Promise<Note> {
@@ -56,7 +55,6 @@ export async function createNote(params: CreateNoteParams): Promise<Note> {
     ...(params.exchange && { exchange: params.exchange }),
     refs: [],
     embed_model: EMBED_MODEL,
-    status: params.status ?? "promossa",
     about: ABOUT_NOBODY,
     updated_at: when,
   };
@@ -106,6 +104,16 @@ export async function changeTags(id: string, tags: string[]): Promise<void> {
   const found = await getByIds([id]);
   if (found.length === 0) throw new Error(`Note not found: ${id}`);
   await setPayload(id, { tags });
+}
+
+export async function markArchived(ids: string[], at: Date): Promise<void> {
+  await ensureCollection();
+  await setPayloadMany(ids, { archived_at: at.toISOString() });
+}
+
+export async function clearArchived(ids: string[]): Promise<void> {
+  await ensureCollection();
+  await deletePayloadKeys(ids, ["archived_at"]);
 }
 
 export async function searchNotes(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
@@ -178,6 +186,16 @@ export async function resolveNoteId(idOrPrefix: string): Promise<string> {
 
   assert(NOTE_ID_SHAPE.test(matches[0]), "resolveNoteId: a resolved id is a full id");
   return matches[0];
+}
+
+/** Returns the whole note for a full id or the one prefix that matches it. */
+export async function noteById(idOrPrefix: string): Promise<Note> {
+  assert(idOrPrefix.trim().length > 0, "noteById: the id is not blank");
+  const id = await resolveNoteId(idOrPrefix);
+  const found = await getByIds([id]);
+  if (found.length === 0) throw new Error(`Note not found: ${id}`);
+  assert(found[0].id === id, "noteById: the note found carries the id asked");
+  return found[0];
 }
 
 export interface DeleteSummary {

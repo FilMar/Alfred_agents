@@ -1,7 +1,7 @@
 import { completeSimple, getEnvApiKey } from "@earendil-works/pi-ai";
 import type { AssistantMessage, Message, Usage } from "@earendil-works/pi-ai";
 
-import { assert, isNonBlank } from "../../contract/contract.js";
+import { assert, isNonBlank } from "../../common/contract.js";
 import type { Role } from "./config.js";
 
 export type JsonCheck = (json: unknown) => string | null;

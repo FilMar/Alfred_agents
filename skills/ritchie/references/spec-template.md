@@ -1,6 +1,6 @@
 # Spec template
 
-`SPEC.md` is written in step 1, next to the work, in Italian. The
+`SPEC.md` is written in step 1, in the project root, in Italian. The
 Italian is deliberate: the spec is the domain in the user's words, and
 the user is Italian.
 

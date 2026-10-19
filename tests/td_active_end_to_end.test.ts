@@ -46,11 +46,14 @@ const version = await Version.add(extractor, null, "first", NOW);
 
 let seq = 0;
 let sessionNo = 0;
-function freshSession() {
+function freshSession(count = 2, repeatUser = false) {
   sessionNo += 1;
-  const session = `e2e-${sessionNo}`;
+  const session = `e2e00000-0000-4000-8000-${String(sessionNo).padStart(12, "0")}`;
   db.upsertSession(tl.handle, { id: session, started: NOW.toISOString() });
-  const turns = ["ciao|Ciao.", `${USER}|${AGENT}`].map((pair) => {
+  const pairs = repeatUser
+    ? Array.from({ length: count }, () => `${USER}|${AGENT}`)
+    : ["ciao|Ciao.", `${USER}|${AGENT}`, ...Array.from({ length: Math.max(0, count - 2) }, (_, k) => `altro${k}|Altro${k}.`)];
+  const turns = pairs.slice(0, Math.max(count, 2)).map((pair) => {
     const [input, output] = pair.split("|");
     seq += 1;
     const id = exchangeId(session, `message-${seq}`);
@@ -87,7 +90,7 @@ function enqueue(...texts: string[]) {
 }
 
 function notesStored() {
-  return [...(memory.collections.get("third-brain")?.values() ?? [])].map((p) => p.payload as { what: string; exchange?: string; status?: string; refs: { id: string; reason: string }[] });
+  return [...(memory.collections.get("third-brain")?.values() ?? [])].map((p) => p.payload as { what: string; exchange?: string; refs: { id: string; reason: string }[] });
 }
 
 function entriesStored() {
@@ -109,7 +112,7 @@ describe("active mode on stubs", () => {
     const target = turns[1].id();
     expect(report.failures).toEqual([]);
     expect(notesStored().length).toBe(notesBefore + 1);
-    expect(notesStored().find((n) => n.what === note.what)).toMatchObject({ exchange: target, status: "provvisoria" });
+    expect(notesStored().find((n) => n.what === note.what)).toMatchObject({ exchange: target });
     expect(entriesStored().length).toBe(entriesBefore + 1);
     expect(entriesStored().find((e) => e.if === rule.if)).toMatchObject({ exchange: target });
     expect(distilledOf(turns)).toEqual([distiller.recorder.run(), distiller.recorder.run()]);
@@ -159,6 +162,47 @@ describe("active mode on stubs", () => {
     expect(distilledOf(turns)).toEqual([null, null]);
   });
 
+  test("active writes the episodes of the session with their dates and exchanges", async () => {
+    const { read, turns } = freshSession();
+    const distiller = await D.distillerOf(version, NOW, "active");
+    enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
+    await D.distillSession(distiller, read);
+    const stored = [...(memory.collection("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[]; from: string; to: string; summary: string });
+    const mine = stored.filter((e) => e.session === read.session());
+    expect(mine.length).toBe(1);
+    expect(mine[0]).toMatchObject({ exchanges: turns.map((t) => t.id()), from: turns[0].timestamp(), to: turns[1].timestamp(), summary: "saluto e regola sul log" });
+  });
+
+  test("shadow writes no episode", async () => {
+    const { read } = freshSession();
+    const before = memory.collection("tl_episodes")?.size ?? 0;
+    const distiller = await D.distillerOf(version, NOW, "shadow");
+    enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
+    await D.distillSession(distiller, read);
+    expect(memory.collection("tl_episodes")?.size ?? 0).toBe(before);
+  });
+
+  test("an episode store that is down is a failure and the session stays open", async () => {
+    const { read, turns } = freshSession();
+    const distiller = await D.distillerOf(version, NOW, "active");
+    enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
+    memory.failPath("/collections/tl_episodes");
+    const report = await D.distillSession(distiller, read);
+    expect(report.failures.some((f: string) => f.startsWith("episodes: "))).toBe(true);
+    expect(distilledOf(turns)).toEqual([null, null]);
+  });
+
+  test("distilling the same session again leaves the same episodes", async () => {
+    const { read } = freshSession();
+    for (let round = 0; round < 2; round++) {
+      const distiller = await D.distillerOf(version, NOW, "active");
+      enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
+      await D.distillSession(distiller, read);
+    }
+    const stored = [...(memory.collection("tl_episodes")?.values() ?? [])].filter((p) => (p.payload as { session: string }).session === read.session());
+    expect(stored.length).toBe(1);
+  });
+
   test("a store that is down is a failure and the session stays open", async () => {
     const { read, turns } = freshSession();
     const distiller = await D.distillerOf(version, NOW, "active");
@@ -177,6 +221,91 @@ const NEW_ONLY = `{"verdicts":[{"cand":0,"verdict":"new"}]}`;
 function verdictOf(verdict: string) {
   return { cand: 0, verdict, of: verdict === "new" ? null : "x", adds: null, reason: null, do: verdict === "append" ? "x" : null };
 }
+
+const NOTE_ONLY_JSON = JSON.stringify({ notes: [note], rules: [] });
+const SPLIT_ALL = (last: number) => `{"episodes":[{"from":0,"to":${last},"summary":"saluto e regola sul log"}]}`;
+
+describe("the same-session cutoff", () => {
+  test("a candidate that says again a saved item is a duplicate and the judge is not asked", async () => {
+    const { read, turns } = freshSession(2, true);
+    const notesBefore = notesStored().length;
+    const distiller = await D.distillerOf(version, NOW, "active", null, null, 0.8);
+    enqueue(SPLIT, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY, NOTE_ONLY_JSON, KEEPS_NOTE);
+    const report = await D.distillSession(distiller, read);
+    expect(report.failures).toEqual([]);
+    expect(model.queue.length).toBe(0);
+    expect(notesStored().length).toBe(notesBefore + 1);
+    const second = report.exchanges[1].decision.verdicts[0];
+    expect(second.verdict).toBe("duplicate");
+    expect(second.of).toBe(report.exchanges[0].decision.saves[0].savedId);
+    expect(distilledOf(turns)).toEqual([distiller.recorder.run(), distiller.recorder.run()]);
+  });
+
+  test("without a cutoff the judge is asked and the note is saved again", async () => {
+    const { read } = freshSession(2, true);
+    const notesBefore = notesStored().length;
+    const distiller = await D.distillerOf(version, NOW, "active", null, null, null);
+    enqueue(SPLIT, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY);
+    await D.distillSession(distiller, read);
+    expect(model.queue.length).toBe(0);
+    expect(notesStored().length).toBe(notesBefore + 2);
+  });
+
+  test("a twin does not take a place of the cap per session", async () => {
+    const { read } = freshSession(3, true);
+    const distiller = await D.distillerOf(version, NOW, "active", null, 2, 0.8);
+    enqueue(SPLIT_ALL(2), NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY, NOTE_ONLY_JSON, KEEPS_NOTE, NOTE_ONLY_JSON, KEEPS_NOTE);
+    const report = await D.distillSession(distiller, read);
+    expect(report.failures).toEqual([]);
+    expect(model.queue.length).toBe(0);
+  });
+});
+
+describe("the cap per session", () => {
+  test("a full session sends no later exchange to the model and still closes", async () => {
+    const { read, turns } = freshSession(3);
+    const notesBefore = notesStored().length;
+    const distiller = await D.distillerOf(version, NOW, "active", null, 1);
+    enqueue(SPLIT_ALL(2), NOTHING, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY);
+    const report = await D.distillSession(distiller, read);
+    expect(report.failures).toEqual([]);
+    expect(notesStored().length).toBe(notesBefore + 1);
+    expect(model.queue.length).toBe(0);
+    expect(distilledOf(turns)).toEqual([distiller.recorder.run(), distiller.recorder.run(), distiller.recorder.run()]);
+  });
+
+  test("inside one exchange the candidates over the cap keep their verdict and are not saved", async () => {
+    const { read, turns } = freshSession();
+    const notesBefore = notesStored().length;
+    const entriesBefore = entriesStored().length;
+    const distiller = await D.distillerOf(version, NOW, "active", null, 1);
+    enqueue(SPLIT, NOTHING, BOTH, KEEPS_NOTE, KEEPS_RULE, NEW_NEW);
+    const report = await D.distillSession(distiller, read);
+    expect(report.failures).toEqual([]);
+    expect(notesStored().length).toBe(notesBefore + 1);
+    expect(entriesStored().length).toBe(entriesBefore);
+    expect(distilledOf(turns)).toEqual([distiller.recorder.run(), distiller.recorder.run()]);
+  });
+
+  test("shadow simulates the cap and writes nothing", async () => {
+    const { read, turns } = freshSession(3);
+    const notesBefore = notesStored().length;
+    const distiller = await D.distillerOf(version, NOW, "shadow", null, 1);
+    enqueue(SPLIT_ALL(2), NOTHING, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY);
+    await D.distillSession(distiller, read);
+    expect(model.queue.length).toBe(0);
+    expect(notesStored().length).toBe(notesBefore);
+    expect(distilledOf(turns)).toEqual([null, null, null]);
+  });
+
+  test("no cap sends every exchange to the model", async () => {
+    const { read } = freshSession(3);
+    const distiller = await D.distillerOf(version, NOW, "shadow", null, null);
+    enqueue(SPLIT_ALL(2), NOTHING, NOTE_ONLY_JSON, KEEPS_NOTE, NEW_ONLY, NOTHING);
+    await D.distillSession(distiller, read);
+    expect(model.queue.length).toBe(0);
+  });
+});
 
 describe("the gaps the mutants found", () => {
   test("the neighbour search leaves no hit on the notes it reads", async () => {
@@ -259,4 +388,46 @@ describe("what joins the session list", () => {
       expect(list.size()).toBe(size);
     });
   }
+});
+
+
+describe("a session that comes back with more exchanges", () => {
+  function reopenedSession() {
+    const { session, turns } = freshSession(4);
+    return { session, turns, read: SessionRead.of(session, turns.slice(2), turns.slice(0, 2)) };
+  }
+
+  test("the episodes cover the whole session and only the pending exchanges are extracted", async () => {
+    const { read, turns } = reopenedSession();
+    const distiller = await D.distillerOf(version, NOW, "active");
+    enqueue(SPLIT_ALL(3), NOTHING, NOTHING);
+    const report = await D.distillSession(distiller, read);
+    const stored = [...(memory.collection("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] });
+    expect(report.failures).toEqual([]);
+    expect(model.queue.length).toBe(0);
+    expect(stored.filter((e) => e.session === read.session()).flatMap((e) => e.exchanges)).toEqual(turns.map((t) => t.id()));
+    expect(report.exchanges.map((e: { turn: { id(): string } }) => e.turn.id())).toEqual(turns.slice(2).map((t) => t.id()));
+  });
+
+  test("a second run replaces the episodes of the first with the whole session", async () => {
+    const { session, turns } = freshSession(4);
+    const first = SessionRead.of(session, turns.slice(0, 2));
+    await D.distillSession(await D.distillerOf(version, NOW, "active"), (enqueue(SPLIT_ALL(1), NOTHING, NOTHING), first));
+    const second = SessionRead.of(session, turns.slice(2), turns.slice(0, 2));
+    await D.distillSession(await D.distillerOf(version, NOW, "active"), (enqueue(SPLIT_ALL(3), NOTHING, NOTHING), second));
+    const mine = [...(memory.collection("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] }).filter((e) => e.session === session);
+    expect(mine.map((e) => e.exchanges)).toEqual([turns.map((t) => t.id())]);
+  });
+
+  test("a failed split leaves the episodes of the first run where they are", async () => {
+    const { session, turns } = freshSession(4);
+    const first = SessionRead.of(session, turns.slice(0, 2));
+    await D.distillSession(await D.distillerOf(version, NOW, "active"), (enqueue(SPLIT_ALL(1), NOTHING, NOTHING), first));
+    const second = SessionRead.of(session, turns.slice(2), turns.slice(0, 2));
+    enqueue(NOT_JSON, NOT_JSON, NOT_JSON);
+    await D.distillSession(await D.distillerOf(version, NOW, "active"), second);
+    model.queue.length = 0;
+    const mine = [...(memory.collection("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string; exchanges: string[] }).filter((e) => e.session === session);
+    expect(mine.map((e) => e.exchanges)).toEqual([turns.slice(0, 2).map((t) => t.id())]);
+  });
 });

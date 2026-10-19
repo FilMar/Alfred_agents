@@ -107,16 +107,6 @@ describe("Outcome.judged", () => {
   });
 });
 
-describe("Outcome.nearIdentical", () => {
-  test("a judged candidate", () => {
-    judgedNote().nearIdentical();
-  });
-
-  test("precondition - only an open candidate is dropped", () => {
-    expect(() => droppedNote().nearIdentical()).toThrow("Outcome.nearIdentical: only an open candidate is dropped");
-  });
-});
-
 describe("Outcome.decided", () => {
   test("a verdict with a pointer", () => {
     decidedNote();
@@ -127,7 +117,7 @@ describe("Outcome.decided", () => {
   });
 
   test("precondition - only an open candidate gets a verdict", () => {
-    expect(() => judgedNote().nearIdentical().decided("new", null)).toThrow("Outcome.decided: only an open candidate gets a verdict");
+    expect(() => droppedNote().decided("new", null)).toThrow("Outcome.decided: only an open candidate gets a verdict");
   });
 
   test("precondition - a candidate gets one verdict", () => {
@@ -182,10 +172,6 @@ describe("Outcome.toRow, every stage", () => {
     keptRule().judged({ is_textbook: 0.9 }, "is_textbook").toRow(head);
   });
 
-  test("near identical", () => {
-    judgedNote().nearIdentical().toRow(head);
-  });
-
   test("decided", () => {
     decidedNote().toRow(head);
   });
@@ -221,7 +207,7 @@ describe("Recorder.rows", () => {
   });
 
   test("one outcome per stage", () => {
-    recorder.rows(EXCHANGE, [keptNote(), droppedNote(), judgedNote().nearIdentical(), decidedNote().saved("tb-43")], new Date("2026-10-08T11:00:00.000Z"));
+    recorder.rows(EXCHANGE, [keptNote(), droppedNote(), judgedNote(), decidedNote().saved("tb-43")], new Date("2026-10-08T11:00:00.000Z"));
   });
 
   test("precondition - not an exchange id", () => {
@@ -241,6 +227,6 @@ describe("Recorder.write", () => {
   });
 
   test("one outcome per stage", async () => {
-    await recorder.write(EXCHANGE, [keptRule(), droppedNote(), judgedNote().nearIdentical(), decidedNote().saved("tb-43")]);
+    await recorder.write(EXCHANGE, [keptRule(), droppedNote(), judgedNote(), decidedNote().saved("tb-43")]);
   });
 });

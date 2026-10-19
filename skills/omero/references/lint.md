@@ -4,15 +4,13 @@ Health-check the wiki.
 
 The user requests a health-check. You do:
 
-1. `Glob .wiki/*.md` — list all pages.
-2. `Read` each one.
+1. Run `scripts/lint_wiki.py`. It reports broken links, leftover dot files, decisions over 40 lines, missing frontmatter, a replaced page that still exists, index rows with no file, pages missing from the index, rows under the wrong `## <topic>`, and sentences over 30 words.
+2. `Glob .wiki/*.md` and `Read` the pages for what a script cannot see.
 3. Flag:
    - Contradictions between pages.
    - Orphan pages (no incoming links).
    - Concepts mentioned without a dedicated decision.
-   - A `replaces` target that does not exist.
-   - A decision file over 100 lines, or one that holds more than one decision.
-   - A decision listed in `index.md` that is actually superseded, or a live decision missing from `index.md`.
+   - A decision that holds more than one decision.
    - A term in `GLOSSARY.md` never used anywhere in `.wiki/`, or a term used more than once across decisions with no glossary entry.
-   - Prose that breaks the easy-English rule (`GLOSSARY.md`): long sentences, subordinate clauses, jargon where a common word would do. This one needs a real read, not a grep — judge it the way you would judge your own writing.
+   - Prose that breaks the easy-English rule (`GLOSSARY.md`) in ways the script does not count: subordinate clauses, jargon where a common word would do. This needs a real read.
 4. Propose open questions to explore.

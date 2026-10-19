@@ -2,6 +2,7 @@
 
 import { createApp } from "../../tools/tl/src/api.ts";
 import * as db from "../../tools/tl/src/db.ts";
+import { EMBED_MODEL } from "../../tools/tb/src/infra.ts";
 
 const DIMS = 768;
 
@@ -10,6 +11,8 @@ type Collections = Map<string, Map<string, Point>>;
 
 export type MemoryStubs = Readonly<{
   collections: Collections;
+  aliases: Map<string, string>;
+  collection(name: string): Map<string, Point> | undefined;
   failPath(fragment: string | null): void;
   stop(): void;
 }>;
@@ -39,8 +42,15 @@ function matches(payload: Record<string, unknown>, id: string, filter: any): boo
   const mustNot: any[] = filter.must_not ?? [];
   const test = (c: any): boolean => {
     if (c.has_id) return c.has_id.includes(id);
+    if (c.is_empty) {
+      const value = payload[c.is_empty.key];
+      return value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
+    }
     const raw = payload[c.key];
     const values = Array.isArray(raw) ? raw : [raw];
+    if (c.range) {
+      return values.some((v) => typeof v === "string" && (c.range.gte === undefined || v >= c.range.gte) && (c.range.lte === undefined || v <= c.range.lte) && (c.range.gt === undefined || v > c.range.gt) && (c.range.lt === undefined || v < c.range.lt));
+    }
     if (c.match?.any) return values.some((v) => c.match.any.includes(v));
     if (c.match && "value" in c.match) return values.includes(c.match.value);
     return true;
@@ -54,6 +64,7 @@ function json(body: unknown, status = 200): Response {
 
 export function startMemoryStubs(): MemoryStubs {
   const collections: Collections = new Map();
+  const aliases = new Map<string, string>();
   let failing: string | null = null;
 
   const qdrant = Bun.serve({
@@ -62,9 +73,20 @@ export function startMemoryStubs(): MemoryStubs {
       const url = new URL(req.url);
       const path = url.pathname;
       if (failing !== null && path.includes(failing)) return json({ error: "stub failure" }, 500);
+      if (path === "/") return json({ title: "memory stub" });
+      if (path === "/collections/aliases" && req.method === "POST") {
+        const body: any = await req.json();
+        for (const action of body.actions) {
+          const { alias_name, collection_name } = action.create_alias;
+          if (aliases.has(alias_name) || collections.has(alias_name) || !collections.has(collection_name)) return json({ error: "conflict" }, 409);
+          aliases.set(alias_name, collection_name);
+        }
+        return json({ result: true });
+      }
       const m = /^\/collections\/([^/]+)(\/.*)?$/.exec(path);
       if (m === null) return new Response("not found", { status: 404 });
-      const [, name, rest = ""] = m;
+      const [, called, rest = ""] = m;
+      const name = aliases.get(called) ?? called;
       const body: any = req.method === "GET" ? {} : await req.json().catch(() => ({}));
       if (rest === "") {
         if (req.method === "GET") {
@@ -89,6 +111,13 @@ export function startMemoryStubs(): MemoryStubs {
       if (rest.startsWith("/points/") && req.method === "GET") {
         const point = points.get(decodeURIComponent(rest.slice("/points/".length)));
         return point === undefined ? json({ error: "no point" }, 404) : json({ result: { id: rest.slice(8), payload: point.payload, vector: denseOf(point.vector) } });
+      }
+      if (rest === "/points/payload/delete") {
+        for (const id of body.points as string[]) {
+          const point = points.get(id);
+          if (point !== undefined) for (const key of body.keys as string[]) delete point.payload[key];
+        }
+        return json({ result: true });
       }
       if (rest === "/points/payload") {
         for (const id of body.points as string[]) {
@@ -122,6 +151,7 @@ export function startMemoryStubs(): MemoryStubs {
   const ollama = Bun.serve({
     port: 0,
     async fetch(req) {
+      if (req.method === "GET") return json({ models: [{ name: EMBED_MODEL }] });
       if (failing !== null && "/api/embed".includes(failing)) return json({ error: "stub failure" }, 500);
       const body: any = await req.json();
       return json({ embeddings: [embed(String(body.input))] });
@@ -132,6 +162,8 @@ export function startMemoryStubs(): MemoryStubs {
   process.env.OLLAMA_URL = `http://localhost:${ollama.port}`;
   return {
     collections,
+    aliases,
+    collection: (name) => collections.get(aliases.get(name) ?? name),
     failPath: (fragment) => { failing = fragment; },
     stop: () => { qdrant.stop(); ollama.stop(); },
   };

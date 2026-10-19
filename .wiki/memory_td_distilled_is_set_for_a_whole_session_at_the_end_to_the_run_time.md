@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, tl, session]
-sources: [tools/td/SPEC_ACTIVE.md, tools/td/src/distiller.ts, tools/td/src/save.ts, tools/td/src/session.ts]
+sources: [tools/td/SPEC_ACTIVE.md@61d5a9f, tools/td/src/distiller.ts, tools/td/src/save.ts, tools/td/src/session.ts]
 ---
 
 ## Decision
@@ -13,7 +13,7 @@ A session is the unit of `distilled`.
 - With any failure, nothing closes. The next run takes the whole session again.
 - `td distill` with no argument takes every session that has pending exchanges, one after the other. `td distill <session>` takes one.
 
-This replaces one line of the pipeline decision. Its last row said `distilled` is the extractor id. `tl` checks that `distilled` is a time, so an id cannot be stored.
+`tl` checks that `distilled` is a time, so an extractor id cannot be stored there.
 
 ## Why
 
@@ -28,6 +28,5 @@ Taking every pending session is what makes active mode empty the queue. In shado
 ## Cross-references
 
 - [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — the table whose last row this changes
-- [memory_td_episodes_split_a_session_in_one_call_checked_for_full_cover_and_listed_as_json_strings](memory_td_episodes_split_a_session_in_one_call_checked_for_full_cover_and_listed_as_json_strings) — why a split cannot be repeated
 - [memory_td_session_reader_drops_only_task_notifications_and_api_errors_under_a_cap_of_1000](memory_td_session_reader_drops_only_task_notifications_and_api_errors_under_a_cap_of_1000) — what counts as noise
 - [memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending](memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending) — the cap, a failure that keeps a session open

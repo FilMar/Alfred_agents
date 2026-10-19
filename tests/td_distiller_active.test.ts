@@ -23,8 +23,8 @@ const { targetOf } = await import("../tools/td/src/extraction.ts");
 const { SessionList } = await import("../tools/td/src/novelty.ts");
 
 const NOW = new Date("2026-10-11T10:00:00.000Z");
-const SESSION = "s-1";
-const OTHER = "s-2";
+const SESSION = "5e5a0001-0000-4000-8000-000000000001";
+const OTHER = "5e5a0002-0000-4000-8000-000000000002";
 db.upsertSession(tl.handle, { id: SESSION, started: NOW.toISOString() });
 db.upsertSession(tl.handle, { id: OTHER, started: NOW.toISOString() });
 

@@ -1,6 +1,6 @@
 ---
 name: efesto
-description: "Use this skill to create, write, review, or fix a skill (SKILL.md + scripts/ + references/) in this repo. Covers: turning a workflow or idea into a new skill; auditing or improving an existing skill; checking a skill against the three core rules — predictability, English-only easy-English text, and the direct-CLI scripts convention; migrating a skill off its old justfile; running a skill for a real test; packaging a skill to share. If the user is talking about a skill as something to make, fix, review, standardize, migrate, test, or package — use this skill."
+description: "Use this skill to create, write, review, or fix a skill (SKILL.md + scripts/ + references/) in this repo. Covers: turning a workflow or idea into a new skill; auditing or improving an existing skill; checking a skill against the three core rules — predictability, English-only easy-English text, and the direct-CLI scripts convention; running a skill for a real test; packaging a skill to share. If the user is talking about a skill as something to make, fix, review, standardize, migrate, test, or package — use this skill."
 ---
 
 # Efesto
@@ -77,11 +77,6 @@ the whole audit; nothing else in this skill matters more.
 3. Add whatever the user is asking for, then re-run the audit — a fix for
    one rule can break another (e.g. a new example written in Italian).
 4. Test it for real, same as step 7 above.
-
-### Migrate a skill off its justfile
-
-The justfile layer is retired. Follow `references/MIGRATION.md` step by
-step.
 
 ### Package a skill
 
@@ -186,8 +181,7 @@ scripts/list_scripts.sh <skill_path>          # list scripts + descriptions
 python3 scripts/lint_skill.py [<skill_path>]  # no arg: every skill in the repo
 ```
 
-`lint` flags a leftover `justfile`, a `just`/`pi-just` call in a code
-block, a script with no `# desc:` header, a `SKILL.md` reference to a
+`lint` flags a `just`/`pi-just` call in a code block, a script with no `# desc:` header, a `SKILL.md` reference to a
 missing script, a script `SKILL.md` never mentions, invalid frontmatter
 (via `validate.py`), and a `SKILL.md` long enough to need a
 `references/` split. `lint` cannot see rule 1 or rule 2 — those need a

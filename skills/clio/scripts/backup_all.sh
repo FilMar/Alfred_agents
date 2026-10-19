@@ -7,6 +7,7 @@ set -euo pipefail
 QDRANT_COLLECTIONS=(
     "third-brain"
     "pi_identity"
+    "tl_episodes"
 )
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -1,6 +1,6 @@
 ---
 tags: [skill, ritchie, contracts, messages]
-sources: [skills/ritchie/SKILL.md, skills/ritchie/references/rules.md, skills/ritchie/references/languages.md]
+sources: [skills/ritchie/SKILL.md, skills/ritchie/references/rules.md, skills/ritchie/references/languages.md (deleted)]
 replaces: []
 ---
 

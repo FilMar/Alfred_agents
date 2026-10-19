@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, novelty]
-sources: [tools/td/SPEC_ACTIVE.md, tools/td/src/novelty.ts, tools/td/src/save.ts]
+sources: [tools/td/SPEC_ACTIVE.md@61d5a9f, tools/td/src/novelty.ts, tools/td/src/save.ts]
 ---
 
 ## Decision
@@ -30,4 +30,4 @@ The cost of this choice is one lost link: the fact that a second source said the
 
 - [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — phase 2b and the rule on `extends`
 - [memory_refs_carry_non_semantic_reach](memory_refs_carry_non_semantic_reach) — what a ref is worth
-- [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_distiller_td_is_fourteen_components_behind_one_entry_point) — components 10 and 11
+- [memory_distiller_td_is_fourteen_components_behind_one_entry_point](memory_td_is_its_own_tool) — components 10 and 11

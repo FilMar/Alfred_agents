@@ -1,4 +1,4 @@
-import { assert, isNonBlank, isPositiveInt, isRecord } from "../../contract/contract.js";
+import { allNonBlank, assert, isNonBlank, isPositiveInt, isRecord } from "../../common/contract.js";
 
 export const NOTE_KINDS = ["dato", "protocollo", "attrito", "configurazione"] as const;
 export type NoteKind = (typeof NOTE_KINDS)[number];
@@ -484,9 +484,6 @@ function isNoteKind(kind: string): kind is NoteKind {
   return (NOTE_KINDS as readonly string[]).includes(kind);
 }
 
-function allNonBlank(items: readonly string[]): boolean {
-  return items.every(isNonBlank);
-}
 
 function isUnique(items: readonly string[]): boolean {
   return new Set(items).size === items.length;

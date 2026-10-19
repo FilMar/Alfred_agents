@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { COLLECTION, DENSE_VECTOR_NAME, SPARSE_VECTOR_NAME, VECTOR_SIZE, SNIPPET_MAX_LEN, qdrantClient, HttpError, getCollectionInfo, createCollection } from "./infra.js";
 import type { Note, NoteType, SearchOptions, SearchResult, RelatedResult, Citation } from "./types.js";
-import { assert } from "../../contract/contract.js";
+import { assert } from "../../common/contract.js";
 import { NOTE_TYPES, isEvidence, noteToText, topRelated, RELATED_LIMIT } from "./types.js";
 
 // ─── ID / Vettori ─────────────────────────────────────────────────────────────
@@ -141,6 +141,15 @@ export async function setPayloadMany(ids: string[], payload: Record<string, unkn
   });
 }
 
+/** Removes payload keys from many notes in a single request. */
+export async function deletePayloadKeys(ids: string[], keys: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  await qdrantClient.request("POST", `/collections/${COLLECTION}/points/payload/delete?wait=true`, {
+    keys,
+    points: ids,
+  });
+}
+
 /** Fetches notes by ID. Returns [] on 404. */
 export async function getByIds(ids: string[]): Promise<Note[]> {
   if (ids.length === 0) return [];
@@ -201,6 +210,10 @@ function buildSearchFilter(options: SearchOptions): Record<string, unknown> | un
 
   if (!options.include_hubs) {
     must_not.push({ key: "kind", match: { value: "indice" } });
+  }
+
+  if (options.exclude_archived) {
+    must.push({ is_empty: { key: "archived_at" } });
   }
 
   if (must.length === 0 && must_not.length === 0) return undefined;

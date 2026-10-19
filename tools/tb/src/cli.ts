@@ -6,13 +6,16 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { checkHealth, EMBED_MODEL } from "./infra.js";
-import { serveGraph, GRAPH_PORT } from "./graph/server.js";
 import { serveApi, API_PORT } from "./api.js";
-import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId } from "./notes.js";
+import { noteById, createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId, markArchived, clearArchived } from "./notes.js";
 import { getByIds } from "./qdrant.js";
+import { refineReport, COUNTERS_START, REFINE_NOTES_LIMIT } from "./refine.js";
 import type { NoteType, SearchOptions, Link } from "./types.js";
-import { ContractError } from "../../contract/contract.js";
-import { NOTE_TYPES, NOTE_STATUSES, isValidKind, normalizeTags, errorMessage } from "./types.js";
+import { ContractError } from "../../common/contract.js";
+import { NOTE_TYPES, isValidKind } from "./types.js";
+import { collect, die, errorMessage, out, outText } from "../../common/cli.js";
+import { blocksOf, noteBlock } from "../../common/render.js";
+import { normalizeTags } from "../../common/tags.js";
 
 // ─── Compose path ─────────────────────────────────────────────────────────────
 
@@ -24,16 +27,7 @@ const QDRANT_POLL_INTERVAL_MS = 1_000;
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
 
-function out(data: unknown): void {
-  process.stdout.write(JSON.stringify(data, null, 2) + "\n");
-}
-
-function die(message: string): never {
-  process.stderr.write(`Error: ${message}\n`);
-  process.exit(1);
-}
-
-/** Accepts a full id or a unique prefix, the way the graph view prints it. */
+/** Accepts a full id or a unique prefix. */
 async function resolveOrDie(idOrPrefix: string): Promise<string> {
   try {
     return await resolveNoteId(idOrPrefix);
@@ -60,11 +54,6 @@ async function requireServices(opts: { needsEmbedding?: boolean } = {}): Promise
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function collect(val: string, acc: string[]): string[] {
-  acc.push(val);
-  return acc;
-}
 
 function validateKind(kind: string): asserts kind is NoteType {
   if (!isValidKind(kind)) {
@@ -142,10 +131,8 @@ program
   .option("--tags <tag>", "Tag (repeatable)", collect, [] as string[])
   .option("--source <uri>", "URI or reference to the original source")
   .option("--exchange <id>", "Id of the tl exchange the note comes from")
-  .option("--status <status>", "provvisoria | promossa", "promossa")
   .action(async (opts) => {
     validateKind(opts.kind);
-    if (!NOTE_STATUSES.includes(opts.status)) die(`invalid status: "${opts.status}". Allowed: ${NOTE_STATUSES.join(", ")}`);
     await requireServices({ needsEmbedding: true });
 
     const note = await createNote({
@@ -155,7 +142,6 @@ program
       tags: normalizeTags(opts.tags),
       source: opts.source,
       exchange: opts.exchange,
-      status: opts.status,
     });
 
     out({ id: note.id });
@@ -199,6 +185,8 @@ program
   .option("--min-score <n>", "Minimum score to keep a direct hit (never cuts related notes)")
   .option("--related-limit <n>", "Maximum related notes kept, best score first")
   .option("--no-hits", "Do not count this search as a hit on the returned notes")
+  .option("--no-archived", "Leave out the archived notes, related ones included")
+  .option("--json", "Print the full results as JSON instead of text blocks")
   .action(async (query: string, opts) => {
     await requireServices({ needsEmbedding: true });
 
@@ -213,10 +201,27 @@ program
       min_score: opts.minScore !== undefined ? parseFloat(opts.minScore) : undefined,
       related_limit: opts.relatedLimit !== undefined ? parseInt(opts.relatedLimit, 10) : undefined,
       record_hits: opts.hits,
+      exclude_archived: opts.archived === false,
     };
 
     const results = await searchNotes(query, options);
-    out(results);
+    if (opts.json) out(results);
+    else outText(blocksOf(results.map((result) => noteBlock(result.note))));
+  });
+
+// ─── meta ─────────────────────────────────────────────────────────────────────
+
+program
+  .command("meta <id>")
+  .description("Print the whole note as JSON. Accepts a full id or a unique prefix.")
+  .action(async (id: string) => {
+    await requireServices({ needsEmbedding: false });
+
+    try {
+      out(await noteById(id));
+    } catch (err) {
+      die(errorMessage(err));
+    }
   });
 
 // ─── update ───────────────────────────────────────────────────────────────────
@@ -320,18 +325,31 @@ program
     out(notes);
   });
 
-// ─── graph ────────────────────────────────────────────────────────────────────
+// ─── refine ───────────────────────────────────────────────────────────────────
 
 program
-  .command("graph")
-  .description("Open the Third Brain graph in the browser")
-  .action(async () => {
+  .command("refine")
+  .description("Print the trust spread, the notes under the floor and the plan. Writes only with --apply.")
+  .option("--apply", "Write archived_at on the notes to archive, and remove it from the notes to restore")
+  .action(async (opts) => {
     await requireServices({ needsEmbedding: false });
-    serveGraph();
-    const url = `http://localhost:${GRAPH_PORT}`;
-    process.stdout.write(`Graph: ${url}\n`);
-    spawnSync("xdg-open", [url], { stdio: "ignore" });
-    await new Promise(() => {}); // keep process alive
+
+    try {
+      const notes = await browseNotes({ limit: REFINE_NOTES_LIMIT });
+      const now = new Date();
+      const report = refineReport(notes, now, COUNTERS_START);
+
+      if (!opts.apply) {
+        out(report);
+        return;
+      }
+
+      await markArchived(report.plan.archive.map((entry) => entry.id), now);
+      await clearArchived(report.plan.restore.map((entry) => entry.id));
+      out({ ...report, applied: { archived: report.plan.archive.length, restored: report.plan.restore.length } });
+    } catch (err) {
+      die(errorMessage(err));
+    }
   });
 
 // ─── serve ────────────────────────────────────────────────────────────────────

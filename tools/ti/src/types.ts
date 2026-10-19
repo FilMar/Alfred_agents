@@ -17,12 +17,3 @@ export interface SearchOptions {
   min_score?: number;
 }
 
-/** Normalizes a tag list: split on commas, trim, drop empties. */
-export function normalizeTags(tags: string[]): string[] {
-  return tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean);
-}
-
-/** Extracts a readable message from an unknown error type. */
-export function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}

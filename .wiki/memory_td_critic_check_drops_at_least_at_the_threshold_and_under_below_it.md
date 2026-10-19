@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, critic, config]
-sources: [conversation, tools/td/src/config.ts, tests/td_config.test.ts, spikes/2026-10-02-extractor-f/main.py]
+sources: [conversation, tools/td/src/config.ts, tests/td_config.test.ts, spikes/2026-10-02-extractor-f/main.py (deleted)]
 replaces: [memory_td_question_above_drops_at_the_threshold_and_below_drops_under_it]
 ---
 
@@ -35,6 +35,6 @@ A probability is a finite number from 0 to 1, both ends included. `NaN` is refus
 
 ## Cross-references
 
-- [.memory_td_question_above_drops_at_the_threshold_and_below_drops_under_it](.memory_td_question_above_drops_at_the_threshold_and_below_drops_under_it) — the replaced decision
+- `memory_td_question_above_drops_at_the_threshold_and_below_drops_under_it@ff370b9` — the replaced decision
 - [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question) — the checks and their thresholds
-- [memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy](memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy) — how a check is built
+- [memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy](memory_td_config_enters_as_checked_json) — how a check is built

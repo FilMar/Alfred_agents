@@ -16,8 +16,8 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 
 | Agent | Role |
 |-------|------|
-| `annibale` | Orchestrator: decomposes complex work into multi-hat flows |
-| `piano` | Founds new projects through dialogue: produces README, ROADMAP, CLAUDE.md |
+| `annibale` | Agentic debate: viewpoints made on the fly, one synthesis |
+| `piano` | Debates what a project or feature is for: writes `.design/main.md` |
 | `platone` | Sediments ideas in the TB atomically and connectedly |
 | `feynman` | Teaches the TB corpus with the Feynman technique |
 | `socrate` | Generates cognitive friction: finds contradictions and gaps, never closes |
@@ -27,15 +27,9 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 | `indiana` | Code archaeology: diagnoses patterns and technical debt |
 | `efesto` | Creates and improves skills |
 | `omero` | Maintains the local project wiki in `.wiki/` |
-| `ermes` | Manages email via Himalaya: triage, search, compose drafts (no send/delete) |
 | `mose` | Writes atomic context→action rules for the Third Identity |
-| `jobs` | Manages tasks via Taskwarrior with GTD semantics |
 | `linus` | Manages GitHub via gh: issues, project board, recaps |
-| `atlante` | Turns data into standalone interactive HTML charts (D3.js) |
-| `vinci` | Generates a Curriculum Vitae in Typst from conversation |
 | `clio` | Backs up Qdrant to MEGA cloud: snapshots, restores, timer |
-| `draghi` | Imports bank export CSVs into an expense ledger, computes trends |
-| `ulisse` | Skill navigator: points to the right skill instead of doing the task |
 
 Full, always-current roster (derived from the filesystem at print time):
 
@@ -65,7 +59,7 @@ Before answering on a topic that might be in the TB:
 tb search "<topic>" --depth 1
 ```
 
-For complex problems that benefit from multiple perspectives: Annibale orchestrates a multi-hat flow. Read its SKILL.md and follow it.
+For a judgment with trade-offs that benefits from several viewpoints: Annibale runs a debate. Read its SKILL.md and follow it.
 To extract content from URLs or videos: Polo.
 
 ### On a project — Omero

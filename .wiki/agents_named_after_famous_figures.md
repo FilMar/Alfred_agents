@@ -1,11 +1,11 @@
 ---
 tags: [agents, naming, skills]
-sources: [.wiki/agenti.md]
+sources: [.wiki/agenti.md@f87afd9]
 ---
 
 ## Decision
 
-Name a skill after the most famous figure whose iconic trait coincides with the skill's function — any pantheon (myth, history, science, pop), single word, and it must pass the bar test: hearing the name, you guess the function without footnotes. Current names follow this rule (platone, annibale, omero, ermes, mose, ulisse, ...).
+Name a skill after the most famous figure whose iconic trait matches the skill's function. Any pantheon works (myth, history, science, pop). The name is one word. It passes the bar test: hearing the name, you guess the function without footnotes. Current names follow this rule (platone, annibale, omero, mose, ...).
 
 ## Why
 

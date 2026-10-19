@@ -1,7 +1,7 @@
 import { getApiProvider, getSupportedThinkingLevels } from "@earendil-works/pi-ai";
 import type { Api, Model, ModelThinkingLevel } from "@earendil-works/pi-ai";
 
-import { assert, isNonBlank, isPositiveInt, isRecord, isUnit, sameJson } from "../../contract/contract.js";
+import { assert, isNonBlank, isPositiveInt, isRecord, isUnit, sameJson } from "../../common/contract.js";
 import { CANDIDATE_KINDS } from "../../tl/src/types.js";
 import type { CandidateKind } from "../../tl/src/types.js";
 

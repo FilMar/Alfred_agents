@@ -1,4 +1,4 @@
-import { assert } from "../../contract/contract.js";
+import { assert } from "../../common/contract.js";
 
 // ─── Enum constants ─────────────────────────────────────────────────────
 
@@ -13,11 +13,7 @@ export const NOTE_TYPES = [
 
 // ─── Derived types ────────────────────────────────────────────────────────────
 
-export const NOTE_STATUSES = ["provvisoria", "promossa"] as const;
-
 export type NoteType = (typeof NOTE_TYPES)[number];
-
-export type NoteStatus = (typeof NOTE_STATUSES)[number];
 
 /** Subject a note describes. `mondo` means it describes no one in particular. */
 export const ABOUT_NOBODY = "mondo";
@@ -40,16 +36,6 @@ export function isEvidence(kind: NoteType): boolean {
 /** Type guard: validates an arbitrary kind against the NOTE_TYPES enum. */
 export function isValidKind(kind: string): kind is NoteType {
   return (NOTE_TYPES as readonly string[]).includes(kind);
-}
-
-/** Normalizes a tag list: split on commas, trim, drop empties. */
-export function normalizeTags(tags: string[]): string[] {
-  return tags.flatMap((t) => t.split(",").map((s) => s.trim())).filter(Boolean);
-}
-
-/** Extracts a readable message from an unknown error type. */
-export function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 /** Canonical text to embed for a note: context + content. */
@@ -101,12 +87,12 @@ export interface Note {
   last_hit_related?: string;
   /** Model that produced the dense vector — a vector is only comparable within one model */
   embed_model?: string;
-  /** `promossa` passed a human, `provvisoria` was proposed and not yet read */
-  status?: NoteStatus;
   /** Subject of the note: an entity name, or `mondo` */
   about?: string;
   /** ISO 8601 — last change to any mutable field */
   updated_at?: string;
+  /** ISO 8601 — when `tb refine --apply` archived the note. Absent while the note is live. */
+  archived_at?: string;
 }
 
 // ─── Search ──────────────────────────────────────────────────────────────────
@@ -143,6 +129,8 @@ export interface SearchOptions {
   related_limit?: number;
   /** If false, hits are not counted on the notes. Default: true. */
   record_hits?: boolean;
+  /** If true, leaves out the notes that have `archived_at`, related ones included. Default: false. */
+  exclude_archived?: boolean;
 }
 
 /** Related results kept after ranking, when the caller names no limit. */

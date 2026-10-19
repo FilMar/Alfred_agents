@@ -354,6 +354,26 @@ describe("settle", () => {
     ]);
   });
 
+  it("turns a verdict that points at an item of another kind into new, with no link and no extra field", () => {
+    for (const verdict of ["duplicate", "extends", "contradicts"]) {
+      expect(
+        settle({ verdicts: [{ cand: 0, verdict, of: 1, adds: "aggiunge", adds_is_new_idea: true, reason: "perché" }] }, [NOTE], KNOWN2),
+      ).toEqual([{ cand: 0, verdict: "new", of: null, adds: null, reason: null, do: null }]);
+    }
+    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 0, do: "azione" }] }, [RULE], KNOWN2)).toEqual([
+      { cand: 0, verdict: "new", of: null, adds: null, reason: null, do: null },
+    ]);
+  });
+
+  it("keeps a verdict that points at an item of its own kind", () => {
+    expect(settle({ verdicts: [{ cand: 0, verdict: "contradicts", of: 0, reason: "dice il contrario" }] }, [NOTE], KNOWN2)).toEqual([
+      { cand: 0, verdict: "contradicts", of: "k0", adds: null, reason: "dice il contrario", do: null },
+    ]);
+    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 1, do: "azione" }] }, [RULE], KNOWN2)).toEqual([
+      { cand: 0, verdict: "append", of: "k1", adds: null, reason: null, do: "azione" },
+    ]);
+  });
+
   it("turns a note extends without a usable adds into duplicate", () => {
     expect(settle({ verdicts: [{ cand: 0, verdict: "extends", of: 0 }] }, [NOTE], KNOWN2)).toEqual([
       { cand: 0, verdict: "duplicate", of: "k0", adds: null, reason: null, do: null },
@@ -393,8 +413,8 @@ describe("settle", () => {
 
   it("carries a contradicts verdict with its trimmed reason", () => {
     expect(
-      settle({ verdicts: [{ cand: 0, verdict: "contradicts", of: 1, reason: "  dice il contrario  " }] }, [NOTE], KNOWN2),
-    ).toEqual([{ cand: 0, verdict: "contradicts", of: "k1", adds: null, reason: "dice il contrario", do: null }]);
+      settle({ verdicts: [{ cand: 0, verdict: "contradicts", of: 0, reason: "  dice il contrario  " }] }, [NOTE], KNOWN2),
+    ).toEqual([{ cand: 0, verdict: "contradicts", of: "k0", adds: null, reason: "dice il contrario", do: null }]);
   });
 
   it("nulls a reason that is missing, blank or not a string", () => {
@@ -404,11 +424,11 @@ describe("settle", () => {
   });
 
   it("turns a rule append without a do into duplicate", () => {
-    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 0 }] }, [RULE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "duplicate", of: "k0", adds: null, reason: null, do: null },
+    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 1 }] }, [RULE], KNOWN2)).toEqual([
+      { cand: 0, verdict: "duplicate", of: "k1", adds: null, reason: null, do: null },
     ]);
-    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 0, do: "   " }] }, [RULE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "duplicate", of: "k0", adds: null, reason: null, do: null },
+    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 1, do: "   " }] }, [RULE], KNOWN2)).toEqual([
+      { cand: 0, verdict: "duplicate", of: "k1", adds: null, reason: null, do: null },
     ]);
   });
 
@@ -443,8 +463,12 @@ describe("settle", () => {
   });
 
   it("maps the of to the key of the known item, first and last", () => {
-    expect(settle({ verdicts: [{ cand: 0, verdict: "duplicate", of: 0 }] }, [NOTE], KNOWN2)[0].of).toBe("k0");
-    expect(settle({ verdicts: [{ cand: 0, verdict: "duplicate", of: 1 }] }, [NOTE], KNOWN2)[0].of).toBe("k1");
+    const twoNotes: readonly Known[] = [
+      { key: "k0", kind: "note", text: "la prima nota" },
+      { key: "k1", kind: "note", text: "la seconda nota" },
+    ];
+    expect(settle({ verdicts: [{ cand: 0, verdict: "duplicate", of: 0 }] }, [NOTE], twoNotes)[0].of).toBe("k0");
+    expect(settle({ verdicts: [{ cand: 0, verdict: "duplicate", of: 1 }] }, [NOTE], twoNotes)[0].of).toBe("k1");
   });
 });
 

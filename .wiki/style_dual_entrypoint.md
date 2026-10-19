@@ -5,9 +5,9 @@ sources: [tools/tb/src/api.ts, tools/ti/src/api.ts]
 
 ## Decision
 
-`tb` and `ti` each expose the same business logic through two thin entry points: `cli.ts` (commander, for humans and agents shelling out) and `api.ts` (Hono, for HTTP tool integrations, e.g. registering the module as an OpenAPI Tool Server). Added 2026-07-23.
+`tb` and `ti` each expose the same business logic through two thin entry points. `cli.ts` (commander) is for humans and agents shelling out. `api.ts` (Hono) is for HTTP tool integrations, for example registering the module as an OpenAPI Tool Server. Added 2026-07-23.
 
-- One Hono route per CLI command, same option names and semantics (`POST /search`, `POST /save`, `GET /tags`, `GET /random`, `GET /browse`, `PATCH /notes/:id` for `tb`; `POST /add`, `POST /search`, `GET /list`, `DELETE /entries/:id`, `PATCH /entries/:id` for `ti`).
+- One Hono route per CLI command, same option names and semantics.
 - A static, hand-written `GET /openapi.json` — no codegen; kept in sync by hand because the surface is small and changes rarely.
 - `serveApi()` called from a `serve` CLI command via `Bun.serve({ port, fetch: app.fetch })`.
 - Ports are env-overridable: `TB_API_PORT` (8788), `TI_API_PORT` (8789).
@@ -21,4 +21,3 @@ Both entry points calling the same underlying functions means behavior can never
 ## Cross-references
 
 - [style_tb_ti_layering](style_tb_ti_layering) — the layering this sits on
-- [th_http_api_scoped_no_db](th_http_api_scoped_no_db) — the planned `th` extension, deliberately divergent (async job polling)

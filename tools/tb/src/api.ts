@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 
 import { createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags } from "./notes.js";
-import { NOTE_TYPES, NOTE_STATUSES, isValidKind, normalizeTags, errorMessage, validateSearchOptions } from "./types.js";
+import { NOTE_TYPES, isValidKind, validateSearchOptions } from "./types.js";
+import { errorMessage } from "../../common/cli.js";
+import { normalizeTags } from "../../common/tags.js";
 import type { NoteType, SearchOptions } from "./types.js";
 import type { ScrollOptions } from "./qdrant.js";
 
@@ -65,7 +67,6 @@ const OPENAPI_SPEC = {
                   tags: { type: "array", items: { type: "string" } },
                   source: { type: "string" },
                   exchange: { type: "string" },
-                  status: { type: "string", enum: NOTE_STATUSES, default: "promossa" },
                 },
               },
             },
@@ -163,10 +164,7 @@ app.post("/save", async (c) => {
   const kind = body.kind ?? "dato";
   if (!isValidKind(kind)) return c.json({ error: `invalid kind: "${kind}". Allowed: ${NOTE_TYPES.join(", ")}` }, 400);
 
-  const status = body.status ?? "promossa";
-  if (!NOTE_STATUSES.includes(status)) return c.json({ error: `invalid status: "${status}". Allowed: ${NOTE_STATUSES.join(", ")}` }, 400);
-
-  const note = await createNote({ what: body.what, why: body.why, kind, tags: normalizeTags(body.tags ?? []), source: body.source, exchange: body.exchange, status });
+  const note = await createNote({ what: body.what, why: body.why, kind, tags: normalizeTags(body.tags ?? []), source: body.source, exchange: body.exchange });
   return c.json({ id: note.id });
 });
 

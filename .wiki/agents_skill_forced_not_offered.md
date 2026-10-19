@@ -17,13 +17,13 @@ sources: [conversation, tools/th/src/prompt.ts, tools/th/src/cli.ts, skills/anni
 
 Before this, a delegated run used a skill by being asked to: *"use the christopher skill to retrieve…"*. That is a sentence in the task, and a model can read the file partially, skip it, or improvise the protocol — and nothing downstream would show it. An unobservable failure mode is the worst kind, because the output still looks like an answer.
 
-Measured on a real run: forcing `efesto` cost **6,380 input tokens**, the skill's actual text. `formatSkillsForPrompt`, the function pi uses for discovery, would have added about one line — name, description, and an invitation to read the file with a tool the run may not even have. That gap between a catalogue entry and the protocol itself is the whole difference between offering and forcing. Asked which skill it had been given, the run answered with its name and nothing else.
+Measured on a real run: forcing `efesto` cost **6,380 input tokens**, the skill's actual text. `formatSkillsForPrompt`, the function pi uses for discovery, would have added about one line: name, description, and an invitation to read the file. The run may not even have the tool to read it. That gap between a catalogue entry and the protocol itself is the whole difference between offering and forcing. Asked which skill it had been given, the run answered with its name and nothing else.
 
 There is a second gain, in the shape of a rule. The old rule was a prohibition: *never pass a skill name as `--member`*. A prohibition has to be remembered every time, and the thing it forbids is the obvious thing to try. Now there is a flag with the skill's name on it, so the rule becomes *where a skill goes*, which needs no remembering.
 
-The mechanism is pi's own: `loadSkills` finds every skill this machine and this project offer, the same way the interactive agent does, so the names accepted here are exactly the names that work elsewhere and a wrong one is answered with the full list.
+The mechanism is pi's own. `loadSkills` finds every skill this machine and this project offer, the same way the interactive agent does. So the names accepted here are exactly the names that work elsewhere. A wrong name is answered with the full list.
 
-One hazard stays, and is not solved by code: a skill that writes — `mose` needs explicit confirmation, `platone` consolidates, `clio` moves backups — becomes unattended when forced into a detached run. The gate those skills describe lives in their text, not in `th`.
+One hazard stays, and code does not solve it. A skill that writes becomes unattended when forced into a detached run. `mose` needs explicit confirmation, `platone` consolidates, and `clio` moves backups. The gate those skills describe lives in their text, not in `th`.
 
 ## Cross-references
 

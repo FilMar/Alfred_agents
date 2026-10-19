@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, safety]
-sources: [tools/td/SPEC_ACTIVE.md, tools/td/src/save.ts, tools/td/src/distiller.ts, tools/td/src/cli.ts]
+sources: [tools/td/SPEC_ACTIVE.md@61d5a9f, tools/td/src/save.ts, tools/td/src/distiller.ts, tools/td/src/cli.ts]
 ---
 
 ## Decision
@@ -26,5 +26,6 @@ First live run, one session of 38 exchanges: with a cap of 6, six items were wri
 ## Cross-references
 
 - [memory_td_distilled_is_set_for_a_whole_session_at_the_end_to_the_run_time](memory_td_distilled_is_set_for_a_whole_session_at_the_end_to_the_run_time) — why the capped session is redone whole
-- [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) — the manual path that stays until the automatic one is trusted
+- [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) — the run at the start of a session uses this cap; the manual path stays
+- [memory_td_session_cap_limits_one_session](memory_td_session_cap_limits_one_session) — the cap of one session, which closes it
 - [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) — a cap and a judge in place of a human gate

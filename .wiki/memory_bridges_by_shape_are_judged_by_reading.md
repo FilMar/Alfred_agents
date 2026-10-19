@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, refs, bridges, distiller]
-sources: [conversation, spikes/2026-10-01-extraction-hats/main.py, spikes/2026-10-01-extraction-hats/bridges.jsonl]
+sources: [conversation, spikes/2026-10-01-extraction-hats/main.py (deleted), spikes/2026-10-01-extraction-hats/bridges.jsonl (deleted)]
 ---
 
 ## Decision

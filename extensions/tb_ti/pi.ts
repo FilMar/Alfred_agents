@@ -7,49 +7,17 @@ export default function (pi: ExtensionAPI): void {
 
     const [tiResult, tbResult] = await Promise.allSettled([
       execSearch("ti", event.prompt, { limit: 2, minScore: HOOK_MIN_SCORE }),
-      execSearch("tb", event.prompt, { depth: 1, limit: 2, minScore: HOOK_MIN_SCORE, relatedLimit: 3 }),
+      execSearch("tb", event.prompt, { depth: 1, limit: 2, minScore: HOOK_MIN_SCORE, relatedLimit: 3, noArchived: true }),
     ]);
 
     let context = "";
 
-    // Third Identity results
     if (tiResult.status === "fulfilled" && tiResult.value.trim()) {
-      try {
-        const tiData = JSON.parse(tiResult.value);
-        const tiFormatted = tiData
-          .slice(0, 2)
-          .map((r: { if?: string; do?: string; tags?: string[] }) => {
-            const ifPart = r.if || "—";
-            const doPart = r.do || "—";
-            const tags = r.tags?.length ? `\nTags: ${r.tags.join(", ")}` : "";
-            return `**If**: ${ifPart}\n**Do**: ${doPart}${tags}`;
-          })
-          .join("\n\n");
-        context += `## Third Identity (ti) matches\n\n${tiFormatted}\n\n`;
-      } catch {
-        context += `## Third Identity (ti) matches\n\n${tiResult.value.trim()}\n\n`;
-      }
+      context += `## Third Identity (ti) matches\n\n${tiResult.value.trim()}\n\n`;
     }
 
-    // Third Brain results
     if (tbResult.status === "fulfilled" && tbResult.value.trim()) {
-      try {
-        const tbData = JSON.parse(tbResult.value);
-        const tbFormatted = tbData
-          .slice(0, 2)
-          .map((r: { note?: { what?: string; why?: string; tags?: string[]; kind?: string }; what?: string; why?: string; kind?: string; via?: string }) => {
-            const what = r.note?.what || r.what || "—";
-            const why = r.note?.why || r.why || "—";
-            const tags = r.note?.tags?.length ? `\nTags: ${r.note.tags.join(", ")}` : "";
-            const kind = r.note?.kind || r.kind ? `\nKind: ${r.note?.kind || r.kind}` : "";
-            const via = r.via === "related" ? "\nReached through an edge, not matched by the prompt" : "";
-            return `**What**: ${what}\n**Why**: ${why}${tags}${kind}${via}`;
-          })
-          .join("\n\n");
-        context += `## Third Brain (tb) matches\n\n${tbFormatted}`;
-      } catch {
-        context += `## Third Brain (tb) matches\n\n${tbResult.value.trim()}`;
-      }
+      context += `## Third Brain (tb) matches\n\n${tbResult.value.trim()}`;
     }
 
     if (!context.trim()) return;
@@ -70,14 +38,20 @@ export default function (pi: ExtensionAPI): void {
 // near 0.53 and an off-topic one never passes 0.25. The old 0.8 fired on no prompt at all.
 const HOOK_MIN_SCORE = 0.5;
 
+// Eight characters are enough: tb and ti accept a unique prefix of an id.
+function shortId(id: string | undefined): string {
+  return (id ?? "").slice(0, 8);
+}
+
 async function execSearch(
   cmd: string,
   query: string,
-  opts: { limit?: number; minScore?: number; depth?: number; relatedLimit?: number } = {},
+  opts: { limit?: number; minScore?: number; depth?: number; relatedLimit?: number; noArchived?: boolean } = {},
 ): Promise<string> {
   const args = ["search", query, "--limit", String(opts.limit ?? 5), "--min-score", String(opts.minScore ?? HOOK_MIN_SCORE)];
   if (opts.depth) args.push("--depth", String(opts.depth));
   if (opts.relatedLimit !== undefined) args.push("--related-limit", String(opts.relatedLimit));
+  if (opts.noArchived) args.push("--no-archived");
 
   try {
     const { stdout } = await runCommand(cmd, args);

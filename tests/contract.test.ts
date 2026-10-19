@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { assert } from "../tools/contract/contract.ts";
+import { assert } from "../tools/common/contract.ts";
 
 describe("assert", () => {
   test("a true condition with a string message", () => {

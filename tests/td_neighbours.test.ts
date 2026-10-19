@@ -63,7 +63,6 @@ const seedNote = async (what: string): Promise<void> => {
     kind: "attrito",
     tags: ["architettura"],
     exchange: "exchange-1",
-    status: "provvisoria",
   });
 };
 

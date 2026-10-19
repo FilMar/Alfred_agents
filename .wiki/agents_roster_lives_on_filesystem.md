@@ -1,6 +1,6 @@
 ---
 tags: [agents, roster, skills]
-sources: [.wiki/agenti.md]
+sources: [.wiki/agenti.md@f87afd9]
 ---
 
 ## Decision
@@ -19,5 +19,5 @@ A copy in the wiki goes stale: a previous table claimed 14 skills while `skills/
 
 ## Cross-references
 
-- [agents_skills_inline_members_via_th](.agents_skills_inline_members_via_th) — the skills/members boundary the roster respects
+- `agents_skills_inline_members_via_th@b896c3d` — the skills/members boundary the roster respects
 - [skill_convention_direct_cli](skill_convention_direct_cli) — what a skill folder contains

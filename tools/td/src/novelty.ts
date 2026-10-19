@@ -1,4 +1,4 @@
-import { assert, isNonBlank, isRecord } from "../../contract/contract.js";
+import { assert, isNonBlank, isRecord } from "../../common/contract.js";
 import type { CandidateKind } from "../../tl/src/types.js";
 import { NoteCandidate } from "./candidate.js";
 import type { Extractor } from "./config.js";
@@ -167,31 +167,33 @@ export function settle(json: unknown, candidates: readonly Candidate[], known: r
     const doText = typeof raw.do === "string" && isNonBlank(raw.do) ? raw.do.trim() : null;
     const newIdea =
       raw.adds_is_new_idea === true || (typeof raw.adds_is_new_idea === "string" && raw.adds_is_new_idea.toLowerCase() === "true");
-    let verdict = modelVerdict;
-    if (kind === "note" && modelVerdict === "extends") {
+    const target = modelVerdict === "new" ? null : known[raw.of as number];
+    const crossKind = target !== null && target.kind !== kind;
+    let verdict = crossKind ? "new" : modelVerdict;
+    if (!crossKind && kind === "note" && modelVerdict === "extends") {
       if (adds === null) {
         verdict = "duplicate";
       } else if (!newIdea) {
         verdict = "ref_only";
       }
     }
-    if (kind === "rule" && modelVerdict === "append" && doText === null) {
+    if (!crossKind && kind === "rule" && modelVerdict === "append" && doText === null) {
       verdict = "duplicate";
     }
     verdicts.push({
       cand: k,
       verdict,
-      of: modelVerdict === "new" ? null : known[raw.of as number].key,
-      adds,
-      reason,
-      do: doText,
+      of: target === null || crossKind ? null : target.key,
+      adds: crossKind ? null : adds,
+      reason: crossKind ? null : reason,
+      do: crossKind ? null : doText,
     });
   }
   result = verdicts;
   assert(result.length === candidates.length, "settle: one verdict per candidate");
   assert(inCandidateOrder(result), "settle: the verdicts are in candidate order");
   assert(areSettledFor(result, candidates), "settle: every verdict is settled for the kind of its candidate");
-  assert(ofsAreConsistent(result, known), "settle: a new verdict has no of, any other has the key of a known item");
+  assert(ofsAreConsistent(result, candidates, known), "settle: a new verdict has no of, any other has the key of a known item of the kind of its candidate");
   return result;
 }
 
@@ -247,8 +249,8 @@ function carries(item: Known, kind: CandidateKind, text: string): boolean {
   return item.kind === kind && item.text === text;
 }
 
-function ofsAreConsistent(verdicts: readonly Verdict[], known: readonly Known[]): boolean {
-  return verdicts.every((v) => (v.verdict === "new" ? v.of === null : known.some((n) => n.key === v.of)));
+function ofsAreConsistent(verdicts: readonly Verdict[], candidates: readonly Candidate[], known: readonly Known[]): boolean {
+  return verdicts.every((v, k) => (v.verdict === "new" ? v.of === null : known.some((n) => n.key === v.of && n.kind === kindOf(candidates[k]))));
 }
 
 function inCandidateOrder(verdicts: readonly Verdict[]): boolean {

@@ -209,3 +209,70 @@ test("SessionRead.read rejects a session over the pending cap", async () => {
     "SessionRead.#pending: the session holds fewer pending exchanges than the cap",
   );
 });
+test("SessionRead.of rejects an earlier turn of another session", () => {
+  const pending = row();
+  const foreign = row({ session: "s-other" });
+  expect(() => SessionRead.of("s-1", [turnOf(pending)], [turnOf(foreign)])).toThrow(
+    "SessionRead.of: every turn belongs to the session, session=s-1",
+  );
+});
+
+test("SessionRead.of rejects an earlier turn that is also pending", () => {
+  const same = turnOf(row());
+  expect(() => SessionRead.of("s-1", [same], [same])).toThrow("SessionRead.of: turn ids are unique, earlier turns included");
+});
+
+test("SessionRead.of rejects an earlier turn that is noise", () => {
+  const noise = turnOf(row({ meta: { trigger: "task-notification" }, output: "Task completed." }));
+  expect(() => SessionRead.of("s-1", [], [noise])).toThrow("SessionRead.of: an earlier turn is not noise");
+});
+
+test("SessionRead.whole: earlier and pending turns in one time order", () => {
+  const earlyA = turnOf(row({ timestamp: "2026-10-09T10:00:00.000Z" }));
+  const earlyB = turnOf(row({ timestamp: "2026-10-09T10:00:02.000Z" }));
+  const late = turnOf(row({ timestamp: "2026-10-09T10:00:03.000Z" }));
+  const middle = turnOf(row({ timestamp: "2026-10-09T10:00:01.000Z" }));
+  SessionRead.of("s-1", [late, middle], [earlyB, earlyA]).whole();
+});
+
+test("SessionRead.whole: a session with nothing earlier is its pending turns", () => {
+  SessionRead.of("s-1", [turnOf(row())]).whole();
+});
+
+test("SessionRead.isPending tells a pending turn from an earlier one", () => {
+  const pending = turnOf(row({ timestamp: "2026-10-09T10:00:01.000Z" }));
+  const earlier = turnOf(row({ timestamp: "2026-10-09T10:00:00.000Z" }));
+  const read = SessionRead.of("s-1", [pending], [earlier]);
+  const table: [typeof pending, boolean][] = [[pending, true], [earlier, false]];
+  expect(table.map(([turn]) => read.isPending(turn))).toEqual(table.map(([, want]) => want));
+});
+
+test("SessionRead.isPending rejects a turn the session does not hold", () => {
+  const read = SessionRead.of("s-1", [turnOf(row())]);
+  expect(() => read.isPending(turnOf(row()))).toThrow("SessionRead.isPending: a turn not pending is an earlier turn of the session");
+});
+
+test("SessionRead.read: distilled exchanges come back as earlier turns, noise left out", async () => {
+  const session = "s-earlier";
+  const done = row({ session, timestamp: "2026-10-09T10:00:00.000Z" });
+  const doneNoise = row({ session, timestamp: "2026-10-09T10:00:01.000Z", meta: { trigger: "task-notification" }, output: "Task completed." });
+  const open = row({ session, timestamp: "2026-10-09T10:00:02.000Z" });
+  await seed(session, [done, doneNoise, open]);
+  await markDistilled(done.exchange.id, "2026-10-09T11:00:00.000Z");
+  await markDistilled(doneNoise.exchange.id, "2026-10-09T11:00:00.000Z");
+  const read = await SessionRead.read(session);
+  expect([read.earlier().map((t: { id(): string }) => t.id()), read.turns().map((t: { id(): string }) => t.id())]).toEqual([
+    [done.exchange.id],
+    [open.exchange.id],
+  ]);
+});
+
+test("SessionRead.read rejects a session at the distilled cap", async () => {
+  const session = "s-distilled-cap";
+  const rows = capRows(session, PENDING_CAP);
+  await seed(session, rows);
+  for (const r of rows) await markDistilled(r.exchange.id, "2026-10-09T11:00:00.000Z");
+  await expect(SessionRead.read(session)).rejects.toThrow(
+    `SessionRead.#distilled: the session holds fewer distilled exchanges than the cap, got=${PENDING_CAP}`,
+  );
+});

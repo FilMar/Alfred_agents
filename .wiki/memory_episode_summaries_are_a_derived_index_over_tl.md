@@ -1,44 +1,40 @@
 ---
 tags: [memory, tl, episodic, distiller, index]
-sources: [spikes/2026-10-01-extraction-hats/main.py, spikes/2026-10-01-extraction-hats/extract_v3.jsonl, tools/tl/README.md]
+sources: [.design/memory.md@0e0a366, SPEC.md@6b044c8, REVIEW.md@6b044c8, tools/tl/src/episodes.ts, tools/tl/src/episode_store.ts, spikes/2026-10-01-extraction-hats/main.py (deleted), spikes/2026-10-01-extraction-hats/extract_v3.jsonl (deleted), tools/tl/README.md]
 ---
 
 ## Decision
 
-The episodes that phase 0 of the distiller finds become an index of their own. It is the search over `tl`.
+The episodes that phase 0 of the distiller finds become an index of their own: the search over `tl`.
 
-Phase 0 splits a session into episodes. An episode is a run of consecutive exchanges about one problem. Each one gets a summary of 20 to 30 words that says how it ended: what turned out true, what was decided, which hypothesis fell. The distiller needs these summaries anyway. The index keeps them.
+An episode is a run of consecutive exchanges about one problem. Each one has a summary of 20 to 30 words that says how it ended: what turned out true, what was decided, which hypothesis fell. The distiller needs these summaries anyway.
 
-The shape, a design target with no code yet:
+The shape:
 
-- A Qdrant collection, `tl_episodes`, on the Rasp next to `tb` and `ti`. The vector is the summary, embedded with the same nomic model.
-- Payload: `session`, `exchanges[]`, `summary`, `model`, `prompt_version`, `created`.
+- A Qdrant collection on the Rasp next to `tb` and `ti`. The real collection is `tl_episodes__v2moe-768` and `tl_episodes` is its alias, as for the other two ([alias rule](memory_alias_makes_migration_reversible)). The vector is the summary, embedded with the same nomic model. The payload holds `session`, `exchanges[]`, `from`, `to`, `summary`, `extractor`, `model` and `created`. `from` and `to` are the times of the first and the last exchange. `extractor` is the id of the configuration row that made the summary, and that row holds the prompt and the model. `created` is when the summary was made. The point id is the SHA-256 of `session:first exchange`, written like a `tb` note id. Writing a session replaces all of its episodes.
 - `tl` stays the only source of truth. An episode holds pointers to exchanges, never their text.
-- The index is derived. It can be dropped and rebuilt from `tl` at any time. A better phase 0 prompt means a full rebuild.
-- A command such as `tl search "<query>"` returns episodes. `tl show` opens the exchanges behind them.
+- The index is derived. It can be dropped and rebuilt from `tl`. A better phase 0 prompt means a full rebuild.
+- `tl search "<query>"` returns episodes. `tl episode <id>` opens one, and `tl show` opens an exchange of it.
 
-It is built after the extraction pipeline is stable. Phase 0 is shared, so the index then costs one embedding per episode.
+Phase 0 of the distiller writes it, so the index costs one embedding per episode. It is built before the automatic run: see [memory_episodes_fill_from_the_normal_distill_run](memory_episodes_fill_from_the_normal_distill_run). `tl` owns it: see [memory_episode_index_belongs_to_tl](memory_episode_index_belongs_to_tl).
 
 ## Why
 
-`tl` has no search. It is CRUD over three tables. "What did we do on X last week" has no answer today. Episodic memory was already named as the hole in the stack in [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi). A summary per episode with a vector fills it at almost no cost.
+`tl` has no search. "What did we do on X last week" has no answer today. A summary per episode with a vector fills the hole named in [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) at almost no cost.
 
-The summaries hold up. On session `684fbf7a` (38 exchanges, 29 after noise), glm-5.3-flash found 9 episodes in one call. All 9 summaries match the session, and their outcomes were checked against the exchanges. One summary stops early because the split cut the story in two. That is an extraction problem, not an index problem: the summary is still true.
+The summaries hold up. On session `684fbf7a` (38 exchanges), glm-5.3-flash found 9 episodes in one call, and all 9 summaries match the session. One stops early because the split cut the story in two. That is an extraction problem.
 
-The summaries hold project terms (table names, migration names). That is right for an index, because you search it with those names. It is wrong for a `tb` note, which is why the summaries are not notes.
+`created` is the time of the summary, so a session read weeks later would show today's date. `from` and `to` give the date of the work itself.
 
-`tl` itself never distils. A summary is a distillation, so it does not go in the `tl` tables as if it were raw data. It lives beside them, marked with the model and prompt that made it. This keeps `tl` honest. It also follows the reason `tl` exists, which is to redo derived work when the tool improves ([memory_raw_text_lives_in_the_archive_not_the_note](memory_raw_text_lives_in_the_archive_not_the_note)).
+They hold project terms such as table names. That is right for an index, because you search it with those names. It is wrong for a `tb` note, so the summaries are not notes. `tl` never distils, so a summary does not go in its tables. It lives beside them, marked with the extractor that made it.
 
-Alternatives that lost:
+Lost: Hindsight as the engine (it drops the raw text and overlaps `tb`), and a table in the `tl` SQLite with `sqlite-vec` (a second retrieval stack next to Qdrant).
 
-- **Hindsight as the engine.** It extracts facts and drops the raw text, and it overlaps `tb`. The parts that matter here are one structured call and code for the rest. They are cheap to build in place.
-- **A table in the `tl` SQLite with `sqlite-vec`, or text search only.** Each one is simpler alone. Each one adds a second retrieval stack next to Qdrant.
-
-A later use, not decided here: the session-start hook could query the last episodes of the current project. That is the "initial memory" the Hindsight question started from.
+The agent finds episodes with `tl search` when it needs them: see [memory_episodes_are_neither_pruned_nor_injected](memory_episodes_are_neither_pruned_nor_injected).
 
 ## Cross-references
 
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — what `tl` holds, and why it never distils
 - [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) — episodic memory is the hole
-- [memory_distillation_stays_manual_for_now](memory_distillation_stays_manual_for_now) — the distiller this phase 0 belongs to
+- [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) — the distiller this phase 0 belongs to
 - [memory_embedding_model_follows_the_corpus_language](memory_embedding_model_follows_the_corpus_language) — the embedding model the index reuses

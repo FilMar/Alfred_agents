@@ -5,10 +5,9 @@ sources: [conversation, skills/ritchie/SKILL.md]
 
 ## Decision
 
-`SPEC.md` and `REVIEW.md` are scaffolding, not artifacts. They are
-committed with the branch during the run. On approval, with a project
-`.wiki/`, omero files the decision as a wiki page and the pair is
-removed from the tree; git keeps the raw text in the branch history.
+`SPEC.md` and `REVIEW.md` are scaffolding, not artifacts. They live in
+the project root and are committed with the branch during the run. On approval, with a project
+`.wiki/`, omero files the decision as a wiki page and the pair is removed from the tree. Git keeps the raw text in the branch history.
 Without a `.wiki/` the pair stays: it is the only record.
 
 ## Why
@@ -17,7 +16,7 @@ Keeping every pair next to its module means, over time, more markdown
 than code in the tree. The tree stays code.
 
 Nothing durable is lost. The permanent record is the wiki page: the
-why, in English, immutable, linked from the roadmap task it closes.
+why, in English, linked from the roadmap task it closes.
 The raw pair stays in git history for the rare case it is needed. The
 lesson that survives the project goes to tb, via platone, with the page
 path as its source.

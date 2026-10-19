@@ -7,21 +7,9 @@ import * as tl from "../../tl/src/client.js";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { die, errorMessage, out } from "../../common/cli.js";
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
-
-function out(data: unknown): void {
-    process.stdout.write(JSON.stringify(data, null, 2) + "\n");
-}
-
-function die(message: string): never {
-    process.stderr.write(`Error: ${message}\n`);
-    process.exit(1);
-}
-
-function errorMessage(err: unknown): string {
-    return err instanceof Error ? err.message : String(err);
-}
 
 function splitCSV(val: string): string[] {
     return val.split(",").map((s) => s.trim()).filter(Boolean);

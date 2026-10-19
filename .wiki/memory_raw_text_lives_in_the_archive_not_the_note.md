@@ -1,47 +1,24 @@
 ---
 tags: [memory, tb, tl, schema]
-sources: [ROADMAP_MEMORIA.md, tools/tb/src/types.ts, spikes/2026-09-28-tb-corpus/data/translations_it.json]
+sources: [ROADMAP_MEMORIA.md@7edd8d8, tools/tb/src/types.ts, spikes/2026-09-28-tb-corpus/data/translations_it.json (deleted)]
 replaces: [memory_keep_raw_source_for_reingest]
 ---
 
 ## Decision
 
-A note does not carry the raw text it was distilled from. The `source_raw` field is
-removed from the schema and from all 747 notes. The raw text lives where records live:
-in `tl` for work the agent did, and in git for anything a human committed. A note
-points at it with `session`, the id of where it was born.
-
-The field was called `source_event`. It is now `session`. There is no "event" in `tl`
-any more.
+A note does not carry the raw text it was distilled from. The `source_raw` field is removed from the schema and from all 747 notes. The raw text lives where records live: in `tl` for work the agent did, and in git for anything a human committed. A note points at it with `session`, the id of where it was born. The field `source_event` is now `session`, because there is no "event" in `tl` any more.
 
 ## Why
 
-The need is real and the place was wrong. A note must be re-extractable when the
-distiller improves, and 369 notes of 737 cannot be, because their raw text is gone.
-That argument holds. It does not follow that every note should carry a copy.
+The need is real and the place was wrong. A note must be re-extractable when the distiller improves, and 369 notes of 737 cannot be, because their raw text is gone. That does not mean every note should carry a copy.
 
-The raw text of one exchange feeds many notes. Copying it into each one pays for the
-same text several times, and pays in the worst place: the payload is what a search
-returns and what a hook puts in a context window that gets re-read about 29 times per
-session. A record that is read rarely does not belong in the object that is read
-constantly. It belongs in the archive, with one address per note.
+The raw text of one exchange feeds many notes. A copy in each pays for the same text several times, and in the worst place. The payload is what a search returns. A hook puts it in a context window that is re-read about 29 times per session. A record that is read rarely does not belong in the object that is read constantly.
 
-`tl` is the archive and it holds the raw text once. So the note needs a pointer, not a
-payload — and this is the case where the rule applies cleanly: point when the target is
-durable and addressable, copy when it is not. `tl` is durable because it is ours and
-nothing rotates it away. That was never true of a chat transcript, which is why the
-copy looked necessary in the first place.
+So the note holds a pointer. The rule: point when the target is durable and addressable, copy when it is not. `tl` is durable because it is ours and nothing rotates it. A chat transcript is not, which is why the copy looked necessary.
 
-The field also failed a rule this project already had: do not add a field because it
-might be needed; find the query that reads it. `source_raw` had no reader. Its only
-content after the migration was an empty string on 725 notes and the English original
-of 22 translated ones — and those 22 originals belong in git next to their translation,
-which is where they now are, in `spikes/2026-09-28-tb-corpus/data/translations_it.json`.
+The field also failed an old rule: do not add a field because it might be needed, find the query that reads it. `source_raw` had no reader. Its content was an empty string on 725 notes and the English original of 22 translated ones. Those originals are in git next to their translation, in `spikes/2026-09-28-tb-corpus/data/translations_it.json`.
 
-On the name: "event" came from the first design of `tl`, when it was an event log with
-one row per event. `tl` is a work archive with `sessions` and `exchanges`, and no table
-called events. A name that survives the concept it described keeps pulling the design
-back — that is how the same schema once reached nineteen columns.
+A name that survives the concept it described keeps pulling the design back. "Event" came from the first design of `tl`, an event log. That is how the same schema once reached nineteen columns.
 
 ## Cross-references
 
