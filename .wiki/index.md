@@ -114,6 +114,7 @@ updated: 2026-10-16
 | [memory_td_same_session_cutoff_drops_twins](memory_td_same_session_cutoff_drops_twins) | td drops a candidate that repeats an item of the session, cosine 0.8 by default |
 | [memory_td_verdicts_keep_their_kind](memory_td_verdicts_keep_their_kind) | A verdict links only items of the kind of the candidate, else it is new |
 | [memory_td_episodes_are_built_from_the_whole_session](memory_td_episodes_are_built_from_the_whole_session) | Phase 0 reads the whole session so a returning session keeps its episodes |
+| [memory_ti_gets_hits_and_refine_exactly_like_tb](memory_ti_gets_hits_and_refine_exactly_like_tb) | ti gets hit counters and ti refine, same formula and archive as tb |
 
 ## skill
 
