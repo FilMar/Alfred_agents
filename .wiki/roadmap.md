@@ -15,11 +15,6 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 - [ ] [A] An `append` must fit the `if` of its rule. The first Aristotele run found 4 rules with `do` items that were notes to the critic ("Aggiungere il trigger...", "Estendere la regola..."). One rule had 7 `do` items, and one of them was a different situation.
 - [ ] `td` reads `tb guide` and `ti guide`. [detail](skill_quality_guides_are_printed_by_tb_guide_and_ti_guide)
 
-## Goal 3: clean-up
-
-- [ ] [M] Put `tests/` in a `tsc` project. Drop the `client.ts?extractions` import trick. [detail](memory_clients_read_their_url_per_call)
-- [ ] [A] Ritchie `check_body_diff.py` ignores a `return` inside a nested function.
-
 ## Ideas
 
 One line each. An idea becomes blocks only when it is the next goal.

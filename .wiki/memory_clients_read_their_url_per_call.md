@@ -21,6 +21,6 @@ Two cases happened:
 - `tl/src/client.ts` imports `tb`, so the first test file that touched `tl` loaded `infra.ts`. The test of `loadVocabulary` got the real tags.
 - `tl.test.ts` loaded the `tl` client while `TL_API_URL` still pointed at the real store. The first recorder test sent its rows there. They were refused and nothing was written. The next test would not be so lucky.
 
-A workaround existed: `tl_extractions.test.ts` imports `client.ts?extractions`. It cannot reach a client imported deep inside another module. Reading the URL per call fixes every test at once. A new `HttpClient` per call costs nothing next to a network request.
+A workaround existed: `tl_extractions.test.ts` imported `client.ts?extractions`. It could not reach a client imported deep inside another module. Reading the URL per call fixes every test at once, so the workaround is gone: the test imports `client.ts` like any other file. A new `HttpClient` per call costs nothing next to a network request.
 
 A spy left on a shared client leaks. `ti.test.ts` put spies on `qdrantClient.request` and never removed them. Every test file after it got the fake answer `{}`.
