@@ -14,7 +14,7 @@ A note with `trust` under 0.2 is archived. Archived means only that. Nothing mov
 - **A deliberate search still finds them.** A `tb search` by the agent shows `archived_at` in the result, and the hit counts as a signal. On the next run `trust` is computed again. At 0.2 or more, `archived_at` is cleared and the hook injects the note again. The hook never revives a note, because it gives archived notes no hit.
 - So the archive is not a deletion queue. A note can leave it.
 
-The threshold of 0.2 is by eye. See [memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known).
+The threshold of 0.2 is by eye. See [memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known](memory_tb_refine_half_life_is_30_days).
 
 ## Why
 

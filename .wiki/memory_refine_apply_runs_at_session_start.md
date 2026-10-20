@@ -25,7 +25,7 @@ No cap, because the archive is reversible: a hit brings the note back. Add `--ma
 
 The Curator of Hermes Agent has the same shape: use counters, thresholds in days, a reversible archive, no automatic delete. It checks 168 hours since the last run and 2 hours idle, because its run can be an LLM review. Hindsight has no forgetting at all. See [the Curator docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/curator) and [the Hindsight paper](https://arxiv.org/html/2512.12818v1).
 
-The first wave is 164 notes on 2027-01-18. The entry is on before the parameters are fixed, so the weights, the half-life and the 0.2 threshold must be settled before that day. Otherwise those notes are archived at the first session start after it, with the values that are in the code.
+The first wave comes on 2026-10-31: every old note with no hit shares the floor date of 2026-09-21, so they are archived at the first session start after it.
 
 Known limit: two sessions opened together can run two rounds. The `archived_at` of a note may then be the second instant.
 

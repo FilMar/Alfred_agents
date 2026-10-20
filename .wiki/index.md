@@ -84,7 +84,7 @@ updated: 2026-10-16
 | [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing) | tb refine: trust 0..1 derived from the hit counters, start 0.5, floor at 2026-09-21; the first pass computes it and stores nothing |
 | [memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first) | Delete when archived and no signal for 365 days, after an append-only log line; not before 2027-09-21 |
 | [memory_tb_refine_browse_notes_reads_one_page_so_refine_passes_a_limit_of_10000_and_asserts_the_read_is_not_cut](memory_tb_refine_browse_notes_reads_one_page_so_refine_passes_a_limit_of_10000_and_asserts_the_read_is_not_cut) | browseNotes reads one page of 20; refine passes limit 10000 and asserts the read is not cut |
-| [memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known) | Threshold 0.2 and half-life 90 wait for the hit rate of Nov-Dec 2026: with no new hit, 164 notes fall together on 2027-01-18 |
+| [memory_tb_refine_half_life_is_30_days](memory_tb_refine_half_life_is_30_days) | Half-life 30 days, threshold 0.2, for tb and ti: a note with no hit leaves the hook about 40 days after its last signal |
 | [memory_tb_note_status_field_is_removed_because_nothing_reads_it_and_nothing_promotes_it](memory_tb_note_status_field_is_removed_because_nothing_reads_it_and_nothing_promotes_it) | The note status field is removed: nobody reads it and nobody promotes it; old notes keep it |
 | [memory_tb_note_payload_is_pinned_by_an_exact_test_so_a_key_cannot_appear_or_vanish_unseen](memory_tb_note_payload_is_pinned_by_an_exact_test_so_a_key_cannot_appear_or_vanish_unseen) | A test pins the exact payload of a note; fields arrive from precise writes |
 | [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) | GLM ignores format schemas; JSON from the prompt, checked by code, one retry |
@@ -119,6 +119,7 @@ updated: 2026-10-16
 | [memory_ghost_rules_are_plain_ti_rules_with_the_same_do](memory_ghost_rules_are_plain_ti_rules_with_the_same_do) | A ghost rule is a plain ti add with the same do: separate stats per trigger, no multi-vector points |
 | [memory_aristotele_is_a_manual_curator_of_tb_and_ti](memory_aristotele_is_a_manual_curator_of_tb_and_ti) | Aristotele curates tb and ti when the user starts it: merges, refs, hubs, ghost rules, no approval, a web report after |
 | [memory_near_and_reach_find_what_aristotele_judges](memory_near_and_reach_find_what_aristotele_judges) | tb near and ti near list close pairs; tl prompts piped into ti reach counts which rules real prompts reach; code finds, Aristotele judges |
+| [memory_td_extractor_row_3_drops_generic_rules_and_bad_appends](memory_td_extractor_row_3_drops_generic_rules_and_bad_appends) | Row 3: a critic check drops generic rules; an append must fit the if of its rule and be an order |
 
 ## skill
 

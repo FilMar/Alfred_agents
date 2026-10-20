@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, trigger, hook]
-sources: [SPEC.md@cd6404b, REVIEW.md@cd6404b, extensions/tb_refine/distill.sh, extensions/tb_refine/claude.sh, extensions/tb_refine/pi.ts, conversation]
+sources: [SPEC.md@cd6404b, REVIEW.md@cd6404b, SPEC.md@67c44cc, REVIEW.md@67c44cc, extensions/tb_refine/distill.sh, extensions/tb_refine/claude.sh, extensions/tb_refine/pi.ts, conversation]
 replaces: [memory_distillation_stays_manual_for_now@d6529d6]
 ---
 
@@ -19,7 +19,7 @@ There is no timer and no service. The user can still run `td distill` by hand. I
 
 ## Why
 
-The manual flow waited for a trigger. The problems of an automatic run were solved earlier. `td` calls `pi-ai` and not `th`. So it archives no run of its own and carries no fixed prompt cost. It has no timeout bug. A count of the queue at the start of a session is the simplest trigger left. It needs no daemon and no schedule.
+The manual flow waited for a trigger. The problems of an automatic run were solved earlier. `td` calls `pi-ai` and not `th`. So it archives no run of its own and carries no fixed prompt cost. It has no timeout bug. Each call of `td` to the model waits at most 5 minutes (`CALL_TIMEOUT_MS`). A call that runs out is a rejected answer, like a model error, so a hung model never blocks the run. A count of the queue at the start of a session is the simplest trigger left. It needs no daemon and no schedule.
 
 The lock is a kernel lock on an open file, not a file that must be deleted. When the process dies, or the PC is switched off, the kernel frees it. A pacman-style lock file would block every later run until someone deleted it. A run that was stopped half way is safe: each session closes by itself, and what was not read stays in the queue.
 
@@ -28,7 +28,6 @@ Known limits:
 - Only the PC runs it. The embedding model is local, and the Rasp has no Ollama. A job that survives a switched-off PC needs that first.
 - The script is bash with no test in the repo. It was tried on stubs of `tl` and `bun`, and the pi extension was not tried in a real pi session.
 - The session cap is per run. A session that comes back can save more items.
-- A call of `td` to the model has no timeout.
 
 ## Cross-references
 

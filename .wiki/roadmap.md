@@ -8,13 +8,6 @@ A block is one run of ritchie (code) or efesto (skill). [A] is architecture: sma
 
 Only the next goals have blocks. When a goal is done, pick the next one from Ideas and cut it into blocks then.
 
-## Goal 2: td can be trusted
-
-- [ ] A timeout on the model calls of `td`. [detail](memory_td_distills_by_itself_at_session_start)
-- [ ] [A] The critic drops a rule that is too generic.
-- [ ] [A] An `append` must fit the `if` of its rule. The first Aristotele run found 4 rules with `do` items that were notes to the critic ("Aggiungere il trigger...", "Estendere la regola..."). One rule had 7 `do` items, and one of them was a different situation.
-- [ ] `td` reads `tb guide` and `ti guide`. [detail](skill_quality_guides_are_printed_by_tb_guide_and_ti_guide)
-
 ## Ideas
 
 One line each. An idea becomes blocks only when it is the next goal.
@@ -49,10 +42,10 @@ To discuss with Piano before any block.
 
 Measures, trials and work gated by a date or a size.
 
-- `tb refine`: read the hit rate, then fix weights, half-life and the 0.2 threshold before 2027-01-18. [detail](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known)
+- `tb refine`: read the first archive list after 2026-10-31. If notes still in use leave, lengthen the half-life. [detail](memory_tb_refine_half_life_is_30_days)
 - `tb refine`: delete a note archived with no signal for a year. Not before 2027-09-21. [detail](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first)
 - `tb refine`: store a `trust` field only once a reader needs it. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing)
-- `ti refine`: read the archived rules of the first runs, from mid-February 2027. [detail](memory_ti_gets_hits_and_refine_exactly_like_tb)
+- `ti refine`: read the archived rules of the first runs, from 2026-11-29. [detail](memory_ti_gets_hits_and_refine_exactly_like_tb)
 - Count the twins with the cutoff 0.75. Lower to 0.72 if twins pass, raise it if different ideas drop. [detail](memory_td_same_session_cutoff_drops_twins)
 - Find clusters of near notes in one session, for example siblings above 0.55. [detail](memory_td_session_cap_limits_one_session)
 - Check the minimum score 0.30 of `tl search` on more episodes. [detail](memory_episode_search_filters_the_period_in_qdrant)
