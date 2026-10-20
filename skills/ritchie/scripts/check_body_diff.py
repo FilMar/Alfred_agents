@@ -5,6 +5,8 @@
 must hold the same segments, in the same order, with any lines between
 them. Those lines are the bodies. A body that comes right before an assert
 (a postcondition) must not hold a return: it would skip the postcondition.
+A return inside a nested function (a lambda, a closure, an inner def) is
+that function's own return, so it does not count.
 
 Exit 1 on any violation.
 """
@@ -20,6 +22,8 @@ TODO = re.compile(
 )
 ASSERT = re.compile(r"^\s*(?:debug_assert|assert|(?:\w+\.)?Assert)\b")
 RETURN = re.compile(r"^\s*return\b")
+FUNC_HEAD = re.compile(r"(?:=>\s*|\bfunction\b[^{]*|\bfunc\b[^{]*|\bfn\b[^{]*|\|[^|]*\|\s*(?:->[^{]*)?)$")
+PY_DEF = re.compile(r"^(\s*)(?:async\s+)?def\s")
 
 
 def segments(lines):
@@ -52,6 +56,26 @@ def starts_with_assert(block):
     return False
 
 
+def outer_returns(body):
+    braces, defs, found = [], [], False
+    for line in body:
+        indent = len(line) - len(line.lstrip())
+        if line.strip():
+            while defs and indent <= defs[-1]:
+                defs.pop()
+        if RETURN.match(line) and "fn" not in braces and not defs:
+            found = True
+        py_def = PY_DEF.match(line)
+        if py_def:
+            defs.append(len(py_def.group(1)))
+        for i, ch in enumerate(line):
+            if ch == "{":
+                braces.append("fn" if FUNC_HEAD.search(line[:i]) else "block")
+            elif ch == "}" and braces:
+                braces.pop()
+    return found
+
+
 def check(todo_lines, body_lines):
     segs, todos = segments(todo_lines)
     errors = []
@@ -67,7 +91,7 @@ def check(todo_lines, body_lines):
         body = body_lines[pos:at]
         if any(TODO.match(b) for b in body):
             errors.append(f"todo at line {todos[k - 1]}: still a todo")
-        if starts_with_assert(seg) and any(RETURN.match(b) for b in body):
+        if starts_with_assert(seg) and outer_returns(body):
             errors.append(f"todo at line {todos[k - 1]}: a return in the body skips the postconditions")
         pos = at + len(seg)
     return errors
