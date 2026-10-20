@@ -35,7 +35,7 @@ To discuss with Piano before any block.
 
 - analisi: `.design/analisi.md`. `polo` reads sources. Missing: official and independent sources, the chart (`atlante` is in git), the stop when there are none. The expense CSV (`.bank.csv` in `essays`, read with `xan`) is a case too. On request only, or a monthly summary.
 - memory: discuss `.design/memory.md`.
-- Procedural memory: learn from outcomes of hats and skills, metrics per hat. [detail](memory_procedural_memory_grows_on_data)
+- Procedural memory: `tp`, a runner of procedures (decided 2026-10-20, shape still moving, so no decision page yet). A procedure is a script in a folder; the folder is the registry, there is no register command. The script does the deterministic steps and asks `th` one structured question where judgment is needed: one branch per verdict, no loop. Every run writes a row in `tl` with its outcome, so skill telemetry comes from the runner. Two sources of procedures: a flow over `tl` that finds the operations done often and proposes the script; the agent itself, when it sees that a script it just wrote is generic, saves it in `tp`. The trigger is a `ti` rule whose `do` says `tp run <name>`. Use is the judge: a procedure never run again is archived like a note. Runs under the `th` bwrap profile. Replaces the "tb note of kind protocollo" step in [detail](memory_procedural_memory_grows_on_data); that page is rewritten when the design ends. To Piano first.
 - From the MCP audit: a JSON Schema layer for CLI output, a command whitelist with audit log, the binary trigger rule and an MCP shim for `ti`. [detail](core_mcp_not_adopted_cli_json_schemas_first)
 
 ## Watch
