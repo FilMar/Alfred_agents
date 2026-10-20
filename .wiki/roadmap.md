@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-10-19
+updated: 2026-10-20
 ---
 
 A block is one run of ritchie (code) or efesto (skill). [A] is architecture: small, read it closely in review. [M] is mechanical: big, the first piece shows the rest.
@@ -10,14 +10,9 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 ## Goal 1: memory curates itself
 
-Order: the design first, then the rest.
-
-- [ ] [A] Design of Aristotele as curator of `tb` and `ti`, with Piano. It replaces the idea of `tb link`. [detail](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge)
-- [ ] [A] `tb merge`: one note absorbs another and keeps its refs.
-- [ ] [A] Several triggers for one `ti` rule.
 - [ ] Measure which rules the real prompts in `tl` cannot reach.
 - [ ] [M] The HTML report of a curation run.
-- [ ] Rewrite the Aristotele skill with efesto. [detail](skill_census_platone_and_mose_removed_td_writes)
+- [ ] Rewrite the Aristotele skill with efesto. [detail](memory_aristotele_is_a_manual_curator_of_tb_and_ti)
 
 ## Goal 2: td can be trusted
 

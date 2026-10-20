@@ -87,7 +87,6 @@ updated: 2026-10-16
 | [memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known) | Threshold 0.2 and half-life 90 wait for the hit rate of Nov-Dec 2026: with no new hit, 164 notes fall together on 2027-01-18 |
 | [memory_tb_note_status_field_is_removed_because_nothing_reads_it_and_nothing_promotes_it](memory_tb_note_status_field_is_removed_because_nothing_reads_it_and_nothing_promotes_it) | The note status field is removed: nobody reads it and nobody promotes it; old notes keep it |
 | [memory_tb_note_payload_is_pinned_by_an_exact_test_so_a_key_cannot_appear_or_vanish_unseen](memory_tb_note_payload_is_pinned_by_an_exact_test_so_a_key_cannot_appear_or_vanish_unseen) | A test pins the exact payload of a note; fields arrive from precise writes |
-| [memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge) | Possible design, no code: `tb link` finds ref candidates by vector, one LLM hat judges pairs, refs carry an origin; hubs later |
 | [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) | GLM ignores format schemas; JSON from the prompt, checked by code, one retry |
 | [memory_procedural_memory_grows_on_data](memory_procedural_memory_grows_on_data) | Procedural memory grows on data: skill telemetry first, then extraction and a revision loop |
 | [memory_clients_read_their_url_per_call](memory_clients_read_their_url_per_call) | tb and tl clients read their URL per call, so a test never reaches the real store |
@@ -116,6 +115,9 @@ updated: 2026-10-16
 | [memory_td_episodes_are_built_from_the_whole_session](memory_td_episodes_are_built_from_the_whole_session) | Phase 0 reads the whole session so a returning session keeps its episodes |
 | [memory_ti_gets_hits_and_refine_exactly_like_tb](memory_ti_gets_hits_and_refine_exactly_like_tb) | ti counts hits and runs ti refine with the formula and archive of tb |
 | [memory_refine_rows_name_the_text_text](memory_refine_rows_name_the_text_text) | refine rows name the note text or the rule if as text |
+| [memory_tb_merge_moves_links_onto_one_note](memory_tb_merge_moves_links_onto_one_note) | tb merge moves refs, backrefs, tags and hits of the drops onto one note, then deletes them; writes no text |
+| [memory_ghost_rules_are_plain_ti_rules_with_the_same_do](memory_ghost_rules_are_plain_ti_rules_with_the_same_do) | A ghost rule is a plain ti add with the same do: separate stats per trigger, no multi-vector points |
+| [memory_aristotele_is_a_manual_curator_of_tb_and_ti](memory_aristotele_is_a_manual_curator_of_tb_and_ti) | Aristotele curates tb and ti when the user starts it: merges, refs, hubs, ghost rules, no approval, a web report after |
 
 ## skill
 
