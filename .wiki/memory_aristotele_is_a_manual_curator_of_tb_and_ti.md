@@ -13,6 +13,8 @@ Aristotele stays. It is the curator of both `tb` and `ti`, and the user starts i
 - It adds refs where they are useful, and writes hubs that sum up several notes in one argument.
 - It adds ghost rules for rules that the prompts rarely reach ([ghost rules](memory_ghost_rules_are_plain_ti_rules_with_the_same_do)).
 - At the end it shows a temporary web report of what it did, with charts.
+- It runs no backup of its own. The server backs up the memory by itself.
+- It works on one thread of notes per run, not on a whole tag.
 
 `tb link`, the command plus one LLM judge planned to replace Aristotele, is not built.
 
@@ -23,6 +25,10 @@ The user decides when curation runs, and the agent decides what to keep. This ma
 `tb refine` measures whether a note is alive, from use. Aristotele judges whether it is right: duplicate, wrong, or worth a link or a hub. They stay separate, so each can be checked on its own.
 
 The report replaces approval. The user reads what happened afterwards, instead of approving each change before it happens.
+
+A backup step was planned first. The user dropped it: the backup already happens on the server, so a second one in the skill is a manual copy of an automatic step.
+
+The first real run showed that a large tag cannot be read whole: `sistema` holds hundreds of notes. One thread per run is a goal the run can finish.
 
 ## Cross-references
 

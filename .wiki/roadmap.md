@@ -8,16 +8,11 @@ A block is one run of ritchie (code) or efesto (skill). [A] is architecture: sma
 
 Only the next goals have blocks. When a goal is done, pick the next one from Ideas and cut it into blocks then.
 
-## Goal 1: memory curates itself
-
-- [ ] [M] The HTML report of a curation run.
-- [ ] Rewrite the Aristotele skill with efesto. [detail](memory_aristotele_is_a_manual_curator_of_tb_and_ti)
-
 ## Goal 2: td can be trusted
 
 - [ ] A timeout on the model calls of `td`. [detail](memory_td_distills_by_itself_at_session_start)
 - [ ] [A] The critic drops a rule that is too generic.
-- [ ] [A] An `append` must fit the `if` of its rule.
+- [ ] [A] An `append` must fit the `if` of its rule. The first Aristotele run found 4 rules with `do` items that were notes to the critic ("Aggiungere il trigger...", "Estendere la regola..."). One rule had 7 `do` items, and one of them was a different situation.
 - [ ] `td` reads `tb guide` and `ti guide`. [detail](skill_quality_guides_are_printed_by_tb_guide_and_ti_guide)
 
 ## Goal 3: clean-up
