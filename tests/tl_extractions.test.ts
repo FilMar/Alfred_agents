@@ -35,7 +35,7 @@ function freshDb() {
 
 const server = Bun.serve({ port: 0, fetch: createApp(freshDb()).fetch });
 process.env.TL_API_URL = `http://localhost:${server.port}`;
-const client = await import("../tools/tl/src/client.ts?extractions");
+import * as client from "../tools/tl/src/client.ts";
 
 describe("types.ts", () => {
   it("validateNewExtractor", () => {

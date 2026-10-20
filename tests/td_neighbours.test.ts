@@ -42,7 +42,7 @@ const noteCandidate = async (what: string): Promise<Candidate> => {
     tags: ["architettura"],
     contexts: ["a", "b"],
     quote: "lo ha detto l'utente",
-  });
+  })!;
 };
 
 const ruleCandidate = async (cond: string): Promise<Candidate> => {
@@ -52,7 +52,7 @@ const ruleCandidate = async (cond: string): Promise<Candidate> => {
     do: "chiudila",
     tags: ["casa"],
     quote: "lo ha detto l'utente",
-  });
+  })!;
 };
 
 const seedNote = async (what: string): Promise<void> => {
@@ -66,9 +66,9 @@ const seedNote = async (what: string): Promise<void> => {
   });
 };
 
-const seedEntry = async (cond: string, actions: string[]): Promise<void> => {
+const seedEntry = async (cond: string, action: string): Promise<void> => {
   const { addEntry } = await import("../tools/ti/src/identity.ts");
-  await addEntry(cond, actions, ["casa"], "exchange-1");
+  await addEntry(cond, action, ["casa"], "exchange-1");
 };
 
 const withStubs = async (run: (stubs: Stubs) => Promise<void>): Promise<void> => {
@@ -243,8 +243,8 @@ test("neighboursOf: at most topK neighbours", async () => {
 test("neighboursOf: every neighbour has the kind of the candidate", async () => {
   await withStubs(async () => {
     const { neighboursOf } = await neighbours();
-    await seedEntry("la porta è aperta", ["chiudila"]);
-    await seedEntry("la porta è aperta di notte", ["chiudila piano"]);
+    await seedEntry("la porta è aperta", "chiudila");
+    await seedEntry("la porta è aperta di notte", "chiudila piano");
     await neighboursOf(await ruleCandidate("la porta è aperta"), 5);
   });
 });
@@ -263,7 +263,7 @@ test("neighboursOf: a store error is not caught", async () => {
   await withStubs(async (stubs) => {
     const { neighboursOf } = await neighbours();
     await seedNote("il camino è acceso");
-    await seedEntry("la porta è aperta", ["chiudila"]);
+    await seedEntry("la porta è aperta", "chiudila");
     const note = await noteCandidate("il camino è acceso");
     const rule = await ruleCandidate("la porta è aperta");
     await neighboursOf(note, 3);

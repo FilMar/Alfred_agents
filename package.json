@@ -12,7 +12,7 @@
   },
   "scripts": {
     "test": "bun test tests/",
-    "typecheck": "tsc --project tools/tb/tsconfig.json --noEmit && tsc --project tools/ti/tsconfig.json --noEmit && tsc --project tools/tl/tsconfig.json --noEmit && tsc --project tools/th/tsconfig.json --noEmit && tsc --project tools/td/tsconfig.json --noEmit"
+    "typecheck": "tsc --project tools/tb/tsconfig.json --noEmit && tsc --project tools/ti/tsconfig.json --noEmit && tsc --project tools/tl/tsconfig.json --noEmit && tsc --project tools/th/tsconfig.json --noEmit && tsc --project tools/td/tsconfig.json --noEmit && tsc --project tests/tsconfig.json"
   },
   "pi": {
     "skills": [

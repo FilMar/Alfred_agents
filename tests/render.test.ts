@@ -147,7 +147,7 @@ test("ruleView keeps every other field of the entry", () => {
 });
 
 test("ruleView accepts an entry without a vector", () => {
-  ruleView({ id: "abcdefgh" });
+  ruleView<{ id: string; vector?: unknown }>({ id: "abcdefgh" });
 });
 
 test("ruleView accepts an entry with an undefined vector", () => {

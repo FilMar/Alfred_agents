@@ -1,4 +1,4 @@
-import { afterAll, expect, test } from "vitest";
+import { afterAll, expect, test } from "bun:test";
 import { startMemoryStubs, startTlStub } from "./helpers/td_stubs.ts";
 import type { Verdict } from "../tools/td/src/novelty.ts";
 
@@ -30,12 +30,12 @@ afterAll(() => {
   tl.stop();
 });
 
-function noteOf(what: string): NoteCandidate {
-  return NoteCandidate.fromModel({ what, why: "Il contratto lo chiede", kind: "attrito", tags: ["architettura"], contexts: ["a", "b"], quote: "Come detto a voce" });
+function noteOf(what: string): NonNullable<ReturnType<typeof NoteCandidate.fromModel>> {
+  return NoteCandidate.fromModel({ what, why: "Il contratto lo chiede", kind: "attrito", tags: ["architettura"], contexts: ["a", "b"], quote: "Come detto a voce" })!;
 }
 
-function ruleOf(ifText: string): RuleCandidate {
-  return RuleCandidate.fromModel({ if: ifText, do: "Non fare il deploy", tags: ["testing"], quote: "Il test era rosso" });
+function ruleOf(ifText: string): NonNullable<ReturnType<typeof RuleCandidate.fromModel>> {
+  return RuleCandidate.fromModel({ if: ifText, do: "Non fare il deploy", tags: ["testing"], quote: "Il test era rosso" })!;
 }
 
 function verdictOf(verdict: string, of: string | null = null): Verdict {

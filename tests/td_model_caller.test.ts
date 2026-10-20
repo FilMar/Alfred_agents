@@ -27,7 +27,7 @@ function sse(text: string, thinking?: string): string {
 const server = Bun.serve({
   port: 0,
   async fetch(req) {
-    seen.push(await req.json());
+    seen.push((await req.json()) as (typeof seen)[number]);
     const next = queue.shift() ?? { status: 400 };
     if ("status" in next) {
       return new Response(JSON.stringify({ error: { message: "fake failure" } }),

@@ -190,7 +190,7 @@ export function startModelStub(): ModelStub {
       return new Response(sse, { headers: { "content-type": "text/event-stream" } });
     },
   });
-  return { port: server.port, queue, stop: () => server.stop() };
+  return { port: server.port as number, queue, stop: () => server.stop() };
 }
 
 export type TlStub = Readonly<{ handle: ReturnType<typeof db.open>; stop(): void }>;

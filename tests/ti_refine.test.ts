@@ -7,6 +7,7 @@ import type { IdentityEntry } from "../tools/ti/src/types.ts";
 function rule(overrides: Partial<IdentityEntry> = {}): IdentityEntry {
   return {
     id: "r-1",
+    vector: [],
     if: "if the user asks about the tide, check the tide table first",
     do: ["read the tide table before answering"],
     tags: ["hook"],

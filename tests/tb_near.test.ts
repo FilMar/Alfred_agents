@@ -184,7 +184,7 @@ describe("nearPairs", () => {
     ["returns nothing below min", setORTH, 0.5, []],
     ["returns nothing from no items", setEMPTY, -1, []],
   ])("%s", (name: string, set: VectorSet, min: number, expected: readonly Pair[]) => {
-    expect(nearPairs(set, min)).toEqual(expected);
+    expect(nearPairs(set, min)).toEqual([...expected]);
   });
 });
 
@@ -220,6 +220,6 @@ describe("topPairs", () => {
     ["keeps everything when the limit passes the length", pairsABC, 5, [pairA, pairB, pairC]],
     ["keeps nothing when there is nothing", [], 1, []],
   ])("%s", (name: string, pairs: readonly Pair[], limit: number, expected: readonly Pair[]) => {
-    expect(topPairs(pairs, limit)).toEqual(expected);
+    expect(topPairs(pairs, limit)).toEqual([...expected]);
   });
 });
