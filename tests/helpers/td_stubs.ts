@@ -143,7 +143,7 @@ export function startMemoryStubs(): MemoryStubs {
         return json({ result: { points: scored } });
       }
       if (rest === "/points/scroll") {
-        const all = [...points.entries()].filter(([id, p]) => matches(p.payload, id, body.filter)).map(([id, p]) => ({ id, payload: p.payload }));
+        const all = [...points.entries()].filter(([id, p]) => matches(p.payload, id, body.filter)).map(([id, p]) => ({ id, payload: p.payload, ...(body.with_vector && { vector: p.vector }) }));
         return json({ result: { points: all, next_page_offset: null } });
       }
       return new Response("not found", { status: 404 });

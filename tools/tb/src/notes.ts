@@ -1,9 +1,10 @@
 import { embedDocument, embedQuery, EMBED_MODEL } from "./infra.js";
-import { ensureCollection, upsert, setPayload, setPayloadMany, deletePayloadKeys, getByIds, search, scroll, scrollLinkedTo, scrollAllIds, deletePoints, randomNoteId, noteId, listTags, NOTE_ID_SHAPE } from "./qdrant.js";
+import { ensureCollection, upsert, setPayload, setPayloadMany, deletePayloadKeys, getByIds, search, scroll, scrollLinkedTo, scrollAllIds, scrollAllWithVectors, deletePoints, randomNoteId, noteId, listTags, NOTE_ID_SHAPE } from "./qdrant.js";
 import type { ScrollOptions, TagFacet } from "./qdrant.js";
 import { REFS_LIMIT } from "./infra.js";
 import { assert } from "../../common/contract.js";
 import { mergePlan } from "./merge.js";
+import { NEAR_ITEMS_LIMIT, vectorSetOf, nearPairs, topPairs } from "./near.js";
 import { noteToText, withoutLink, nextHit, nextRelatedHit, matchPrefix, groupByPayload, validateSearchOptions, ABOUT_NOBODY } from "./types.js";
 import type { Note, NoteType, Link, SearchOptions, SearchResult, DirectResult, RelatedResult, PayloadWrite } from "./types.js";
 
@@ -250,6 +251,33 @@ export async function mergeNotes(intoId: string, dropIds: string[]): Promise<Mer
   await deletePoints([...dropped]);
 
   return { into: into.id, dropped, relinked: relinked.length };
+}
+
+export interface NearPair {
+  a: string;
+  b: string;
+  score: number;
+  a_text: string;
+  b_text: string;
+}
+
+/** The pairs of live notes closer than `min`, closest first. */
+export async function nearNotes(min: number, limit: number, tags: string[] = []): Promise<NearPair[]> {
+  await ensureCollection();
+  const live = (await scrollAllWithVectors()).filter(
+    ({ note }) => note.archived_at === undefined && (tags.length === 0 || note.tags.some((tag) => tags.includes(tag))),
+  );
+  if (live.length > NEAR_ITEMS_LIMIT) {
+    throw new Error(`${live.length} notes, the limit is ${NEAR_ITEMS_LIMIT}: narrow them with --tags`);
+  }
+
+  const texts = new Map(live.map(({ note }) => [note.id, note.what]));
+  const set = vectorSetOf(live.map(({ note, vector }) => ({ id: note.id, vector })));
+  return topPairs(nearPairs(set, min), limit).map((pair) => ({
+    ...pair,
+    a_text: texts.get(pair.a)!,
+    b_text: texts.get(pair.b)!,
+  }));
 }
 
 export async function browseNotes(options: ScrollOptions = {}): Promise<Note[]> {

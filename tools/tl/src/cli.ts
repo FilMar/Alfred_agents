@@ -12,12 +12,15 @@ import { die, errorMessage, out, outText } from "../../common/cli.js";
 import { blocksOf } from "../../common/render.js";
 import { episodeById, searchEpisodes } from "./episode_store.js";
 import { DAY_SHAPE, episodeBlock } from "./episodes.js";
+import { promptsOf } from "./prompts.js";
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
 
 // How many exchanges a sum reads before it is wrong to do this in the client.
 const COST_LIMIT = 5_000;
 const PENDING_LIMIT = 50;
+const PROMPTS_EXCHANGES_LIMIT = 100_000;
+const CONTENTS_IN_FLIGHT = 20;
 
 const program = new Command();
 
@@ -157,6 +160,38 @@ function costKey(by: string): ((e: Exchange) => string) | null {
   if (by === "model") return (e) => e.model ?? "unknown";
   return null;
 }
+
+// ─── prompts ──────────────────────────────────────────────────────────────────
+
+program
+  .command("prompts")
+  .description("The prompts the user wrote, oldest first, with no repeats. Input for ti reach")
+  .option("--since <day>", "Only prompts on or after this day (YYYY-MM-DD)")
+  .option("--until <day>", "Only prompts on or before this day (YYYY-MM-DD)")
+  .action(async (opts) => {
+    for (const [flag, day] of [["--since", opts.since], ["--until", opts.until]] as const) {
+      if (day !== undefined && !DAY_SHAPE.test(day)) die(`${flag} must be a day like 2026-09-30.`);
+    }
+    if (opts.since !== undefined && opts.until !== undefined && opts.since > opts.until) die("--since is after --until.");
+    try {
+      const exchanges = await client.fetchExchanges({
+        kind: "chat",
+        since: opts.since,
+        until: opts.until === undefined ? undefined : `${opts.until}T23:59:59.999Z`,
+        limit: PROMPTS_EXCHANGES_LIMIT,
+      });
+      const sources = [];
+      for (let i = 0; i < exchanges.length; i += CONTENTS_IN_FLIGHT) {
+        const batch = exchanges.slice(i, i + CONTENTS_IN_FLIGHT);
+        const contents = await Promise.all(batch.map((exchange) => client.fetchContents(exchange.id, false)));
+        sources.push(...batch.map((exchange, k) => ({ exchange, text: contents[k].input })));
+      }
+      out(promptsOf(sources));
+    } catch (err) {
+      if (err instanceof ContractError) throw err;
+      die(errorMessage(err));
+    }
+  });
 
 // ─── pending ──────────────────────────────────────────────────────────────────
 

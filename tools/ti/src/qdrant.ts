@@ -39,7 +39,7 @@ export async function queryPoints(
   });
 }
 
-export async function scrollPoints(options: { filter?: any; limit?: number; offset?: any }): Promise<any> {
+export async function scrollPoints(options: { filter?: any; limit?: number; offset?: any; with_vector?: boolean }): Promise<any> {
   return qdrantClient.request("POST", "/collections/pi_identity/points/scroll", { with_payload: true, ...options });
 }
 

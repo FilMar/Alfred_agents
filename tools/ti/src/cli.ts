@@ -10,6 +10,12 @@ import { normalizeTags } from "../../common/tags.js";
 import { ContractError } from "../../common/contract.js";
 import { refineReport } from "../../tb/src/refine.js";
 import { countedOf, COUNTERS_START } from "./refine.js";
+import { promptTextsOf, reachOf } from "./reach.js";
+
+// The prompt hook searches with these values.
+const HOOK_LIMIT = "2";
+const HOOK_MIN_SCORE = "0.5";
+const SEARCHES_IN_FLIGHT = 8;
 
 
 // ─── Output helpers ───────────────────────────────────────────────────────────
@@ -133,6 +139,52 @@ program
     await identity.markArchived(report.plan.archive.map((entry) => entry.id), now);
     await identity.clearArchived(report.plan.restore.map((entry) => entry.id));
     out({ ...report, applied: { archived: report.plan.archive.length, restored: report.plan.restore.length } });
+  });
+
+program
+  .command("near")
+  .description("Print the pairs of live rules whose if is closer than --min, closest first, with both texts")
+  .requiredOption("--min <cosine>", "Lowest cosine kept, between -1 and 1")
+  .option("--limit <n>", "Maximum number of pairs", "100")
+  .action(async (opts) => {
+    await requireServices({ needsEmbedding: false });
+    const min = parseFloat(opts.min);
+    const limit = parseInt(opts.limit, 10);
+    if (!(Number.isFinite(min) && min >= -1 && min <= 1)) die("--min must be a number between -1 and 1.");
+    if (!Number.isInteger(limit) || limit < 1) die("--limit must be a positive integer.");
+    out(await identity.nearRules(min, limit));
+  });
+
+program
+  .command("reach")
+  .description("Read the output of tl prompts on stdin, search each prompt like the hook does, and print how often each live rule comes up. Counts no hit.")
+  .option("--limit <n>", "Results per search", HOOK_LIMIT)
+  .option("--min-score <n>", "Minimum score per result", HOOK_MIN_SCORE)
+  .action(async (opts) => {
+    const limit = parseInt(opts.limit, 10);
+    const minScore = parseFloat(opts.minScore);
+    if (!Number.isInteger(limit) || limit < 1) die("--limit must be a positive integer.");
+    if (!Number.isFinite(minScore)) die("--min-score must be a number.");
+
+    let input: unknown;
+    try {
+      input = JSON.parse(await Bun.stdin.text());
+    } catch {
+      die("stdin is not JSON. Pipe tl prompts into ti reach.");
+    }
+    const parsed = promptTextsOf(input);
+    if (!parsed.ok) die(parsed.error);
+
+    await requireServices({ needsEmbedding: true });
+    const rules = (await identity.listEntries()).filter((rule) => rule.archived_at === undefined);
+    const found: string[][] = [];
+    for (let i = 0; i < parsed.texts.length; i += SEARCHES_IN_FLIGHT) {
+      const batch = parsed.texts.slice(i, i + SEARCHES_IN_FLIGHT);
+      const results = await Promise.all(batch.map((text) =>
+        identity.searchEntries(text, { limit, min_score: minScore, record_hits: false, exclude_archived: true })));
+      found.push(...results.map((list) => list.map((entry) => entry.id)));
+    }
+    out(reachOf(rules.map((rule) => ({ id: rule.id, if: rule.if })), found));
   });
 
 program

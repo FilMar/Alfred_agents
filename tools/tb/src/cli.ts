@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 import { checkHealth, EMBED_MODEL } from "./infra.js";
 import { serveApi, API_PORT } from "./api.js";
-import { noteById, createNote, addRefs, changeKind, changeTags, deleteNote, mergeNotes, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId, markArchived, clearArchived } from "./notes.js";
+import { noteById, createNote, addRefs, changeKind, changeTags, deleteNote, mergeNotes, nearNotes, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId, markArchived, clearArchived } from "./notes.js";
 import { getByIds } from "./qdrant.js";
 import { refineReport, COUNTERS_START, REFINE_NOTES_LIMIT } from "./refine.js";
 import type { NoteType, SearchOptions, Link } from "./types.js";
@@ -346,6 +346,27 @@ program
   });
 
 // ─── refine ───────────────────────────────────────────────────────────────────
+
+program
+  .command("near")
+  .description("Print the pairs of live notes closer than --min, closest first, with both texts")
+  .requiredOption("--min <cosine>", "Lowest cosine kept, between -1 and 1")
+  .option("--tags <tag>", "Only notes with one of these tags (repeatable)", collect, [] as string[])
+  .option("--limit <n>", "Maximum number of pairs", "100")
+  .action(async (opts) => {
+    await requireServices({ needsEmbedding: false });
+    const min = parseFloat(opts.min);
+    const limit = parseInt(opts.limit, 10);
+    if (!(Number.isFinite(min) && min >= -1 && min <= 1)) die("--min must be a number between -1 and 1.");
+    if (!Number.isInteger(limit) || limit < 1) die("--limit must be a positive integer.");
+
+    try {
+      out(await nearNotes(min, limit, normalizeTags(opts.tags)));
+    } catch (err) {
+      if (err instanceof ContractError) throw err;
+      die(errorMessage(err));
+    }
+  });
 
 program
   .command("refine")

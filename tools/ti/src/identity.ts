@@ -3,6 +3,8 @@ import { NOTE_ID_SHAPE } from "../../tb/src/qdrant.js";
 import { matchPrefix, nextHit, groupByPayload } from "../../tb/src/types.js";
 import type { PayloadWrite } from "../../tb/src/types.js";
 import { assert } from "../../common/contract.js";
+import { NEAR_ITEMS_LIMIT, vectorSetOf, nearPairs, topPairs } from "../../tb/src/near.js";
+import type { NearPair } from "../../tb/src/notes.js";
 import * as qdrant from "./qdrant.js";
 import type { IdentityEntry, SearchOptions } from "./types.js";
 
@@ -121,6 +123,29 @@ export async function listEntries(tags?: string[]): Promise<IdentityEntry[]> {
     id: p.id,
     vector: p.vector ?? [],
     ...p.payload,
+  }));
+}
+
+/** The pairs of live rules whose `if` vectors are closer than `min`, closest first. */
+export async function nearRules(min: number, limit: number): Promise<NearPair[]> {
+  await qdrant.ensureCollection();
+  const points: any[] = [];
+  let offset: any = undefined;
+  do {
+    const res = await qdrant.scrollPoints({ limit: 100, offset, with_vector: true });
+    points.push(...(res.result?.points ?? []));
+    offset = res.result?.next_page_offset ?? null;
+  } while (offset !== null);
+
+  const live = points.filter((p) => p.payload.archived_at === undefined);
+  if (live.length > NEAR_ITEMS_LIMIT) throw new Error(`${live.length} rules, the limit is ${NEAR_ITEMS_LIMIT}`);
+
+  const texts = new Map<string, string>(live.map((p) => [p.id, p.payload.if]));
+  const set = vectorSetOf(live.map((p) => ({ id: p.id, vector: p.vector })));
+  return topPairs(nearPairs(set, min), limit).map((pair) => ({
+    ...pair,
+    a_text: texts.get(pair.a)!,
+    b_text: texts.get(pair.b)!,
   }));
 }
 
