@@ -40,13 +40,15 @@ function matches(payload: Record<string, unknown>, id: string, filter: any): boo
   if (!filter) return true;
   const must: any[] = filter.must ?? [];
   const mustNot: any[] = filter.must_not ?? [];
+  const should: any[] = filter.should ?? [];
   const test = (c: any): boolean => {
     if (c.has_id) return c.has_id.includes(id);
     if (c.is_empty) {
       const value = payload[c.is_empty.key];
       return value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
     }
-    const raw = payload[c.key];
+    const [field, nested] = String(c.key).split("[].");
+    const raw = nested === undefined ? payload[field] : ((payload[field] as any[]) ?? []).map((item) => item[nested]);
     const values = Array.isArray(raw) ? raw : [raw];
     if (c.range) {
       return values.some((v) => typeof v === "string" && (c.range.gte === undefined || v >= c.range.gte) && (c.range.lte === undefined || v <= c.range.lte) && (c.range.gt === undefined || v > c.range.gt) && (c.range.lt === undefined || v < c.range.lt));
@@ -55,7 +57,7 @@ function matches(payload: Record<string, unknown>, id: string, filter: any): boo
     if (c.match && "value" in c.match) return values.includes(c.match.value);
     return true;
   };
-  return must.every(test) && !mustNot.some(test);
+  return must.every(test) && !mustNot.some(test) && (should.length === 0 || should.some(test));
 }
 
 function json(body: unknown, status = 200): Response {

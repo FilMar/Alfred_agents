@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 import { checkHealth, EMBED_MODEL } from "./infra.js";
 import { serveApi, API_PORT } from "./api.js";
-import { noteById, createNote, addRefs, changeKind, changeTags, deleteNote, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId, markArchived, clearArchived } from "./notes.js";
+import { noteById, createNote, addRefs, changeKind, changeTags, deleteNote, mergeNotes, searchNotes, browseNotes, randomNote, listNoteTags, resolveNoteId, markArchived, clearArchived } from "./notes.js";
 import { getByIds } from "./qdrant.js";
 import { refineReport, COUNTERS_START, REFINE_NOTES_LIMIT } from "./refine.js";
 import type { NoteType, SearchOptions, Link } from "./types.js";
@@ -299,6 +299,26 @@ program
     try {
       out(await deleteNote(target));
     } catch (err) {
+      die(errorMessage(err));
+    }
+  });
+
+program
+  .command("merge <into> <drops...>")
+  .description("Move the refs, backrefs, tags and hits of the drops onto <into>, then delete the drops")
+  .action(async (into: string, drops: string[]) => {
+    await requireServices({ needsEmbedding: false });
+
+    const intoId = await resolveOrDie(into);
+    const dropIds: string[] = [];
+    for (const drop of drops) dropIds.push(await resolveOrDie(drop));
+    if (dropIds.includes(intoId)) die("A note cannot be merged into itself.");
+    if (new Set(dropIds).size !== dropIds.length) die("A note is given twice.");
+
+    try {
+      out(await mergeNotes(intoId, dropIds));
+    } catch (err) {
+      if (err instanceof ContractError) throw err;
       die(errorMessage(err));
     }
   });

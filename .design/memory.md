@@ -22,3 +22,4 @@
 - Io chiedo cosa abbiamo fatto in passato su un tema, in qualunque progetto; l'agente ottiene gli episodi con riassunto e data, e può aprire gli scambi originali in `tl`.
 - L'agente riprende un progetto dopo mesi, ottiene il perché delle scelte dal wiki del progetto.
 - Il tempo passa, l'agente non vede più le note che nessuno usa.
+- Io lancio Aristotele quando voglio; l'agente unisce, collega e crea hub da solo, senza chiedermi niente, e mi mostra un report di cosa ha fatto.

@@ -3,6 +3,7 @@ import { ensureCollection, upsert, setPayload, setPayloadMany, deletePayloadKeys
 import type { ScrollOptions, TagFacet } from "./qdrant.js";
 import { REFS_LIMIT } from "./infra.js";
 import { assert } from "../../common/contract.js";
+import { mergePlan } from "./merge.js";
 import { noteToText, withoutLink, nextHit, nextRelatedHit, matchPrefix, groupByPayload, validateSearchOptions, ABOUT_NOBODY } from "./types.js";
 import type { Note, NoteType, Link, SearchOptions, SearchResult, DirectResult, RelatedResult, PayloadWrite } from "./types.js";
 
@@ -218,6 +219,37 @@ export async function deleteNote(id: string): Promise<DeleteSummary> {
 
   await deletePoints([id]);
   return { id, deleted: true, unlinked: linked.length };
+}
+
+export interface MergeSummary {
+  into: string;
+  dropped: readonly string[];
+  /** Notes whose links moved from a dropped note to `into`. */
+  relinked: number;
+}
+
+/** Moves the links and counters of the drops onto `into`, then deletes the drops. */
+export async function mergeNotes(intoId: string, dropIds: string[]): Promise<MergeSummary> {
+  const found = await getByIds([intoId, ...dropIds]);
+  const byId = new Map(found.map((note) => [note.id, note]));
+  const missing = [intoId, ...dropIds].find((id) => !byId.has(id));
+  if (missing) throw new Error(`Note not found: ${missing}`);
+
+  const linked = (await Promise.all(dropIds.map(scrollLinkedTo))).flat();
+  const drops = dropIds.map((id) => byId.get(id)!);
+  const outcome = mergePlan(byId.get(intoId)!, drops, linked, new Date(), REFS_LIMIT);
+  if (!outcome.ok) throw new Error(outcome.error);
+
+  const { into, relinked, dropped } = outcome.plan;
+  for (const relink of relinked) {
+    await setPayload(relink.id, { refs: relink.refs, backrefs: relink.backrefs });
+  }
+  const { hits, hits_related, last_hit, last_hit_related, archived_at } = into;
+  await setPayload(into.id, { refs: into.refs, backrefs: into.backrefs, tags: into.tags, hits, hits_related, last_hit, last_hit_related, archived_at, updated_at: into.updated_at });
+  if (archived_at === undefined) await deletePayloadKeys([into.id], ["archived_at"]);
+  await deletePoints([...dropped]);
+
+  return { into: into.id, dropped, relinked: relinked.length };
 }
 
 export async function browseNotes(options: ScrollOptions = {}): Promise<Note[]> {
