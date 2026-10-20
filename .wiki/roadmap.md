@@ -28,7 +28,6 @@ Order: the design first, then the rest.
 
 ## Goal 3: clean-up
 
-- [ ] [M] Git: set `origin/HEAD` and prune. Delete the 18 merged branches, the 4 old local ones and `origin/feature/cockpit-skeleton`.
 - [ ] [M] Put `tests/` in a `tsc` project. Drop the `client.ts?extractions` import trick. [detail](memory_clients_read_their_url_per_call)
 - [ ] [A] Ritchie `check_body_diff.py` ignores a `return` inside a nested function.
 
