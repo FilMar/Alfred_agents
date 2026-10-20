@@ -1,5 +1,5 @@
 #!/bin/bash
-# Claude hook (SessionStart): archive and restore notes by trust.
+# Claude hook (SessionStart): archive and restore notes and rules by trust.
 #
 # It never blocks the start of a session and never fails it: tb refine and
 # the distiller (distill.sh, which checks the queue itself) run
@@ -12,6 +12,7 @@
 cat >/dev/null
 
 setsid tb refine --apply >/dev/null 2>&1 &
+setsid ti refine --apply >/dev/null 2>&1 &
 setsid "$(dirname "$(readlink -f "$0")")/distill.sh" >/dev/null 2>&1 &
 
 exit 0

@@ -15,7 +15,7 @@ prompt=$(jq -r '.prompt // empty' <<<"$input")
 ti_file=$(mktemp)
 tb_file=$(mktemp)
 
-ti search "$prompt" --limit 2 --min-score 0.5 2>/dev/null >"$ti_file" &
+ti search "$prompt" --limit 2 --min-score 0.5 --no-archived 2>/dev/null >"$ti_file" &
 pid_ti=$!
 
 tb search "$prompt" --depth 1 --limit 2 --min-score 0.5 --related-limit 3 --no-archived 2>/dev/null >"$tb_file" &

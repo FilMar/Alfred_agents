@@ -10,19 +10,22 @@ export const HIT_CAP = 10;
 export const HALF_LIFE_DAYS = 90;
 export const TRUST_FLOOR = 0.2;
 export const BIN_COUNT = 10;
-export const LOW_WHAT_CHARS = 80;
+export const LOW_TEXT_CHARS = 80;
 
+export type Counted = Readonly<
+  Pick<Note, "id" | "what" | "when" | "hits" | "hits_related" | "last_hit" | "last_hit_related" | "archived_at">
+>;
 export type Signals = Readonly<{ hits: number; hitsRelated: number; lastSignal: Date }>;
 export type Spread = Readonly<{ bins: readonly number[]; total: number; belowFloor: number }>;
 export type LowNote = Readonly<{
   id: string;
   trust: number;
-  what: string;
+  text: string;
   when: string;
   hits: number;
   hits_related: number;
 }>;
-export type Scored = Readonly<{ note: Note; trust: number }>;
+export type Scored = Readonly<{ note: Counted; trust: number }>;
 export type Plan = Readonly<{ archive: readonly LowNote[]; restore: readonly LowNote[] }>;
 export type RefineReport = Readonly<{ spread: Spread; low: readonly LowNote[]; plan: Plan }>;
 
@@ -73,23 +76,23 @@ function byTrustThenId(left: LowNote, right: LowNote): number {
   return left.trust - right.trust || Number(left.id > right.id) - Number(left.id < right.id);
 }
 
-function viewOf(note: Note, trust: number): LowNote {
+function viewOf(note: Counted, trust: number): LowNote {
   return {
     id: note.id,
     trust,
-    what: note.what.slice(0, LOW_WHAT_CHARS),
+    text: note.what.slice(0, LOW_TEXT_CHARS),
     when: note.when,
     hits: note.hits ?? 0,
     hits_related: note.hits_related ?? 0,
   };
 }
 
-function floorHolds(note: Note, signals: Signals, countersStart: Date): boolean {
+function floorHolds(note: Counted, signals: Signals, countersStart: Date): boolean {
   const hasSignal = note.last_hit !== undefined || note.last_hit_related !== undefined;
   return hasSignal || signals.lastSignal.getTime() >= countersStart.getTime();
 }
 
-export function signalsOf(note: Note, countersStart: Date): Signals {
+export function signalsOf(note: Counted, countersStart: Date): Signals {
   assert(isIsoDate(note.when), "signalsOf: when is an ISO date");
   assert(isValidDate(countersStart), "signalsOf: countersStart is a valid date");
   let result: Signals = { hits: 0, hitsRelated: 0, lastSignal: countersStart };
@@ -150,19 +153,19 @@ export function spreadOf(trusts: readonly number[]): Spread {
   return result;
 }
 
-export function lowNoteOf(note: Note, trust: number): LowNote {
+export function lowNoteOf(note: Counted, trust: number): LowNote {
   assert(trust < TRUST_FLOOR, "lowNoteOf: the trust is under the floor");
   const result = viewOf(note, trust);
   assert(result.id === note.id, "lowNoteOf: the id is the note id");
-  assert(result.what.length <= LOW_WHAT_CHARS, "lowNoteOf: what is cut to the limit");
+  assert(result.text.length <= LOW_TEXT_CHARS, "lowNoteOf: text is cut to the limit");
   return result;
 }
 
-export function restoredNoteOf(note: Note, trust: number): LowNote {
+export function restoredNoteOf(note: Counted, trust: number): LowNote {
   assert(trust >= TRUST_FLOOR, "restoredNoteOf: the trust is at the floor or above");
   const result = viewOf(note, trust);
   assert(result.id === note.id, "restoredNoteOf: the id is the note id");
-  assert(result.what.length <= LOW_WHAT_CHARS, "restoredNoteOf: what is cut to the limit");
+  assert(result.text.length <= LOW_TEXT_CHARS, "restoredNoteOf: text is cut to the limit");
   return result;
 }
 
@@ -188,7 +191,7 @@ export function planOf(scored: readonly Scored[]): Plan {
   return result;
 }
 
-export function refineReport(notes: readonly Note[], now: Date, countersStart: Date): RefineReport {
+export function refineReport(notes: readonly Counted[], now: Date, countersStart: Date): RefineReport {
   assert(notes.length < REFINE_NOTES_LIMIT, "refineReport: the read is not cut by the limit");
   let result: RefineReport = { spread: { bins: [], total: 0, belowFloor: 0 }, low: [], plan: { archive: [], restore: [] } };
   const scored: Scored[] = [];

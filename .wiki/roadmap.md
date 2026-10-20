@@ -10,9 +10,8 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 ## Goal 1: memory curates itself
 
-Order: the first block, then the design, then the rest.
+Order: the design first, then the rest.
 
-- [ ] [M] `ti` hits and `ti refine`, the same as `tb`. [detail](memory_ti_gets_hits_and_refine_exactly_like_tb)
 - [ ] [A] Design of Aristotele as curator of `tb` and `ti`, with Piano. It replaces the idea of `tb link`. [detail](memory_tb_link_is_a_possible_architecture_that_replaces_aristotele_with_vector_candidates_and_one_llm_judge)
 - [ ] [A] `tb merge`: one note absorbs another and keeps its refs.
 - [ ] [A] Several triggers for one `ti` rule.
@@ -70,7 +69,7 @@ Measures, trials and work gated by a date or a size.
 - `tb refine`: read the hit rate, then fix weights, half-life and the 0.2 threshold before 2027-01-18. [detail](memory_tb_refine_threshold_and_half_life_are_not_fixed_before_the_hit_rate_of_november_and_december_is_known)
 - `tb refine`: delete a note archived with no signal for a year. Not before 2027-09-21. [detail](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first)
 - `tb refine`: store a `trust` field only once a reader needs it. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing)
-- `ti refine`: read the archived rules of the first runs. [detail](memory_ti_gets_hits_and_refine_exactly_like_tb)
+- `ti refine`: read the archived rules of the first runs, from mid-February 2027. [detail](memory_ti_gets_hits_and_refine_exactly_like_tb)
 - Count the twins with the cutoff 0.75. Lower to 0.72 if twins pass, raise it if different ideas drop. [detail](memory_td_same_session_cutoff_drops_twins)
 - Find clusters of near notes in one session, for example siblings above 0.55. [detail](memory_td_session_cap_limits_one_session)
 - Check the minimum score 0.30 of `tl search` on more episodes. [detail](memory_episode_search_filters_the_period_in_qdrant)

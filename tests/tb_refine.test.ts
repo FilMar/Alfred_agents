@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   COUNTERS_START,
-  LOW_WHAT_CHARS,
+  LOW_TEXT_CHARS,
   REFINE_NOTES_LIMIT,
   TRUST_FLOOR,
   lowNoteOf,
@@ -289,7 +289,7 @@ describe("lowNoteOf", () => {
     lowNoteOf(makeNote({ id: "keep", when: NOW_ISO, what: "w" }), 0.1);
   });
 
-  test("lowNoteOf: what is cut to the limit", () => {
+  test("lowNoteOf: text is cut to the limit", () => {
     lowNoteOf(makeNote({ id: "long", when: NOW_ISO, what: "w".repeat(200) }), 0.1);
   });
 
@@ -308,7 +308,7 @@ describe("lowNoteOf", () => {
     ).toEqual({
       id: "full",
       trust: 0.15,
-      what: "a short what",
+      text: "a short what",
       when: "2026-10-01T00:00:00.000Z",
       hits: 3,
       hits_related: 2,
@@ -316,10 +316,10 @@ describe("lowNoteOf", () => {
   });
 
   test("a what of exactly 80 characters is kept whole", () => {
-    expect(lowNoteOf(makeNote({ id: "eighty", when: NOW_ISO, what: "e".repeat(LOW_WHAT_CHARS) }), 0.19)).toEqual({
+    expect(lowNoteOf(makeNote({ id: "eighty", when: NOW_ISO, what: "e".repeat(LOW_TEXT_CHARS) }), 0.19)).toEqual({
       id: "eighty",
       trust: 0.19,
-      what: "e".repeat(LOW_WHAT_CHARS),
+      text: "e".repeat(LOW_TEXT_CHARS),
       when: NOW_ISO,
       hits: 0,
       hits_related: 0,
@@ -328,11 +328,11 @@ describe("lowNoteOf", () => {
 
   test("a what of 81 characters is cut to 80, no ellipsis", () => {
     expect(
-      lowNoteOf(makeNote({ id: "over", when: NOW_ISO, what: "o".repeat(LOW_WHAT_CHARS + 1) }), 0.05),
+      lowNoteOf(makeNote({ id: "over", when: NOW_ISO, what: "o".repeat(LOW_TEXT_CHARS + 1) }), 0.05),
     ).toEqual({
       id: "over",
       trust: 0.05,
-      what: "o".repeat(LOW_WHAT_CHARS),
+      text: "o".repeat(LOW_TEXT_CHARS),
       when: NOW_ISO,
       hits: 0,
       hits_related: 0,
@@ -343,7 +343,7 @@ describe("lowNoteOf", () => {
     expect(lowNoteOf(makeNote({ id: "bare", when: NOW_ISO, what: "bare" }), 0.05)).toEqual({
       id: "bare",
       trust: 0.05,
-      what: "bare",
+      text: "bare",
       when: NOW_ISO,
       hits: 0,
       hits_related: 0,
@@ -406,7 +406,7 @@ describe("refineReport", () => {
         {
           id: "gone",
           trust: 0.0625,
-          what: "gone",
+          text: "gone",
           when: "2026-02-01T00:00:00.000Z",
           hits: 0,
           hits_related: 0,
@@ -414,7 +414,7 @@ describe("refineReport", () => {
         {
           id: "aa",
           trust: 0.125,
-          what: "a".repeat(LOW_WHAT_CHARS),
+          text: "a".repeat(LOW_TEXT_CHARS),
           when: "2026-05-01T00:00:00.000Z",
           hits: 0,
           hits_related: 0,
@@ -422,7 +422,7 @@ describe("refineReport", () => {
         {
           id: "zz",
           trust: 0.125,
-          what: "zz",
+          text: "zz",
           when: "2026-06-01T00:00:00.000Z",
           hits: 0,
           hits_related: 0,

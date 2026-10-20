@@ -49,7 +49,7 @@ export async function neighboursOf(candidate: Candidate, topK: number): Promise<
     const found = await searchNotes(query, { depth: 0, limit: topK, record_hits: false });
     result = found.map((hit) => neighbourOfNote(hit.note));
   } else {
-    const found = await searchEntries(query, { limit: topK });
+    const found = await searchEntries(query, { limit: topK, record_hits: false });
     result = found.map((entry) => neighbourOfEntry(entry));
   }
   assert(result.length <= topK, () => `neighboursOf: at most topK neighbours, got=${result.length}`);
