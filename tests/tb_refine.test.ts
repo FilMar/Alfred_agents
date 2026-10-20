@@ -13,13 +13,13 @@ import {
 import type { Note } from "../tools/tb/src/types.ts";
 
 // Anchor dates, all UTC midnights so the day gaps stay whole.
-// NOW is COUNTERS_START plus 90 days, one half life.
+// NOW is COUNTERS_START plus 90 days, three half lives.
 const NOW = new Date("2026-12-20T00:00:00.000Z");
 const NOW_ISO = "2026-12-20T00:00:00.000Z";
 const COUNTERS_START_ISO = "2026-09-21T00:00:00.000Z";
-// COUNTERS_START plus 118 and 119 days: the floor crossing of a signal-less note.
-const AFTER_118 = new Date("2027-01-17T00:00:00.000Z");
-const AFTER_119 = new Date("2027-01-18T00:00:00.000Z");
+// COUNTERS_START plus 39 and 40 days: the floor crossing of a signal-less note.
+const AFTER_39 = new Date("2026-10-30T00:00:00.000Z");
+const AFTER_40 = new Date("2026-10-31T00:00:00.000Z");
 
 type NoteFields = {
   id?: string;
@@ -160,16 +160,16 @@ describe("trustOf", () => {
     expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: NOW }, NOW)).toBe(0.5);
   });
 
-  test("the trust halves every 90 days", () => {
-    expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: COUNTERS_START }, NOW)).toBe(0.25);
+  test("the trust halves every 30 days", () => {
+    expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: new Date("2026-11-20T00:00:00.000Z") }, NOW)).toBe(0.25);
   });
 
   test("two half lives", () => {
-    expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: new Date("2026-06-23T00:00:00.000Z") }, NOW)).toBe(0.125);
+    expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: new Date("2026-10-21T00:00:00.000Z") }, NOW)).toBe(0.125);
   });
 
   test("three half lives", () => {
-    expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: new Date("2026-03-25T00:00:00.000Z") }, NOW)).toBe(0.0625);
+    expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: new Date("2026-09-21T00:00:00.000Z") }, NOW)).toBe(0.0625);
   });
 
   test("a last signal in the future counts zero days", () => {
@@ -178,7 +178,7 @@ describe("trustOf", () => {
 
   test("the days count as fractions", () => {
     expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: new Date("2026-12-19T12:00:00.000Z") }, NOW)).toBeCloseTo(
-      0.49807829,
+      0.49425701,
       6,
     );
   });
@@ -208,15 +208,15 @@ describe("trustOf", () => {
   });
 
   test("six hits after two half lives sit exactly at the floor", () => {
-    expect(trustOf({ hits: 6, hitsRelated: 0, lastSignal: new Date("2026-06-23T00:00:00.000Z") }, NOW)).toBe(0.2);
+    expect(trustOf({ hits: 6, hitsRelated: 0, lastSignal: new Date("2026-10-21T00:00:00.000Z") }, NOW)).toBe(0.2);
   });
 
-  test("118 days without hits stay above the floor", () => {
-    expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: COUNTERS_START }, AFTER_118)).toBeGreaterThan(TRUST_FLOOR);
+  test("39 days without hits stay above the floor", () => {
+    expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: COUNTERS_START }, AFTER_39)).toBeGreaterThan(TRUST_FLOOR);
   });
 
-  test("119 days without hits drop below the floor", () => {
-    expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: COUNTERS_START }, AFTER_119)).toBeLessThan(TRUST_FLOOR);
+  test("40 days without hits drop below the floor", () => {
+    expect(trustOf({ hits: 0, hitsRelated: 0, lastSignal: COUNTERS_START }, AFTER_40)).toBeLessThan(TRUST_FLOOR);
   });
 });
 
@@ -371,7 +371,7 @@ describe("refineReport", () => {
 
   test("refineReport: one low note per trust below the floor", () => {
     refineReport(
-      [makeNote({ id: "gone", when: "2026-02-01T00:00:00.000Z", what: "gone", last_hit: "2026-03-25T00:00:00.000Z" })],
+      [makeNote({ id: "gone", when: "2026-02-01T00:00:00.000Z", what: "gone", last_hit: "2026-09-21T00:00:00.000Z" })],
       NOW,
       COUNTERS_START,
     );
@@ -396,11 +396,11 @@ describe("refineReport", () => {
     const notes = [
       makeNote({ id: "fresh", when: NOW_ISO, what: "fresh", hits: 10, hits_related: 10, last_hit: NOW_ISO }),
       makeNote({ id: "young", when: NOW_ISO, what: "young" }),
-      makeNote({ id: "nose", when: COUNTERS_START_ISO, what: "nose" }),
-      makeNote({ id: "edge", when: "2026-06-01T00:00:00.000Z", what: "edge", hits: 6, last_hit: "2026-06-23T00:00:00.000Z" }),
-      makeNote({ id: "zz", when: "2026-06-01T00:00:00.000Z", what: "zz", last_hit: "2026-06-23T00:00:00.000Z" }),
-      makeNote({ id: "aa", when: "2026-05-01T00:00:00.000Z", what: "a".repeat(90), last_hit: "2026-06-23T00:00:00.000Z" }),
-      makeNote({ id: "gone", when: "2026-02-01T00:00:00.000Z", what: "gone", last_hit: "2026-03-25T00:00:00.000Z" }),
+      makeNote({ id: "nose", when: "2026-11-20T00:00:00.000Z", what: "nose" }),
+      makeNote({ id: "edge", when: "2026-06-01T00:00:00.000Z", what: "edge", hits: 6, last_hit: "2026-10-21T00:00:00.000Z" }),
+      makeNote({ id: "zz", when: "2026-06-01T00:00:00.000Z", what: "zz", last_hit: "2026-10-21T00:00:00.000Z" }),
+      makeNote({ id: "aa", when: "2026-05-01T00:00:00.000Z", what: "a".repeat(90), last_hit: "2026-10-21T00:00:00.000Z" }),
+      makeNote({ id: "gone", when: "2026-02-01T00:00:00.000Z", what: "gone", last_hit: "2026-09-21T00:00:00.000Z" }),
     ];
     const low = [
         {
@@ -438,7 +438,7 @@ describe("refineReport", () => {
   test("an archived note that was hit again goes to restore, one still under the floor stays archived", () => {
     const notes = [
       makeNote({ id: "back", when: "2026-02-01T00:00:00.000Z", what: "back", hits: 2, last_hit: NOW_ISO, archived_at: "2026-10-01T00:00:00.000Z" }),
-      makeNote({ id: "still", when: "2026-02-01T00:00:00.000Z", what: "still", last_hit: "2026-03-25T00:00:00.000Z", archived_at: "2026-10-01T00:00:00.000Z" }),
+      makeNote({ id: "still", when: "2026-02-01T00:00:00.000Z", what: "still", last_hit: "2026-09-21T00:00:00.000Z", archived_at: "2026-10-01T00:00:00.000Z" }),
     ];
     const report = refineReport(notes, NOW, COUNTERS_START);
     expect(report.plan.archive).toEqual([]);
@@ -455,18 +455,18 @@ describe("refineReport", () => {
     });
   });
 
-  test("after 118 days the same note is still above the floor", () => {
+  test("after 39 days the same note is still above the floor", () => {
     const notes = [makeNote({ id: "old", when: "2026-08-01T00:00:00.000Z", what: "old" })];
-    expect(refineReport(notes, AFTER_118, COUNTERS_START)).toEqual({
+    expect(refineReport(notes, AFTER_39, COUNTERS_START)).toEqual({
       spread: { bins: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], total: 1, belowFloor: 0 },
       low: [],
       plan: { archive: [], restore: [] },
     });
   });
 
-  test("after 119 days it drops below the floor", () => {
+  test("after 40 days it drops below the floor", () => {
     const notes = [makeNote({ id: "old", when: "2026-08-01T00:00:00.000Z", what: "old" })];
-    const report = refineReport(notes, AFTER_119, COUNTERS_START);
+    const report = refineReport(notes, AFTER_40, COUNTERS_START);
     expect(report.spread.total).toBe(1);
     expect(report.spread.belowFloor).toBe(1);
     expect(report.low.length).toBe(1);

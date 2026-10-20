@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
+import { QUALITY_BAR } from "../tools/td/src/guides.ts";
 import type { Turn } from "../tools/td/src/session.ts";
 import type { Contents, Exchange } from "../tools/tl/src/types.ts";
 
@@ -183,6 +184,7 @@ describe("extractionPrompt", () => {
 
   test("vocabulary, session map, how the episode ended, the episode, the target", () => {
     const prompt =
+      `${QUALITY_BAR}\n\n` +
       "Tag vocabulary: sviluppo-software, architettura, memoria, qualità\n\n" +
       `${map.text()}\n\n` +
       `## How this episode ended\n${episode.summary()}\n\n` +

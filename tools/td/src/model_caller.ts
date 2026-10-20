@@ -1,13 +1,15 @@
 import { completeSimple, getEnvApiKey } from "@earendil-works/pi-ai";
 import type { AssistantMessage, Message, Usage } from "@earendil-works/pi-ai";
 
-import { assert, isNonBlank } from "../../common/contract.js";
+import { assert, isNonBlank, isPositiveInt } from "../../common/contract.js";
 import type { Role } from "./config.js";
 
 export type JsonCheck = (json: unknown) => string | null;
 
 // The answer, then one fix.
 export const MAX_TRIES = 2;
+
+export const CALL_TIMEOUT_MS = 300_000;
 
 // Ollama wants a key, any key.
 const NO_KEY = "none";
@@ -147,14 +149,15 @@ export class ModelAnswer {
 }
 
 export class ModelCaller {
-  static async ask(role: Role, prompt: string, check: JsonCheck): Promise<ModelAnswer> {
+  static async ask(role: Role, prompt: string, check: JsonCheck, timeoutMs = CALL_TIMEOUT_MS): Promise<ModelAnswer> {
     assert(isNonBlank(prompt), "ModelCaller.ask: the prompt is not blank");
+    assert(isPositiveInt(timeoutMs), () => `ModelCaller.ask: timeoutMs is a positive integer, got=${timeoutMs}`);
     const messages: Message[] = [{ role: "user", content: prompt, timestamp: Date.now() }];
     let tokens = ModelTokens.zero();
     let result: ModelAnswer | null = null;
     let lastError: string | null = null;
     for (let tries = 1; tries <= MAX_TRIES; tries++) {
-      const reply = await ModelCaller.#send(role, messages);
+      const reply = await ModelCaller.#send(role, messages, timeoutMs);
       tokens = tokens.plus(ModelTokens.of(reply.usage));
       if (reply.stopReason === "error" || reply.stopReason === "aborted") {
         result = ModelAnswer.rejected(reply.errorMessage ?? "the model call failed", tries, tokens);
@@ -198,15 +201,16 @@ export class ModelCaller {
     return result;
   }
 
-  static async #send(role: Role, messages: readonly Message[]): Promise<AssistantMessage> {
+  static async #send(role: Role, messages: readonly Message[], timeoutMs: number): Promise<AssistantMessage> {
     assert(messages.length % 2 === 1, () => `ModelCaller.#send: the last message is the user's, count=${messages.length}`);
     const connection = role.connection();
     const thinking = role.thinking();
     const apiKey = ModelCaller.#apiKey(connection.toJson().provider);
     const temperature = role.temperature();
+    const signal = AbortSignal.timeout(timeoutMs);
     const options = thinking === "off"
-      ? { apiKey, temperature }
-      : { apiKey, temperature, reasoning: thinking };
+      ? { apiKey, temperature, signal }
+      : { apiKey, temperature, signal, reasoning: thinking };
     const result = await completeSimple(
       connection.toPiModel(),
       { systemPrompt: role.system(), messages: [...messages] },

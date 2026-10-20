@@ -3,6 +3,7 @@ import { listTags } from "../../tb/src/qdrant.js";
 import { Checked, Evidence, NoteCandidate, ProjectTerms, RuleCandidate, TagVocabulary } from "./candidate.js";
 import type { Extractor } from "./config.js";
 import { cut } from "./episodes.js";
+import { QUALITY_BAR } from "./guides.js";
 import type { Episode, SessionMap } from "./episodes.js";
 import { ModelCaller } from "./model_caller.js";
 import type { ModelAnswer } from "./model_caller.js";
@@ -52,10 +53,10 @@ export function targetText(target: Target, inputChars: number, outputChars: numb
 export function extractionPrompt(target: Target, vocabulary: readonly string[], extractor: Extractor): string {
   assert(vocabulary.length > 0, "extractionPrompt: the vocabulary is not empty");
   const result =
-    `Tag vocabulary: ${vocabulary.join(", ")}\n\n${target.map.text()}\n\n## How this episode ended\n${target.episode.summary()}` +
+    `${QUALITY_BAR}\n\nTag vocabulary: ${vocabulary.join(", ")}\n\n${target.map.text()}\n\n## How this episode ended\n${target.episode.summary()}` +
     `\n\n## The episode (context)\n${episodeText(target, extractor.episodeChars())}` +
     `\n\n## >>> TARGET: extract only from this exchange <<<\n${targetText(target, extractor.targetInputChars(), extractor.targetOutputChars())}`;
-  assert(result.startsWith(`Tag vocabulary: ${vocabulary.join(", ")}\n\n`), "extractionPrompt: the prompt starts with the vocabulary");
+  assert(result.startsWith(`${QUALITY_BAR}\n\nTag vocabulary: ${vocabulary.join(", ")}\n\n`), "extractionPrompt: the prompt starts with the quality bar, then the vocabulary");
   assert(result.includes(target.map.text()), "extractionPrompt: the prompt holds the session map");
   assert(result.endsWith(targetText(target, extractor.targetInputChars(), extractor.targetOutputChars())), "extractionPrompt: the prompt ends with the target");
   return result;

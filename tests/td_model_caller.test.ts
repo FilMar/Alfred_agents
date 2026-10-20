@@ -6,7 +6,7 @@ import type { JsonCheck } from "../tools/td/src/model_caller.ts";
 import { Role } from "../tools/td/src/config.ts";
 
 
-type Reply = { text: string; thinking?: string } | { status: number };
+type Reply = { text: string; thinking?: string } | { status: number } | { delayMs: number };
 const queue: Reply[] = [];
 const seen: Array<{ messages: Array<{ role: string; content: unknown }>; reasoning_effort?: string }> = [];
 
@@ -29,6 +29,10 @@ const server = Bun.serve({
   async fetch(req) {
     seen.push((await req.json()) as (typeof seen)[number]);
     const next = queue.shift() ?? { status: 400 };
+    if ("delayMs" in next) {
+      await Bun.sleep(next.delayMs);
+      return new Response(sse('{"a":1}'), { headers: { "content-type": "text/event-stream" } });
+    }
     if ("status" in next) {
       return new Response(JSON.stringify({ error: { message: "fake failure" } }),
         { status: next.status, headers: { "content-type": "application/json" } });
@@ -264,6 +268,30 @@ describe("ModelCaller.ask", () => {
   test("the prompt is not blank", async () => {
     await expect(ModelCaller.ask(role(base), "", check))
       .rejects.toThrow("ModelCaller.ask: the prompt is not blank");
+  });
+
+  test("timeoutMs 0 is not a positive integer", async () => {
+    await expect(ModelCaller.ask(role(base), "Give me the JSON.", check, 0))
+      .rejects.toThrow("ModelCaller.ask: timeoutMs is a positive integer");
+  });
+
+  test("a fractional timeoutMs is not a positive integer", async () => {
+    await expect(ModelCaller.ask(role(base), "Give me the JSON.", check, 1.5))
+      .rejects.toThrow("ModelCaller.ask: timeoutMs is a positive integer");
+  });
+
+  test("timeoutMs 1, at the edge, is a positive integer", async () => {
+    queue.length = 0;
+    queue.push({ delayMs: 200 });
+    await ModelCaller.ask(role(base), "Give me the JSON.", check, 1);
+  });
+
+  test("a call past the timeout is a rejected answer at the first try", async () => {
+    queue.length = 0;
+    queue.push({ delayMs: 500 });
+    const answer = await ModelCaller.ask(role(base), "Give me the JSON.", check, 50);
+    expect(answer.isOk()).toBe(false);
+    expect(answer.tries()).toBe(1);
   });
 
   const outcomes: Array<{

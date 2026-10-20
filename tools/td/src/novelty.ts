@@ -2,6 +2,7 @@ import { assert, isNonBlank, isRecord } from "../../common/contract.js";
 import type { CandidateKind } from "../../tl/src/types.js";
 import { NoteCandidate } from "./candidate.js";
 import type { Extractor } from "./config.js";
+import { QUALITY_BAR } from "./guides.js";
 import { kindOf } from "./critic.js";
 import type { Candidate } from "./critic.js";
 import type { ModelAnswer } from "./model_caller.js";
@@ -87,7 +88,7 @@ export function savedText(candidate: Candidate): string {
 export function noveltyPrompt(candidates: readonly Candidate[], known: readonly Known[]): string {
   let result: string;
   assert(candidates.length > 0, "noveltyPrompt: at least one candidate");
-  const lines: string[] = ["## Candidates"];
+  const lines: string[] = [QUALITY_BAR, "", "## Candidates"];
   for (let k = 0; k < candidates.length; k += 1) {
     lines.push(`C${k} (${kindOf(candidates[k])}): ${candidateText(candidates[k])}`);
   }
@@ -96,6 +97,7 @@ export function noveltyPrompt(candidates: readonly Candidate[], known: readonly 
     lines.push(`N${k} (${known[k].kind}): ${known[k].text.slice(0, KNOWN_TEXT_CHARS)}`);
   }
   result = lines.join("\n") + "\n\nUse the integer after C as `cand` and the integer after N as `of`.";
+  assert(result.startsWith(`${QUALITY_BAR}\n\n## Candidates\n`), "noveltyPrompt: the prompt starts with the quality bar");
   assert(listsCandidates(result, candidates), "noveltyPrompt: every candidate is a C line, numbered from 0");
   assert(listsKnown(result, known), "noveltyPrompt: every known item is an N line, numbered from 0, cut at KNOWN_TEXT_CHARS");
   assert(result.endsWith("Use the integer after C as `cand` and the integer after N as `of`."), "noveltyPrompt: the prompt ends with the id instruction");

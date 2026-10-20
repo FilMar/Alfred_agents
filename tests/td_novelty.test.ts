@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 
 import { NoteCandidate, RuleCandidate } from "../tools/td/src/candidate.ts";
 import { Extractor } from "../tools/td/src/config.ts";
+import { QUALITY_BAR } from "../tools/td/src/guides.ts";
 import {
   KNOWN_TEXT_CHARS,
   MODEL_VERDICTS,
@@ -170,7 +171,9 @@ describe("noveltyPrompt", () => {
   });
 
   it("lists the only candidate and no neighbour", () => {
-    const expected = `## Candidates
+    const expected = `${QUALITY_BAR}
+
+## Candidates
 C0 (note): ${NOTE_TEXT}
 
 ## Neighbours
@@ -180,7 +183,9 @@ ${IDS}`;
   });
 
   it("numbers every candidate and every known item", () => {
-    const expected = `## Candidates
+    const expected = `${QUALITY_BAR}
+
+## Candidates
 C0 (note): ${NOTE_TEXT}
 C1 (rule): ${RULE_TEXT}
 
@@ -196,7 +201,9 @@ ${IDS}`;
     const inside = "x".repeat(KNOWN_TEXT_CHARS - 1) + "!";
     const edge = "y".repeat(KNOWN_TEXT_CHARS - 1) + "!";
     const outside = "z".repeat(KNOWN_TEXT_CHARS) + "@";
-    const expected = `## Candidates
+    const expected = `${QUALITY_BAR}
+
+## Candidates
 C0 (note): ${NOTE_TEXT}
 
 ## Neighbours
