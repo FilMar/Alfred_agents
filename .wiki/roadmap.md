@@ -10,7 +10,6 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 ## Goal 1: memory curates itself
 
-- [ ] Measure which rules the real prompts in `tl` cannot reach.
 - [ ] [M] The HTML report of a curation run.
 - [ ] Rewrite the Aristotele skill with efesto. [detail](memory_aristotele_is_a_manual_curator_of_tb_and_ti)
 

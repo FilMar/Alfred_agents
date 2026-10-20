@@ -118,6 +118,7 @@ updated: 2026-10-16
 | [memory_tb_merge_moves_links_onto_one_note](memory_tb_merge_moves_links_onto_one_note) | tb merge moves refs, backrefs, tags and hits of the drops onto one note, then deletes them; writes no text |
 | [memory_ghost_rules_are_plain_ti_rules_with_the_same_do](memory_ghost_rules_are_plain_ti_rules_with_the_same_do) | A ghost rule is a plain ti add with the same do: separate stats per trigger, no multi-vector points |
 | [memory_aristotele_is_a_manual_curator_of_tb_and_ti](memory_aristotele_is_a_manual_curator_of_tb_and_ti) | Aristotele curates tb and ti when the user starts it: merges, refs, hubs, ghost rules, no approval, a web report after |
+| [memory_near_and_reach_find_what_aristotele_judges](memory_near_and_reach_find_what_aristotele_judges) | tb near and ti near list close pairs; tl prompts piped into ti reach counts which rules real prompts reach; code finds, Aristotele judges |
 
 ## skill
 
