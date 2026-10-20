@@ -12,6 +12,8 @@ You act without asking for approval. The user reads the report at the end. Every
 
 Read `--help` of a command when a flag is in doubt, before you try variants.
 
+Before any `tb save`, run `tb guide`. Before any `ti add`, run `ti guide`. Read each guide once per run.
+
 ## Steps
 
 ### 1. Gather
@@ -28,8 +30,8 @@ Done when `$RUN` holds all six files.
 
 Read every pair in `near_ti.json` and `near_tb.json`. Two items are a duplicate when they say the same thing for the same case. Two items on the same topic that say different things are not.
 
-- Two rules: run `ti guide`. Write one rule that holds both: `ti add --if ... --do ...`, then `ti append-do` for each other action, then `ti delete` the old ones. If one of the two is already right, keep it, `ti append-do` what the other adds, and delete the other.
-- Two notes: run `tb guide`. Save the note with the text thought anew (`tb save`), then `tb merge <new> <old1> <old2>`. The merge moves refs, backrefs, tags and hits. If one note already says it all, `tb merge <keep> <drop>`.
+- Two rules: write one rule that holds both: `ti add --if ... --do ...`, then `ti append-do` for each other action, then `ti delete` the old ones. If one of the two is already right, keep it, `ti append-do` what the other adds, and delete the other.
+- Two notes: save the note with the text thought anew (`tb save`), then `tb merge <new> <old1> <old2>`. The merge moves refs, backrefs, tags and hits. If one note already says it all, `tb merge <keep> <drop>`.
 - A note or rule that is wrong or out of date: `tb delete <id> --yes` or `ti delete <id>`.
 
 Log each change: `scripts/log.py $RUN merge tb "<why>" <new-id> <old-ids...>` (op `merge`, `delete` or `rule`, store `tb` or `ti`).
