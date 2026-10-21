@@ -6,6 +6,11 @@
 # nomic-embed-text-v2-moe, a real prompt tops out around 0.53 and an off-topic one
 # never passes 0.25. The old 0.8 came from a model whose scores all sat near 0.7,
 # and it fired on none of eight real prompts — the injection was silent.
+# 2026-10-21 spike (spikes/2026-10-21-hook-preview + threshold-fix): 0.5 sat on the
+# edge of the used-note band (used 0.506-0.600, misses 0.33-0.50). Lowered to 0.3:
+# trims the noise tail, empties ti on conversational prompts, keeps the miss band.
+# Below ~0.25 the threshold is a no-op on this corpus (measured cosine floor).
+# Related notes removed: they bypass --min-score via ref-traversal (depth 0).
 
 input=$(cat)
 prompt=$(jq -r '.prompt // empty' <<<"$input")
@@ -15,10 +20,10 @@ prompt=$(jq -r '.prompt // empty' <<<"$input")
 ti_file=$(mktemp)
 tb_file=$(mktemp)
 
-ti search "$prompt" --limit 2 --min-score 0.5 --no-archived 2>/dev/null >"$ti_file" &
+ti search "$prompt" --limit 5 --min-score 0.3 --no-archived 2>/dev/null >"$ti_file" &
 pid_ti=$!
 
-tb search "$prompt" --depth 1 --limit 2 --min-score 0.5 --related-limit 3 --no-archived 2>/dev/null >"$tb_file" &
+tb search "$prompt" --depth 0 --limit 5 --min-score 0.3 --no-archived 2>/dev/null >"$tb_file" &
 pid_tb=$!
 
 wait "$pid_ti" "$pid_tb"

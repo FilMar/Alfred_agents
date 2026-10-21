@@ -6,8 +6,8 @@ export default function (pi: ExtensionAPI): void {
     if (!event.prompt?.trim()) return;
 
     const [tiResult, tbResult] = await Promise.allSettled([
-      execSearch("ti", event.prompt, { limit: 2, minScore: HOOK_MIN_SCORE, noArchived: true }),
-      execSearch("tb", event.prompt, { depth: 1, limit: 2, minScore: HOOK_MIN_SCORE, relatedLimit: 3, noArchived: true }),
+      execSearch("ti", event.prompt, { limit: HOOK_LIMIT, minScore: HOOK_MIN_SCORE, noArchived: true }),
+      execSearch("tb", event.prompt, { depth: 0, limit: HOOK_LIMIT, minScore: HOOK_MIN_SCORE, noArchived: true }),
     ]);
 
     let context = "";
@@ -36,7 +36,18 @@ export default function (pi: ExtensionAPI): void {
 
 // The cutoff belongs to the model: on nomic-embed-text-v2-moe a real prompt tops out
 // near 0.53 and an off-topic one never passes 0.25. The old 0.8 fired on no prompt at all.
-const HOOK_MIN_SCORE = 0.5;
+// 2026-10-21 spike (spikes/2026-10-21-hook-preview + threshold-fix): 0.5 sat exactly on
+// the edge of the used-note band (used notes score 0.506-0.600, misses 0.33-0.50).
+// Lowered to 0.3: it trims the noise tail without touching the miss population,
+// and it empties the ti channel on conversational prompts (rules rarely pass 0.3).
+// Below ~0.25 the threshold is a no-op on this corpus (measured cosine floor).
+const HOOK_MIN_SCORE = 0.3;
+
+// Max results per source, ordered by rank. 5 was chosen in the spike: with depth 0
+// (no related explosion) it stays readable. Related notes were removed because
+// they bypass --min-score (they arrive via ref-traversal without a direct score)
+// and were the largest noise source.
+const HOOK_LIMIT = 5;
 
 // Eight characters are enough: tb and ti accept a unique prefix of an id.
 function shortId(id: string | undefined): string {
@@ -49,7 +60,8 @@ async function execSearch(
   opts: { limit?: number; minScore?: number; depth?: number; relatedLimit?: number; noArchived?: boolean } = {},
 ): Promise<string> {
   const args = ["search", query, "--limit", String(opts.limit ?? 5), "--min-score", String(opts.minScore ?? HOOK_MIN_SCORE)];
-  if (opts.depth) args.push("--depth", String(opts.depth));
+  // depth 0 must be explicit: falsy values skip the flag and tb defaults to depth 1 (related on)
+  if (opts.depth !== undefined) args.push("--depth", String(opts.depth));
   if (opts.relatedLimit !== undefined) args.push("--related-limit", String(opts.relatedLimit));
   if (opts.noArchived) args.push("--no-archived");
 
