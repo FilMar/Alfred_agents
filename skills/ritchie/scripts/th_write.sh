@@ -40,8 +40,13 @@ work="$(mktemp -d -t ritchie-XXXXXX)"
 target="$(basename "$todo_file")"
 tests_name="$(basename "$test_file")"
 import_path="$(python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], os.path.dirname(sys.argv[2])))' "$todo_file" "$test_file")"
-cp "$todo_file" "$work/$target"
-cp "$todo_file" "$work/$target.todo"
+# src/ and test/ keep same-basename files apart: a test file that shares
+# the todo file's name must not overwrite the copy the run edits.
+src_dir="$work/src"
+test_dir="$work/test"
+mkdir -p "$src_dir" "$test_dir"
+cp "$todo_file" "$src_dir/$target"
+cp "$todo_file" "$src_dir/$target.todo"
 cp "$spec_file" "$work/spec.md"
 
 RULES_TESTS='You write tests from contracts. You never see a body: every body is a todo line.
@@ -52,7 +57,7 @@ An assert above the todo line is a precondition. An assert below it is a postcon
 - A classifier (a pure function whose rule is its own definition): an outcome table with the expected result, from the spec. This is the only place where a test has its own expect.
 - Import only what the file exports. Never import or reach a private member.
 - Use the test framework and style of the project language.
-Read only the files in this directory and the modules the todo file imports. Never read other test files.
+Read only src/, spec.md and the modules the todo file imports. Never read other test files.
 Write the test file once and stop. You cannot run it.'
 
 RULES_BODY='You write function bodies. Each body replaces one todo line, in that place only.
@@ -60,32 +65,32 @@ RULES_BODY='You write function bodies. Each body replaces one todo line, in that
 - A function with postconditions has no return in its body: assign result and let the postconditions after the todo line run.
 - No recursion. Every loop has a bound.
 - The tests and the spec say what the body must do. The contracts must hold for every test.
-Read only the files in this directory and the modules the todo file imports. Never read another version of this file.
+Read only src/, test/ and spec.md. Never read another version of this file.
 Edit the file once and stop. You cannot run it.'
 
 if [ "$mode" = tests ]; then
   [ ! -e "$test_file" ] || { echo "test file exists, remove it first: $test_file" >&2; exit 2; }
   hat="$TESTS_HAT"
   system="$RULES_TESTS"
-  task="Read $target and spec.md in this directory. Write the tests to $tests_name in this directory. The test file will live next to other tests and must import the module as $import_path."
+  task="Read src/$target and spec.md. Write the tests as test/$tests_name. The test file will live next to other tests and must import the module as $import_path."
 else
   [ -f "$test_file" ] || { echo "no test file: $test_file" >&2; exit 2; }
-  cp "$test_file" "$work/$tests_name"
+  cp "$test_file" "$test_dir/$tests_name"
   hat="$BODY_HAT"
   system="$RULES_BODY"
-  task="Read $tests_name and spec.md in this directory. Replace every todo line of $target in this directory with its body."
+  task="Read test/$tests_name and spec.md. Replace every todo line of src/$target with its body."
 fi
 
 (cd "$work" && th run --hat "$hat" --model "$MODEL" --thinking "$THINKING" --tools "$TOOLS" \
   --system "$system" --timeout "$TIMEOUT_S" --no-archive --task "$task")
 
 if [ "$mode" = tests ]; then
-  [ -f "$work/$tests_name" ] || { echo "the run wrote no test file; work dir: $work" >&2; exit 1; }
-  cp "$work/$tests_name" "$test_file"
+  [ -f "$test_dir/$tests_name" ] || { echo "the run wrote no test file; work dir: $work" >&2; exit 1; }
+  cp "$test_dir/$tests_name" "$test_file"
   echo "tests written: $test_file"
 else
-  python3 "$here/check_body_diff.py" "$work/$target.todo" "$work/$target" \
+  python3 "$here/check_body_diff.py" "$src_dir/$target.todo" "$src_dir/$target" \
     || { echo "body rejected, $todo_file left as it was; work dir: $work" >&2; exit 1; }
-  cp "$work/$target" "$todo_file"
+  cp "$src_dir/$target" "$todo_file"
   echo "bodies written: $todo_file"
 fi
