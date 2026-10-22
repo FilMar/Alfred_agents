@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# desc: Per-function report: logic lines (contracts excluded), invariant count, compound or computing asserts, recursion, tests with own asserts. Rust, Python, TypeScript, Go.
-# usage: contract_report.py <file-or-dir>... [--lines 40] [--asserts 5] [--all]
+# desc: Per-function report: logic lines (contracts excluded), invariant count, compound or computing asserts, recursion, tests with own asserts; plus files over the line limit. Rust, Python, TypeScript, Go.
+# usage: contract_report.py <file-or-dir>... [--lines 40] [--asserts 5] [--file-lines 350] [--all]
 """Heuristic report, not a parser. It reads one file at a time with regexes.
 
 Flags:
@@ -11,8 +11,9 @@ Flags:
                the message is not checked, so a lazy message closure is fine
   recursion    the body calls the function by its own name
   test-assert  a test function holds an assert of its own
+  file>N       a file holds more than N lines, every line counted, tests included
 
-Exit 1 when any function is flagged, so the script can gate a commit.
+Exit 1 when any function or file is flagged, so the script can gate a commit.
 """
 import re
 import statistics
@@ -43,7 +44,8 @@ ASSERT_START = {
 LINE_COMMENT = {"rust": "//", "python": "#", "ts": "//", "go": "//"}
 AND_TOKEN = {"rust": "&&", "python": " and ", "ts": "&&", "go": "&&"}
 COMPUTE_MARKERS = {
-    "rust": [re.compile(r"\|\s*[\w_,\s()]*\|"), re.compile(r"\.(all|any|iter|map|fold|filter)\(")],
+    "rust": [re.compile(r"(?:^|[(,={]|\bmove)\s*\|[^|]*\|"),
+             re.compile(r"\.(all|any|iter|map|fold|filter)\(")],
     "python": [re.compile(r"\blambda\b"), re.compile(r"\bfor\b"), re.compile(r"\b(all|any|sum)\(")],
     "ts": [re.compile(r"=>"), re.compile(r"\.(every|some|map|filter|reduce)\(")],
     "go": [re.compile(r"\bfunc\s*\(")],
@@ -189,6 +191,11 @@ def detect_method(lines, i, lang, receiver):
     return not re.match(r"^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?function\b", sig)
 
 
+def file_lines(path):
+    text = path.read_text(errors="replace")
+    return text.count("\n") + (0 if text.endswith("\n") or not text else 1)
+
+
 def scan_file(path, lang, limit_lines, limit_asserts):
     lines = path.read_text(errors="replace").split("\n")
     functions = []
@@ -281,27 +288,36 @@ def collect(paths):
 
 
 def main(argv):
-    limit_lines, limit_asserts, show_all, paths = 40, 5, False, []
+    limit_lines, limit_asserts, limit_file, show_all, paths = 40, 5, 350, False, []
     it = iter(argv)
     for a in it:
         if a == "--lines":
             limit_lines = int(next(it))
         elif a == "--asserts":
             limit_asserts = int(next(it))
+        elif a == "--file-lines":
+            limit_file = int(next(it))
         elif a == "--all":
             show_all = True
         else:
             paths.append(a)
     if not paths:
         print(__doc__.strip().split("\n")[0])
-        print("usage: contract_report.py <file-or-dir>... [--lines 40] [--asserts 5] [--all]")
+        print("usage: contract_report.py <file-or-dir>... [--lines 40] [--asserts 5] "
+              "[--file-lines 350] [--all]")
         return 2
     functions = []
+    long_files = []
     for f in collect(paths):
         functions.extend(scan_file(f, EXT[f.suffix], limit_lines, limit_asserts))
+        count = file_lines(f)
+        if count > limit_file:
+            long_files.append((f, count))
     if not functions:
         print("no functions found")
         return 2
+    for f, count in long_files:
+        print(f"{f}  lines={count}  file>{limit_file}")
     rows = functions if show_all else [f for f in functions if f.flags]
     for fn in rows:
         print(f"{fn.path}:{fn.line_no}  {fn.name:<28} logic={fn.logic_lines:<3} inv={len(fn.asserts):<2} "
@@ -310,8 +326,9 @@ def main(argv):
     flagged = [f for f in functions if f.flags]
     print(f"\n{len(functions)} functions  median={statistics.median(sizes):g}  "
           f"mean={statistics.mean(sizes):.1f}  max={max(sizes)}  "
-          f"over{limit_lines}={sum(s > limit_lines for s in sizes)}  flagged={len(flagged)}")
-    return 1 if flagged else 0
+          f"over{limit_lines}={sum(s > limit_lines for s in sizes)}  flagged={len(flagged)}  "
+          f"files over{limit_file}={len(long_files)}")
+    return 1 if flagged or long_files else 0
 
 
 if __name__ == "__main__":

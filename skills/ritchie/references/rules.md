@@ -140,7 +140,22 @@ each early return instead: the contracts then exist twice and drift
 apart. `scripts/check_body_diff.py` rejects both: a changed contract line
 and a `return` in a body that has postconditions after it.
 
-## Structs
+## File shape
+
+**Why a file limit.** The function limit alone let a 770-line file
+pass: every function in it was under 40 lines, and the file held four
+jobs. A long file is the sign a module took on too much, the same way
+a long function is. The user set the limit at 350 lines.
+
+**Every line counts.** Unlike the function limit, the file limit counts
+blanks, contracts and tests. It measures what a reader must scroll
+through, and a simple count leaves nothing to argue about.
+
+**Measured deviations:** in frameworld, ten files written before the
+rule are over 350 lines, from 402 to 657. They stay as debt until a
+change touches them.
+
+
 
 **Why private fields, no exception.** With a public field no single place
 holds the rule for what makes it valid. Every call site re-derives the

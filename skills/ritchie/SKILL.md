@@ -125,6 +125,12 @@ deviates: `references/rules.md`.
   end asserts it.
 - No recursion. No early `return` before postconditions: one exit.
 
+**File shape**
+
+- 350 lines per file, every line counted, tests included.
+- To split: one file per job, one folder per stage. A test file that
+  grows past the limit becomes a folder that mirrors its jobs.
+
 **Structs**
 
 - A value is immutable. Only its own contracted functions build it or
