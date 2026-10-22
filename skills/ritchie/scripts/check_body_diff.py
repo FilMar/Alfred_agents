@@ -16,7 +16,7 @@ from pathlib import Path
 
 TODO = re.compile(
     r'^\s*(?:throw new Error\(["\'`]todo'
-    r'|todo!\('
+    r'|(?:let [^=]*=\s*)?todo!\('
     r'|raise NotImplementedError'
     r'|panic\("todo)'
 )
