@@ -343,6 +343,8 @@ export async function distillAll(distiller: Distiller, sessions: readonly string
     const read = await SessionRead.read(session);
     if (read.turns().length > 0) {
       reports.push(await distillSession(distiller, read));
+    } else if (distiller.mode === "active" && read.noise().length > 0) {
+      await closeExchanges(read.noise().map((t) => t.id()), distiller.recorder.run());
     }
   }
   result = reports;

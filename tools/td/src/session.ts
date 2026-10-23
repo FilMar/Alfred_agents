@@ -3,7 +3,7 @@ import { fetchContents, fetchExchanges } from "../../tl/src/client.js";
 import { TIMESTAMP_SHAPE } from "../../tl/src/types.js";
 import type { Contents, Exchange } from "../../tl/src/types.js";
 
-export type Noise = "task-notification" | "harness-error";
+export type Noise = "task-notification" | "harness-error" | "delegated";
 
 // Longest session seen: 210 exchanges.
 export const PENDING_CAP = 1000;
@@ -31,11 +31,14 @@ export class Turn {
 
   noise(): Noise | null {
     let result: Noise | null = null;
-    if (this.#s.exchange.meta?.trigger === "task-notification") {
+    if (this.#s.exchange.kind === "subtask") {
+      result = "delegated";
+    } else if (this.#s.exchange.meta?.trigger === "task-notification") {
       result = "task-notification";
     } else if (this.#s.contents.output.trimStart().startsWith("API Error:")) {
       result = "harness-error";
     }
+    assert(result !== "delegated" || this.#s.exchange.kind === "subtask", "Turn.noise: a delegated turn is a subtask exchange");
     assert(result !== "task-notification" || this.#s.exchange.meta?.trigger === "task-notification", "Turn.noise: a task notification has that trigger");
     assert(result !== "harness-error" || this.#s.contents.output.trimStart().startsWith("API Error:"), "Turn.noise: a harness error is an output that starts with API Error:");
     return result;

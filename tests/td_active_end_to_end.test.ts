@@ -363,6 +363,66 @@ describe("the gaps the mutants found", () => {
     expect(closing.closed.length).toBe(3);
     expect(db.getExchange(tl.handle, noiseId)?.distilled).toBe(distiller.recorder.run());
   });
+
+  test("session delegated exchanges are closed with the turns", async () => {
+    const { session, turns } = freshSession();
+    seq += 1;
+    const delegatedId = exchangeId(session, `message-${seq}`);
+    const delegated = { id: delegatedId, session, timestamp: new Date(Date.UTC(2026, 0, 1) + seq * 1000).toISOString(), kind: "subtask" as const, actor: "white-core" };
+    db.upsertExchange(tl.handle, delegated);
+    const contents = { exchange_id: delegatedId, input: "Write the bodies.", output: "The bodies are written." };
+    db.upsertContents(tl.handle, contents);
+    const read = SessionRead.of(session, [...turns, Turn.of(delegated, contents)]);
+    const distiller = await D.distillerOf(version, NOW, "active");
+    enqueue(SPLIT, NOTHING, NOTHING);
+    const split = await SessionMap.split(read, distiller.extractor);
+    const exchanges = [];
+    for (const index of [0, 1]) {
+      const target = targetOf(split.map!, split.map!.episodes()[0], index);
+      exchanges.push(await D.decideTarget(distiller, target, await D.distillTarget(distiller, target), SessionList.empty()));
+    }
+    const closing = await D.closeSession(distiller, read, split, exchanges);
+    expect(closing.closed.length).toBe(3);
+    expect(db.getExchange(tl.handle, delegatedId)?.distilled).toBe(distiller.recorder.run());
+  });
+
+  test("a session of only delegated exchanges closes with no model call and no episode", async () => {
+    sessionNo += 1;
+    const session = `e2e00000-0000-4000-8000-${String(sessionNo).padStart(12, "0")}`;
+    db.upsertSession(tl.handle, { id: session, started: NOW.toISOString() });
+    const ids = [];
+    for (const output of ["The tests are written.", "The bodies are written."]) {
+      seq += 1;
+      const id = exchangeId(session, `message-${seq}`);
+      ids.push(id);
+      db.upsertExchange(tl.handle, { id, session, timestamp: new Date(Date.UTC(2026, 0, 1) + seq * 1000).toISOString(), kind: "subtask", actor: "white-core" });
+      db.upsertContents(tl.handle, { exchange_id: id, input: "Write the tests.", output });
+    }
+    const distiller = await D.distillerOf(version, NOW, "active");
+    const reports = await D.distillAll(distiller, [session]);
+    expect(reports).toEqual([]);
+    expect(model.queue.length).toBe(0);
+    for (const id of ids) {
+      expect(db.getExchange(tl.handle, id)?.distilled).toBe(distiller.recorder.run());
+    }
+    const episodes = [...(memory.collection("tl_episodes")?.values() ?? [])].map((p) => p.payload as { session: string }).filter((e) => e.session === session);
+    expect(episodes).toEqual([]);
+  });
+
+  test("shadow leaves a quiet session pending and asks no model", async () => {
+    sessionNo += 1;
+    const session = `e2e00000-0000-4000-8000-${String(sessionNo).padStart(12, "0")}`;
+    db.upsertSession(tl.handle, { id: session, started: NOW.toISOString() });
+    seq += 1;
+    const id = exchangeId(session, `message-${seq}`);
+    db.upsertExchange(tl.handle, { id, session, timestamp: new Date(Date.UTC(2026, 0, 1) + seq * 1000).toISOString(), kind: "subtask", actor: "white-core" });
+    db.upsertContents(tl.handle, { exchange_id: id, input: "Write the tests.", output: "The tests are written." });
+    const distiller = await D.distillerOf(version, NOW, "shadow");
+    const reports = await D.distillAll(distiller, [session]);
+    expect(reports).toEqual([]);
+    expect(model.queue.length).toBe(0);
+    expect(db.getExchange(tl.handle, id)?.distilled).toBeUndefined();
+  });
 });
 
 describe("what joins the session list", () => {

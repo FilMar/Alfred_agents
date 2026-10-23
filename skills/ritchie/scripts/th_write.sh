@@ -99,7 +99,7 @@ else
 fi
 
 (cd "$work" && th run --hat "$hat" --model "$MODEL" --thinking "$THINKING" --tools "$TOOLS" \
-  --system "$system" --timeout "$TIMEOUT_S" --no-archive --task "$task")
+  --system "$system" --timeout "$TIMEOUT_S" --task "$task")
 
 if [ "$mode" = tests ]; then
   [ -f "$test_dir/$tests_name" ] || { echo "the run wrote no test file; work dir: $work" >&2; exit 1; }

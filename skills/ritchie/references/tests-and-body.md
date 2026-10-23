@@ -13,8 +13,10 @@ scripts/th_write.sh body  <todo-file> <spec-file> <test-file>
 The script fixes the hat, the model, the thinking level, the tools and
 the system prompt of each role. Ritchie passes only the files. To change
 the model or a rule for a run, edit the script, not the call. A run works
-on copies in a temp directory and cannot run code. A run takes minutes:
-call the script in the background and wait for it.
+on copies in a temp directory and cannot run code. Each finished run
+files itself in tl as a subtask row; the distiller reads it but never
+distills it. A run takes minutes: call the script in the background and
+wait for it.
 
 ## 1. Spec
 

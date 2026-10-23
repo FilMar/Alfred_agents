@@ -57,6 +57,16 @@ function turnIn(session: string, input: string, output: string) {
   return Turn.of(exchange, contents);
 }
 
+function subtaskIn(session: string, output: string) {
+  seq += 1;
+  const id = exchangeId(session, `message-${seq}`);
+  const exchange = { id, session, timestamp: new Date(Date.UTC(2026, 0, 1) + seq * 1000).toISOString(), kind: "subtask" as const, actor: "black-core" };
+  db.upsertExchange(tl.handle, exchange);
+  const contents = { exchange_id: id, input: "Write the tests.", output };
+  db.upsertContents(tl.handle, contents);
+  return Turn.of(exchange, contents);
+}
+
 const USER = "secondo me quando il test fallisce devi leggere il log prima di toccare il codice";
 const AGENT = "Abbiamo visto che con soglia cosine 0.95 due note opposte sembrano duplicate, quindi la soglia va abbassata.";
 const note = {
@@ -320,6 +330,20 @@ describe("closeSession", () => {
   test("active closes every exchange read when nothing failed", async () => {
     const distiller = await D.distillerOf(version, NOW, "active");
     const { read, split } = await sessionParts(distiller, [NOTHING, NOTHING]);
+    const exchanges = [];
+    for (const index of [0, 1]) {
+      const target = targetOf(split.map!, split.map!.episodes()[0], index);
+      exchanges.push(await D.decideTarget(distiller, target, await D.distillTarget(distiller, target), SessionList.empty()));
+    }
+    await D.closeSession(distiller, read, split, exchanges);
+  });
+
+  test("active closes the delegated exchanges with the turns", async () => {
+    const distiller = await D.distillerOf(version, NOW, "active");
+    const delegated = subtaskIn(SESSION, "The tests are written.");
+    const read = SessionRead.of(SESSION, [turnIn(SESSION, "ciao", "Ciao."), turnIn(SESSION, USER, AGENT), delegated]);
+    enqueue(SPLIT, NOTHING, NOTHING);
+    const split = await SessionMap.split(read, distiller.extractor);
     const exchanges = [];
     for (const index of [0, 1]) {
       const target = targetOf(split.map!, split.map!.episodes()[0], index);

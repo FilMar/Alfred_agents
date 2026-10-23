@@ -86,10 +86,11 @@ test("Turn.of: the turn carries the contents", () => {
 const outcomeTable: ReadonlyArray<{
   name: string;
   options: RowOptions;
-  expected: "task-notification" | "harness-error" | null;
+  expected: "task-notification" | "harness-error" | "delegated" | null;
 }> = [
   { name: "a task notification", options: { meta: { trigger: "task-notification" }, output: "Task completed." }, expected: "task-notification" },
   { name: "a task notification wins over a harness error output", options: { meta: { trigger: "task-notification" }, output: "API Error: 500" }, expected: "task-notification" },
+  { name: "a subtask kind wins over a task notification", options: { kind: "subtask", meta: { trigger: "task-notification" }, output: "Task completed." }, expected: "delegated" },
   { name: "an output that starts with API Error:", options: { output: "API Error: overloaded" }, expected: "harness-error" },
   { name: "leading whitespace before API Error:", options: { output: "  API Error: overloaded" }, expected: "harness-error" },
   { name: "a human trigger with a harness error output", options: { meta: { trigger: "human" }, output: "API Error: overloaded" }, expected: "harness-error" },
@@ -102,7 +103,7 @@ const outcomeTable: ReadonlyArray<{
   { name: "a human trigger", options: { meta: { trigger: "human" } }, expected: null },
   { name: "a peer trigger", options: { meta: { trigger: "peer" }, output: "A peer note." }, expected: null },
   { name: "no meta at all", options: {}, expected: null },
-  { name: "a subtask kind", options: { kind: "subtask", output: "The subtask ran." }, expected: null },
+  { name: "a subtask kind", options: { kind: "subtask", output: "The subtask ran." }, expected: "delegated" },
 ];
 
 for (const { name, options, expected } of outcomeTable) {
@@ -256,10 +257,12 @@ test("SessionRead.read: distilled exchanges come back as earlier turns, noise le
   const session = "s-earlier";
   const done = row({ session, timestamp: "2026-10-09T10:00:00.000Z" });
   const doneNoise = row({ session, timestamp: "2026-10-09T10:00:01.000Z", meta: { trigger: "task-notification" }, output: "Task completed." });
-  const open = row({ session, timestamp: "2026-10-09T10:00:02.000Z" });
-  await seed(session, [done, doneNoise, open]);
+  const doneDelegated = row({ session, kind: "subtask", timestamp: "2026-10-09T10:00:02.000Z", output: "The subtask ran." });
+  const open = row({ session, timestamp: "2026-10-09T10:00:03.000Z" });
+  await seed(session, [done, doneNoise, doneDelegated, open]);
   await markDistilled(done.exchange.id, "2026-10-09T11:00:00.000Z");
   await markDistilled(doneNoise.exchange.id, "2026-10-09T11:00:00.000Z");
+  await markDistilled(doneDelegated.exchange.id, "2026-10-09T11:00:00.000Z");
   const read = await SessionRead.read(session);
   expect([read.earlier().map((t: { id(): string }) => t.id()), read.turns().map((t: { id(): string }) => t.id())]).toEqual([
     [done.exchange.id],
