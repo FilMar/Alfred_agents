@@ -28,5 +28,5 @@ Taking every pending session is what makes active mode empty the queue. In shado
 ## Cross-references
 
 - [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) — the table whose last row this changes
-- [memory_td_session_reader_drops_only_task_notifications_and_api_errors_under_a_cap_of_1000](memory_td_session_reader_drops_only_task_notifications_and_api_errors_under_a_cap_of_1000) — what counts as noise
+- [memory_distiller_distills_chat_only](memory_distiller_distills_chat_only) — what counts as noise
 - [memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending](memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending) — the cap, a failure that keeps a session open
