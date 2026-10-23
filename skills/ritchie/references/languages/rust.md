@@ -87,6 +87,13 @@ fn with_zoom_rejects_zero() {
 }
 ```
 
+Unit tests live in `src/tests/<file>.rs`, one file per source file.
+`src/tests/mod.rs` lists them, and `lib.rs` ends with
+`#[cfg(test)] mod tests;`. A test imports with
+`use crate::<module path>::...`, and this reaches `pub(crate)` items
+too. `th_write.sh` tells the run the module path. After the run, add
+`mod <file>;` to `src/tests/mod.rs`.
+
 ## 6. World error
 
 `Result<T, E>`. One enum per phase deriving `thiserror::Error`, a root

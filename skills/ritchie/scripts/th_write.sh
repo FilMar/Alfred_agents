@@ -40,6 +40,22 @@ work="$(mktemp -d -t ritchie-XXXXXX)"
 target="$(basename "$todo_file")"
 tests_name="$(basename "$test_file")"
 import_path="$(python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], os.path.dirname(sys.argv[2])))' "$todo_file" "$test_file")"
+import_rule="The test file will live next to other tests and must import the module as $import_path."
+if [ "$mode" = tests ] && [[ "$target" == *.rs ]]; then
+  # Rust has no file imports: name the module path from src/ down.
+  mod_path="$(python3 -c '
+import os, sys
+parts = sys.argv[1].split(os.sep)
+if "src" not in parts:
+    sys.exit(1)
+rest = parts[len(parts) - parts[::-1].index("src"):]
+rest[-1] = rest[-1][:-3]
+if rest[-1] in ("lib", "main", "mod"):
+    rest.pop()
+print("::".join(["crate"] + rest))
+' "$todo_file")" || { echo "no src/ dir above the todo file: $todo_file" >&2; exit 2; }
+  import_rule="Import the code under test with use $mod_path::...; and nothing else. Never write #[path] or a mod line for a source file: the tests module already lives inside the crate."
+fi
 # src/ and test/ keep same-basename files apart: a test file that shares
 # the todo file's name must not overwrite the copy the run edits.
 src_dir="$work/src"
@@ -57,6 +73,7 @@ An assert above the todo line is a precondition. An assert below it is a postcon
 - A classifier (a pure function whose rule is its own definition): an outcome table with the expected result, from the spec. This is the only place where a test has its own expect.
 - Import only what the file exports. Never import or reach a private member.
 - Use the test framework and style of the project language.
+- The test file holds code only. Write no comment of any kind.
 Read only src/, spec.md and the modules the todo file imports. Never read other test files.
 Write the test file once and stop. You cannot run it.'
 
@@ -72,7 +89,7 @@ if [ "$mode" = tests ]; then
   [ ! -e "$test_file" ] || { echo "test file exists, remove it first: $test_file" >&2; exit 2; }
   hat="$TESTS_HAT"
   system="$RULES_TESTS"
-  task="Read src/$target and spec.md. Write the tests as test/$tests_name. The test file will live next to other tests and must import the module as $import_path."
+  task="Read src/$target and spec.md. Write the tests as test/$tests_name. $import_rule"
 else
   [ -f "$test_file" ] || { echo "no test file: $test_file" >&2; exit 2; }
   cp "$test_file" "$test_dir/$tests_name"
@@ -88,6 +105,12 @@ if [ "$mode" = tests ]; then
   [ -f "$test_dir/$tests_name" ] || { echo "the run wrote no test file; work dir: $work" >&2; exit 1; }
   cp "$test_dir/$tests_name" "$test_file"
   echo "tests written: $test_file"
+  bad="$(grep -nE '#\[path|^[[:space:]]*//' "$test_file" || true)"
+  if [ -n "$bad" ]; then
+    echo "test file breaks a rule (#[path] or a comment), fix these lines by hand:" >&2
+    echo "$bad" >&2
+    exit 1
+  fi
 else
   python3 "$here/check_body_diff.py" "$src_dir/$target.todo" "$src_dir/$target" \
     || { echo "body rejected, $todo_file left as it was; work dir: $work" >&2; exit 1; }
