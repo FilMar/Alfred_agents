@@ -33,7 +33,7 @@ here="$(cd "$(dirname "$0")" && pwd)"
 case "$mode" in tests|body) ;; *) usage ;; esac
 [ -f "$todo_file" ] || { echo "no todo file: $todo_file" >&2; exit 2; }
 [ -f "$spec_file" ] || { echo "no spec file: $spec_file" >&2; exit 2; }
-grep -qE 'throw new Error\(["'"'"'`]todo|todo!\(|raise NotImplementedError|panic\("todo' "$todo_file" \
+grep -qE 'throw new Error\(["'"'"'`]todo|todo!\(|raise NotImplementedError|panic\("todo|die "todo' "$todo_file" \
   || { echo "no todo line in $todo_file" >&2; exit 2; }
 
 work="$(mktemp -d -t ritchie-XXXXXX)"

@@ -18,7 +18,8 @@ TODO = re.compile(
     r'^\s*(?:throw new Error\(["\'`]todo'
     r'|(?:let [^=]*=\s*)?todo!\('
     r'|raise NotImplementedError'
-    r'|panic\("todo)'
+    r'|panic\("todo'
+    r'|die\s+["\']todo)'
 )
 ASSERT = re.compile(r"^\s*(?:debug_assert|assert|(?:\w+\.)?Assert)\b")
 RETURN = re.compile(r"^\s*return\b")
