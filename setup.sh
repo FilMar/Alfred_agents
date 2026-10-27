@@ -74,11 +74,3 @@ if command -v claude &>/dev/null || command -v pi &>/dev/null; then
         link "$REPO/extensions/tb_refine/pi.ts" "$PI/extensions/tb_refine.ts" "~/.pi/agent/extensions/tb_refine.ts"
     fi
 fi
-
-# --- systemd user services (tb, ti HTTP API) ---
-echo "systemd user services (tb, ti)"
-mkdir -p "$HOME/.config/systemd/user"
-link "$REPO/tools/tb/deploy/tb.service" "$HOME/.config/systemd/user/tb.service" "~/.config/systemd/user/tb.service"
-link "$REPO/tools/ti/deploy/ti.service" "$HOME/.config/systemd/user/ti.service" "~/.config/systemd/user/ti.service"
-systemctl --user daemon-reload
-echo "  [ok]   linked, not enabled. To start: systemctl --user enable --now tb.service ti.service"
