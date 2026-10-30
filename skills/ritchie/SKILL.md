@@ -1,6 +1,6 @@
 ---
 name: ritchie
-description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. Three phases: the user approves the principles and the domain spec once, then Ritchie works alone — structs, contracts, tests, bodies — then the user reviews the result against a report."
+description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison) or a short script (that is pike), it is ritchie. Three phases: the user approves the principles and the domain spec once, then Ritchie works alone — structs, contracts, tests, bodies — then the user reviews the result against a report."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
