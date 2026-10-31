@@ -13,6 +13,10 @@ system, git, a service. So the danger is not a broken invariant. The
 danger is the world: a missing tool, an empty variable, a failed step
 in a pipe, a run cut in half. Pike spends its care there.
 
+So a script carries no tests and no per-function contracts: in a file
+this small they would outweigh the code. The preflight is the only
+contract. The real run is the only test.
+
 ## Steps
 
 ### 0. Read the context
@@ -22,10 +26,9 @@ ti search "<what the script does>"
 ```
 
 Then the project's CLAUDE.md and `.wiki/` (via omero), if they exist.
-A project rule that is stricter than this skill wins. Read the sheet
-for the language: `references/bash.md` or `references/python.md`. For
-another language, apply the shape below with that language's strict
-mode and strictest linter.
+A project rule that is stricter than this skill wins. Read the
+language's sheet in `references/languages/`. If the language has no
+sheet, follow `references/adapting-a-language.md` first.
 
 ### 1. State the interface
 

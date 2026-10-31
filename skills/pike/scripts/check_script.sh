@@ -22,9 +22,11 @@ shebang=$(head -n 1 "$file")
 case $file in
     *.sh) kind=shell ;;
     *.py) kind=python ;;
+    *.ts) kind=typescript ;;
     *) case $shebang in
         *bash* | */sh) kind=shell ;;
         *python* | *uv\ run*) kind=python ;;
+        *deno*) kind=typescript ;;
         *) kind=other ;;
     esac ;;
 esac
@@ -43,7 +45,12 @@ case $kind in
         uvx --quiet ruff check --select ALL --ignore D,T20,INP001,CPY --quiet "$file" || fail "ruff check"
         uvx --quiet ruff format --check --quiet "$file" || fail "ruff format"
         ;;
-    *) printf 'SKIP no linter known for %s\n' "$file" ;;
+    typescript)
+        deno check --no-lock --quiet "$file" || fail "deno check"
+        deno lint --rules-exclude=no-import-prefix --quiet "$file" || fail "deno lint"
+        deno fmt --check --quiet "$file" || fail "deno fmt"
+        ;;
+    *) fail "no gate for this language: follow references/adapting-a-language.md" ;;
 esac
 
 $failed && exit 1

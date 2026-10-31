@@ -1,8 +1,37 @@
 # Python
 
-The skeleton. Copy it, then delete what the script does not use.
-Standard library first. A third-party package goes in an inline
-script block, so `uv run` installs it and no virtualenv is needed.
+Answers to `references/adapting-a-language.md`.
+
+1. **Run.** `#!/usr/bin/env -S uv run --script`. Packages go in the
+   inline `# /// script` block; `uv` installs them on the first run.
+   Standard library first.
+2. **Fail fast.** Python stops on any uncaught exception. Catch only
+   what you turn into `die`, at the place you can name the cause.
+3. **Flags.** `argparse.ArgumentParser(allow_abbrev=False)`. It exits
+   with code 2 on a wrong flag by itself.
+4. **Die.**
+   ```python
+   def die(message: str, code: int = 1) -> NoReturn:
+       print(f"name: {message}", file=sys.stderr)
+       sys.exit(code)
+   ```
+5. **Subprocess.**
+   ```python
+   subprocess.run(["git", "fetch", "--prune"], check=True, timeout=30)
+   ```
+6. **Files.**
+   ```python
+   tmp = target.with_name(f".{target.name}.tmp")
+   try:
+       tmp.write_text(text)
+       tmp.replace(target)
+   finally:
+       tmp.unlink(missing_ok=True)
+   ```
+7. **Gate.** `ruff check --select ALL --ignore D,T20,INP001,CPY` and
+   `ruff format --check`.
+
+## Skeleton
 
 ```python
 #!/usr/bin/env -S uv run --script
@@ -15,11 +44,12 @@ import argparse
 import sys
 from collections import Counter
 from pathlib import Path
+from typing import NoReturn
 
 FILES_MAX = 100_000
 
 
-def die(message: str, code: int = 1) -> None:
+def die(message: str, code: int = 1) -> NoReturn:
     print(f"count_lines: {message}", file=sys.stderr)
     sys.exit(code)
 
@@ -54,13 +84,6 @@ if __name__ == "__main__":
 
 ## Idioms that matter
 
-- `argparse` with `allow_abbrev=False`, so only full flags work. It
-  exits with code 2 on wrong usage by itself.
 - `pathlib.Path`, never string paths.
-- `subprocess.run([...], check=True, timeout=...)` with a list. Never
-  `shell=True`.
-- An atomic write: write to `path.with_suffix(".tmp")`, then
-  `tmp.replace(path)`.
-- Catch only the exception you can act on, at the point where you can
-  act on it. Turn it into `die(...)` with a message for the user.
+- A list for `subprocess.run`, never `shell=True`.
 - Type hints on every function. They are the cheapest check there is.
