@@ -94,6 +94,9 @@ with `sources` pointing at the pair — and the pair leaves the tree; git
 keeps the raw text in the branch history. Without a `.wiki/`, the pair
 stays: it is the only record.
 
+Then offer dijkstra: it makes the code shorter under these same rules,
+and never longer.
+
 ## The rules
 
 Why each rule holds, its edge cases, and where real code still

@@ -27,6 +27,7 @@ One line each. An idea becomes blocks only when it is the next goal.
 - Router pass: multi-direction skills become dispatch tables. [detail](skill_router_pass_planned)
 - Socrate becomes a `ti` principle. [detail](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood)
 - The piano rule in `ti` covers new features too. [detail](skill_piano_writes_design_main_md)
+- Ritchie: settle "every function has a contract" against "one invariant is checked once per call chain". Dijkstra decides it case by case today. [detail](skill_dijkstra_proves_owner_rules_against_baseline)
 - Census of the skills not yet judged: feynman, indiana, polo and the rest.
 
 ## Design

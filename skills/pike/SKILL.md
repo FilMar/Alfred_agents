@@ -93,7 +93,8 @@ expected output.
 ### 4. Report
 
 Three lines in chat: the path, the command you ran, what it printed.
-No code text in chat.
+No code text in chat. Then offer dijkstra: it makes the script shorter
+under these same rules, and never longer.
 
 ## Limits
 
