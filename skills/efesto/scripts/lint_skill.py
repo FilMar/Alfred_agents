@@ -88,7 +88,7 @@ def lint(skill_dir: Path):
                 f"SKILL.md:{lineno}: `{toks[0]}` call — call the CLI directly or a script"
             )
 
-    referenced = set(re.findall(r"scripts/([A-Za-z0-9_.-]+)", text))
+    referenced = set(re.findall(r"(?<!/)scripts/([A-Za-z0-9_.-]+)", text))
     scripts = script_files(skill_dir)
     names = {f.name for f in scripts}
     for name in sorted(referenced - names):

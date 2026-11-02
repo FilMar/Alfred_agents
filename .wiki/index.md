@@ -142,6 +142,14 @@ updated: 2026-10-16
 | [skill_ritchie_spec_review_pair_is_ephemeral_scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding) | The pair is scaffolding: removed at approval, the wiki page is the record |
 | [skill_census_removed_erodoto_jobs_ulisse](skill_census_removed_erodoto_jobs_ulisse) | Removed 2026-10-12: erodoto, jobs and ulisse |
 | [skill_census_four_unused_skills_removed](skill_census_four_unused_skills_removed) | Removed 2026-10-14: ermes, draghi, vinci and atlante; linus stays |
+| [skill_pike_scripts_carry_no_tests_or_contracts](skill_pike_scripts_carry_no_tests_or_contracts) | Scripts have no tests or per-function contracts: the preflight is the contract, the real run the test |
+| [skill_pike_hands_off_to_ritchie_past_the_limit](skill_pike_hands_off_to_ritchie_past_the_limit) | Past 100 shell / 200 other lines, or with own state, the script goes to ritchie |
+| [skill_pike_gate_fails_closed_on_unknown_language](skill_pike_gate_fails_closed_on_unknown_language) | Seven questions adapt a language; check_script.sh fails on a language with no gate |
+| [skill_dijkstra_never_grows_the_code](skill_dijkstra_never_grows_the_code) | Cleanup never adds net lines; size_gate.sh counts new files and the tool's definition |
+| [skill_dijkstra_proves_owner_rules_against_baseline](skill_dijkstra_proves_owner_rules_against_baseline) | The owner's check must show no new finding against the baseline taken before the cuts |
+| [skill_dijkstra_tool_sheets_per_language_rules_per_owner](skill_dijkstra_tool_sheets_per_language_rules_per_owner) | Per-language tool sheets; owner rules apply; macros and decorators never hold an assert |
+| [skill_dijkstra_cuts_weak_tests_never_strengthens_them](skill_dijkstra_cuts_weak_tests_never_strengthens_them) | Weak tests are cut or merged, never strengthened |
+| [skill_dijkstra_public_library_items_are_api](skill_dijkstra_public_library_items_are_api) | A pub item with no caller in the crate is API: flag it, do not cut it |
 
 ## orchestrator
 

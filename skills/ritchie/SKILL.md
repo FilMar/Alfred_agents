@@ -1,6 +1,6 @@
 ---
 name: ritchie
-description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison), it is ritchie. Three phases: the user approves the principles and the domain spec once, then Ritchie works alone — structs, contracts, tests, bodies — then the user reviews the result against a report."
+description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison) or a short script (that is pike), it is ritchie. Three phases: the user approves the principles and the domain spec once, then Ritchie works alone — structs, contracts, tests, bodies — then the user reviews the result against a report."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
@@ -37,6 +37,19 @@ ti search "<what you are about to write>"
 Then the project's `.wiki/` (via omero) and its CLAUDE.md. A project
 rule that is stricter than this skill wins. Check
 `references/languages/` for the language's sheet; read it.
+
+If `graphify` is installed, find the code the work touches before you
+read it:
+
+```
+GRAPHIFY_OUT=.graph graphify update .
+graphify query "<what you are about to write>"
+graphify affected "<symbol you will change>"
+```
+
+`query` names the files to read. `affected` lists what depends on the
+symbols you will change: that is the blast radius, and it goes into the
+spec. `graphify --help` is the authority on the syntax.
 
 ### 1. Setup — the user is present
 
@@ -83,7 +96,9 @@ Then the project's formatter and linter at their strictest setting,
 then the test suite. All three green before commit.
 
 Write `REVIEW.md` in the project root, in Italian, on the shape of
-`references/review-template.md`, and present it. The user reads the
+`references/review-template.md`, and present it. With graphify, refresh
+the graph and add `graphify affected` for each changed public symbol:
+the user sees what else the change reaches. The user reads the
 code here — this is the moment the user keeps the ability to judge it.
 The user approves, or sends the work back with one comment; only the
 involved part repeats, and the review is updated each round.
@@ -93,6 +108,9 @@ omero files the decision as a wiki page — the why, in English,
 with `sources` pointing at the pair — and the pair leaves the tree; git
 keeps the raw text in the branch history. Without a `.wiki/`, the pair
 stays: it is the only record.
+
+Then offer dijkstra: it makes the code shorter under these same rules,
+and never longer.
 
 ## The rules
 

@@ -27,7 +27,10 @@ One line each. An idea becomes blocks only when it is the next goal.
 - Router pass: multi-direction skills become dispatch tables. [detail](skill_router_pass_planned)
 - Socrate becomes a `ti` principle. [detail](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood)
 - The piano rule in `ti` covers new features too. [detail](skill_piano_writes_design_main_md)
+- Ritchie: settle "every function has a contract" against "one invariant is checked once per call chain". Dijkstra decides it case by case today. [detail](skill_dijkstra_proves_owner_rules_against_baseline)
 - Census of the skills not yet judged: feynman, indiana, polo and the rest.
+- Skill text in ASD-STE100: instructions in the imperative, 20 words for steps, 25 for prose, a project word list. Check it with the STE term checker on LanguageTool, if it runs locally. Draft: `git show 3ba89be:STANDARDS.md`.
+- A checklist system: lists made from real failures, `PASS` or `FAIL` with a proof, a log for pruning. Draft: `git show 3ba89be:STANDARDS.md`.
 
 ## Design
 
