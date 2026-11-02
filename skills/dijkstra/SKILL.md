@@ -47,14 +47,24 @@ baseline: `~/.pi/agent/skills/ritchie/scripts/contract_report.py
 ### 1. Hunt
 
 If `graphify` is installed, refresh the graph first:
-`GRAPHIFY_OUT=.graph graphify update .`. It gives leads for two hunts.
-For dead code, `graphify explain "<symbol>"` shows its callers: a
-symbol with none is a candidate. For redundant checks, `graphify path
-"<caller>" "<callee>"` shows the chain to read. A lead is not a cut:
-the graph misses dynamic calls, so confirm each one in the code.
+`GRAPHIFY_OUT=.graph graphify update .`. Put `GRAPHIFY_OUT=.graph` in
+front of every graph command below too: without it, graphify looks in
+`graphify-out/`. Skip every graph step when graphify is not installed.
+`graphify --help` is the authority on its syntax.
 
-Read every file in scope in full. Look for these, in this order. The
-first ones save the most lines.
+Read every file in scope in full. When the scope is too big to read in
+full, the graph is required to pick the order:
+`graphify god-nodes --top 20` names the hubs, and `graphify explain
+"<symbol>"` shows what each one touches. Read those files first, and
+list the files you did not read in the report.
+
+On a small scope the graph is an optional lead. For dead code,
+`graphify explain "<symbol>"` shows its callers: a symbol with none is
+a candidate. For redundant checks, `graphify path "<caller>"
+"<callee>"` shows the chain to read. A lead is not a cut: the graph
+misses dynamic calls, so confirm each one in the code.
+
+Look for these, in this order. The first ones save the most lines.
 
 1. **Duplication.** Two copies of the same logic, the same shape, or
    the same check. Merge them into one helper, a table, or a loop.
@@ -102,6 +112,11 @@ D3  src/parse.py:40-71  duplication  -18  merge parse_a and parse_b into one tab
 The columns are: id, place, kind, net line change, what changes. Then
 the total. Order by lines saved. Add a short risk note only to a
 proposal that changes behaviour on an edge case.
+
+A proposal that changes a signature, renames or removes a public
+symbol needs `graphify affected "<symbol>"` before it goes in the
+list. Name the callers it finds, tests included, in the proposal line,
+and count their edits in its net line change.
 
 Wait for the user's answer: all, a list of ids, or none.
 
