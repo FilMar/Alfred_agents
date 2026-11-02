@@ -4,6 +4,7 @@ import type { Usage } from "@earendil-works/pi-ai";
 import { MAX_TRIES, ModelAnswer, ModelCaller, ModelTokens } from "../tools/td/src/model_caller.ts";
 import type { JsonCheck } from "../tools/td/src/model_caller.ts";
 import { Role } from "../tools/td/src/config.ts";
+import { extractorJson } from "./helpers/td_stubs.ts";
 
 
 type Reply = { text: string; thinking?: string } | { status: number } | { delayMs: number };
@@ -48,21 +49,8 @@ afterAll(() => {
 const base = `http://localhost:${server.port}/v1`;
 
 function role(baseUrl: string, thinking: "off" | "low" = "low", reasoning = true): Role {
-  return Role.fromJson({
-    connection: {
-      provider: "ollama",
-      id: "glm-5.3-flash",
-      api: "openai-completions",
-      baseUrl,
-      reasoning,
-      compat: { supportsDeveloperRole: false },
-      contextWindow: 128000,
-      maxTokens: 8192,
-    },
-    thinking,
-    temperature: 0.1,
-    system: "You answer in JSON.",
-  });
+  const json = extractorJson(baseUrl, "You answer in JSON.").extract;
+  return Role.fromJson({ ...json, connection: { ...json.connection, reasoning }, thinking });
 }
 
 const check: JsonCheck = (json) => {
@@ -88,49 +76,26 @@ test("MAX_TRIES is 2: the answer, then one fix", () => {
 });
 
 describe("ModelTokens", () => {
-  test("zero: every count is zero", () => {
-    ModelTokens.zero();
-  });
+  const counts: [string, () => unknown, string | null][] = [
+    ["zero: every count is zero", () => ModelTokens.zero(), null],
+    ["of: the tokens carry the usage", () => ModelTokens.of(usage), null],
+    ["of: 0, at the edge, is a count", () => ModelTokens.of(usageOf(0, 0, 0, 0)), null],
+    ["of: 1, just inside the edge, is a count", () => ModelTokens.of(usageOf(1, 1, 1, 1)), null],
+    ["of: input below 0 is not a count", () => ModelTokens.of({ ...usage, input: -1 }), "ModelTokens.of: input is a count"],
+    ["of: output below 0 is not a count", () => ModelTokens.of({ ...usage, output: -1 }), "ModelTokens.of: output is a count"],
+    ["of: cacheRead below 0 is not a count", () => ModelTokens.of({ ...usage, cacheRead: -1 }), "ModelTokens.of: cacheRead is a count"],
+    ["of: cacheWrite below 0 is not a count", () => ModelTokens.of({ ...usage, cacheWrite: -1 }), "ModelTokens.of: cacheWrite is a count"],
+    ["of: a fractional input is not a count", () => ModelTokens.of({ ...usage, input: 0.5 }), "ModelTokens.of: input is a count"],
+    ["of: an infinite input is not a count", () => ModelTokens.of({ ...usage, input: Infinity }), "ModelTokens.of: input is a count"],
+    ["of: NaN is not a count", () => ModelTokens.of({ ...usage, input: NaN }), "ModelTokens.of: input is a count"],
+  ];
 
-  test("of: the tokens carry the usage", () => {
-    ModelTokens.of(usage);
-  });
-
-  test("of: 0, at the edge, is a count", () => {
-    ModelTokens.of(usageOf(0, 0, 0, 0));
-  });
-
-  test("of: 1, just inside the edge, is a count", () => {
-    ModelTokens.of(usageOf(1, 1, 1, 1));
-  });
-
-  test("of: input below 0 is not a count", () => {
-    expect(() => ModelTokens.of({ ...usage, input: -1 })).toThrow("ModelTokens.of: input is a count");
-  });
-
-  test("of: output below 0 is not a count", () => {
-    expect(() => ModelTokens.of({ ...usage, output: -1 })).toThrow("ModelTokens.of: output is a count");
-  });
-
-  test("of: cacheRead below 0 is not a count", () => {
-    expect(() => ModelTokens.of({ ...usage, cacheRead: -1 })).toThrow("ModelTokens.of: cacheRead is a count");
-  });
-
-  test("of: cacheWrite below 0 is not a count", () => {
-    expect(() => ModelTokens.of({ ...usage, cacheWrite: -1 })).toThrow("ModelTokens.of: cacheWrite is a count");
-  });
-
-  test("of: a fractional input is not a count", () => {
-    expect(() => ModelTokens.of({ ...usage, input: 0.5 })).toThrow("ModelTokens.of: input is a count");
-  });
-
-  test("of: an infinite input is not a count", () => {
-    expect(() => ModelTokens.of({ ...usage, input: Infinity })).toThrow("ModelTokens.of: input is a count");
-  });
-
-  test("of: NaN is not a count", () => {
-    expect(() => ModelTokens.of({ ...usage, input: NaN })).toThrow("ModelTokens.of: input is a count");
-  });
+  for (const [name, call, message] of counts) {
+    test(name, () => {
+      if (message === null) call();
+      else expect(call).toThrow(message);
+    });
+  }
 
   test("plus: each count is the sum of both", () => {
     const a = ModelTokens.of(usage);
@@ -140,128 +105,54 @@ describe("ModelTokens", () => {
 });
 
 describe("ModelAnswer", () => {
-  test("accepted: the answer is ok on the first try", () => {
-    ModelAnswer.accepted({ a: 1 }, 1, ModelTokens.zero());
-  });
+  const TRIES = "tries is from 1 to MAX_TRIES";
+  const answers: [string, () => unknown, string | null][] = [
+    ["accepted: the answer is ok on the first try", () => ModelAnswer.accepted({ a: 1 }, 1, ModelTokens.zero()), null],
+    ["accepted: the answer is ok on the last try", () => ModelAnswer.accepted({ a: 1 }, MAX_TRIES, ModelTokens.zero()), null],
+    ["accepted: try 0 is not a try", () => ModelAnswer.accepted({ a: 1 }, 0, ModelTokens.zero()), `ModelAnswer.accepted: ${TRIES}`],
+    ["accepted: one try past MAX_TRIES is not a try", () => ModelAnswer.accepted({ a: 1 }, MAX_TRIES + 1, ModelTokens.zero()), `ModelAnswer.accepted: ${TRIES}`],
+    ["accepted: a fractional try is not a try", () => ModelAnswer.accepted({ a: 1 }, 1.5, ModelTokens.zero()), `ModelAnswer.accepted: ${TRIES}`],
+    ["accepted: the json is given", () => ModelAnswer.accepted(undefined, 1, ModelTokens.zero()), "ModelAnswer.accepted: the json is given"],
+    ["rejected: the answer is not ok on the first try", () => ModelAnswer.rejected("no luck", 1, ModelTokens.zero()), null],
+    ["rejected: the answer is not ok on the last try", () => ModelAnswer.rejected("no luck", MAX_TRIES, ModelTokens.zero()), null],
+    ["rejected: try 0 is not a try", () => ModelAnswer.rejected("no luck", 0, ModelTokens.zero()), `ModelAnswer.rejected: ${TRIES}`],
+    ["rejected: one try past MAX_TRIES is not a try", () => ModelAnswer.rejected("no luck", MAX_TRIES + 1, ModelTokens.zero()), `ModelAnswer.rejected: ${TRIES}`],
+    ["rejected: a fractional try is not a try", () => ModelAnswer.rejected("no luck", 1.5, ModelTokens.zero()), `ModelAnswer.rejected: ${TRIES}`],
+    ["rejected: the failure is not blank", () => ModelAnswer.rejected("", 1, ModelTokens.zero()), "ModelAnswer.rejected: the failure is not blank"],
+    ["json: only an ok answer has json", () => ModelAnswer.rejected("no luck", 1, ModelTokens.zero()).json(), "ModelAnswer.json: only an ok answer has json"],
+  ];
 
-  test("accepted: the answer is ok on the last try", () => {
-    ModelAnswer.accepted({ a: 1 }, MAX_TRIES, ModelTokens.zero());
-  });
-
-  test("accepted: try 0 is not a try", () => {
-    expect(() => ModelAnswer.accepted({ a: 1 }, 0, ModelTokens.zero()))
-      .toThrow("ModelAnswer.accepted: tries is from 1 to MAX_TRIES");
-  });
-
-  test("accepted: one try past MAX_TRIES is not a try", () => {
-    expect(() => ModelAnswer.accepted({ a: 1 }, MAX_TRIES + 1, ModelTokens.zero()))
-      .toThrow("ModelAnswer.accepted: tries is from 1 to MAX_TRIES");
-  });
-
-  test("accepted: a fractional try is not a try", () => {
-    expect(() => ModelAnswer.accepted({ a: 1 }, 1.5, ModelTokens.zero()))
-      .toThrow("ModelAnswer.accepted: tries is from 1 to MAX_TRIES");
-  });
-
-  test("accepted: the json is given", () => {
-    expect(() => ModelAnswer.accepted(undefined, 1, ModelTokens.zero()))
-      .toThrow("ModelAnswer.accepted: the json is given");
-  });
-
-  test("rejected: the answer is not ok on the first try", () => {
-    ModelAnswer.rejected("no luck", 1, ModelTokens.zero());
-  });
-
-  test("rejected: the answer is not ok on the last try", () => {
-    ModelAnswer.rejected("no luck", MAX_TRIES, ModelTokens.zero());
-  });
-
-  test("rejected: try 0 is not a try", () => {
-    expect(() => ModelAnswer.rejected("no luck", 0, ModelTokens.zero()))
-      .toThrow("ModelAnswer.rejected: tries is from 1 to MAX_TRIES");
-  });
-
-  test("rejected: one try past MAX_TRIES is not a try", () => {
-    expect(() => ModelAnswer.rejected("no luck", MAX_TRIES + 1, ModelTokens.zero()))
-      .toThrow("ModelAnswer.rejected: tries is from 1 to MAX_TRIES");
-  });
-
-  test("rejected: a fractional try is not a try", () => {
-    expect(() => ModelAnswer.rejected("no luck", 1.5, ModelTokens.zero()))
-      .toThrow("ModelAnswer.rejected: tries is from 1 to MAX_TRIES");
-  });
-
-  test("rejected: the failure is not blank", () => {
-    expect(() => ModelAnswer.rejected("", 1, ModelTokens.zero()))
-      .toThrow("ModelAnswer.rejected: the failure is not blank");
-  });
-
-  test("json: only an ok answer has json", () => {
-    const answer = ModelAnswer.rejected("no luck", 1, ModelTokens.zero());
-    expect(() => answer.json()).toThrow("ModelAnswer.json: only an ok answer has json");
-  });
+  for (const [name, call, message] of answers) {
+    test(name, () => {
+      if (message === null) call();
+      else expect(call).toThrow(message);
+    });
+  }
 });
 
 describe("ModelCaller.extractJson", () => {
-  test("the result is an object, an array or null", () => {
-    ModelCaller.extractJson('{"a":1}');
-  });
+  const texts: [string, string, unknown][] = [
+    ["a bare object", '{"a":1}', { a: 1 }],
+    ["a bare array", "[1,2]", [1, 2]],
+    ["a fenced block with a json tag", '```json\n{"a":1}\n```', { a: 1 }],
+    ["a fenced block with no tag", '```\n{"a":1}\n```', { a: 1 }],
+    ["json inside prose", 'Here it is: {"a":1} hope it helps', { a: 1 }],
+    ["braces in the prose before a fenced block", 'Shape: {a}\n```json\n{"a":1}\n```', { a: 1 }],
+    ["an array inside an object", '{"a":[1,2]}', { a: [1, 2] }],
+    ["an object inside an array", '[{"a":1}]', [{ a: 1 }]],
+    ["plain words give null", "no json here", null],
+    ["an empty text gives null", "", null],
+    ["an unclosed object gives null", '{"a":1', null],
+    ["a key without quotes gives null", "{a:1}", null],
+    ["a bare string gives null", '"just a string"', null],
+    ["a bare number gives null", "42", null],
+  ];
 
-  test("a bare object", () => {
-    expect(ModelCaller.extractJson('{"a":1}')).toEqual({ a: 1 });
-  });
-
-  test("a bare array", () => {
-    expect(ModelCaller.extractJson("[1,2]")).toEqual([1, 2]);
-  });
-
-  test("a fenced block with a json tag", () => {
-    expect(ModelCaller.extractJson('```json\n{"a":1}\n```')).toEqual({ a: 1 });
-  });
-
-  test("a fenced block with no tag", () => {
-    expect(ModelCaller.extractJson('```\n{"a":1}\n```')).toEqual({ a: 1 });
-  });
-
-  test("json inside prose", () => {
-    expect(ModelCaller.extractJson('Here it is: {"a":1} hope it helps')).toEqual({ a: 1 });
-  });
-
-  test("braces in the prose before a fenced block", () => {
-    expect(ModelCaller.extractJson('Shape: {a}\n```json\n{"a":1}\n```')).toEqual({ a: 1 });
-  });
-
-  test("an array inside an object", () => {
-    expect(ModelCaller.extractJson('{"a":[1,2]}')).toEqual({ a: [1, 2] });
-  });
-
-  test("an object inside an array", () => {
-    expect(ModelCaller.extractJson('[{"a":1}]')).toEqual([{ a: 1 }]);
-  });
-
-  test("plain words give null", () => {
-    expect(ModelCaller.extractJson("no json here")).toBeNull();
-  });
-
-  test("an empty text gives null", () => {
-    expect(ModelCaller.extractJson("")).toBeNull();
-  });
-
-  test("an unclosed object gives null", () => {
-    expect(ModelCaller.extractJson('{"a":1')).toBeNull();
-  });
-
-  test("a key without quotes gives null", () => {
-    expect(ModelCaller.extractJson("{a:1}")).toBeNull();
-  });
-
-  test("a bare string gives null", () => {
-    expect(ModelCaller.extractJson('"just a string"')).toBeNull();
-  });
-
-  test("a bare number gives null", () => {
-    expect(ModelCaller.extractJson("42")).toBeNull();
-  });
+  for (const [name, text, expected] of texts) {
+    test(name, () => {
+      expect(ModelCaller.extractJson(text)).toEqual(expected);
+    });
+  }
 });
 
 describe("ModelCaller.ask", () => {

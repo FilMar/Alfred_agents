@@ -46,19 +46,15 @@ export class ModelConnection {
     assert(ModelConnection.#isJson(raw), () => `ModelConnection.fromJson: raw is a model connection with a known api, raw=${JSON.stringify(raw)}`);
     const result = new ModelConnection(raw);
     assert(sameJson(result.toJson(), raw), "ModelConnection.fromJson: the connection writes back the json it came from");
-    assert(result.#s.compat !== raw.compat, "ModelConnection.fromJson: the connection does not share compat with raw");
     return result;
   }
 
   toJson(): ModelConnectionJson {
-    const result = { ...this.#s, compat: { ...this.#s.compat } };
-    assert(sameJson(result, this.#s), () => `ModelConnection.toJson: the json carries every field of the connection, id=${this.#s.id}`);
-    assert(result.compat !== this.#s.compat, "ModelConnection.toJson: the json does not share compat with the connection");
-    return result;
+    return { ...this.#s, compat: { ...this.#s.compat } };
   }
 
   toPiModel(): Model<Api> {
-    const result: Model<Api> = {
+    return {
       id: this.#s.id,
       name: this.#s.id,
       api: this.#s.api,
@@ -71,9 +67,6 @@ export class ModelConnection {
       maxTokens: this.#s.maxTokens,
       compat: { ...this.#s.compat },
     };
-    assert(this.#carriedBy(result), () => `ModelConnection.toPiModel: the model carries every field of the connection, id=${this.#s.id}`);
-    assert(result.compat !== this.#s.compat, "ModelConnection.toPiModel: the model does not share compat with the connection");
-    return result;
   }
 
   static #isJson(raw: unknown): raw is ModelConnectionJson {
@@ -89,22 +82,6 @@ export class ModelConnection {
       Object.values(raw.compat).every((flag) => typeof flag === "boolean") &&
       typeof raw.contextWindow === "number" &&
       typeof raw.maxTokens === "number"
-    );
-  }
-
-  #carriedBy(model: Model<Api>): boolean {
-    return sameJson(
-      {
-        provider: model.provider,
-        id: model.id,
-        api: model.api,
-        baseUrl: model.baseUrl,
-        reasoning: model.reasoning,
-        compat: model.compat ?? {},
-        contextWindow: model.contextWindow,
-        maxTokens: model.maxTokens,
-      },
-      this.#s,
     );
   }
 
@@ -143,9 +120,7 @@ export class Role {
   }
 
   toJson(): RoleJson {
-    const result = { ...this.#s, connection: this.#s.connection.toJson() };
-    assert(sameJson(result, { ...this.#s, connection: this.#s.connection.toJson() }), () => `Role.toJson: the json carries every field of the role, model=${this.#s.connection.toJson().id}`);
-    return result;
+    return { ...this.#s, connection: this.#s.connection.toJson() };
   }
 
   connection(): ModelConnection {
@@ -211,9 +186,7 @@ export class CriticCheck {
   }
 
   toJson(): CriticCheckJson {
-    const result = { ...this.#s };
-    assert(sameJson(result, this.#s), () => `CriticCheck.toJson: the json carries every field of the check, name=${this.#s.name}`);
-    return result;
+    return { ...this.#s };
   }
 
   name(): string {
@@ -310,7 +283,7 @@ export class Extractor {
   }
 
   toJson(): ExtractorJson {
-    const result = {
+    return {
       ...this.#s,
       episodes: this.#s.episodes.toJson(),
       extract: this.#s.extract.toJson(),
@@ -318,8 +291,6 @@ export class Extractor {
       novelty: this.#s.novelty.toJson(),
       checks: this.#s.checks.map((c) => c.toJson()),
     };
-    assert(this.#carriedBy(result), "Extractor.toJson: the json carries every field of the extractor");
-    return result;
   }
 
   episodes(): Role {
@@ -339,10 +310,7 @@ export class Extractor {
   }
 
   checksFor(kind: CandidateKind): readonly CriticCheck[] {
-    const result = this.#s.checks.filter((c) => c.kind() === kind);
-    assert(Extractor.#allOfKind(result, kind), () => `Extractor.checksFor: every check is for the kind asked, kind=${kind}`);
-    assert(result.length === this.#countOf(kind), () => `Extractor.checksFor: no check of the kind is missing, kind=${kind}, result=${result.length}`);
-    return result;
+    return this.#s.checks.filter((c) => c.kind() === kind);
   }
 
   episodeChars(): number {
@@ -369,22 +337,6 @@ export class Extractor {
     return this.#s.topK;
   }
 
-  #carriedBy(json: ExtractorJson): boolean {
-    return sameJson(json, {
-      episodes: this.#s.episodes.toJson(),
-      extract: this.#s.extract.toJson(),
-      critic: this.#s.critic.toJson(),
-      novelty: this.#s.novelty.toJson(),
-      checks: this.#s.checks.map((c) => c.toJson()),
-      episodeChars: this.#s.episodeChars,
-      targetInputChars: this.#s.targetInputChars,
-      targetOutputChars: this.#s.targetOutputChars,
-      listingChars: this.#s.listingChars,
-      vocabularySize: this.#s.vocabularySize,
-      topK: this.#s.topK,
-    });
-  }
-
   static #isJson(raw: unknown): raw is ExtractorJson {
     return (
       isRecord(raw) &&
@@ -399,14 +351,6 @@ export class Extractor {
 
   static #badSize(s: ExtractorState): string | null {
     return SIZES.find((k) => !isPositiveInt(s[k])) ?? null;
-  }
-
-  #countOf(kind: CandidateKind): number {
-    return this.#s.checks.filter((c) => c.kind() === kind).length;
-  }
-
-  static #allOfKind(checks: readonly CriticCheck[], kind: CandidateKind): boolean {
-    return checks.every((c) => c.kind() === kind);
   }
 
   static #hasKind(checks: readonly CriticCheck[], kind: CandidateKind): boolean {

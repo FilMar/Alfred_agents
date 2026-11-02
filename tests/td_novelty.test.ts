@@ -21,7 +21,7 @@ import {
   verdictsCheck,
   type Known,
 } from "../tools/td/src/novelty.ts";
-import { startModelStub, type ModelStub } from "./helpers/td_stubs.ts";
+import { extractorJson, startModelStub, type ModelStub } from "./helpers/td_stubs.ts";
 
 const NOTE = NoteCandidate.fromModel({
   what: "La SessionList conserva gli item già salvati",
@@ -53,35 +53,7 @@ const RULE_TEXT = `SE ${RULE.toJson().if} ALLORA ${RULE.toJson().do}`;
 // spec.md: the tail of every novelty prompt.
 const IDS = "Use the integer after C as `cand` and the integer after N as `of`.";
 
-function extractorAt(port: number): Extractor {
-  const connection = {
-    provider: "ollama",
-    id: "glm-5.3-flash",
-    api: "openai-completions",
-    baseUrl: `http://localhost:${port}/v1`,
-    reasoning: true,
-    compat: { supportsDeveloperRole: false },
-    contextWindow: 128000,
-    maxTokens: 8192,
-  };
-  const role = { connection, thinking: "low", temperature: 0.1, system: "You extract notes." };
-  return Extractor.fromJson({
-    episodes: role,
-    extract: role,
-    critic: role,
-    novelty: role,
-    checks: [
-      { name: "is_textbook_definition", text: "A manual already says this.", kind: "note", dropWhen: "atLeast", threshold: 0.6 },
-      { name: "is_user_rejection", text: "The user rejected something.", kind: "rule", dropWhen: "under", threshold: 0.4 },
-    ],
-    episodeChars: 4000,
-    targetInputChars: 6000,
-    targetOutputChars: 8000,
-    listingChars: 300,
-    vocabularySize: 80,
-    topK: 5,
-  });
-}
+const extractorAt = (port: number): Extractor => Extractor.fromJson(extractorJson(`http://localhost:${port}/v1`));
 
 describe("the fixed sets", () => {
   it("holds the verdicts the model picks from, the settled ones and the cut", () => {
@@ -94,10 +66,6 @@ describe("the fixed sets", () => {
 });
 
 describe("SessionList", () => {
-  it("starts empty", () => {
-    SessionList.empty();
-  });
-
   it("add refuses a blank text", () => {
     const list = SessionList.empty();
     expect(() => list.add("note", "", null)).toThrow("SessionList.add: the text is not blank");
@@ -144,24 +112,19 @@ describe("SessionList", () => {
   });
 });
 
-describe("candidateText", () => {
-  it("reads a note as <what> | perché: <why>", () => {
-    expect(candidateText(NOTE)).toBe(NOTE_TEXT);
-  });
+describe("candidateText and savedText", () => {
+  const texts: [string, () => string, string][] = [
+    ["candidateText reads a note as <what> | perché: <why>", () => candidateText(NOTE), NOTE_TEXT],
+    ["candidateText reads a rule as SE <if> ALLORA <do>", () => candidateText(RULE), RULE_TEXT],
+    ["savedText saves a note as its what", () => savedText(NOTE), NOTE.toJson().what],
+    ["savedText saves a rule as SE <if> ALLORA <do>", () => savedText(RULE), RULE_TEXT],
+  ];
 
-  it("reads a rule as SE <if> ALLORA <do>", () => {
-    expect(candidateText(RULE)).toBe(RULE_TEXT);
-  });
-});
-
-describe("savedText", () => {
-  it("saves a note as its what", () => {
-    expect(savedText(NOTE)).toBe(NOTE.toJson().what);
-  });
-
-  it("saves a rule as SE <if> ALLORA <do>", () => {
-    expect(savedText(RULE)).toBe(RULE_TEXT);
-  });
+  for (const [name, call, expected] of texts) {
+    it(name, () => {
+      expect(call()).toBe(expected);
+    });
+  }
 });
 
 describe("noveltyPrompt", () => {
@@ -230,97 +193,44 @@ describe("verdictsCheck", () => {
     );
   });
 
-  it("needs a record with a verdicts list", () => {
-    expect(verdictsCheck(null, PAIR, KNOWN2)).toBe("need list `verdicts`");
-    expect(verdictsCheck("no", PAIR, KNOWN2)).toBe("need list `verdicts`");
-    expect(verdictsCheck({}, PAIR, KNOWN2)).toBe("need list `verdicts`");
-    expect(verdictsCheck({ verdicts: null }, PAIR, KNOWN2)).toBe("need list `verdicts`");
-    expect(verdictsCheck({ verdicts: 3 }, PAIR, KNOWN2)).toBe("need list `verdicts`");
-  });
+  const LIST = "need list `verdicts`";
+  const ONE = "need exactly one verdict per cand 0..1";
+  const NOTE_SET = "cand 0: verdict must be one of contradicts, duplicate, extends, new";
+  const OF = "cand 0: `of` must be a neighbour id 0..1";
+  const rows: [string, unknown, readonly (NoteCandidate | RuleCandidate)[], readonly Known[], string | null][] = [
+    ["needs a record with a verdicts list", null, PAIR, KNOWN2, LIST],
+    ["needs a record with a verdicts list", "no", PAIR, KNOWN2, LIST],
+    ["needs a record with a verdicts list", {}, PAIR, KNOWN2, LIST],
+    ["needs a record with a verdicts list", { verdicts: null }, PAIR, KNOWN2, LIST],
+    ["needs a record with a verdicts list", { verdicts: 3 }, PAIR, KNOWN2, LIST],
+    ["needs exactly one verdict per cand", { verdicts: [] }, PAIR, KNOWN2, ONE],
+    ["needs exactly one verdict per cand", { verdicts: [{ cand: 0, verdict: "new" }] }, PAIR, KNOWN2, ONE],
+    ["needs exactly one verdict per cand", { verdicts: [{ cand: 0, verdict: "new" }, { cand: 0, verdict: "new" }] }, PAIR, KNOWN2, ONE],
+    ["needs exactly one verdict per cand", { verdicts: [{ cand: 0, verdict: "new" }, { cand: 1, verdict: "new" }, { cand: 1, verdict: "new" }] }, PAIR, KNOWN2, ONE],
+    ["needs exactly one verdict per cand", { verdicts: [5, { cand: 1, verdict: "new" }] }, PAIR, KNOWN2, ONE],
+    ["needs a verdict of the fixed set of the kind", { verdicts: [{ cand: 0, verdict: "append", of: 0 }, { cand: 1, verdict: "new" }] }, PAIR, KNOWN2, NOTE_SET],
+    ["needs a verdict of the fixed set of the kind", { verdicts: [{ cand: 0, verdict: "new" }, { cand: 1, verdict: "extends", of: 0 }] }, PAIR, KNOWN2, "cand 1: verdict must be one of append, duplicate, new"],
+    ["needs a verdict of the fixed set of the kind", { verdicts: [{ cand: 0 }, { cand: 1, verdict: "new" }] }, PAIR, KNOWN2, NOTE_SET],
+    ["needs a neighbour id when the verdict is not new", { verdicts: [{ cand: 0, verdict: "duplicate", of: 2 }] }, [NOTE], KNOWN2, OF],
+    ["needs a neighbour id when the verdict is not new", { verdicts: [{ cand: 0, verdict: "duplicate", of: -1 }] }, [NOTE], KNOWN2, OF],
+    ["needs a neighbour id when the verdict is not new", { verdicts: [{ cand: 0, verdict: "duplicate", of: 1.5 }] }, [NOTE], KNOWN2, OF],
+    ["needs a neighbour id when the verdict is not new", { verdicts: [{ cand: 0, verdict: "duplicate", of: "1" }] }, [NOTE], KNOWN2, OF],
+    ["needs a neighbour id when the verdict is not new", { verdicts: [{ cand: 0, verdict: "duplicate" }] }, [NOTE], KNOWN2, OF],
+    ["needs a neighbour id when the verdict is not new", { verdicts: [{ cand: 0, verdict: "duplicate" }] }, [NOTE], [], "cand 0: `of` must be a neighbour id 0..-1"],
+    ["accepts one good verdict per candidate", { verdicts: [{ cand: 0, verdict: "new" }] }, [NOTE], [], null],
+    ["accepts one good verdict per candidate", { verdicts: [{ cand: 0, verdict: "new", of: 99 }] }, [NOTE], KNOWN2, null],
+    ["accepts one good verdict per candidate", { verdicts: [{ cand: 0, verdict: "duplicate", of: 0 }] }, [NOTE], KNOWN2, null],
+    ["accepts one good verdict per candidate", { verdicts: [{ cand: 0, verdict: "duplicate", of: 1 }] }, [NOTE], KNOWN2, null],
+    ["accepts one good verdict per candidate", { verdicts: [{ cand: 0, verdict: "contradicts", of: 0 }, { cand: 1, verdict: "append", of: 1 }] }, PAIR, KNOWN2, null],
+    ["returns the first of the errors", { verdicts: [{ cand: 0, verdict: "side", of: 2 }] }, [NOTE], KNOWN2, NOTE_SET],
+    ["returns the first of the errors", { verdicts: [{ cand: 0, verdict: "side" }, { cand: 0, verdict: "new" }] }, PAIR, KNOWN2, ONE],
+  ];
 
-  it("needs exactly one verdict per cand", () => {
-    expect(verdictsCheck({ verdicts: [] }, PAIR, KNOWN2)).toBe("need exactly one verdict per cand 0..1");
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "new" }] }, PAIR, KNOWN2)).toBe(
-      "need exactly one verdict per cand 0..1",
-    );
-    expect(
-      verdictsCheck({ verdicts: [{ cand: 0, verdict: "new" }, { cand: 0, verdict: "new" }] }, PAIR, KNOWN2),
-    ).toBe("need exactly one verdict per cand 0..1");
-    expect(
-      verdictsCheck(
-        { verdicts: [{ cand: 0, verdict: "new" }, { cand: 1, verdict: "new" }, { cand: 1, verdict: "new" }] },
-        PAIR,
-        KNOWN2,
-      ),
-    ).toBe("need exactly one verdict per cand 0..1");
-    expect(verdictsCheck({ verdicts: [5, { cand: 1, verdict: "new" }] }, PAIR, KNOWN2)).toBe(
-      "need exactly one verdict per cand 0..1",
-    );
-  });
-
-  it("needs a verdict of the fixed set of the kind", () => {
-    expect(
-      verdictsCheck(
-        { verdicts: [{ cand: 0, verdict: "append", of: 0 }, { cand: 1, verdict: "new" }] },
-        PAIR,
-        KNOWN2,
-      ),
-    ).toBe("cand 0: verdict must be one of contradicts, duplicate, extends, new");
-    expect(
-      verdictsCheck(
-        { verdicts: [{ cand: 0, verdict: "new" }, { cand: 1, verdict: "extends", of: 0 }] },
-        PAIR,
-        KNOWN2,
-      ),
-    ).toBe("cand 1: verdict must be one of append, duplicate, new");
-    expect(verdictsCheck({ verdicts: [{ cand: 0 }, { cand: 1, verdict: "new" }] }, PAIR, KNOWN2)).toBe(
-      "cand 0: verdict must be one of contradicts, duplicate, extends, new",
-    );
-  });
-
-  it("needs a neighbour id when the verdict is not new", () => {
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "duplicate", of: 2 }] }, [NOTE], KNOWN2)).toBe(
-      "cand 0: `of` must be a neighbour id 0..1",
-    );
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "duplicate", of: -1 }] }, [NOTE], KNOWN2)).toBe(
-      "cand 0: `of` must be a neighbour id 0..1",
-    );
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "duplicate", of: 1.5 }] }, [NOTE], KNOWN2)).toBe(
-      "cand 0: `of` must be a neighbour id 0..1",
-    );
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "duplicate", of: "1" }] }, [NOTE], KNOWN2)).toBe(
-      "cand 0: `of` must be a neighbour id 0..1",
-    );
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "duplicate" }] }, [NOTE], KNOWN2)).toBe(
-      "cand 0: `of` must be a neighbour id 0..1",
-    );
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "duplicate" }] }, [NOTE], [])).toBe(
-      "cand 0: `of` must be a neighbour id 0..-1",
-    );
-  });
-
-  it("accepts one good verdict per candidate", () => {
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "new" }] }, [NOTE], [])).toBe(null);
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "new", of: 99 }] }, [NOTE], KNOWN2)).toBe(null);
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "duplicate", of: 0 }] }, [NOTE], KNOWN2)).toBe(null);
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "duplicate", of: 1 }] }, [NOTE], KNOWN2)).toBe(null);
-    expect(
-      verdictsCheck(
-        { verdicts: [{ cand: 0, verdict: "contradicts", of: 0 }, { cand: 1, verdict: "append", of: 1 }] },
-        PAIR,
-        KNOWN2,
-      ),
-    ).toBe(null);
-  });
-
-  it("returns the first of the errors", () => {
-    expect(verdictsCheck({ verdicts: [{ cand: 0, verdict: "side", of: 2 }] }, [NOTE], KNOWN2)).toBe(
-      "cand 0: verdict must be one of contradicts, duplicate, extends, new",
-    );
-    expect(
-      verdictsCheck({ verdicts: [{ cand: 0, verdict: "side" }, { cand: 0, verdict: "new" }] }, PAIR, KNOWN2),
-    ).toBe("need exactly one verdict per cand 0..1");
-  });
+  for (const [at, [name, json, candidates, known, expected]] of rows.entries()) {
+    it(`${name} (${at})`, () => {
+      expect(verdictsCheck(json, candidates, known)).toBe(expected);
+    });
+  }
 });
 
 describe("settle", () => {
@@ -345,50 +255,31 @@ describe("settle", () => {
     );
   });
 
-  it("keeps a new verdict and trims its strings", () => {
-    expect(
-      settle(
-        { verdicts: [{ cand: 0, verdict: "new", adds: "  nuova idea  ", reason: "  perché  ", do: "  azione  " }] },
-        [NOTE],
-        KNOWN2,
-      ),
-    ).toEqual([{ cand: 0, verdict: "new", of: null, adds: "nuova idea", reason: "perché", do: "azione" }]);
-  });
+  const v = (cand: number, verdict: string, of: string | null = null, adds: string | null = null, reason: string | null = null, d: string | null = null) =>
+    ({ cand, verdict, of, adds, reason, do: d });
+  const settled: [string, unknown, readonly (NoteCandidate | RuleCandidate)[], ReturnType<typeof v>[]][] = [
+    ["keeps a new verdict and trims its strings", { verdicts: [{ cand: 0, verdict: "new", adds: "  nuova idea  ", reason: "  perché  ", do: "  azione  " }] }, [NOTE], [v(0, "new", null, "nuova idea", "perché", "azione")]],
+    ["drops the of of a new verdict even when the model gave one", { verdicts: [{ cand: 0, verdict: "new", of: 1 }] }, [NOTE], [v(0, "new")]],
+    ...["duplicate", "extends", "contradicts"].map((verdict): [string, unknown, readonly NoteCandidate[], ReturnType<typeof v>[]] =>
+      [`turns a note ${verdict} that points at a rule into new`, { verdicts: [{ cand: 0, verdict, of: 1, adds: "aggiunge", adds_is_new_idea: true, reason: "perché" }] }, [NOTE], [v(0, "new")]]),
+    ["turns a rule append that points at a note into new", { verdicts: [{ cand: 0, verdict: "append", of: 0, do: "azione" }] }, [RULE], [v(0, "new")]],
+    ["keeps a note verdict that points at a note", { verdicts: [{ cand: 0, verdict: "contradicts", of: 0, reason: "dice il contrario" }] }, [NOTE], [v(0, "contradicts", "k0", null, "dice il contrario")]],
+    ["keeps a rule verdict that points at a rule", { verdicts: [{ cand: 0, verdict: "append", of: 1, do: "azione" }] }, [RULE], [v(0, "append", "k1", null, null, "azione")]],
+    ["turns a note extends without adds into duplicate", { verdicts: [{ cand: 0, verdict: "extends", of: 0 }] }, [NOTE], [v(0, "duplicate", "k0")]],
+    ["turns a note extends with a blank adds into duplicate", { verdicts: [{ cand: 0, verdict: "extends", of: 0, adds: "   " }] }, [NOTE], [v(0, "duplicate", "k0")]],
+    ["carries a contradicts verdict with its trimmed reason", { verdicts: [{ cand: 0, verdict: "contradicts", of: 0, reason: "  dice il contrario  " }] }, [NOTE], [v(0, "contradicts", "k0", null, "dice il contrario")]],
+    ["turns a rule append without a do into duplicate", { verdicts: [{ cand: 0, verdict: "append", of: 1 }] }, [RULE], [v(0, "duplicate", "k1")]],
+    ["turns a rule append with a blank do into duplicate", { verdicts: [{ cand: 0, verdict: "append", of: 1, do: "   " }] }, [RULE], [v(0, "duplicate", "k1")]],
+    ["keeps a rule append with its trimmed do", { verdicts: [{ cand: 0, verdict: "append", of: 1, do: "  anche questo  " }] }, [RULE], [v(0, "append", "k1", null, null, "anche questo")]],
+    ["keeps a rule new verdict with no of", { verdicts: [{ cand: 0, verdict: "new" }] }, [RULE], [v(0, "new")]],
+    ["sorts the verdicts by cand", { verdicts: [{ cand: 1, verdict: "new" }, { cand: 0, verdict: "duplicate", of: 0 }] }, PAIR, [v(0, "duplicate", "k0"), v(1, "new")]],
+  ];
 
-  it("drops the of of a new verdict even when the model gave one", () => {
-    expect(settle({ verdicts: [{ cand: 0, verdict: "new", of: 1 }] }, [NOTE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "new", of: null, adds: null, reason: null, do: null },
-    ]);
-  });
-
-  it("turns a verdict that points at an item of another kind into new, with no link and no extra field", () => {
-    for (const verdict of ["duplicate", "extends", "contradicts"]) {
-      expect(
-        settle({ verdicts: [{ cand: 0, verdict, of: 1, adds: "aggiunge", adds_is_new_idea: true, reason: "perché" }] }, [NOTE], KNOWN2),
-      ).toEqual([{ cand: 0, verdict: "new", of: null, adds: null, reason: null, do: null }]);
-    }
-    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 0, do: "azione" }] }, [RULE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "new", of: null, adds: null, reason: null, do: null },
-    ]);
-  });
-
-  it("keeps a verdict that points at an item of its own kind", () => {
-    expect(settle({ verdicts: [{ cand: 0, verdict: "contradicts", of: 0, reason: "dice il contrario" }] }, [NOTE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "contradicts", of: "k0", adds: null, reason: "dice il contrario", do: null },
-    ]);
-    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 1, do: "azione" }] }, [RULE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "append", of: "k1", adds: null, reason: null, do: "azione" },
-    ]);
-  });
-
-  it("turns a note extends without a usable adds into duplicate", () => {
-    expect(settle({ verdicts: [{ cand: 0, verdict: "extends", of: 0 }] }, [NOTE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "duplicate", of: "k0", adds: null, reason: null, do: null },
-    ]);
-    expect(settle({ verdicts: [{ cand: 0, verdict: "extends", of: 0, adds: "   " }] }, [NOTE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "duplicate", of: "k0", adds: null, reason: null, do: null },
-    ]);
-  });
+  for (const [name, json, candidates, expected] of settled) {
+    it(name, () => {
+      expect(settle(json, candidates, KNOWN2)).toEqual(expected);
+    });
+  }
 
   it("keeps a note extends when the adds is a new idea", () => {
     expect(
@@ -418,55 +309,10 @@ describe("settle", () => {
     }
   });
 
-  it("carries a contradicts verdict with its trimmed reason", () => {
-    expect(
-      settle({ verdicts: [{ cand: 0, verdict: "contradicts", of: 0, reason: "  dice il contrario  " }] }, [NOTE], KNOWN2),
-    ).toEqual([{ cand: 0, verdict: "contradicts", of: "k0", adds: null, reason: "dice il contrario", do: null }]);
-  });
-
   it("nulls a reason that is missing, blank or not a string", () => {
     expect(settle({ verdicts: [{ cand: 0, verdict: "duplicate", of: 0 }] }, [NOTE], KNOWN2)[0].reason).toBe(null);
     expect(settle({ verdicts: [{ cand: 0, verdict: "duplicate", of: 0, reason: "   " }] }, [NOTE], KNOWN2)[0].reason).toBe(null);
     expect(settle({ verdicts: [{ cand: 0, verdict: "duplicate", of: 0, reason: 7 }] }, [NOTE], KNOWN2)[0].reason).toBe(null);
-  });
-
-  it("turns a rule append without a do into duplicate", () => {
-    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 1 }] }, [RULE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "duplicate", of: "k1", adds: null, reason: null, do: null },
-    ]);
-    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 1, do: "   " }] }, [RULE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "duplicate", of: "k1", adds: null, reason: null, do: null },
-    ]);
-  });
-
-  it("keeps a rule append with its trimmed do", () => {
-    expect(settle({ verdicts: [{ cand: 0, verdict: "append", of: 1, do: "  anche questo  " }] }, [RULE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "append", of: "k1", adds: null, reason: null, do: "anche questo" },
-    ]);
-  });
-
-  it("keeps a rule new verdict with no of", () => {
-    expect(settle({ verdicts: [{ cand: 0, verdict: "new" }] }, [RULE], KNOWN2)).toEqual([
-      { cand: 0, verdict: "new", of: null, adds: null, reason: null, do: null },
-    ]);
-  });
-
-  it("sorts the verdicts by cand", () => {
-    expect(
-      settle(
-        {
-          verdicts: [
-            { cand: 1, verdict: "new" },
-            { cand: 0, verdict: "duplicate", of: 0 },
-          ],
-        },
-        PAIR,
-        KNOWN2,
-      ),
-    ).toEqual([
-      { cand: 0, verdict: "duplicate", of: "k0", adds: null, reason: null, do: null },
-      { cand: 1, verdict: "new", of: null, adds: null, reason: null, do: null },
-    ]);
   });
 
   it("maps the of to the key of the known item, first and last", () => {

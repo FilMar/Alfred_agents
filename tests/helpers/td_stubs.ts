@@ -201,3 +201,16 @@ export function startTlStub(): TlStub {
   process.env.TL_API_URL = `http://localhost:${server.port}`;
   return { handle, stop: () => server.stop() };
 }
+
+export function extractorJson(baseUrl: string, system = "You extract notes.") {
+  const connection = { provider: "ollama", id: "glm-5.3-flash", api: "openai-completions", baseUrl, reasoning: true, compat: { supportsDeveloperRole: false }, contextWindow: 128000, maxTokens: 8192 };
+  const role = { connection, thinking: "low", temperature: 0.1, system };
+  return {
+    episodes: role, extract: role, critic: role, novelty: role,
+    checks: [
+      { name: "is_textbook_definition", text: "A manual already says this.", kind: "note", dropWhen: "atLeast", threshold: 0.6 },
+      { name: "is_user_rejection", text: "The user rejected something.", kind: "rule", dropWhen: "under", threshold: 0.4 },
+    ],
+    episodeChars: 4000, targetInputChars: 6000, targetOutputChars: 8000, listingChars: 300, vocabularySize: 80, topK: 5,
+  };
+}

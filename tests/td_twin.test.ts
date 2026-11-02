@@ -12,7 +12,6 @@ import {
   sameLength,
   twinIsNearest,
   twinOf,
-  twinReaches,
   type SessionVector,
   type Twin,
 } from "../tools/td/src/twin.ts";
@@ -148,23 +147,6 @@ describe("inUnitRange", () => {
   });
 });
 
-describe("twinReaches", () => {
-  it("is true for no twin, and for a twin whose score is at least the cutoff", () => {
-    const table: Array<[Twin | null, number, boolean]> = [
-      [null, 0.8, true], // no twin always reaches
-      [null, 1, true],
-      [{ key: "a", score: 0.8 }, 0.8, true], // a score equal to the cutoff reaches: at least the cutoff
-      [{ key: "a", score: 1 }, 1, true], // the same at the edge cutoff 1
-      [{ key: "a", score: 1 }, 0.8, true], // above the cutoff
-      [{ key: "a", score: 0.79 }, 0.8, false], // below the cutoff
-      [{ key: "a", score: 0 }, 0.8, false],
-    ];
-    for (const [twin, cutoff, expected] of table) {
-      expect(twinReaches(twin, cutoff)).toBe(expected);
-    }
-  });
-});
-
 describe("twinIsNearest", () => {
   it("checks that the twin is the first nearest item, and that without a twin nothing reaches the cutoff", () => {
     // the cosines below are exact: 1 for [1, 0] and [1, 0], 0 for [1, 0] and [0, 1], -1 for [1, 0] and [-1, 0]
@@ -270,13 +252,6 @@ describe("twinOf", () => {
 });
 
 describe("cutoffOf", () => {
-  it("rejects text that is not a string", () => {
-    const raws = [42, 0.8, null, undefined, true, {}, ["0.8"]];
-    for (const raw of raws) {
-      expect(() => cutoffOf(raw as unknown as string)).toThrow("cutoffOf: raw is text");
-    }
-  });
-
   it("returns the cutoff written in the text, or null when the text is not a cutoff", () => {
     // the contract asserts: "cutoffOf: the cutoff is a number above 0 and at most 1, or null"
     cutoffOf("0.8"); // the default of the CLI

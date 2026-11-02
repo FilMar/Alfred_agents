@@ -11,33 +11,20 @@ import type { Candidate } from "./critic.js";
 export type Neighbour = Readonly<{ id: string; kind: CandidateKind; text: string }>;
 
 export function neighbourOfNote(note: Note): Neighbour {
-  let result: Neighbour;
   assert(isNonBlank(note.id), "neighbourOfNote: the note has an id");
   assert(isNonBlank(note.what), "neighbourOfNote: the note has a what");
-  result = { id: note.id, kind: "note", text: note.what };
-  assert(result.id === note.id, "neighbourOfNote: the neighbour carries the note id");
-  assert(result.kind === "note", "neighbourOfNote: the kind is note");
-  assert(result.text === note.what, "neighbourOfNote: the text is the what of the note");
-  return result;
+  return { id: note.id, kind: "note", text: note.what };
 }
 
 export function neighbourOfEntry(entry: IdentityEntry): Neighbour {
-  let result: Neighbour;
   assert(isNonBlank(entry.if), "neighbourOfEntry: the entry has an if");
   assert(entry.do.length > 0, "neighbourOfEntry: the entry has at least one do");
-  result = { id: entry.id, kind: "rule", text: `SE ${entry.if} ALLORA ${entry.do.join("; ")}` };
-  assert(result.id === entry.id, "neighbourOfEntry: the neighbour carries the entry id");
-  assert(result.kind === "rule", "neighbourOfEntry: the kind is rule");
-  assert(result.text.startsWith(`SE ${entry.if} ALLORA `), "neighbourOfEntry: the text reads SE if ALLORA do");
-  return result;
+  return { id: entry.id, kind: "rule", text: `SE ${entry.if} ALLORA ${entry.do.join("; ")}` };
 }
 
 export function queryOf(candidate: Candidate): string {
-  let result: string;
-  result = candidate instanceof NoteCandidate ? candidate.toJson().what : candidate.toJson().if;
+  const result = candidate instanceof NoteCandidate ? candidate.toJson().what : candidate.toJson().if;
   assert(isNonBlank(result), "queryOf: the query is not blank");
-  assert(!(candidate instanceof NoteCandidate) || result === candidate.toJson().what, "queryOf: a note is searched by its what");
-  assert(candidate instanceof NoteCandidate || result === candidate.toJson().if, "queryOf: a rule is searched by its if");
   return result;
 }
 

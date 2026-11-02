@@ -3,7 +3,7 @@
 // The only own expects are the outcome table of sessionFailures and the panic messages of preconditions.
 
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
-import { startMemoryStubs, startModelStub, startTlStub } from "./helpers/td_stubs.ts";
+import { startMemoryStubs, startModelStub, startTlStub, extractorJson } from "./helpers/td_stubs.ts";
 
 const memory = startMemoryStubs();
 const model = startModelStub();
@@ -30,20 +30,7 @@ db.upsertSession(tl.handle, { id: OTHER, started: NOW.toISOString() });
 
 await createNote({ what: "Una nota di partenza sul cervello", why: "Dà il vocabolario dei tag", kind: "dato", tags: ["architettura", "memoria", "qualità"] });
 
-const connection = {
-  provider: "ollama", id: "glm-5.3-flash", api: "openai-completions",
-  baseUrl: `http://localhost:${model.port}/v1`, reasoning: true,
-  compat: { supportsDeveloperRole: false }, contextWindow: 128000, maxTokens: 8192,
-};
-const role = { connection, thinking: "low", temperature: 0.1, system: "You extract notes." };
-const extractor = Extractor.fromJson({
-  episodes: role, extract: role, critic: role, novelty: role,
-  checks: [
-    { name: "is_textbook_definition", text: "A manual already says this.", kind: "note", dropWhen: "atLeast", threshold: 0.6 },
-    { name: "is_user_rejection", text: "The user rejected something.", kind: "rule", dropWhen: "under", threshold: 0.4 },
-  ],
-  episodeChars: 4000, targetInputChars: 6000, targetOutputChars: 8000, listingChars: 300, vocabularySize: 80, topK: 5,
-});
+const extractor = Extractor.fromJson(extractorJson(`http://localhost:${model.port}/v1`));
 const version = await Version.add(extractor, null, "first", NOW);
 
 let seq = 0;

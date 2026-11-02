@@ -193,7 +193,7 @@ test("SessionRead.read rejects a session at the pending cap", async () => {
   const session = "s-cap-edge";
   await seed(session, capRows(session, PENDING_CAP));
   await expect(SessionRead.read(session)).rejects.toThrow(
-    `SessionRead.#pending: the session holds fewer pending exchanges than the cap, got=${PENDING_CAP}`,
+    `SessionRead.#fetch: the session holds fewer exchanges than the cap, distilled=false, got=${PENDING_CAP}`,
   );
 });
 
@@ -207,7 +207,7 @@ test("SessionRead.read rejects a session over the pending cap", async () => {
   const session = "s-cap-over";
   await seed(session, capRows(session, PENDING_CAP + 1));
   await expect(SessionRead.read(session)).rejects.toThrow(
-    "SessionRead.#pending: the session holds fewer pending exchanges than the cap",
+    "SessionRead.#fetch: the session holds fewer exchanges than the cap, distilled=false",
   );
 });
 test("SessionRead.of rejects an earlier turn of another session", () => {
@@ -276,6 +276,6 @@ test("SessionRead.read rejects a session at the distilled cap", async () => {
   await seed(session, rows);
   for (const r of rows) await markDistilled(r.exchange.id, "2026-10-09T11:00:00.000Z");
   await expect(SessionRead.read(session)).rejects.toThrow(
-    `SessionRead.#distilled: the session holds fewer distilled exchanges than the cap, got=${PENDING_CAP}`,
+    `SessionRead.#fetch: the session holds fewer exchanges than the cap, distilled=true, got=${PENDING_CAP}`,
   );
 });

@@ -29,9 +29,7 @@ export class ModelTokens {
   }
 
   static zero(): ModelTokens {
-    const result = new ModelTokens({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
-    assert(result.total() === 0, "ModelTokens.zero: every count is zero");
-    return result;
+    return new ModelTokens({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
   }
 
   static of(usage: Usage): ModelTokens {
@@ -39,27 +37,16 @@ export class ModelTokens {
     assert(ModelTokens.#isCount(usage.output), () => `ModelTokens.of: output is a count, got=${usage.output}`);
     assert(ModelTokens.#isCount(usage.cacheRead), () => `ModelTokens.of: cacheRead is a count, got=${usage.cacheRead}`);
     assert(ModelTokens.#isCount(usage.cacheWrite), () => `ModelTokens.of: cacheWrite is a count, got=${usage.cacheWrite}`);
-    const result = new ModelTokens({
-      input: usage.input,
-      output: usage.output,
-      cacheRead: usage.cacheRead,
-      cacheWrite: usage.cacheWrite,
-    });
-    assert(result.#carries(usage), "ModelTokens.of: the tokens carry the usage");
-    return result;
+    return new ModelTokens({ input: usage.input, output: usage.output, cacheRead: usage.cacheRead, cacheWrite: usage.cacheWrite });
   }
 
   plus(other: ModelTokens): ModelTokens {
-    const result = new ModelTokens({
+    return new ModelTokens({
       input: this.input() + other.input(),
       output: this.output() + other.output(),
       cacheRead: this.cacheRead() + other.cacheRead(),
       cacheWrite: this.cacheWrite() + other.cacheWrite(),
     });
-    assert(result.total() === this.total() + other.total(), "ModelTokens.plus: the total is the sum of both");
-    assert(result.output() === this.output() + other.output(), "ModelTokens.plus: output is the sum of both");
-    assert(result.cacheRead() === this.cacheRead() + other.cacheRead(), "ModelTokens.plus: cacheRead is the sum of both");
-    return result;
   }
 
   input(): number {
@@ -80,11 +67,6 @@ export class ModelTokens {
 
   total(): number {
     return this.#s.input + this.#s.output + this.#s.cacheRead + this.#s.cacheWrite;
-  }
-
-  #carries(usage: Usage): boolean {
-    return this.input() === usage.input && this.output() === usage.output
-      && this.cacheRead() === usage.cacheRead && this.cacheWrite() === usage.cacheWrite;
   }
 
   static #isCount(value: number): boolean {
@@ -109,17 +91,13 @@ export class ModelAnswer {
   static accepted(json: unknown, tries: number, tokens: ModelTokens): ModelAnswer {
     assert(ModelAnswer.#isTries(tries), () => `ModelAnswer.accepted: tries is from 1 to MAX_TRIES, got=${tries}`);
     assert(json !== undefined, "ModelAnswer.accepted: the json is given");
-    const result = new ModelAnswer({ json, failure: null, tries, tokens });
-    assert(result.isOk(), "ModelAnswer.accepted: the answer is ok");
-    return result;
+    return new ModelAnswer({ json, failure: null, tries, tokens });
   }
 
   static rejected(failure: string, tries: number, tokens: ModelTokens): ModelAnswer {
     assert(ModelAnswer.#isTries(tries), () => `ModelAnswer.rejected: tries is from 1 to MAX_TRIES, got=${tries}`);
     assert(isNonBlank(failure), "ModelAnswer.rejected: the failure is not blank");
-    const result = new ModelAnswer({ json: undefined, failure, tries, tokens });
-    assert(!result.isOk(), "ModelAnswer.rejected: the answer is not ok");
-    return result;
+    return new ModelAnswer({ json: undefined, failure, tries, tokens });
   }
 
   isOk(): boolean {
@@ -177,7 +155,6 @@ export class ModelCaller {
       const failure = `the JSON is still wrong after ${MAX_TRIES} tries: ${lastError}`;
       result = ModelAnswer.rejected(failure, MAX_TRIES, tokens);
     }
-    assert(!result.isOk() || check(result.json()) === null, "ModelCaller.ask: an ok answer passes the check");
     return result;
   }
 
@@ -197,7 +174,6 @@ export class ModelCaller {
         result = null;
       }
     }
-    assert(ModelCaller.#isObjectOrNull(result), "ModelCaller.extractJson: the result is an object, an array or null");
     return result;
   }
 
@@ -222,9 +198,7 @@ export class ModelCaller {
 
   static #correction(error: string): string {
     assert(isNonBlank(error), "ModelCaller.#correction: the error is not blank");
-    const result = `Your JSON is wrong: ${error}. Answer again with only the corrected JSON.`;
-    assert(result.includes(error), "ModelCaller.#correction: the message names the error");
-    return result;
+    return `Your JSON is wrong: ${error}. Answer again with only the corrected JSON.`;
   }
 
   static #apiKey(provider: string): string {
@@ -241,9 +215,5 @@ export class ModelCaller {
       }
     }
     return result;
-  }
-
-  static #isObjectOrNull(value: unknown): boolean {
-    return value === null || typeof value === "object";
   }
 }

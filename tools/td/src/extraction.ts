@@ -1,4 +1,4 @@
-import { allNonBlank, assert, isNonBlank, isPositiveInt, isRecord } from "../../common/contract.js";
+import { allNonBlank, assert, isPositiveInt, isRecord } from "../../common/contract.js";
 import { listTags } from "../../tb/src/qdrant.js";
 import { Checked, Evidence, NoteCandidate, ProjectTerms, RuleCandidate, TagVocabulary } from "./candidate.js";
 import type { Extractor } from "./config.js";
@@ -21,9 +21,7 @@ export type Extraction = Readonly<{ answer: ModelAnswer } & CheckedCandidates>;
 export function targetOf(map: SessionMap, episode: Episode, index: number): Target {
   assert(map.episodes().includes(episode), "targetOf: the episode is in the map");
   assert(isIndexIn(index, episode.turns().length), () => `targetOf: the index is a turn of the episode, index=${index}, turns=${episode.turns().length}`);
-  const result: Target = { map, episode, index };
-  assert(targetTurn(result) === episode.turns()[index], "targetOf: the target is the turn at the index");
-  return result;
+  return { map, episode, index };
 }
 
 export function targetTurn(target: Target): Turn {
@@ -32,34 +30,25 @@ export function targetTurn(target: Target): Turn {
 
 export function episodeText(target: Target, episodeChars: number): string {
   assert(isPositiveInt(episodeChars), () => `episodeText: episodeChars is a positive integer, got=${episodeChars}`);
-  const result = target.episode.turns()
+  return target.episode.turns()
     .map((t, k) => `[${k}]${k === target.index ? " <<< TARGET" : ""} USER: ${cut(t.input(), episodeChars)}\nAGENT: ${cut(t.output(), episodeChars)}`)
     .join("\n\n");
-  assert(result.startsWith("[0]"), "episodeText: the first turn is number 0");
-  assert(result.includes(`[${target.index}] <<< TARGET USER: `), "episodeText: the target turn is marked");
-  return result;
 }
 
 export function targetText(target: Target, inputChars: number, outputChars: number): string {
   assert(isPositiveInt(inputChars), () => `targetText: inputChars is a positive integer, got=${inputChars}`);
   assert(isPositiveInt(outputChars), () => `targetText: outputChars is a positive integer, got=${outputChars}`);
   const turn = targetTurn(target);
-  const result = `USER: ${cut(turn.input(), inputChars)}\n\nAGENT: ${cut(turn.output(), outputChars)}`;
-  assert(result.startsWith("USER: "), "targetText: the text starts with the user");
-  assert(result.includes("\n\nAGENT: "), "targetText: the agent follows the user");
-  return result;
+  return `USER: ${cut(turn.input(), inputChars)}\n\nAGENT: ${cut(turn.output(), outputChars)}`;
 }
 
 export function extractionPrompt(target: Target, vocabulary: readonly string[], extractor: Extractor): string {
   assert(vocabulary.length > 0, "extractionPrompt: the vocabulary is not empty");
-  const result =
+  return (
     `${QUALITY_BAR}\n\nTag vocabulary: ${vocabulary.join(", ")}\n\n${target.map.text()}\n\n## How this episode ended\n${target.episode.summary()}` +
     `\n\n## The episode (context)\n${episodeText(target, extractor.episodeChars())}` +
-    `\n\n## >>> TARGET: extract only from this exchange <<<\n${targetText(target, extractor.targetInputChars(), extractor.targetOutputChars())}`;
-  assert(result.startsWith(`${QUALITY_BAR}\n\nTag vocabulary: ${vocabulary.join(", ")}\n\n`), "extractionPrompt: the prompt starts with the quality bar, then the vocabulary");
-  assert(result.includes(target.map.text()), "extractionPrompt: the prompt holds the session map");
-  assert(result.endsWith(targetText(target, extractor.targetInputChars(), extractor.targetOutputChars())), "extractionPrompt: the prompt ends with the target");
-  return result;
+    `\n\n## >>> TARGET: extract only from this exchange <<<\n${targetText(target, extractor.targetInputChars(), extractor.targetOutputChars())}`
+  );
 }
 
 export function candidatesCheck(json: unknown): string | null {
@@ -79,7 +68,6 @@ export function candidatesCheck(json: unknown): string | null {
       }
     }
   }
-  assert(result === null || isNonBlank(result), "candidatesCheck: an error is not blank");
   return result;
 }
 
@@ -94,13 +82,10 @@ export function checkCandidates(json: unknown, target: Target, vocabulary: reado
     TagVocabulary.of(vocabulary),
   );
   const lists = json as { notes: readonly unknown[]; rules: readonly unknown[] };
-  const result: CheckedCandidates = {
+  return {
     notes: lists.notes.map((n) => NoteCandidate.fromModel(n)!.check(evidence)),
     rules: RuleCandidate.dedupe(lists.rules.map((r) => RuleCandidate.fromModel(r)!.check(evidence))),
   };
-  assert(result.notes.length === listLength(json, "notes"), "checkCandidates: one result per note");
-  assert(result.rules.length === listLength(json, "rules"), "checkCandidates: one result per rule");
-  return result;
 }
 
 export async function extractFrom(target: Target, vocabulary: readonly string[], extractor: Extractor): Promise<Extraction> {
@@ -122,11 +107,6 @@ export async function loadVocabulary(size: number): Promise<readonly string[]> {
   return result;
 }
 
-
 function isIndexIn(index: number, length: number): boolean {
   return Number.isInteger(index) && index >= 0 && index < length;
-}
-
-function listLength(json: unknown, key: string): number {
-  return isRecord(json) && Array.isArray(json[key]) ? json[key].length : -1;
 }

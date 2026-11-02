@@ -2,31 +2,13 @@ import { test, expect } from "bun:test";
 import * as db from "../tools/tl/src/db.ts";
 import { createApp } from "../tools/tl/src/api.ts";
 import { Extractor } from "../tools/td/src/config.ts";
+import { extractorJson } from "./helpers/td_stubs.ts";
 
 const server = Bun.serve({ port: 0, fetch: createApp(db.open(":memory:")).fetch });
 process.env.TL_API_URL = `http://localhost:${server.port}`;
 const { Version } = await import("../tools/td/src/registry.ts");
 
-const connection = {
-  provider: "ollama",
-  id: "glm-5.3-flash",
-  api: "openai-completions",
-  baseUrl: "http://localhost:11434/v1",
-  reasoning: true,
-  compat: { supportsDeveloperRole: false },
-  contextWindow: 128000,
-  maxTokens: 8192,
-};
-const role = { connection, thinking: "low", temperature: 0.1, system: "You are the critic." };
-const noteCheck = { name: "is_textbook_definition", text: "A manual already says this.", kind: "note", dropWhen: "atLeast", threshold: 0.6 };
-const ruleCheck = { name: "is_user_rejection", text: "The user rejected something.", kind: "rule", dropWhen: "under", threshold: 0.4 };
-
-function extractor(): Extractor {
-  return Extractor.fromJson({
-    episodes: role, extract: role, critic: role, novelty: role,
-    checks: [noteCheck, ruleCheck], episodeChars: 4000, targetInputChars: 6000, targetOutputChars: 8000, listingChars: 300, vocabularySize: 80, topK: 5,
-  });
-}
+const extractor = (): Extractor => Extractor.fromJson(extractorJson("http://localhost:11434/v1", "You are the critic."));
 
 const NOW = "2026-10-08T10:00:00.000Z";
 const LATER = "2026-10-08T10:05:00.000Z";

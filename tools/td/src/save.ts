@@ -32,21 +32,13 @@ export class Budget {
 
   static of(max: number | null): Budget {
     assert(max === null || isPositiveInt(max), () => `Budget.of: max is null or a positive integer, got=${max}`);
-    const result = new Budget(max);
-    assert(result.spent() === 0, "Budget.of: nothing is spent yet");
-    assert(max === null || !result.isSpent(), "Budget.of: a new budget is not spent");
-    return result;
+    return new Budget(max);
   }
 
   take(): boolean {
-    let result: boolean;
     const before = this.#spent;
-    if (this.isSpent()) {
-      result = false;
-    } else {
-      this.#spent = this.#spent + 1;
-      result = true;
-    }
+    const result = !this.isSpent();
+    if (result) this.#spent += 1;
     assert(this.#spent === before + (result ? 1 : 0), "Budget.take: one is spent only when taken");
     assert(this.#max === null || this.#spent <= this.#max, "Budget.take: never past the max");
     return result;

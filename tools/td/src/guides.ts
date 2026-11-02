@@ -7,19 +7,10 @@ export const QUALITY_BAR_HEAD =
 export function qualityBar(noteGuide: string, ruleGuide: string): string {
   assert(isNonBlank(noteGuide), "qualityBar: the note guide is not blank");
   assert(isNonBlank(ruleGuide), "qualityBar: the rule guide is not blank");
-  let result: string;
-  result = QUALITY_BAR_HEAD + "\n\n" + noteGuide + "\n\n" + ruleGuide;
-  assert(result.startsWith(QUALITY_BAR_HEAD), "qualityBar: the bar starts with its head");
-  assert(holdsInOrder(result, noteGuide, ruleGuide), "qualityBar: the bar holds the note guide, then the rule guide");
-  return result;
+  return QUALITY_BAR_HEAD + "\n\n" + noteGuide + "\n\n" + ruleGuide;
 }
 
 export const QUALITY_BAR = qualityBar(
   readGuide(new URL("../../tb/guide.md", import.meta.url)),
   readGuide(new URL("../../ti/guide.md", import.meta.url)),
 );
-
-function holdsInOrder(text: string, first: string, second: string): boolean {
-  const at = text.indexOf(first);
-  return at !== -1 && text.indexOf(second, at + first.length) !== -1;
-}

@@ -8,10 +8,7 @@ const MAP_HEADER = "## The whole session, episode by episode (later episodes can
 
 export function cut(text: string, chars: number): string {
   assert(isPositiveInt(chars), () => `cut: chars is a positive integer, got=${chars}`);
-  const result = Array.from(text).slice(0, chars).join("");
-  assert(Array.from(result).length <= chars, "cut: at most chars code points");
-  assert(text.startsWith(result), "cut: the cut is a prefix of the text");
-  return result;
+  return Array.from(text).slice(0, chars).join("");
 }
 
 type EpisodeState = {
@@ -32,9 +29,7 @@ export class Episode {
     assert(Episode.#isRange(from, to), () => `Episode.of: from and to are indices with from <= to, from=${from}, to=${to}`);
     assert(isNonBlank(summary), "Episode.of: the summary is not blank");
     assert(turns.length === to - from + 1, () => `Episode.of: one turn per index, expected=${to - from + 1}, got=${turns.length}`);
-    const result = new Episode({ from, to, summary, turns: [...turns] });
-    assert(result.to() - result.from() + 1 === result.turns().length, "Episode.of: the episode carries the range");
-    return result;
+    return new Episode({ from, to, summary, turns: [...turns] });
   }
 
   from(): number {
@@ -79,7 +74,6 @@ export class SessionMap {
     const map = answer.isOk() ? SessionMap.fromJson(answer.json(), read) : null;
     const result: SessionSplit = { answer, map };
     assert((result.map !== null) === result.answer.isOk(), "SessionMap.split: a map exactly when the answer is ok");
-    assert(result.map === null || result.map.session() === read.session(), "SessionMap.split: the map is of the session read");
     return result;
   }
 
@@ -90,15 +84,12 @@ export class SessionMap {
       .map((t, k) => `${k}: USER: ${JSON.stringify(cut(t.input(), listingChars))}\n   AGENT: ${JSON.stringify(cut(t.output(), listingChars))}`)
       .join("\n");
     assert(result.split("\n").length === 2 * turns.length, "SessionMap.listing: two lines per turn");
-    assert(result.startsWith("0: USER: "), "SessionMap.listing: the first turn is number 0");
     return result;
   }
 
   static check(turnCount: number): JsonCheck {
     assert(isPositiveInt(turnCount), () => `SessionMap.check: turnCount is a positive integer, got=${turnCount}`);
-    const result: JsonCheck = (json) => SessionMap.#badEpisodes(json, turnCount);
-    assert(typeof result === "function", "SessionMap.check: the check is a function");
-    return result;
+    return (json) => SessionMap.#badEpisodes(json, turnCount);
   }
 
   static fromJson(json: unknown, read: SessionRead): SessionMap {
@@ -109,7 +100,6 @@ export class SessionMap {
       session: read.session(),
       episodes: episodes.map((e) => Episode.of(e.from, e.to, e.summary, read.whole().slice(e.from, e.to + 1))),
     });
-    assert(result.session() === read.session(), "SessionMap.fromJson: the map is of the session read");
     assert(SessionMap.#covers(result.episodes(), read.whole().length), "SessionMap.fromJson: the episodes cover every turn in order");
     return result;
   }
@@ -123,10 +113,7 @@ export class SessionMap {
   }
 
   text(): string {
-    const result = [MAP_HEADER, ...this.#s.episodes.map((e) => `- [${e.from()}-${e.to()}] ${e.summary()}`)].join("\n");
-    assert(result.startsWith(`${MAP_HEADER}\n`), "SessionMap.text: the text starts with the header");
-    assert(this.#namesEvery(result), "SessionMap.text: the text names every episode");
-    return result;
+    return [MAP_HEADER, ...this.#s.episodes.map((e) => `- [${e.from()}-${e.to()}] ${e.summary()}`)].join("\n");
   }
 
   static #badEpisodes(json: unknown, turnCount: number): string | null {
@@ -152,7 +139,6 @@ export class SessionMap {
         result = `the last episode must end at ${turnCount - 1}`;
       }
     }
-    assert(result === null || isNonBlank(result), "SessionMap.#badEpisodes: an error is not blank");
     return result;
   }
 
@@ -164,9 +150,5 @@ export class SessionMap {
       next = e.to() + 1;
     }
     return inOrder && next === turnCount;
-  }
-
-  #namesEvery(text: string): boolean {
-    return this.#s.episodes.every((e) => text.includes(`- [${e.from()}-${e.to()}] ${e.summary()}`));
   }
 }

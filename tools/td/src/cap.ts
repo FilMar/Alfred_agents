@@ -24,42 +24,20 @@ export function listWithinCap(size: number, perSession: number | null): boolean 
   return perSession === null || size <= perSession;
 }
 
-export function isSkippable(extraction: Extraction): boolean {
-  return extraction.answer.isOk() && extraction.notes.length === 0 && extraction.rules.length === 0;
-}
-
 export function sessionIsFull(saved: number, perSession: number | null): boolean {
   assert(isCount(saved), "sessionIsFull: saved is a count");
   assert(isCapOrNull(perSession), "sessionIsFull: the cap is a positive integer or null");
-  let result = false;
-  if (perSession !== null) {
-    result = saved >= perSession;
-  }
+  const result = perSession !== null && saved >= perSession;
   assert(noCapNeverFull(perSession, result), "sessionIsFull: with no cap a session is never full");
   assert(fullMeansReached(saved, perSession, result), "sessionIsFull: a full session has reached its cap");
   return result;
 }
 
 export function capOf(raw: string): number | null {
-  assert(typeof raw === "string", "capOf: raw is text");
-  let result: number | null = null;
-  if (/^[0-9]+$/.test(raw)) {
-    const parsed = Number(raw);
-    if (Number.isInteger(parsed) && parsed > 0) {
-      result = parsed;
-    }
-  }
-  assert(isCapOrNull(result), "capOf: the cap is a positive integer or null");
-  return result;
+  const parsed = /^[0-9]+$/.test(raw) ? Number(raw) : Number.NaN;
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
 export function emptyExtraction(): Extraction {
-  let result = {} as Extraction;
-  result = {
-    answer: ModelAnswer.accepted({ notes: [], rules: [] }, 1, ModelTokens.zero()),
-    notes: [],
-    rules: [],
-  };
-  assert(isSkippable(result), "emptyExtraction: an ok answer with no note and no rule");
-  return result;
+  return { answer: ModelAnswer.accepted({ notes: [], rules: [] }, 1, ModelTokens.zero()), notes: [], rules: [] };
 }

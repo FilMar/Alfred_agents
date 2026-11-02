@@ -36,9 +36,7 @@ export class SessionList {
   readonly #items: Known[] = [];
 
   static empty(): SessionList {
-    const result = new SessionList();
-    assert(result.size() === 0, "SessionList.empty: the list is empty");
-    return result;
+    return new SessionList();
   }
 
   size(): number {
@@ -50,43 +48,25 @@ export class SessionList {
   }
 
   add(kind: CandidateKind, text: string, id: string | null): Known {
-    let result: Known;
     assert(isNonBlank(text), "SessionList.add: the text is not blank");
     assert(id === null || isNonBlank(id), "SessionList.add: the id is null or not blank");
-    const before = this.#items.length;
-    result = { key: id ?? `session:${before}`, kind, text };
+    const result: Known = { key: id ?? `session:${this.#items.length}`, kind, text };
     this.#items.push(result);
-    assert(this.#items.length === before + 1, "SessionList.add: the list grew by one");
-    assert(result.key === (id ?? `session:${before}`), "SessionList.add: the key is the saved id, or session:<position> when nothing is saved");
-    assert(carries(result, kind, text), "SessionList.add: the item carries the kind and the text");
     return result;
   }
 }
 
 export function candidateText(candidate: Candidate): string {
-  let result: string;
-  result = candidate instanceof NoteCandidate
-    ? `${candidate.toJson().what} | perché: ${candidate.toJson().why}`
-    : `SE ${candidate.toJson().if} ALLORA ${candidate.toJson().do}`;
-  assert(isNonBlank(result), "candidateText: the text is not blank");
-  assert(!(candidate instanceof NoteCandidate) || result.includes(candidate.toJson().why), "candidateText: a note text holds the why");
-  assert(candidate instanceof NoteCandidate || result === `SE ${candidate.toJson().if} ALLORA ${candidate.toJson().do}`, "candidateText: a rule reads SE if ALLORA do");
-  return result;
+  return candidate instanceof NoteCandidate ? `${candidate.toJson().what} | perché: ${candidate.toJson().why}` : savedText(candidate);
 }
 
 export function savedText(candidate: Candidate): string {
-  let result: string;
-  result = candidate instanceof NoteCandidate
-    ? candidate.toJson().what
-    : `SE ${candidate.toJson().if} ALLORA ${candidate.toJson().do}`;
+  const result = candidate instanceof NoteCandidate ? candidate.toJson().what : `SE ${candidate.toJson().if} ALLORA ${candidate.toJson().do}`;
   assert(isNonBlank(result), "savedText: the text is not blank");
-  assert(!(candidate instanceof NoteCandidate) || result === candidate.toJson().what, "savedText: a note is saved as its what");
-  assert(candidate instanceof NoteCandidate || result === `SE ${candidate.toJson().if} ALLORA ${candidate.toJson().do}`, "savedText: a rule reads SE if ALLORA do");
   return result;
 }
 
 export function noveltyPrompt(candidates: readonly Candidate[], known: readonly Known[]): string {
-  let result: string;
   assert(candidates.length > 0, "noveltyPrompt: at least one candidate");
   const lines: string[] = [QUALITY_BAR, "", "## Candidates"];
   for (let k = 0; k < candidates.length; k += 1) {
@@ -96,12 +76,7 @@ export function noveltyPrompt(candidates: readonly Candidate[], known: readonly 
   for (let k = 0; k < known.length; k += 1) {
     lines.push(`N${k} (${known[k].kind}): ${known[k].text.slice(0, KNOWN_TEXT_CHARS)}`);
   }
-  result = lines.join("\n") + "\n\nUse the integer after C as `cand` and the integer after N as `of`.";
-  assert(result.startsWith(`${QUALITY_BAR}\n\n## Candidates\n`), "noveltyPrompt: the prompt starts with the quality bar");
-  assert(listsCandidates(result, candidates), "noveltyPrompt: every candidate is a C line, numbered from 0");
-  assert(listsKnown(result, known), "noveltyPrompt: every known item is an N line, numbered from 0, cut at KNOWN_TEXT_CHARS");
-  assert(result.endsWith("Use the integer after C as `cand` and the integer after N as `of`."), "noveltyPrompt: the prompt ends with the id instruction");
-  return result;
+  return lines.join("\n") + "\n\nUse the integer after C as `cand` and the integer after N as `of`.";
 }
 
 export function verdictsCheck(json: unknown, candidates: readonly Candidate[], known: readonly Known[]): string | null {
@@ -114,16 +89,12 @@ export function verdictsCheck(json: unknown, candidates: readonly Candidate[], k
   } else {
     result = null;
     for (const raw of list) {
-      if (!isRecord(raw) || !Number.isInteger(raw.cand)) {
-        result = `need exactly one verdict per cand 0..${candidates.length - 1}`;
-        break;
-      }
-      const cand = raw.cand as number;
+      const cand = isRecord(raw) && Number.isInteger(raw.cand) ? (raw.cand as number) : -1;
       if (cand < 0 || cand >= candidates.length || byCand[cand] !== null) {
         result = `need exactly one verdict per cand 0..${candidates.length - 1}`;
         break;
       }
-      byCand[cand] = raw;
+      byCand[cand] = raw as Record<string, unknown>;
     }
     if (result === null && list.length !== candidates.length) {
       result = `need exactly one verdict per cand 0..${candidates.length - 1}`;
@@ -143,7 +114,6 @@ export function verdictsCheck(json: unknown, candidates: readonly Candidate[], k
       }
     }
   }
-  assert(result === null || isNonBlank(result), "verdictsCheck: an error is not blank");
   assert(result !== null || isVerdictList(json, candidates, known), "verdictsCheck: no error only for one good verdict per candidate");
   assert(result === null || !isVerdictList(json, candidates, known), "verdictsCheck: an error only for a wrong json");
   return result;
@@ -218,14 +188,6 @@ export async function judgeNovelty(candidates: readonly Candidate[], known: read
   return result;
 }
 
-function listsCandidates(prompt: string, candidates: readonly Candidate[]): boolean {
-  return candidates.every((c, k) => prompt.includes(`C${k} (${kindOf(c)}): ${candidateText(c)}`));
-}
-
-function listsKnown(prompt: string, known: readonly Known[]): boolean {
-  return known.every((n, k) => prompt.includes(`N${k} (${n.kind}): ${n.text.slice(0, KNOWN_TEXT_CHARS)}`));
-}
-
 function isVerdictList(json: unknown, candidates: readonly Candidate[], known: readonly Known[]): boolean {
   const list = isRecord(json) && Array.isArray(json.verdicts) ? (json.verdicts as readonly unknown[]) : null;
   return list !== null && list.length === candidates.length && coversEvery(list) && list.every((v) => isVerdictOf(v, candidates, known));
@@ -245,10 +207,6 @@ function isVerdictOf(raw: unknown, candidates: readonly Candidate[], known: read
     MODEL_VERDICTS[kindOf(candidate)].includes(raw.verdict) &&
     (raw.verdict === "new" || (Number.isInteger(raw.of) && (raw.of as number) >= 0 && (raw.of as number) < known.length))
   );
-}
-
-function carries(item: Known, kind: CandidateKind, text: string): boolean {
-  return item.kind === kind && item.text === text;
 }
 
 function ofsAreConsistent(verdicts: readonly Verdict[], candidates: readonly Candidate[], known: readonly Known[]): boolean {

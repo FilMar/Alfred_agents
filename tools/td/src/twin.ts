@@ -33,10 +33,6 @@ export function inUnitRange(value: number): boolean {
   return Number.isFinite(value) && value >= -1 - 1e-9 && value <= 1 + 1e-9;
 }
 
-export function twinReaches(twin: Twin | null, cutoff: number): boolean {
-  return twin === null || twin.score >= cutoff;
-}
-
 export function twinIsNearest(twin: Twin | null, vector: readonly number[], items: readonly SessionVector[], cutoff: number): boolean {
   const scores = items.map((item) => cosine(vector, item.vector));
   const best = scores.length === 0 ? -Infinity : Math.max(...scores);
@@ -75,20 +71,11 @@ export function twinOf(vector: readonly number[], items: readonly SessionVector[
   if (best !== null && best.score >= cutoff) {
     result = best;
   }
-  assert(twinReaches(result, cutoff), "twinOf: a twin reaches the cutoff");
   assert(twinIsNearest(result, vector, items, cutoff), "twinOf: the twin is the first nearest item, and without a twin no item reaches the cutoff");
   return result;
 }
 
 export function cutoffOf(raw: string): number | null {
-  assert(typeof raw === "string", "cutoffOf: raw is text");
-  let result: number | null = null;
-  if (/^\d+(\.\d+)?$/.test(raw)) {
-    const value = Number(raw);
-    if (isCutoff(value)) {
-      result = value;
-    }
-  }
-  assert(isCutoffOrNull(result), "cutoffOf: the cutoff is a number above 0 and at most 1, or null");
-  return result;
+  const value = /^\d+(\.\d+)?$/.test(raw) ? Number(raw) : Number.NaN;
+  return isCutoff(value) ? value : null;
 }

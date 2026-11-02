@@ -2,7 +2,9 @@ import { assert, isNonBlank, isPositiveInt, isRecord, isUnit, sameJson } from ".
 import { putExtractions } from "../../tl/src/client.js";
 import { ID_SHAPE, TIMESTAMP_SHAPE, validateNewExtraction } from "../../tl/src/types.js";
 import type { NewExtraction } from "../../tl/src/types.js";
-import type { Checked, NoteCandidate, NoteCandidateJson, RuleCandidate, RuleCandidateJson } from "./candidate.js";
+import type { Checked, NoteCandidateJson, RuleCandidateJson } from "./candidate.js";
+import { kindOf } from "./critic.js";
+import type { Candidate } from "./critic.js";
 
 export type Probabilities = Readonly<Record<string, number>>;
 
@@ -26,22 +28,19 @@ export class Outcome {
     this.#s = Object.freeze(s);
   }
 
-  static ofNote(checked: Checked<NoteCandidate>): Outcome {
-    const result = Outcome.#of("note", checked.candidate().toJson(), checked.candidate().quote(), checked.drop());
-    assert(result.#s.kind === "note", "Outcome.ofNote: the kind is note");
-    assert(result.isOpen() === checked.isKept(), "Outcome.ofNote: open only when the checks kept the note");
-    assert(checked.isKept() || result.#s.droppedBy === `check:${checked.drop()}`, () => `Outcome.ofNote: a check drop is recorded as check:<reason>, drop=${checked.drop()}`);
-    assert(sameJson(result.#s.body, checked.candidate().toJson()), "Outcome.ofNote: the body is the checked note");
-    return result;
-  }
-
-  static ofRule(checked: Checked<RuleCandidate>): Outcome {
-    const result = Outcome.#of("rule", checked.candidate().toJson(), checked.candidate().quote(), checked.drop());
-    assert(result.#s.kind === "rule", "Outcome.ofRule: the kind is rule");
-    assert(result.isOpen() === checked.isKept(), "Outcome.ofRule: open only when the checks kept the rule");
-    assert(checked.isKept() || result.#s.droppedBy === `check:${checked.drop()}`, () => `Outcome.ofRule: a check drop is recorded as check:<reason>, drop=${checked.drop()}`);
-    assert(sameJson(result.#s.body, checked.candidate().toJson()), "Outcome.ofRule: the body is the checked rule");
-    return result;
+  static of(checked: Checked<Candidate>): Outcome {
+    const candidate = checked.candidate();
+    const drop = checked.drop();
+    return new Outcome({
+      kind: kindOf(candidate),
+      body: candidate.toJson(),
+      quote: candidate.quote(),
+      droppedBy: drop === null ? null : `check:${drop}`,
+      probabilities: null,
+      verdict: null,
+      of: null,
+      savedId: null,
+    });
   }
 
   judged(probabilities: Probabilities, drop: string | null): Outcome {
@@ -49,10 +48,7 @@ export class Outcome {
     assert(this.#s.probabilities === null, "Outcome.judged: a candidate is judged once");
     assert(Outcome.#isProbabilities(probabilities), () => `Outcome.judged: probabilities name at least one check, each from 0 to 1, got=${JSON.stringify(probabilities)}`);
     assert(drop === null || Object.hasOwn(probabilities, drop), () => `Outcome.judged: the drop names a judged check, drop=${drop}`);
-    const droppedBy = drop === null ? null : `critic:${drop}`;
-    const result = new Outcome({ ...this.#s, probabilities: Object.freeze({ ...probabilities }), droppedBy });
-    assert(result.#s.droppedBy === (drop === null ? null : `critic:${drop}`), () => `Outcome.judged: a critic drop is recorded as critic:<name>, drop=${drop}`);
-    return result;
+    return new Outcome({ ...this.#s, probabilities: Object.freeze({ ...probabilities }), droppedBy: drop === null ? null : `critic:${drop}` });
   }
 
   decided(verdict: string, of: string | null): Outcome {
@@ -60,18 +56,14 @@ export class Outcome {
     assert(this.#s.verdict === null, "Outcome.decided: a candidate gets one verdict");
     assert(isNonBlank(verdict), "Outcome.decided: the verdict is not blank");
     assert(of === null || isNonBlank(of), "Outcome.decided: of is null or not blank");
-    const result = new Outcome({ ...this.#s, verdict, of });
-    assert(result.#s.verdict === verdict, "Outcome.decided: the verdict is recorded");
-    return result;
+    return new Outcome({ ...this.#s, verdict, of });
   }
 
   saved(id: string): Outcome {
     assert(this.#s.verdict !== null, "Outcome.saved: only a candidate with a verdict is saved");
     assert(this.#s.savedId === null, "Outcome.saved: a candidate is saved once");
     assert(isNonBlank(id), "Outcome.saved: the id is not blank");
-    const result = new Outcome({ ...this.#s, savedId: id });
-    assert(result.#s.savedId === id, "Outcome.saved: the id is recorded");
-    return result;
+    return new Outcome({ ...this.#s, savedId: id });
   }
 
   isOpen(): boolean {
@@ -104,13 +96,8 @@ export class Outcome {
       saved_id: s.savedId,
     };
     assert(validateNewExtraction(result) === null, () => `Outcome.toRow: the row passes the tl checks, error=${validateNewExtraction(result)}`);
-    assert(Outcome.#carries(result, head), "Outcome.toRow: the row carries the head");
     assert(sameJson(Outcome.#stateOf(result), this.#s), "Outcome.toRow: the row reads back as this outcome");
     return result;
-  }
-
-  static #carries(row: NewExtraction, head: RowHead): boolean {
-    return row.extractor_id === head.extractor_id && row.run === head.run && row.exchange_id === head.exchange_id && row.created === head.created;
   }
 
   static #stateOf(row: NewExtraction): OutcomeState {
@@ -124,19 +111,6 @@ export class Outcome {
       of: row.of,
       savedId: row.saved_id,
     };
-  }
-
-  static #of(kind: OutcomeState["kind"], body: OutcomeState["body"], quote: string, drop: string | null): Outcome {
-    return new Outcome({
-      kind,
-      body,
-      quote,
-      droppedBy: drop === null ? null : `check:${drop}`,
-      probabilities: null,
-      verdict: null,
-      of: null,
-      savedId: null,
-    });
   }
 
   static #isProbabilities(p: unknown): boolean {
@@ -176,15 +150,7 @@ export class Recorder {
     assert(ID_SHAPE.test(exchangeId), () => `Recorder.rows: exchangeId is an exchange id, got=${exchangeId}`);
     assert(!Number.isNaN(now.getTime()), "Recorder.rows: now is a valid date");
     const head = { extractor_id: this.#s.extractorId, run: this.#s.run, exchange_id: exchangeId, created: now.toISOString() };
-    const result = outcomes.map((o) => o.toRow(head));
-    assert(result.length === outcomes.length, "Recorder.rows: one row per outcome");
-    assert(this.#allCarry(result, exchangeId, now), "Recorder.rows: every row carries this run, the exchange and the time");
-    return result;
-  }
-
-  #allCarry(rows: readonly NewExtraction[], exchangeId: string, now: Date): boolean {
-    const created = now.toISOString();
-    return rows.every((r) => r.run === this.#s.run && r.extractor_id === this.#s.extractorId && r.exchange_id === exchangeId && r.created === created);
+    return outcomes.map((o) => o.toRow(head));
   }
 
   async write(exchangeId: string, outcomes: readonly Outcome[]): Promise<void> {

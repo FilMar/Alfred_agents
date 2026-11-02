@@ -53,33 +53,12 @@ export class ProjectTerms {
       if (/^[a-z][a-zA-Z0-9]*[A-Z][a-zA-Z0-9]*$/.test(w)) terms.add(w);
     }
 
-    const filtered = new Set([...terms].filter((t) => t.length >= TERM_MIN));
-    const result = new ProjectTerms({ terms: filtered });
-    assert(result.#allLongEnough(), "ProjectTerms.of: every term is at least TERM_MIN characters");
-    return result;
+    return new ProjectTerms({ terms: new Set([...terms].filter((t) => t.length >= TERM_MIN)) });
   }
 
   hitsIn(text: string): readonly string[] {
     const lower = text.toLowerCase();
-    const result = [...this.#s.terms]
-      .filter((t) => lower.includes(t.toLowerCase()))
-      .sort();
-    assert(this.#allTerms(result), "ProjectTerms.hitsIn: every hit is a term");
-    assert(ProjectTerms.#allIn(result, text), "ProjectTerms.hitsIn: every hit occurs in the text, case ignored");
-    return result;
-  }
-
-  #allTerms(hits: readonly string[]): boolean {
-    return hits.every((t) => this.#s.terms.has(t));
-  }
-
-  #allLongEnough(): boolean {
-    return [...this.#s.terms].every((t) => t.length >= TERM_MIN);
-  }
-
-  static #allIn(hits: readonly string[], text: string): boolean {
-    const lower = text.toLowerCase();
-    return hits.every((t) => lower.includes(t.toLowerCase()));
+    return [...this.#s.terms].filter((t) => lower.includes(t.toLowerCase())).sort();
   }
 }
 
@@ -101,9 +80,7 @@ export class TagVocabulary {
         byKey.set(key, tag);
       }
     }
-    const result = new TagVocabulary({ byKey });
-    assert(result.#s.byKey.size <= tags.length, "TagVocabulary.of: no tag is invented");
-    return result;
+    return new TagVocabulary({ byKey });
   }
 
   known(tags: readonly string[]): readonly string[] {
@@ -196,15 +173,11 @@ export class Checked<T> {
   }
 
   static kept<T>(candidate: T): Checked<T> {
-    const result = new Checked({ candidate, drop: null });
-    assert(result.isKept(), "Checked.kept: the result is kept");
-    return result;
+    return new Checked({ candidate, drop: null });
   }
 
   static dropped<T>(candidate: T, drop: CheckDrop): Checked<T> {
-    const result = new Checked({ candidate, drop });
-    assert(result.drop() === drop, () => `Checked.dropped: the result carries the reason, drop=${drop}`);
-    return result;
+    return new Checked({ candidate, drop });
   }
 
   candidate(): T {
@@ -240,15 +213,7 @@ export class NoteCandidate {
   }
 
   static fromModel(raw: unknown): NoteCandidate | null {
-    if (!NoteCandidate.#isModelJson(raw)) return null;
-    const r = raw as NoteCandidateJson;
-    const result = new NoteCandidate({
-      ...r,
-      proposedTags: [],
-    });
-    assert(result === null || NoteCandidate.#isModelJson(raw), "NoteCandidate.fromModel: a candidate comes only from a note shape");
-    assert(result === null || result.#s.proposedTags.length === 0, "NoteCandidate.fromModel: no tag is proposed before the check");
-    return result;
+    return NoteCandidate.#isModelJson(raw) ? new NoteCandidate({ ...(raw as NoteCandidateJson), proposedTags: [] }) : null;
   }
 
   toJson(): NoteCandidateJson {
@@ -261,18 +226,12 @@ export class NoteCandidate {
 
   check(evidence: Evidence): Checked<NoteCandidate> {
     const drop = NOTE_DROPS.find((d) => this.#fails(d, evidence)) ?? null;
-    const result = drop === null ? Checked.kept(this.#withTags(evidence.vocabulary())) : Checked.dropped<NoteCandidate>(this, drop);
+    const result = drop === null ? Checked.kept(new NoteCandidate({ ...this.#s, ...cutTags(evidence.vocabulary(), this.#s.tags) })) : Checked.dropped<NoteCandidate>(this, drop);
     assert(result.isKept() || result.candidate() === this, "NoteCandidate.check: a dropped result carries this candidate");
     assert(result.isKept() || this.#fails(result.drop(), evidence), () => `NoteCandidate.check: the drop names a check the note fails, drop=${result.drop()}, quote=${this.#s.quote}`);
     assert(!result.isKept() || result.candidate().#tagsCutFrom(this, evidence.vocabulary()), () => `NoteCandidate.check: a kept note keeps its known tags first, then proposed ones, at most MAX_TAGS, quote=${this.#s.quote}`);
     assert(!result.isKept() || result.candidate().#passesAll(evidence), () => `NoteCandidate.check: a kept note passes every check, quote=${this.#s.quote}`);
     return result;
-  }
-
-  #withTags(vocabulary: TagVocabulary): NoteCandidate {
-    const tags = vocabulary.known(this.#s.tags).slice(0, MAX_TAGS);
-    const proposedTags = vocabulary.proposed(this.#s.tags).slice(0, MAX_TAGS - tags.length);
-    return new NoteCandidate({ ...this.#s, tags, proposedTags });
   }
 
   #tagsCutFrom(original: NoteCandidate, vocabulary: TagVocabulary): boolean {
@@ -330,15 +289,7 @@ export class RuleCandidate {
   }
 
   static fromModel(raw: unknown): RuleCandidate | null {
-    if (!RuleCandidate.#isModelJson(raw)) return null;
-    const r = raw as RuleCandidateJson;
-    const result = new RuleCandidate({
-      ...r,
-      proposedTags: [],
-    });
-    assert(result === null || RuleCandidate.#isModelJson(raw), "RuleCandidate.fromModel: a candidate comes only from a rule shape");
-    assert(result === null || result.#s.proposedTags.length === 0, "RuleCandidate.fromModel: no tag is proposed before the check");
-    return result;
+    return RuleCandidate.#isModelJson(raw) ? new RuleCandidate({ ...(raw as RuleCandidateJson), proposedTags: [] }) : null;
   }
 
   toJson(): RuleCandidateJson {
@@ -351,7 +302,7 @@ export class RuleCandidate {
 
   check(evidence: Evidence): Checked<RuleCandidate> {
     const drop = RULE_DROPS.find((d) => this.#fails(d, evidence)) ?? null;
-    const result = drop === null ? Checked.kept(this.#withTags(evidence.vocabulary())) : Checked.dropped<RuleCandidate>(this, drop);
+    const result = drop === null ? Checked.kept(new RuleCandidate({ ...this.#s, ...cutTags(evidence.vocabulary(), this.#s.tags) })) : Checked.dropped<RuleCandidate>(this, drop);
     assert(result.isKept() || result.candidate() === this, "RuleCandidate.check: a dropped result carries this candidate");
     assert(result.isKept() || this.#fails(result.drop(), evidence), () => `RuleCandidate.check: the drop names a check the rule fails, drop=${result.drop()}, quote=${this.#s.quote}`);
     assert(!result.isKept() || result.candidate().#tagsCutFrom(this, evidence.vocabulary()), () => `RuleCandidate.check: a kept rule keeps its known tags first, then proposed ones, at most MAX_TAGS, quote=${this.#s.quote}`);
@@ -378,12 +329,6 @@ export class RuleCandidate {
     assert(RuleCandidate.#uniqueKeptQuotes(result), "RuleCandidate.dedupe: no two kept rules share a quote");
     assert(RuleCandidate.#onlyNewDrops(checked, result), "RuleCandidate.dedupe: a rule already dropped keeps its reason, a new drop is same_quote");
     return result;
-  }
-
-  #withTags(vocabulary: TagVocabulary): RuleCandidate {
-    const tags = vocabulary.known(this.#s.tags).slice(0, MAX_TAGS);
-    const proposedTags = vocabulary.proposed(this.#s.tags).slice(0, MAX_TAGS - tags.length);
-    return new RuleCandidate({ ...this.#s, tags, proposedTags });
   }
 
   #tagsCutFrom(original: RuleCandidate, vocabulary: TagVocabulary): boolean {
@@ -437,23 +382,22 @@ function tagKey(tag: string): string {
 }
 
 function normText(text: string): string {
-  const result = text.toLowerCase()
+  return text.toLowerCase()
     .replace(/["'`«»“”.,;:!?()\[\]]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  assert(result === result.trim(), "normText: no space at the ends");
-  assert(!result.includes("  "), "normText: no double space");
-  assert(result === result.toLowerCase(), "normText: lower case");
-  return result;
+}
+
+function cutTags(vocabulary: TagVocabulary, raw: readonly string[]): Readonly<{ tags: readonly string[]; proposedTags: readonly string[] }> {
+  const tags = vocabulary.known(raw).slice(0, MAX_TAGS);
+  return { tags, proposedTags: vocabulary.proposed(raw).slice(0, MAX_TAGS - tags.length) };
 }
 
 function quoteIn(quote: string, text: string, min: number): boolean {
   assert(isPositiveInt(min), () => `quoteIn: min is a positive integer, min=${min}`);
   const nq = normText(quote);
   const nt = normText(text);
-  const result = nq.length >= min && nt.includes(nq);
-  assert(!result || nq.length >= min, () => `quoteIn: a quote found is at least min characters, quote=${quote}`);
-  return result;
+  return nq.length >= min && nt.includes(nq);
 }
 
 function isItalian(text: string): boolean {
@@ -483,7 +427,6 @@ function isCutOf(tags: readonly string[], proposed: readonly string[], known: re
 function isNoteKind(kind: string): kind is NoteKind {
   return (NOTE_KINDS as readonly string[]).includes(kind);
 }
-
 
 function isUnique(items: readonly string[]): boolean {
   return new Set(items).size === items.length;

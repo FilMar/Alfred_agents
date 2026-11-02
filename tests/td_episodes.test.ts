@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from "bun:test";
+import { extractorJson } from "./helpers/td_stubs.ts";
 
 import { Episode, SessionMap } from "../tools/td/src/episodes.ts";
 import { Turn, SessionRead } from "../tools/td/src/session.ts";
@@ -61,20 +62,7 @@ const server = Bun.serve({
 
 afterAll(() => server.stop(true));
 
-const connection = {
-  provider: "ollama", id: "glm-5.3-flash", api: "openai-completions",
-  baseUrl: `http://localhost:${server.port}/v1`, reasoning: true,
-  compat: { supportsDeveloperRole: false }, contextWindow: 128000, maxTokens: 8192,
-};
-const role = { connection, thinking: "low", temperature: 0.1, system: "You split sessions." };
-const extractor = Extractor.fromJson({
-  episodes: role, extract: role, critic: role, novelty: role,
-  checks: [
-    { name: "is_textbook_definition", text: "A manual already says this.", kind: "note", dropWhen: "atLeast", threshold: 0.6 },
-    { name: "is_user_rejection", text: "The user rejected something.", kind: "rule", dropWhen: "under", threshold: 0.4 },
-  ],
-  episodeChars: 4000, targetInputChars: 6000, targetOutputChars: 8000, listingChars: 300, vocabularySize: 80, topK: 5,
-});
+const extractor = Extractor.fromJson(extractorJson(`http://localhost:${server.port}/v1`, "You split sessions."));
 
 const GOOD = '{"episodes":[{"from":0,"to":2,"summary":"s"}]}';
 const GAP = '{"episodes":[{"from":0,"to":1,"summary":"a"}]}';
@@ -85,27 +73,24 @@ beforeEach(() => {
 });
 
 describe("Episode.of", () => {
-  it("refuses a range that ends before it starts", () => {
-    expect(() => Episode.of(1, 0, "s", [])).toThrow("Episode.of: from and to are indices with from <= to");
-  });
+  const RANGE = "Episode.of: from and to are indices with from <= to";
+  const SUMMARY = "Episode.of: the summary is not blank";
+  const TURNS = "Episode.of: one turn per index";
+  const refused: [string, () => unknown, string][] = [
+    ["a range that ends before it starts", () => Episode.of(1, 0, "s", []), RANGE],
+    ["a negative index", () => Episode.of(-1, 0, "s", []), RANGE],
+    ["a non-integer index", () => Episode.of(0.5, 1, "s", []), RANGE],
+    ["an empty summary", () => Episode.of(0, 0, "", [turn()]), SUMMARY],
+    ["a blank summary", () => Episode.of(0, 0, "   ", [turn()]), SUMMARY],
+    ["fewer turns than the range", () => Episode.of(0, 2, "s", [turn(), turn()]), TURNS],
+    ["more turns than the range", () => Episode.of(0, 0, "s", [turn(), turn()]), TURNS],
+  ];
 
-  it("refuses a negative index", () => {
-    expect(() => Episode.of(-1, 0, "s", [])).toThrow("Episode.of: from and to are indices with from <= to");
-  });
-
-  it("refuses a non-integer index", () => {
-    expect(() => Episode.of(0.5, 1, "s", [])).toThrow("Episode.of: from and to are indices with from <= to");
-  });
-
-  it("refuses a blank summary", () => {
-    expect(() => Episode.of(0, 0, "", [turn()])).toThrow("Episode.of: the summary is not blank");
-    expect(() => Episode.of(0, 0, "   ", [turn()])).toThrow("Episode.of: the summary is not blank");
-  });
-
-  it("refuses a turn count that is not the range", () => {
-    expect(() => Episode.of(0, 2, "s", [turn(), turn()])).toThrow("Episode.of: one turn per index");
-    expect(() => Episode.of(0, 0, "s", [turn(), turn()])).toThrow("Episode.of: one turn per index");
-  });
+  for (const [name, call, message] of refused) {
+    it(`refuses ${name}`, () => {
+      expect(call).toThrow(message);
+    });
+  }
 
   it("carries the range", () => {
     Episode.of(0, 2, "s", [turn(), turn(), turn()]);
@@ -130,26 +115,19 @@ describe("SessionMap.listing", () => {
     SessionMap.listing([turn()], 1);
   });
 
-  it("lists one turn", () => {
-    expect(SessionMap.listing([turn()], 300)).toBe("0: USER: \"vai\"\n   AGENT: \"Fatto.\"");
-  });
+  const listings: [string, () => string, string][] = [
+    ["lists one turn", () => SessionMap.listing([turn()], 300), "0: USER: \"vai\"\n   AGENT: \"Fatto.\""],
+    ["escapes the newline of the input", () => SessionMap.listing([turn("a\nb")], 300), "0: USER: \"a\\nb\"\n   AGENT: \"Fatto.\""],
+    ["cuts the input at the limit", () => SessionMap.listing([turn("abcdef")], 3), "0: USER: \"abc\"\n   AGENT: \"Fat\""],
+    ["never splits an emoji", () => SessionMap.listing([turn("😀x")], 1), "0: USER: \"😀\"\n   AGENT: \"F\""],
+    ["joins one entry per turn", () => SessionMap.listing([turn(), turn()], 300), "0: USER: \"vai\"\n   AGENT: \"Fatto.\"\n1: USER: \"vai\"\n   AGENT: \"Fatto.\""],
+  ];
 
-  it("escapes the newline of the input", () => {
-    expect(SessionMap.listing([turn("a\nb")], 300)).toBe("0: USER: \"a\\nb\"\n   AGENT: \"Fatto.\"");
-  });
-
-  it("cuts the input at the limit", () => {
-    expect(SessionMap.listing([turn("abcdef")], 3)).toBe("0: USER: \"abc\"\n   AGENT: \"Fat\"");
-  });
-
-  it("never splits an emoji", () => {
-    expect(SessionMap.listing([turn("😀x")], 1)).toBe("0: USER: \"😀\"\n   AGENT: \"F\"");
-  });
-
-  it("joins one entry per turn", () => {
-    expect(SessionMap.listing([turn(), turn()], 300))
-      .toBe("0: USER: \"vai\"\n   AGENT: \"Fatto.\"\n1: USER: \"vai\"\n   AGENT: \"Fatto.\"");
-  });
+  for (const [name, call, expected] of listings) {
+    it(name, () => {
+      expect(call()).toBe(expected);
+    });
+  }
 });
 
 describe("SessionMap.check", () => {
@@ -157,10 +135,6 @@ describe("SessionMap.check", () => {
     expect(() => SessionMap.check(0)).toThrow("SessionMap.check: turnCount is a positive integer");
     expect(() => SessionMap.check(-1)).toThrow("SessionMap.check: turnCount is a positive integer");
     expect(() => SessionMap.check(0.5)).toThrow("SessionMap.check: turnCount is a positive integer");
-  });
-
-  it("is the check", () => {
-    SessionMap.check(1);
   });
 
   const NEED_LIST = "need list `episodes`";

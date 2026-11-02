@@ -11,19 +11,10 @@ import {
   fullMeansReached,
   isCapOrNull,
   isCount,
-  isSkippable,
   listWithinCap,
   noCapNeverFull,
   sessionIsFull,
 } from "../tools/td/src/cap.ts";
-
-// The shape of an Extraction as isSkippable sees it; derived from the export,
-// so the test never imports a private member of another module.
-type Extraction = Parameters<typeof isSkippable>[0];
-
-function anExtraction(ok: boolean, notes: unknown[] = [], rules: unknown[] = []): Extraction {
-  return { answer: { isOk: () => ok }, notes, rules } as unknown as Extraction;
-}
 
 test("isCount: a non-negative integer", () => {
   expect(isCount(0)).toBe(true); // the edge of the range
@@ -61,14 +52,6 @@ test("fullMeansReached: a full session decided at least the cap", () => {
   expect(fullMeansReached(3, 4, false)).toBe(true); // not full is always fine
 });
 
-test("isSkippable: an ok answer with nothing decided", () => {
-  expect(isSkippable(anExtraction(true))).toBe(true);
-  expect(isSkippable(anExtraction(true, [{}]))).toBe(false); // one note
-  expect(isSkippable(anExtraction(true, [], [{}]))).toBe(false); // one rule
-  expect(isSkippable(anExtraction(false))).toBe(false); // a failed answer
-  expect(isSkippable(anExtraction(false, [{}], [{}]))).toBe(false);
-});
-
 test("sessionIsFull: saved is a count", () => {
   expect(() => sessionIsFull(-1, null)).toThrow("sessionIsFull: saved is a count"); // just outside
   expect(() => sessionIsFull(0.5, null)).toThrow("sessionIsFull: saved is a count"); // not an integer
@@ -92,11 +75,6 @@ test("sessionIsFull: a full session has reached its cap", () => {
   sessionIsFull(3, 4); // one below the default cap
   sessionIsFull(4, 4); // at the default cap
   sessionIsFull(5, 4); // past the default cap
-});
-
-test("capOf: raw is text", () => {
-  expect(() => capOf(4 as unknown as string)).toThrow("capOf: raw is text");
-  expect(() => capOf(null as unknown as string)).toThrow("capOf: raw is text");
 });
 
 test("capOf: the cap is a positive integer or null", () => {

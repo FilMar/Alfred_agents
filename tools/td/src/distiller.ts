@@ -2,6 +2,7 @@ import { assert, isNonBlank } from "../../common/contract.js";
 import type { Extractor } from "./config.js";
 import { critique, kindOf } from "./critic.js";
 import type { Candidate, Judgement } from "./critic.js";
+import type { Checked } from "./candidate.js";
 import { SessionMap } from "./episodes.js";
 import type { SessionSplit } from "./episodes.js";
 import { extractFrom, loadVocabulary, targetOf, targetTurn } from "./extraction.js";
@@ -59,14 +60,10 @@ export type Distiller = Readonly<{
 }>;
 
 export async function distillerOf(version: Version, now: Date, mode: Mode = "shadow", maxSaved: number | null = null, perSession: number | null = null, sameSessionCutoff: number | null = null): Promise<Distiller> {
-  let result: Distiller;
   const recorder = Recorder.start(version.id(), now);
   const extractor = version.extractor();
   const vocabulary = await loadVocabulary(extractor.vocabularySize());
-  result = { extractor, vocabulary, recorder, mode, budget: Budget.of(maxSaved), perSession, sameSessionCutoff };
-  assert(result.extractor === version.extractor(), "distillerOf: the extractor is the one of the version");
-  assert(result.recorder.run() === now.toISOString(), "distillerOf: the run is the time given");
-  return result;
+  return { extractor, vocabulary, recorder, mode, budget: Budget.of(maxSaved), perSession, sameSessionCutoff };
 }
 
 export async function distillTarget(distiller: Distiller, target: Target): Promise<ExchangeReport> {
@@ -74,20 +71,13 @@ export async function distillTarget(distiller: Distiller, target: Target): Promi
   const extraction = await extractFrom(target, distiller.vocabulary, distiller.extractor);
   const judgements: Judgement[] = [];
   const outcomes: Outcome[] = [];
-  if (extraction.answer.isOk()) {
-    for (const checked of extraction.notes) {
-      const judged = await judge(Outcome.ofNote(checked), checked.isKept() ? checked.candidate() : null, target, distiller.extractor);
-      judgements.push(...judged.judgements);
-      outcomes.push(judged.outcome);
-    }
-    for (const checked of extraction.rules) {
-      const judged = await judge(Outcome.ofRule(checked), checked.isKept() ? checked.candidate() : null, target, distiller.extractor);
-      judgements.push(...judged.judgements);
-      outcomes.push(judged.outcome);
-    }
+  const candidates: readonly Checked<Candidate>[] = extraction.answer.isOk() ? [...extraction.notes, ...extraction.rules] : [];
+  for (const checked of candidates) {
+    const judged = await judge(Outcome.of(checked), checked.isKept() ? checked.candidate() : null, target, distiller.extractor);
+    judgements.push(...judged.judgements);
+    outcomes.push(judged.outcome);
   }
   result = { turn: targetTurn(target), extraction, judgements, outcomes, decision: UNDECIDED };
-  assert(result.turn === targetTurn(target), "distillTarget: the report is of the target turn");
   assert(result.extraction.answer.isOk() || recordsNothing(result), "distillTarget: a failed extraction judges and records nothing");
   assert(result.outcomes.length === candidateCount(result.extraction), "distillTarget: one outcome per candidate");
   assert(result.judgements.length === keptCount(result.extraction), "distillTarget: one judgement per kept candidate");
@@ -250,7 +240,6 @@ export async function decideTarget(distiller: Distiller, target: Target, report:
     }
   }
   result = { ...report, outcomes, decision: { answer, verdicts, saves, failures } };
-  assert(result.turn === report.turn, "decideTarget: the result is of the same turn");
   assert(noveltyFailureIsReported(result.decision), "decideTarget: a failed novelty answer is a failure");
   return result;
 }
@@ -281,7 +270,7 @@ export async function closeSession(distiller: Distiller, read: SessionRead, spli
 export function episodesToWrite(distiller: Distiller, map: SessionMap): readonly StoredEpisode[] {
   assert(map.episodes().length > 0, "episodesToWrite: the map has an episode");
   const model = distiller.extractor.episodes().connection().toPiModel().id;
-  const result = map.episodes().map((episode) =>
+  return map.episodes().map((episode) =>
     episodeOf({
       session: map.session(),
       refs: episode.turns().map((turn) => ({ id: turn.id(), timestamp: turn.timestamp() })),
@@ -291,15 +280,10 @@ export function episodesToWrite(distiller: Distiller, map: SessionMap): readonly
       created: distiller.recorder.run(),
     }),
   );
-  assert(result.length === map.episodes().length, "episodesToWrite: one stored episode per episode of the map");
-  return result;
 }
 
 export function skippedReport(target: Target): ExchangeReport {
-  const result: ExchangeReport = { turn: targetTurn(target), extraction: emptyExtraction(), judgements: [], outcomes: [], decision: UNDECIDED };
-  assert(result.turn === targetTurn(target), "skippedReport: the report is of the target turn");
-  assert(recordsNothing(result), "skippedReport: a skipped exchange judges and records nothing");
-  return result;
+  return { turn: targetTurn(target), extraction: emptyExtraction(), judgements: [], outcomes: [], decision: UNDECIDED };
 }
 
 export async function distillSession(distiller: Distiller, read: SessionRead): Promise<SessionReport> {
@@ -325,7 +309,6 @@ export async function distillSession(distiller: Distiller, read: SessionRead): P
   }
   const closing = await closeSession(distiller, read, split, exchanges, episodeFailure);
   result = { read, split, exchanges, ...closing };
-  assert(result.read === read, "distillSession: the report is of the session read");
   assert(listWithinCap(list.size(), distiller.perSession), "distillSession: the session list never passes the cap");
   assert(result.split.map !== null || result.exchanges.length === 0, "distillSession: a failed split reports no exchange");
   assert(result.split.map === null || reportsEveryTurn(result, read), "distillSession: an ok split reports every turn, in order");

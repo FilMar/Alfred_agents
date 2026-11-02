@@ -35,193 +35,76 @@ const note = NoteCandidate.fromModel(noteJson)!;
 const blankQuoteNote = NoteCandidate.fromModel({ ...noteJson, quote: "" })!;
 const rule = RuleCandidate.fromModel(ruleJson)!;
 
-const keptNote = () => Outcome.ofNote(Checked.kept(note));
-const keptRule = () => Outcome.ofRule(Checked.kept(rule));
-const droppedNote = () => Outcome.ofNote(Checked.dropped(blankQuoteNote, "quote"));
+const keptNote = () => Outcome.of(Checked.kept(note));
+const keptRule = () => Outcome.of(Checked.kept(rule));
+const droppedNote = () => Outcome.of(Checked.dropped(blankQuoteNote, "quote"));
 const judgedNote = () => keptNote().judged({ is_textbook: 0.1, is_project_detail: 0.2 }, null);
 const decidedNote = () => judgedNote().decided("extends", "tb-42");
 
 const head = { extractor_id: 1, run: NOW.toISOString(), exchange_id: EXCHANGE, created: NOW.toISOString() };
 
-describe("Outcome.ofNote and ofRule", () => {
-  test("a kept note", () => {
-    keptNote();
-  });
+const recorder = Recorder.start(1, NOW);
 
-  test("a note dropped by a check, with a blank quote", () => {
-    droppedNote();
-  });
+const bareCalls: [string, () => unknown][] = [
+  ["Outcome.of: a kept note", keptNote],
+  ["Outcome.of: a note dropped by a check, with a blank quote", droppedNote],
+  ["Outcome.of: a kept rule", keptRule],
+  ["Outcome.of: a rule dropped by a check", () => Outcome.of(Checked.dropped(rule, "italian"))],
+  ["Outcome.judged: no drop", judgedNote],
+  ["Outcome.judged: a drop that names a judged check", () => keptNote().judged({ is_textbook: 0.9 }, "is_textbook")],
+  ["Outcome.judged: edges 0 and 1 are probabilities", () => keptNote().judged({ a: 0, b: 1 }, null)],
+  ["Outcome.decided: a verdict with a pointer", decidedNote],
+  ["Outcome.decided: a verdict without a pointer", () => judgedNote().decided("new", null)],
+  ["Outcome.saved: a decided candidate", () => decidedNote().saved("tb-43")],
+  ["Outcome.toRow: kept by the checks, not judged yet", () => keptNote().toRow(head)],
+  ["Outcome.toRow: dropped by a check, blank quote", () => droppedNote().toRow(head)],
+  ["Outcome.toRow: a rule dropped by a check", () => Outcome.of(Checked.dropped(rule, "rule_quote")).toRow(head)],
+  ["Outcome.toRow: judged and kept", () => judgedNote().toRow(head)],
+  ["Outcome.toRow: dropped by the critic", () => keptRule().judged({ is_textbook: 0.9 }, "is_textbook").toRow(head)],
+  ["Outcome.toRow: decided", () => decidedNote().toRow(head)],
+  ["Outcome.toRow: saved", () => decidedNote().saved("tb-43").toRow(head)],
+  ["Recorder.start: a row id and a date", () => Recorder.start(1, NOW)],
+  ["Recorder.rows: no outcome", () => recorder.rows(EXCHANGE, [], NOW)],
+  ["Recorder.rows: one outcome per stage", () => recorder.rows(EXCHANGE, [keptNote(), droppedNote(), judgedNote(), decidedNote().saved("tb-43")], new Date("2026-10-08T11:00:00.000Z"))],
+];
 
-  test("a kept rule", () => {
-    keptRule();
+for (const [name, call] of bareCalls) {
+  test(name, () => {
+    call();
   });
+}
 
-  test("a rule dropped by a check", () => {
-    Outcome.ofRule(Checked.dropped(rule, "italian"));
+const PROBABILITIES = "Outcome.judged: probabilities name at least one check";
+const preconditions: [() => unknown, string][] = [
+  [() => droppedNote().judged({ a: 0.5 }, null), "Outcome.judged: only an open candidate is judged"],
+  [() => judgedNote().judged({ a: 0.5 }, null), "Outcome.judged: a candidate is judged once"],
+  [() => keptNote().judged({}, null), PROBABILITIES],
+  [() => keptNote().judged({ a: 1.01 }, null), PROBABILITIES],
+  [() => keptNote().judged({ a: -0.01 }, null), PROBABILITIES],
+  [() => keptNote().judged({ a: Number.NaN }, null), PROBABILITIES],
+  [() => keptNote().judged({ " ": 0.5 }, null), PROBABILITIES],
+  [() => keptNote().judged({ a: 0.5 }, "b"), "Outcome.judged: the drop names a judged check"],
+  [() => droppedNote().decided("new", null), "Outcome.decided: only an open candidate gets a verdict"],
+  [() => decidedNote().decided("new", null), "Outcome.decided: a candidate gets one verdict"],
+  [() => judgedNote().decided(" ", null), "Outcome.decided: the verdict is not blank"],
+  [() => judgedNote().decided("extends", ""), "Outcome.decided: of is null or not blank"],
+  [() => judgedNote().saved("tb-43"), "Outcome.saved: only a candidate with a verdict is saved"],
+  [() => decidedNote().saved("tb-43").saved("tb-44"), "Outcome.saved: a candidate is saved once"],
+  [() => decidedNote().saved(""), "Outcome.saved: the id is not blank"],
+  [() => Recorder.start(0, NOW), "Recorder.start: extractorId is a row id"],
+  [() => Recorder.start(1.5, NOW), "Recorder.start: extractorId is a row id"],
+  [() => Recorder.start(1, new Date("nope")), "Recorder.start: now is a valid date"],
+  [() => recorder.rows("message-1", [keptNote()], NOW), "Recorder.rows: exchangeId is an exchange id"],
+  [() => recorder.rows(EXCHANGE, [keptNote()], new Date("nope")), "Recorder.rows: now is a valid date"],
+];
+
+for (const [at, [call, message]] of preconditions.entries()) {
+  test(`precondition ${at}: ${message}`, () => {
+    expect(call).toThrow(message);
   });
-});
-
-describe("Outcome.judged", () => {
-  test("no drop", () => {
-    judgedNote();
-  });
-
-  test("a drop that names a judged check", () => {
-    keptNote().judged({ is_textbook: 0.9 }, "is_textbook");
-  });
-
-  test("edges: 0 and 1 are probabilities", () => {
-    keptNote().judged({ a: 0, b: 1 }, null);
-  });
-
-  test("precondition - only an open candidate is judged", () => {
-    expect(() => droppedNote().judged({ a: 0.5 }, null)).toThrow("Outcome.judged: only an open candidate is judged");
-  });
-
-  test("precondition - a candidate is judged once", () => {
-    expect(() => judgedNote().judged({ a: 0.5 }, null)).toThrow("Outcome.judged: a candidate is judged once");
-  });
-
-  test("precondition - no probability at all", () => {
-    expect(() => keptNote().judged({}, null)).toThrow("Outcome.judged: probabilities name at least one check");
-  });
-
-  test("precondition - a probability above 1", () => {
-    expect(() => keptNote().judged({ a: 1.01 }, null)).toThrow("Outcome.judged: probabilities name at least one check");
-  });
-
-  test("precondition - a probability below 0", () => {
-    expect(() => keptNote().judged({ a: -0.01 }, null)).toThrow("Outcome.judged: probabilities name at least one check");
-  });
-
-  test("precondition - a NaN probability", () => {
-    expect(() => keptNote().judged({ a: Number.NaN }, null)).toThrow("Outcome.judged: probabilities name at least one check");
-  });
-
-  test("precondition - a blank check name", () => {
-    expect(() => keptNote().judged({ " ": 0.5 }, null)).toThrow("Outcome.judged: probabilities name at least one check");
-  });
-
-  test("precondition - the drop names a check that was not judged", () => {
-    expect(() => keptNote().judged({ a: 0.5 }, "b")).toThrow("Outcome.judged: the drop names a judged check");
-  });
-});
-
-describe("Outcome.decided", () => {
-  test("a verdict with a pointer", () => {
-    decidedNote();
-  });
-
-  test("a verdict without a pointer", () => {
-    judgedNote().decided("new", null);
-  });
-
-  test("precondition - only an open candidate gets a verdict", () => {
-    expect(() => droppedNote().decided("new", null)).toThrow("Outcome.decided: only an open candidate gets a verdict");
-  });
-
-  test("precondition - a candidate gets one verdict", () => {
-    expect(() => decidedNote().decided("new", null)).toThrow("Outcome.decided: a candidate gets one verdict");
-  });
-
-  test("precondition - a blank verdict", () => {
-    expect(() => judgedNote().decided(" ", null)).toThrow("Outcome.decided: the verdict is not blank");
-  });
-
-  test("precondition - a blank pointer", () => {
-    expect(() => judgedNote().decided("extends", "")).toThrow("Outcome.decided: of is null or not blank");
-  });
-});
-
-describe("Outcome.saved", () => {
-  test("a decided candidate", () => {
-    decidedNote().saved("tb-43");
-  });
-
-  test("precondition - only a candidate with a verdict is saved", () => {
-    expect(() => judgedNote().saved("tb-43")).toThrow("Outcome.saved: only a candidate with a verdict is saved");
-  });
-
-  test("precondition - a candidate is saved once", () => {
-    expect(() => decidedNote().saved("tb-43").saved("tb-44")).toThrow("Outcome.saved: a candidate is saved once");
-  });
-
-  test("precondition - a blank id", () => {
-    expect(() => decidedNote().saved("")).toThrow("Outcome.saved: the id is not blank");
-  });
-});
-
-describe("Outcome.toRow, every stage", () => {
-  test("kept by the checks, not judged yet", () => {
-    keptNote().toRow(head);
-  });
-
-  test("dropped by a check, blank quote", () => {
-    droppedNote().toRow(head);
-  });
-
-  test("a rule dropped by a check", () => {
-    Outcome.ofRule(Checked.dropped(rule, "rule_quote")).toRow(head);
-  });
-
-  test("judged and kept", () => {
-    judgedNote().toRow(head);
-  });
-
-  test("dropped by the critic", () => {
-    keptRule().judged({ is_textbook: 0.9 }, "is_textbook").toRow(head);
-  });
-
-  test("decided", () => {
-    decidedNote().toRow(head);
-  });
-
-  test("saved", () => {
-    decidedNote().saved("tb-43").toRow(head);
-  });
-});
-
-describe("Recorder.start", () => {
-  test("a row id and a date", () => {
-    Recorder.start(1, NOW);
-  });
-
-  test("precondition - extractorId 0", () => {
-    expect(() => Recorder.start(0, NOW)).toThrow("Recorder.start: extractorId is a row id");
-  });
-
-  test("precondition - extractorId not an integer", () => {
-    expect(() => Recorder.start(1.5, NOW)).toThrow("Recorder.start: extractorId is a row id");
-  });
-
-  test("precondition - an invalid date", () => {
-    expect(() => Recorder.start(1, new Date("nope"))).toThrow("Recorder.start: now is a valid date");
-  });
-});
-
-describe("Recorder.rows", () => {
-  const recorder = Recorder.start(1, NOW);
-
-  test("no outcome", () => {
-    recorder.rows(EXCHANGE, [], NOW);
-  });
-
-  test("one outcome per stage", () => {
-    recorder.rows(EXCHANGE, [keptNote(), droppedNote(), judgedNote(), decidedNote().saved("tb-43")], new Date("2026-10-08T11:00:00.000Z"));
-  });
-
-  test("precondition - not an exchange id", () => {
-    expect(() => recorder.rows("message-1", [keptNote()], NOW)).toThrow("Recorder.rows: exchangeId is an exchange id");
-  });
-
-  test("precondition - an invalid date", () => {
-    expect(() => recorder.rows(EXCHANGE, [keptNote()], new Date("nope"))).toThrow("Recorder.rows: now is a valid date");
-  });
-});
+}
 
 describe("Recorder.write", () => {
-  const recorder = Recorder.start(1, NOW);
-
   test("no outcome", async () => {
     await recorder.write(EXCHANGE, []);
   });

@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
+import { extractorJson } from "./helpers/td_stubs.ts";
 import { QUALITY_BAR } from "../tools/td/src/guides.ts";
 import type { Turn } from "../tools/td/src/session.ts";
 import type { Contents, Exchange } from "../tools/tl/src/types.ts";
@@ -83,20 +84,7 @@ const map = SessionMap.fromJson({ episodes: [{ from: 0, to: 0, summary: "saluti"
 const episode = map.episodes()[1];
 const target = { map, episode, index: 0 };
 
-const connection = {
-  provider: "ollama", id: "glm-5.3-flash", api: "openai-completions",
-  baseUrl: `http://localhost:${sse.port}/v1`, reasoning: true,
-  compat: { supportsDeveloperRole: false }, contextWindow: 128000, maxTokens: 8192,
-};
-const role = { connection, thinking: "low", temperature: 0.1, system: "You extract notes." };
-const extractor = Extractor.fromJson({
-  episodes: role, extract: role, critic: role, novelty: role,
-  checks: [
-    { name: "is_textbook_definition", text: "A manual already says this.", kind: "note", dropWhen: "atLeast", threshold: 0.6 },
-    { name: "is_user_rejection", text: "The user rejected something.", kind: "rule", dropWhen: "under", threshold: 0.4 },
-  ],
-  episodeChars: 4000, targetInputChars: 6000, targetOutputChars: 8000, listingChars: 300, vocabularySize: 80, topK: 5,
-});
+const extractor = Extractor.fromJson(extractorJson(`http://localhost:${sse.port}/v1`));
 
 const note = {
   what: "La soglia cosine è troppo alta per vedere le note che si contraddicono",

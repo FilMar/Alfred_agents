@@ -77,7 +77,7 @@ export class Version {
   }
 
   static #fromRow(row: ExtractorRow): Version {
-    const result = new Version({
+    return new Version({
       id: row.id,
       parent: row.parent,
       why: row.why,
@@ -85,16 +85,6 @@ export class Version {
       created: row.created,
       extractor: Extractor.fromJson(JSON.parse(row.config)),
     });
-    assert(Version.#carries(result, row), () => `Version.#fromRow: the version carries the row, id=${row.id}`);
-    return result;
-  }
-
-  static #carries(version: Version, row: ExtractorRow): boolean {
-    return version.id() === row.id
-      && version.parent() === row.parent
-      && version.why() === row.why
-      && version.isActive() === row.active
-      && version.created() === row.created;
   }
 
   #records(parent: number | null, why: string, now: Date): boolean {
