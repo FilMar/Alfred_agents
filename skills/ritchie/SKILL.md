@@ -13,18 +13,10 @@ the ceremony does not.
 
 Seven principles, why each holds, and how to derive a case they do not
 cover: `references/principles.md`. Every rule below follows from them.
-When a case is not in the list, derive the answer from the principle
-and say which one.
+For a case not in the list, derive the answer and name the principle.
 
-Edison is the twin skill. A spike suspends every rule here. When a spike
-becomes a feature, the feature is written from scratch under these
-rules. Spike code is evidence, never a starting point.
-
-## New language?
-
-If the project's language has no sheet in `references/languages/`,
-follow `references/adapting-a-language.md`: answer eight questions,
-write the sheet, present it to the user, then write code.
+Edison is the twin skill: a spike suspends every rule here. A spike that
+becomes a feature is rewritten from scratch; its code is evidence only.
 
 ## Steps
 
@@ -35,11 +27,12 @@ ti search "<what you are about to write>"
 ```
 
 Then the project's `.wiki/` (via omero) and its CLAUDE.md. A project
-rule that is stricter than this skill wins. Check
-`references/languages/` for the language's sheet; read it.
+rule that is stricter than this skill wins. Read the language's sheet in
+`references/languages/`. If it has none, follow
+`references/adapting-a-language.md` first: write the sheet and present
+it to the user before any code.
 
-If `graphify` is installed, find the code the work touches before you
-read it:
+If `graphify` is installed, find the code the work touches:
 
 ```
 GRAPHIFY_OUT=.graph graphify update .
@@ -61,13 +54,12 @@ the user's words, in Italian, on the shape of
 `references/spec-template.md`. It is committed with the branch. While
 the run is open, it is the decision log the work resumes from.
 
-The user says "ok". That is the only approval in the middle of the
-work: none.
+The user says "ok". No other approval comes until the review.
 
 ### 2. Work — the user is absent
 
-Read the language sheet. Translate it into code, in this order, all in
-the target file:
+Translate the language sheet into code, in this order, all in the
+target file:
 
 1. **Structs.** Private fields where the language needs privacy to stop
    the write; plain read-only shapes where the type system already
@@ -78,11 +70,9 @@ the target file:
    one assert per invariant. A contract that does not derive from the
    spec is marked `derive?` and reported, never written silently.
 4. **Tests, then body, by two th runs.** `scripts/th_write.sh` writes
-   the tests, then the bodies — one run each, details in
-   `references/tests-and-body.md`. The test run never sees a body. Run
-   the tests against the stub file: every bare-call test fails, every
-   should-panic test passes. The body run is checked by
-   `scripts/check_body_diff.py`.
+   the tests, then the bodies, one run each. The test run never sees a
+   body; `scripts/check_body_diff.py` checks the body run. Details:
+   `references/tests-and-body.md`.
 
 The file is the work. Chat carries no code text from here on.
 
@@ -96,18 +86,16 @@ Then the project's formatter and linter at their strictest setting,
 then the test suite. All three green before commit.
 
 Write `REVIEW.md` in the project root, in Italian, on the shape of
-`references/review-template.md`, and present it. With graphify, refresh
-the graph and add `GRAPHIFY_OUT=.graph graphify affected` for each changed public symbol:
-the user sees what else the change reaches. The user reads the
-code here — this is the moment the user keeps the ability to judge it.
-The user approves, or sends the work back with one comment; only the
-involved part repeats, and the review is updated each round.
+`references/review-template.md`. With graphify, refresh the graph and
+add `GRAPHIFY_OUT=.graph graphify affected` for each changed public
+symbol. Present it: the user reads the code here, and keeps the ability
+to judge it. The user approves, or sends the work back with one
+comment; only that part repeats, and the review is updated each round.
 
-On approval, the scaffolding is removed. If the project has a `.wiki/`,
-omero files the decision as a wiki page — the why, in English,
-with `sources` pointing at the pair — and the pair leaves the tree; git
-keeps the raw text in the branch history. Without a `.wiki/`, the pair
-stays: it is the only record.
+On approval, the scaffolding is removed. With a `.wiki/`, omero files
+the decision as a wiki page (the why, in English, `sources` pointing at
+the pair) and the pair leaves the tree; git keeps it in the branch
+history. Without a `.wiki/`, the pair stays as the only record.
 
 Then offer dijkstra: it makes the code shorter under these same rules,
 and never longer.
@@ -165,8 +153,7 @@ deviates: `references/rules.md`.
   `replace`, a spread copy) when a per-step contract or many optional
   fields justify them. Each returns a new value.
 - No struct writes another's state, same module or crate included.
-- No inheritance. Inheritance is privileged access to someone else's
-  state.
+- No inheritance: it is privileged access to another's state.
 - A constructor returns the type already wrapped. The wrapper hides
   behind an alias.
 - A newtype replaces a bare primitive when the name cannot carry the
@@ -179,16 +166,14 @@ deviates: `references/rules.md`.
 
 **Errors**
 
-- A contract catches a programmer error, and the panic is the right
-  answer. A world error is expected: it is a return value and never
-  panics.
+- A contract catches a programmer error: the panic is the right answer.
+  A world error is expected: it is a return value, never a panic.
 
 **Tests**
 
 - Valid input: a bare call. Invalid input: expect the precondition's
   message.
-- A test contains no assert of its own, except a classifier's outcome
-  table: see `references/rules.md`.
+- A test contains no assert of its own, except a classifier's table.
 - Reject weak oracles: tautological, self-oracle, vacuous, no
   assertion. See `references/principles.md`.
 
@@ -199,8 +184,7 @@ deviates: `references/rules.md`.
   words at most, as a plain `//`.
 - Where a comment would go, put a plainly true assert instead. The
   contract replaces the comment.
-- Design rationale goes in the project wiki and in the spec file, never
-  inline.
+- Design rationale goes in the wiki and the spec, never inline.
 
 **Abstraction**
 
@@ -213,5 +197,4 @@ deviates: `references/rules.md`.
 - A trait or interface pays only with one consumer and many
   implementors. Never over a backend that has one implementation.
 - DRY at the second copy, not the third.
-- A dependency arrives in the commit that uses it, never for a feature
-  still to come.
+- A dependency arrives with the commit that uses it.
