@@ -38,6 +38,19 @@ Then the project's `.wiki/` (via omero) and its CLAUDE.md. A project
 rule that is stricter than this skill wins. Check
 `references/languages/` for the language's sheet; read it.
 
+If `graphify` is installed, find the code the work touches before you
+read it:
+
+```
+GRAPHIFY_OUT=.graph graphify update .
+graphify query "<what you are about to write>"
+graphify affected "<symbol you will change>"
+```
+
+`query` names the files to read. `affected` lists what depends on the
+symbols you will change: that is the blast radius, and it goes into the
+spec. `graphify --help` is the authority on the syntax.
+
 ### 1. Setup — the user is present
 
 Present the principle that governs the work (usually P1 plus the two
@@ -83,7 +96,9 @@ Then the project's formatter and linter at their strictest setting,
 then the test suite. All three green before commit.
 
 Write `REVIEW.md` in the project root, in Italian, on the shape of
-`references/review-template.md`, and present it. The user reads the
+`references/review-template.md`, and present it. With graphify, refresh
+the graph and add `graphify affected` for each changed public symbol:
+the user sees what else the change reaches. The user reads the
 code here — this is the moment the user keeps the ability to judge it.
 The user approves, or sends the work back with one comment; only the
 involved part repeats, and the review is updated each round.

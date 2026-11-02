@@ -31,9 +31,24 @@ Four operations. Each has its own reference file — read it only when that oper
 | Style | a pattern or convention emerges | `references/style.md` |
 | Lint | user requests a health-check | `references/lint.md` |
 
+## Project graph
+
+`graphify` maps the project's code and `.wiki/` into one graph in
+`.graph/` (the shell sets `GRAPHIFY_OUT=.graph`). A decision links to
+code when its text names a symbol in backticks, like `deleteNote()`.
+graphify draws that edge on the next build. Refresh the graph before
+you use it. It takes seconds and no LLM:
+
+```
+GRAPHIFY_OUT=.graph graphify update .
+```
+
+Skip every graph step when `graphify` is not installed. `graphify
+--help` is the authority on its syntax.
+
 ## Scripts
 
-The steps a script can do are scripts: `scripts/lint_wiki.py`, `scripts/retire_page.py` and `scripts/index_row.py`. They run from the project root. `--help` prints the usage of each.
+The steps a script can do are scripts: `scripts/lint_wiki.py`, `scripts/graph_links.py`, `scripts/retire_page.py` and `scripts/index_row.py`. They run from the project root. `--help` prints the usage of each.
 
 ## Default conventions
 

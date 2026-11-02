@@ -60,6 +60,21 @@ Read the project in layers, from general to particular:
 - Are there diagrams, ADRs (Architecture Decision Records), design documents?
 
 **Layer 2 — Real architecture**
+
+Graph first, if `graphify` is installed. It maps the code with a local
+parser, in seconds, with no LLM:
+```bash
+GRAPHIFY_OUT=.graph graphify update <path>
+graphify god-nodes --top 20 --graph <path>/.graph/graph.json
+```
+Then read `<path>/.graph/GRAPH_REPORT.md`: communities with low
+cohesion, import cycles, surprising connections, and edges from docs to
+code. Test a suspected coupling with `graphify path "A" "B" --graph
+<path>/.graph/graph.json`, and one node with `graphify explain "X"`. An
+edge tagged `INFERRED` is a lead, not a fact: confirm it in the code.
+The commands below are the fallback when graphify is missing or cannot
+read the language.
+
 ```bash
 # Entry points
 find <path> \( -name 'main.*' -o -name 'index.*' -o -name 'app.*' \) | grep -v node_modules | grep -v '.git'

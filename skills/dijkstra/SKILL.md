@@ -46,6 +46,13 @@ baseline: `~/.pi/agent/skills/ritchie/scripts/contract_report.py
 
 ### 1. Hunt
 
+If `graphify` is installed, refresh the graph first:
+`GRAPHIFY_OUT=.graph graphify update .`. It gives leads for two hunts.
+For dead code, `graphify explain "<symbol>"` shows its callers: a
+symbol with none is a candidate. For redundant checks, `graphify path
+"<caller>" "<callee>"` shows the chain to read. A lead is not a cut:
+the graph misses dynamic calls, so confirm each one in the code.
+
 Read every file in scope in full. Look for these, in this order. The
 first ones save the most lines.
 
