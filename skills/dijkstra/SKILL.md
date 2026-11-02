@@ -75,7 +75,10 @@ Look for these, in this order. The first ones save the most lines.
 3. **Ceremony.** Code that guards what the type already guarantees, a
    wrapper that only forwards, a getter over a plain field, a newtype
    with no invariant. Ritchie's P3 test: delete it, and if no check
-   fails, it was ceremony.
+   fails, it was ceremony. An assert that cannot fail is ceremony too:
+   see "An assert must be able to fail" in
+   `~/.pi/agent/skills/ritchie/references/rules.md`. An assert that
+   states a decision of the body in another form stays.
 4. **A shorter way.** Walk the language sheet tool by tool, and look
    for the code each one replaces: a macro, a derive, a generic, a
    table, a decorator, a comprehension. Each tool states when it pays

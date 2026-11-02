@@ -61,6 +61,25 @@ comments: where the condition is critical and surprising, a plainly true
 assert is stronger documentation than a comment, because it cannot go
 stale without failing.
 
+**An assert must be able to fail.** An assert earns its place when a
+mistake can make it fire: a wrong body, a wrong caller, bad data from
+outside. It cannot fail, and is not written, in four cases:
+
+- it repeats what the line above just built: `{ kind: "note" }`, then
+  `assert(result.kind === "note")`;
+- the type guarantees it: `typeof raw === "string"` on a `string`
+  parameter;
+- the language guarantees it: a spread makes a new object, `map` and
+  `sort` keep the length;
+- the callee's contract guarantees it: the checked-once rule, applied
+  to postconditions.
+
+An assert that states a decision of the body in another form stays. If
+someone flips a condition in the body, that assert fires. A check on
+data from disk, network or a model stays too. A function can end with
+no contract at all, like a `toJson` or a field mapping. No contract is
+better than one that cannot fail.
+
 **The checked profile.** A standard release build turns debug assertions
 off, so every contract is inert during real play and QA and fires only
 under the test runner. Optimization level and assertions are independent

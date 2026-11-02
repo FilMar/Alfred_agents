@@ -107,11 +107,12 @@ deviates: `references/rules.md`.
 
 **Contracts**
 
-- Every function carries a contract: preconditions first, postconditions
-  before every return. Pure computation included.
+- Every function carries the contract it needs: preconditions first,
+  postconditions before every return. Pure computation included.
+- An assert must be able to fail: skip one already guaranteed by the
+  line above, the type, the language or the callee (`references/rules.md`).
 - At most five invariants per function. Above that, extract functions.
-- One assert per invariant. `assert(a); assert(b);` and not
-  `assert(a && b)`.
+- One assert per invariant: `assert(a); assert(b);`, not `assert(a && b)`.
 - One assert is one expression. A check that computes calls a helper.
 - An invariant is checked once along a call chain. A callee's assert is
   the contract; the caller does not repeat it. Data that crosses a
@@ -182,8 +183,7 @@ deviates: `references/rules.md`.
 - Zero, doc comments included. The signature and the code say
   everything. The exception is a why that code cannot express: five
   words at most, as a plain `//`.
-- Where a comment would go, put a plainly true assert instead. The
-  contract replaces the comment.
+- Where a comment would go, put an assert the code does not guarantee.
 - Design rationale goes in the wiki and the spec, never inline.
 
 **Abstraction**

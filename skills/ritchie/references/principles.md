@@ -69,8 +69,8 @@ shape is used for the other.
 ## P6. Zero comments
 
 The signature and the code say everything. Where a comment would go, put
-a plainly true assert instead: an assert cannot go stale without failing,
-a comment can. The exception is a why the code cannot express, five
+an assert the code does not already guarantee: an assert cannot go stale
+without failing, a comment can. The exception is a why the code cannot express, five
 words at most, as a plain `//`. Design rationale goes in the project
 wiki, never inline.
 
