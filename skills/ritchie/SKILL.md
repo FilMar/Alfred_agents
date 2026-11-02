@@ -43,8 +43,8 @@ read it:
 
 ```
 GRAPHIFY_OUT=.graph graphify update .
-graphify query "<what you are about to write>"
-graphify affected "<symbol you will change>"
+GRAPHIFY_OUT=.graph graphify query "<what you are about to write>"
+GRAPHIFY_OUT=.graph graphify affected "<symbol you will change>"
 ```
 
 `query` names the files to read. `affected` lists what depends on the
@@ -97,7 +97,7 @@ then the test suite. All three green before commit.
 
 Write `REVIEW.md` in the project root, in Italian, on the shape of
 `references/review-template.md`, and present it. With graphify, refresh
-the graph and add `graphify affected` for each changed public symbol:
+the graph and add `GRAPHIFY_OUT=.graph graphify affected` for each changed public symbol:
 the user sees what else the change reaches. The user reads the
 code here — this is the moment the user keeps the ability to judge it.
 The user approves, or sends the work back with one comment; only the

@@ -70,7 +70,8 @@ graphify god-nodes --top 20 --graph <path>/.graph/graph.json
 Then read `<path>/.graph/GRAPH_REPORT.md`: communities with low
 cohesion, import cycles, surprising connections, and edges from docs to
 code. Test a suspected coupling with `graphify path "A" "B" --graph
-<path>/.graph/graph.json`, and one node with `graphify explain "X"`. An
+<path>/.graph/graph.json`, and one node with `graphify explain "X" --graph
+<path>/.graph/graph.json`. An
 edge tagged `INFERRED` is a lead, not a fact: confirm it in the code.
 The commands below are the fallback when graphify is missing or cannot
 read the language.
