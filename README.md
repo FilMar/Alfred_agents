@@ -27,7 +27,6 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 | `efesto` | Creates and improves skills |
 | `omero` | Maintains the local project wiki in `.wiki/` |
 | `linus` | Manages GitHub via gh: issues, project board, recaps |
-| `clio` | Backs up Qdrant to MEGA cloud: snapshots, restores, timer |
 
 Full, always-current roster (derived from the filesystem at print time):
 

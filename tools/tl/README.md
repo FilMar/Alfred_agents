@@ -82,4 +82,4 @@ Every row a transcript yields is `kind: chat`, written by `alfredo`.
 
 ## Backups
 
-`tl` is in the Clio backups. It holds the only copy of the transcripts once they rotate.
+`tl` is in the server backups (filcloud_init, `services/backup/backup_tl.sh`). It holds the only copy of the transcripts once they rotate.
