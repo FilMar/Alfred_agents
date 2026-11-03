@@ -150,6 +150,10 @@ updated: 2026-10-16
 | [skill_dijkstra_tool_sheets_per_language_rules_per_owner](skill_dijkstra_tool_sheets_per_language_rules_per_owner) | Per-language tool sheets; owner rules apply; macros and decorators never hold an assert |
 | [skill_dijkstra_cuts_weak_tests_never_strengthens_them](skill_dijkstra_cuts_weak_tests_never_strengthens_them) | Weak tests are cut or merged, never strengthened |
 | [skill_dijkstra_public_library_items_are_api](skill_dijkstra_public_library_items_are_api) | A pub item with no caller in the crate is API: flag it, do not cut it |
+| [skill_humanlayer_skills_not_adopted_ideas_kept](skill_humanlayer_skills_not_adopted_ideas_kept) | humanlayer/skills not installed; five ideas kept for hook, indiana, efesto, linus |
+| [skill_anti_slop_not_adopted_rules_feed_ritchie](skill_anti_slop_not_adopted_rules_feed_ritchie) | anti-slop not installed; general principles vs TS-only rules, compared with ritchie |
+| [skill_ritchie_may_parse_external_data_at_boundary](skill_ritchie_may_parse_external_data_at_boundary) | Idea: external data is parsed once at the boundary, no unknown or typeof inside |
+| [skill_ritchie_may_allow_casts_only_after_assert](skill_ritchie_may_allow_casts_only_after_assert) | Idea: a cast only in the constructor, right after an assert that proves it |
 
 ## orchestrator
 
@@ -166,6 +170,7 @@ updated: 2026-10-16
 | [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |
 | [style_type_checks_are_private_static_methods_of_their_class](style_type_checks_are_private_static_methods_of_their_class) | A check that knows one type is a private static method; getters have no contract |
 | [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards |
+| [style_pi_may_lint_typescript_with_oxlint](style_pi_may_lint_typescript_with_oxlint) | Idea: oxlint and just lint in pi with a subset of anti-slop rules |
 
 ## wiki
 

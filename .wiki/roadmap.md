@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-10-20
+updated: 2026-11-03
 ---
 
 A block is one run of ritchie (code) or efesto (skill). [A] is architecture: small, read it closely in review. [M] is mechanical: big, the first piece shows the rest.
@@ -31,6 +31,10 @@ One line each. An idea becomes blocks only when it is the next goal.
 - Census of the skills not yet judged: feynman, indiana, polo and the rest.
 - Skill text in ASD-STE100: instructions in the imperative, 20 words for steps, 25 for prose, a project word list. Check it with the STE term checker on LanguageTool, if it runs locally. Draft: `git show 3ba89be:STANDARDS.md`.
 - A checklist system: lists made from real failures, `PASS` or `FAIL` with a proof, a log for pruning. Draft: `git show 3ba89be:STANDARDS.md`.
+- Critical rules stay in CLAUDE.md as `<important if>` blocks, for when the hook is down. [detail](skill_humanlayer_skills_not_adopted_ideas_kept)
+- Ritchie: external data is parsed once at the boundary. [detail](skill_ritchie_may_parse_external_data_at_boundary)
+- Ritchie: a cast only right after an assert that proves it. [detail](skill_ritchie_may_allow_casts_only_after_assert)
+- A TypeScript linter in `pi`, with a few anti-slop rules. [detail](style_pi_may_lint_typescript_with_oxlint)
 
 ## Design
 
