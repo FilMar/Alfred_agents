@@ -8,7 +8,7 @@ sources: [conversation, .design/main.md]
 Each document has one reader.
 
 - `.design/` is for the user. It is minimal, in Italian, and read often.
-- `SPEC.md` and `REVIEW.md` are for the user, once. The user reads them, approves, and they are thrown away.
+- `spec.json` and `review.json` are for the user, once, drawn as one page. The user reads them, approves, and they are thrown away.
 - `.wiki/` is for the agents. It holds the why of a decision, in plain English.
 
 The user does not read the wiki. The effort goes into what an agent needs: pages of 40 lines, names that `grep` finds, and index rows that say what is inside. `scripts/lint_wiki.py` checks them.
