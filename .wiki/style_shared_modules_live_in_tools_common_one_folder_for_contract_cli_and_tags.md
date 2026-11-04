@@ -1,6 +1,6 @@
 ---
 tags: [style, contracts, common, tb, ti, tl, th, td]
-sources: [conversation, tools/common/contract.ts, tools/common/cli.ts, tools/common/tags.ts]
+sources: [conversation, tools/common/contract.ts, tools/common/cli.ts, tools/common/tags.ts, tools/common/http.ts]
 replaces: [style_contract_helpers_live_in_one_shared_module]
 ---
 
@@ -8,11 +8,12 @@ replaces: [style_contract_helpers_live_in_one_shared_module]
 
 `tools/common` is the one folder for every module the tools share. It was `tools/contract` until 2026-10-13.
 
-It holds three modules:
+It holds four modules:
 
 - `contract.ts`: `assert`, `ContractError`, `isNonBlank`, `allNonBlank`, `isPositiveInt`, `isRecord`, `isUnit`, `sameJson`.
 - `cli.ts`: `errorMessage`, `out`, `die`, `collect`. Every CLI had its own copy.
 - `tags.ts`: `normalizeTags`. `tb` and `ti` had one copy each.
+- `http.ts`: `HttpClient`, `HttpError`. They lived in `tb/src/infra.ts`, and `tl`, `th` and `td` imported them from there. The review graph showed it as a link nobody asked for.
 
 The folder knows no tool and imports from no tool. A tool imports it by relative path, for example `../../common/contract.js`. There is no package and no build step. `tb` dropped `rootDir` from its `tsconfig.json`, so it can import from outside `src`. Bun runs the sources, so `dist` is not used.
 

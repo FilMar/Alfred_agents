@@ -10,7 +10,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFile
 import { homedir, hostname } from "node:os";
 import { join } from "node:path";
 
-import { HttpClient } from "../../tb/src/infra.js";
+import { HttpClient } from "../../common/http.js";
 import { assert } from "../../common/contract.js";
 import { apiUrl } from "../../tl/src/client.js";
 import * as pi from "../../tl/src/pi.js";

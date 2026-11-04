@@ -1,5 +1,5 @@
 import { assert, sameJson } from "../../common/contract.js";
-import { HttpError } from "../../tb/src/infra.js";
+import { HttpError } from "../../common/http.js";
 import { activateExtractor, fetchExtractor, putExtractor } from "../../tl/src/client.js";
 import type { Extractor as ExtractorRow } from "../../tl/src/types.js";
 import { Extractor } from "./config.js";

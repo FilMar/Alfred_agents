@@ -1,44 +1,4 @@
-// ─── HTTP client ─────────────────────────────────────────────────────────────
-
-export interface HttpClientConfig {
-  baseUrl: string | (() => string);
-  timeout?: number;
-}
-
-export class HttpError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number,
-  ) {
-    super(message);
-    this.name = "HttpError";
-  }
-}
-
-export class HttpClient {
-  constructor(private readonly config: HttpClientConfig) {}
-
-  // Returns the raw Response without throwing on non-ok.
-  async fetch(method: string, path: string, body?: unknown): Promise<Response> {
-    const base = typeof this.config.baseUrl === "string" ? this.config.baseUrl : this.config.baseUrl();
-    return globalThis.fetch(`${base}${path}`, {
-      method,
-      signal: AbortSignal.timeout(this.config.timeout ?? 10_000),
-      headers: body ? { "Content-Type": "application/json" } : {},
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
-  }
-
-  // Throws HttpError if the response is not ok.
-  async request<T>(method: string, path: string, body?: unknown): Promise<T> {
-    const res = await this.fetch(method, path, body);
-    if (!res.ok) {
-      const text = await res.text();
-      throw new HttpError(`${res.status} ${text.slice(0, 200)}`, res.status);
-    }
-    return res.json() as Promise<T>;
-  }
-}
+import { HttpClient } from "../../common/http.js";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 

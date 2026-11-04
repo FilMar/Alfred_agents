@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { COLLECTION, DENSE_VECTOR_NAME, SPARSE_VECTOR_NAME, VECTOR_SIZE, SNIPPET_MAX_LEN, qdrantClient, HttpError, getCollectionInfo, createCollection } from "./infra.js";
+import { COLLECTION, DENSE_VECTOR_NAME, SPARSE_VECTOR_NAME, VECTOR_SIZE, SNIPPET_MAX_LEN, qdrantClient, getCollectionInfo, createCollection } from "./infra.js";
+import { HttpError } from "../../common/http.js";
 import type { Note, NoteType, SearchOptions, SearchResult, RelatedResult, Citation } from "./types.js";
 import { assert } from "../../common/contract.js";
 import { NOTE_TYPES, isEvidence, noteToText, topRelated, RELATED_LIMIT } from "./types.js";
