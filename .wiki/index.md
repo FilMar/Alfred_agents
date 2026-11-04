@@ -137,7 +137,7 @@ updated: 2026-10-16
 | [skill_ritchie_contract_messages_carry_values](skill_ritchie_contract_messages_carry_values) | Contract messages: stable prefix, then the values the assert reads |
 | [skill_ritchie_classifiers_get_an_outcome_table](skill_ritchie_classifiers_get_an_outcome_table) | A classifier gets an outcome table: the one test with an assert of its own |
 | [skill_router_pass_planned](skill_router_pass_planned) | Router pass design, deliberately deferred |
-| [skill_ritchie_spec_is_a_minimal_italian_document](skill_ritchie_spec_is_a_minimal_italian_document) | The spec: a minimal Italian document — entities, flows, invariants; the code is not the spec |
+| [skill_ritchie_spec_is_shown_not_written](skill_ritchie_spec_is_shown_not_written) | The spec is spec.json drawn by a fixed renderer as an animated graph; the model writes data, never HTML |
 | [skill_ritchie_review_is_the_verdict_packet](skill_ritchie_review_is_the_verdict_packet) | The review: six sections from Esito to Scostamenti, self-contained |
 | [skill_ritchie_spec_review_pair_is_ephemeral_scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding) | The pair is scaffolding: removed at approval, the wiki page is the record |
 | [skill_census_removed_erodoto_jobs_ulisse](skill_census_removed_erodoto_jobs_ulisse) | Removed 2026-10-12: erodoto, jobs and ulisse |
@@ -154,6 +154,7 @@ updated: 2026-10-16
 | [skill_anti_slop_not_adopted_rules_feed_ritchie](skill_anti_slop_not_adopted_rules_feed_ritchie) | anti-slop not installed; general principles vs TS-only rules, compared with ritchie |
 | [skill_ritchie_may_parse_external_data_at_boundary](skill_ritchie_may_parse_external_data_at_boundary) | Idea: external data is parsed once at the boundary, no unknown or typeof inside |
 | [skill_ritchie_may_allow_casts_only_after_assert](skill_ritchie_may_allow_casts_only_after_assert) | Idea: a cast only in the constructor, right after an assert that proves it |
+| [skill_ritchie_review_shows_plan_against_built](skill_ritchie_review_shows_plan_against_built) | The review lays spec.json over the graphify graph in four states: built, missing, not asked, outside |
 
 ## orchestrator
 

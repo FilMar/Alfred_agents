@@ -24,5 +24,5 @@ The verdict sits on top, not at the bottom: a reader of an old review wants the 
 
 ## Cross-references
 
-- [The spec is a minimal Italian document](skill_ritchie_spec_is_a_minimal_italian_document)
+- [The spec is shown, not written](skill_ritchie_spec_is_shown_not_written)
 - [The pair is ephemeral scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding)

@@ -33,5 +33,5 @@ not live links: whatever marker settles that item covers the pair too.
 
 - [The wiki is the project notebook](memory_wiki_is_the_project_notebook) — the extraction test, and where the distilled why lives
 - [A decision is written when the design ends](wiki_decision_is_written_when_the_design_ends) — the pair exists while the shape still moves
-- [The spec is a minimal Italian document](skill_ritchie_spec_is_a_minimal_italian_document)
+- [The spec is shown, not written](skill_ritchie_spec_is_shown_not_written)
 - [The review is the verdict packet](skill_ritchie_review_is_the_verdict_packet)
