@@ -1,0 +1,125 @@
+<!doctype html>
+<script>
+// desc: the page template that render_cuts.py fills with the cuts; CSS and JS inline
+</script>
+<html lang="it"><head><meta charset="utf-8"><title>Tagli</title>
+<style>
+:root{--bg:#f6f5f2;--panel:#fff;--ink:#1d1d1f;--mute:#77777c;--line:#d5d3cc;--cut:#2e9e5b;--gone:#d23c3c;
+--h1:#2f6fdf;--h2:#d9822b;--h3:#8a5cd6;--h4:#1c9aa8;--h5:#c2417a}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--panel:#1d1d21;--ink:#ececef;--mute:#8d8d95;--line:#3a3a40;--cut:#4cc97f;--gone:#ff5c5c;
+--h1:#6a9cff;--h2:#f0a35a;--h3:#b08cff;--h4:#3cc6d4;--h5:#f06aa5}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.big{font-size:34px;font-weight:700;color:var(--cut);min-width:100px}.mute{color:var(--mute);font-size:12px}
+button{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
+button.on{border-color:var(--ink)}
+main{max-width:1100px;margin:0 auto;padding:16px 20px}
+.cut{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:14px 0;padding:14px 16px}
+.cut.off{opacity:.45}.head{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.head input{width:20px;height:20px}.id{font-weight:700}.kind{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+.delta{margin-left:auto;font-weight:700;color:var(--cut);font-size:18px}
+.stage{margin-top:10px}.stage:empty{display:none}
+.cut[data-s=prima] .dopo,.cut[data-s=dopo] .prima{display:none}
+.body{display:flex;gap:18px;align-items:flex-start}.left{flex:1;min-width:0}
+pre{margin:0;font:12px/1.55 ui-monospace,monospace;white-space:pre;overflow-x:auto}
+.code{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px}
+.code b{font:600 11px system-ui;display:block;color:var(--mute);margin-bottom:2px}
+.kw{color:#a626a4}.str{color:#2e8b57}.num{color:#c76b00}.type{color:#0f8a9a}.prop{color:#3b6fd4}.com{color:var(--mute);font-style:italic}.pun{color:var(--mute)}
+@media (prefers-color-scheme:dark){.kw{color:#d58cf0}.str{color:#7fd39a}.num{color:#f2a65a}.type{color:#5fd0de}.prop{color:#8db2ff}}
+.skel{opacity:.5}.hole{border-radius:4px;padding:0 2px;outline:1.5px solid}
+.der{outline-style:dashed}.der sup{font:600 9px system-ui;margin-left:2px;color:var(--ink)}
+table.t{border-collapse:separate;border-spacing:4px 3px;font:12px ui-monospace,monospace;margin-top:8px}
+table.t th{font:600 12px system-ui;text-align:left;padding:0 4px}table.t td{border-radius:4px;padding:2px 6px;white-space:nowrap;max-width:420px;overflow:hidden;text-overflow:ellipsis}
+.call,.calls div{font:12px/1.7 ui-monospace,monospace;margin-top:6px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin:4px 0 8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:4px}
+.sizes{display:flex;gap:8px;align-items:flex-end;height:110px;flex:none}.sizes div{width:38px;border-radius:4px 4px 0 0;text-align:center;font-size:11px;color:#fff;padding-top:2px}
+.warn{color:var(--gone);font-size:12px;margin-bottom:6px}
+table.m{border-collapse:separate;border-spacing:3px;font:12px ui-monospace,monospace}
+table.m th{font:600 11px system-ui;color:var(--mute);text-align:left;padding:0 6px}
+table.m td{background:var(--bg);border-radius:4px;padding:3px 6px;white-space:nowrap}table.m td.def{opacity:.35}table.m td.diff{background:var(--h1);color:#fff}
+.defs{font:12px ui-monospace,monospace;border:1px dashed var(--mute);border-radius:8px;padding:6px 10px;margin-bottom:8px}
+.fn{display:flex;gap:10px;align-items:center;font:12px ui-monospace,monospace;padding:3px 0}.fn span.n{width:230px}
+.badge{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:3px}.badge.g{background:var(--gone)}.badge.k{background:var(--cut)}
+</style></head><body>
+<header><div><div class="big" id="total"></div><div class="mute">righe con la scelta</div></div>
+<div class="mute" id="pick"></div><button id="copy">Copia la scelta</button><button id="allbefore">Tutto prima</button><button id="allafter">Tutto dopo</button>
+<div class="mute" id="scope" style="margin-left:auto"></div></header>
+<main id="cuts"></main>
+<script>
+const D = __DATA__;
+const NUM = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳";
+function HC(n) { return `var(--h${(n - 1) % 5 + 1})`; }
+function $(h) { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content.firstChild; }
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
+function tint(h) { return `background:color-mix(in srgb, ${HC(h)} 18%, transparent);outline-color:${HC(h)}`; }
+function segs(parts) { return parts.map(p => `<span class="${p.c || ""}">${esc(p.t)}</span>`).join(""); }
+function groups(row) {
+  const out = [];
+  row.forEach(s => { const last = out[out.length - 1]; if (last && last.h === s.h) last.parts.push(s); else out.push({ h: s.h, parts: [s] }); });
+  return out;
+}
+function rowHtml(row, kind) {
+  return groups(row).map(g => {
+    if (!g.h) return `<span class="skel">${segs(g.parts)}</span>`;
+    const k = kind[g.h];
+    if (!k) return `<span class="hole" style="${tint(g.h)}">${segs(g.parts)}</span>`;
+    return `<span class="hole der" style="outline-color:${HC(k.of)}">${segs(g.parts)}<sup>${k.how === "uguale" ? "=" : "str "}${NUM[k.of - 1]}</sup></span>`;
+  }).join("");
+}
+function sizes(before, after) {
+  const a = Math.max(0, after), top = Math.max(before, a, 1);
+  return `<div class="sizes"><div style="height:${110 * before / top}px;background:var(--gone)">${before}</div><div style="height:${110 * a / top}px;background:var(--cut)">${a}</div></div>`;
+}
+function legend(items) { return `<div class="legend">${items.map(([style, text]) => `<span><i style="${style}"></i>${text}</span>`).join("")}</div>`; }
+function stampView(d, delta) {
+  const keys = [...d.free.map(h => [`${tint(h)};outline:1.5px solid ${HC(h)}`, `${NUM[h - 1]} parametro`]),
+    ...Object.entries(d.kind).map(([h, k]) => [`outline:1.5px dashed ${HC(k.of)}`, `${NUM[h - 1]} ${k.how === "uguale" ? "ripete" : "è la stringa di"} ${NUM[k.of - 1]}: non è un parametro`])];
+  const copies = d.rows.map((r, i) => `<div class="code"><b>${esc(d.copie[i].nome || "")}</b><pre>${rowHtml(r, d.kind)}</pre></div>`).join("");
+  const call = d.chiamata ? `<div class="call">${esc(d.chiamata).replace(/[①-⑳]/g, n => `<b style="color:${HC(NUM.indexOf(n) + 1)}">${n}</b>`)}</div>
+    <table class="t"><tr>${d.free.map(h => `<th style="color:${HC(h)}">${NUM[h - 1]}</th>`).join("")}</tr>${d.table.map(r => `<tr>${r.map((v, i) => `<td style="${tint(d.free[i])}">${esc(v)}</td>`).join("")}</tr>`).join("")}</table>` : "";
+  const callers = (d.chiamanti || []).map(c => `<div>↳ ${esc(c)}</div>`).join("");
+  const warn = d.low ? `<div class="warn">somiglianza bassa (${d.share}): i buchi non sono affidabili</div>` : "";
+  return `${warn}<div class="prima">${legend(keys)}<div class="body"><div class="left">${copies}</div>${sizes(d.prima, d.prima + delta)}</div></div>
+    <div class="dopo"><div class="body"><div class="left"><div class="code"><b>dopo</b><pre>${segs(d.after)}</pre></div>${call}<div class="calls">${callers}</div></div>${sizes(d.prima, d.prima + delta)}</div></div>`;
+}
+function matrixView(d) {
+  const head = `<tr><th></th>${d.campi.map(f => `<th>${esc(f)}</th>`).join("")}</tr>`;
+  const rows = flat => d.cells.map(r => `<tr><th>${esc(d.oggetto || "")}</th>${r.map(c => c.def && flat ? "<td></td>" : `<td class="${c.def ? "def" : "diff"}">${esc(c.v)}</td>`).join("")}</tr>`).join("");
+  const defs = `<div class="defs">DEFAULTS = { ${d.defaults.map(x => `${esc(x.f)}: ${esc(x.v)}`).join(", ")} }</div>`;
+  return `<div class="prima">${legend([["background:var(--h1)", "diverso dal default"], ["background:var(--line)", "uguale al default"]])}<table class="m">${head}${rows(false)}</table></div>
+    <div class="dopo">${defs}<table class="m">${head}${rows(true)}</table></div>`;
+}
+function ceremonyView(d) {
+  const line = (f, gone) => `<div class="fn"><span class="n">${esc(f.nome)}</span><span>${gone ? f.via.map(g => `<span class="badge g" title="${esc(g)}"></span>`).join("") : ""}${"<span class='badge k'></span>".repeat(f.restano || 0)}</span></div>`;
+  return `<div class="prima">${legend([["background:var(--gone)", "assert che non può fallire"], ["background:var(--cut)", "assert che resta"]])}${d.funzioni.map(f => line(f, true)).join("")}</div>
+    <div class="dopo">${d.funzioni.map(f => line(f, false)).join("")}</div>`;
+}
+const on = Object.fromEntries(D.tagli.map(c => [c.id, true]));
+function total() {
+  const sel = D.tagli.filter(c => on[c.id]);
+  document.getElementById("total").textContent = sel.reduce((s, c) => s + c.delta, 0);
+  document.getElementById("pick").textContent = "scelta: " + (sel.map(c => c.id).join(", ") || "nessuna");
+}
+function show(box, state) {
+  box.dataset.s = state;
+  box.querySelectorAll("button[data-s]").forEach(b => b.classList.toggle("on", b.dataset.s === state));
+}
+const boxes = D.tagli.map(c => {
+  const view = c.stampo ? stampView(c.stampo, c.delta) : c.matrice ? matrixView(c.matrice) : c.cerimonia ? ceremonyView(c.cerimonia) : "";
+  const buttons = view ? `<button data-s="prima">Prima</button><button data-s="dopo">Dopo</button>` : "";
+  const box = $(`<section class="cut"><div class="head"><input type="checkbox" checked><span class="id">${esc(c.id)}</span><span class="kind">${esc(c.tipo)}</span>
+    <span>${esc(c.cosa)}</span><span class="mute">${esc(c.dove)}</span>${buttons}<span class="delta">${c.delta}</span></div><div class="stage">${view}</div></section>`);
+  const cb = box.querySelector("input");
+  cb.onchange = () => { on[c.id] = cb.checked; box.classList.toggle("off", !cb.checked); total(); };
+  box.querySelectorAll("button[data-s]").forEach(b => { b.onclick = () => show(box, b.dataset.s); });
+  show(box, "prima");
+  document.getElementById("cuts").append(box);
+  return box;
+});
+total();
+document.getElementById("scope").textContent = D.scope ? "scope " + D.scope : "";
+document.getElementById("copy").onclick = () => navigator.clipboard.writeText(D.tagli.filter(c => on[c.id]).map(c => c.id).join(", "));
+document.getElementById("allbefore").onclick = () => boxes.forEach(b => show(b, "prima"));
+document.getElementById("allafter").onclick = () => boxes.forEach(b => show(b, "dopo"));
+</script></body></html>

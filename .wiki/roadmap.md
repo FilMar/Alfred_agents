@@ -30,7 +30,6 @@ One line each. An idea becomes blocks only when it is the next goal.
 - Ritchie: settle "every function has a contract" against "one invariant is checked once per call chain". Dijkstra decides it case by case today. [detail](skill_dijkstra_proves_owner_rules_against_baseline)
 - Spec view: a layout that stays readable with 15 entities and 20 flows. [detail](skill_ritchie_spec_is_shown_not_written)
 - Spec view: find CLI calls without a regex per tool, so a call like `bun <path> distill` is not missed. [detail](skill_ritchie_review_shows_plan_against_built)
-- Dijkstra: the report page as a pike script, then the skill update with efesto. [detail](skill_dijkstra_report_is_a_before_after_page)
 - Census of the skills not yet judged: feynman, indiana, polo and the rest.
 - Skill text in ASD-STE100: instructions in the imperative, 20 words for steps, 25 for prose, a project word list. Check it with the STE term checker on LanguageTool, if it runs locally. Draft: `git show 3ba89be:STANDARDS.md`.
 - A checklist system: lists made from real failures, `PASS` or `FAIL` with a proof, a log for pruning. Draft: `git show 3ba89be:STANDARDS.md`.

@@ -1,11 +1,11 @@
 ---
 tags: [skill, dijkstra, report, render, tree-sitter]
-sources: [conversation, spikes/2026-11-04-cuts-view/main.py (local, not in git)]
+sources: [conversation, skills/dijkstra/references/cuts-template.md, skills/dijkstra/scripts/cut_holes.py, spikes/2026-11-04-cuts-view/main.py (local, not in git)]
 ---
 
 ## Decision
 
-The dijkstra report becomes one local HTML page, drawn by a fixed renderer from data the model writes. The model never writes HTML. This is a design target: no script exists yet.
+The dijkstra report becomes one local HTML page, drawn by a fixed renderer from data the model writes. The model never writes HTML. It writes `cuts.json`; `cut_holes.py` finds the holes, `render_cuts.py` fills `cuts_page.html`, and `cuts_page.sh` runs both.
 
 Each cut is one view with two states, Prima and Dopo, switched by buttons. A header pair, Tutto prima and Tutto dopo, switches every view. There are no animations.
 

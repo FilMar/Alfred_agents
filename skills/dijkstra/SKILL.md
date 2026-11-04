@@ -106,20 +106,18 @@ flag too.
 
 ### 2. Report
 
-Present one list in chat. One line per proposal:
-
-```
-D3  src/parse.py:40-71  duplication  -18  merge parse_a and parse_b into one table-driven parser
-```
-
-The columns are: id, place, kind, net line change, what changes. Then
-the total. Order by lines saved. Add a short risk note only to a
-proposal that changes behaviour on an edge case.
+Write the proposals as `cuts.json` in `${TMPDIR:-/tmp}`, never in the
+tree (the size gate counts new files), on the shape of
+`references/cuts-template.md`. The values are in Italian. Then draw the
+page with `scripts/cuts_page.sh --cuts <file>` (it runs
+`scripts/cut_holes.py` and `scripts/render_cuts.py`). Each cut shows
+Prima and Dopo; the user ticks the cuts and copies the choice. Chat
+carries only the total and the path of the page.
 
 A proposal that changes a signature, renames or removes a public
 symbol needs `graphify affected "<symbol>"` before it goes in the
-list. Name the callers it finds, tests included, in the proposal line,
-and count their edits in its net line change.
+list. Put the callers it finds, tests included, in `chiamanti`, and
+count their edits in its `delta`.
 
 Wait for the user's answer: all, a list of ids, or none.
 
