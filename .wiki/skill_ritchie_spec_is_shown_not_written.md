@@ -1,6 +1,6 @@
 ---
 tags: [skill, ritchie, spec, template, render]
-sources: [conversation, skills/ritchie/references/spec-template.md, spikes/2026-11-04-spec-view/main.py]
+sources: [conversation, skills/ritchie/references/spec-template.md, skills/ritchie/scripts/render_page.py, spikes/2026-11-04-spec-view/main.py (local, not in git)]
 replaces: [skill_ritchie_spec_is_a_minimal_italian_document@86b2f64]
 ---
 
@@ -10,7 +10,7 @@ Ritchie writes the spec as `spec.json`, not `SPEC.md`. The fields stay the same:
 
 A fixed renderer turns `spec.json` into one local HTML page. Entities are the nodes of a graph. Flows are animated edges: one pill goes out with what passes and one comes back with what returns. Invariants are badges on the nodes they bind. Text shows only on hover. The user approves by looking at the page, then says "ok" in chat.
 
-The model writes data only. It never writes HTML. This is a design target: no renderer exists yet outside the spike.
+The model writes data only. It never writes HTML. `skills/ritchie/scripts/render_page.py` fills one fixed template, `render_page.html`. A pike script, so it has no tests: the real runs are the test.
 
 ## Why
 
@@ -24,6 +24,6 @@ The old reasons still hold: the user approves the domain before code exists, in 
 
 ## Cross-references
 
-- [The review is the verdict packet](skill_ritchie_review_is_the_verdict_packet)
+- [The review is a page from review.json](skill_ritchie_review_is_a_page_from_review_json)
 - [The pair is ephemeral scaffolding](skill_ritchie_spec_review_pair_is_ephemeral_scaffolding)
 - [Contract messages carry values](skill_ritchie_contract_messages_carry_values) — the contract in the code, the machine's half of the spec

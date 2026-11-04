@@ -1,6 +1,6 @@
 ---
 tags: [skill, ritchie, review, render, graphify]
-sources: [conversation, spikes/2026-11-04-plan-vs-built/main.py]
+sources: [conversation, skills/ritchie/scripts/overlay.py, spikes/2026-11-04-plan-vs-built/main.py (local, not in git)]
 ---
 
 ## Decision
@@ -16,7 +16,7 @@ The page shows four states and no more:
 - red: built, not asked. A link in the code that the spec does not name, written on a line the work changed.
 - grey: outside the repo, so it cannot be checked
 
-How a link was found (an import or a CLI call) shows only on hover. This is a design target: no renderer exists yet outside the spike.
+How a link was found (an import or a CLI call) shows only on hover. `skills/ritchie/scripts/overlay.py` computes the states and `render_page.py` draws them. They are two scripts because one would pass the 200-line limit of pike. `review_page.sh` runs both.
 
 ## Why
 
@@ -31,5 +31,5 @@ The CLI search is needed because the tools call each other as commands, and grap
 ## Cross-references
 
 - [The spec is shown, not written](skill_ritchie_spec_is_shown_not_written)
-- [The review is the verdict packet](skill_ritchie_review_is_the_verdict_packet) — `Copertura della spec` and `Scostamenti` are what this page draws
+- [The review is a page from review.json](skill_ritchie_review_is_a_page_from_review_json)
 - [Shared modules live in tools/common](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags) — the th to tb import breaks it

@@ -1,0 +1,191 @@
+<!doctype html>
+<script>
+// desc: the page template that render_page.py fills with the spec data; CSS and JS inline
+</script>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spec</title>
+<style>
+:root{--bg:#f6f5f2;--panel:#fff;--ink:#1d1d1f;--mute:#77777c;--line:#b9b7b0;--node:#fff;--nodeb:#2b2b30;
+--go:#2f6fdf;--back:#d9822b;--ctl:#8a8a92;--inv:#c43d3d;--dev:#8a5cd6;--hl:#ffe9a8;
+--fatto:#2e9e5b;--manca:#d9a400;--extra:#d23c3c;--esterno:#9a9aa2}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--panel:#1d1d21;--ink:#ececef;--mute:#8d8d95;--line:#55555c;--node:#232328;--nodeb:#c9c9d0;
+--go:#6a9cff;--back:#f0a35a;--ctl:#77777f;--inv:#ff6b6b;--dev:#b08cff;--hl:#4a4020;--fatto:#4cc97f;--manca:#f0c419;--extra:#ff5c5c;--esterno:#7a7a82}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;display:flex;height:100vh;overflow:hidden}
+#stage{flex:1;position:relative}svg{width:100%;height:100%;display:block}
+aside{width:320px;background:var(--panel);border-left:1px solid var(--line);padding:16px;overflow:auto}
+h1{font-size:16px;margin:0 0 4px}.sub{font-size:12px;color:var(--mute);margin-bottom:12px}
+h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:16px 0 6px}
+button{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:4px 0}
+.counts{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;font-size:12px}
+.row{display:flex;gap:8px;align-items:center;padding:4px 6px;border-radius:6px;cursor:pointer;font-size:13px}
+.row:hover,.row.on{background:var(--hl)}
+.num,.mark{flex:none;width:20px;height:20px;border-radius:50%;color:#fff;font-size:11px;display:grid;place-items:center}
+.mark{border-radius:5px}.arrow{color:var(--mute)}
+.cells{display:flex;flex-wrap:wrap;gap:4px}.cell{width:16px;height:16px;border-radius:3px}
+#card{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;
+padding:10px 12px;font-size:12px;width:280px;box-shadow:0 6px 20px rgba(0,0,0,.15);display:none}
+#card b{display:block;font-size:14px;margin-bottom:6px}#card .g{display:grid;grid-template-columns:62px 1fr;gap:2px 8px}
+#card em{font-style:normal;color:var(--mute)}#card code{font-size:11px;display:block;color:var(--mute);word-break:break-all}
+.node rect.box{fill:var(--node);stroke:var(--nodeb);stroke-width:2}
+.node.costruito rect.box{stroke:var(--fatto)}.node.mancante rect.box{stroke:var(--manca);stroke-dasharray:6 4;fill:transparent}
+.node.esterno rect.box{stroke:var(--esterno);stroke-dasharray:2 3}
+.node text{fill:var(--ink);font-weight:600;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.node{cursor:grab;transition:opacity .2s}.dim{opacity:.13}
+.edge{fill:none;stroke:var(--line);stroke-width:2;transition:opacity .2s}
+.edge.fatto{stroke:var(--fatto)}.edge.manca{stroke:var(--manca);stroke-dasharray:6 5}.edge.extra{stroke:var(--extra)}
+.edge.esterno{stroke:var(--esterno);stroke-dasharray:2 5}.edge.ctl{stroke:var(--ctl);stroke-dasharray:4 4;stroke-width:1.2}
+.edge.hot{stroke-width:4}.hit{fill:none;stroke:transparent;stroke-width:14;cursor:help}
+.tag{font-size:10px;fill:#fff;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.pill text{font-size:12px;font-weight:600;fill:#fff;dominant-baseline:central;text-anchor:middle}
+</style></head><body>
+<div id="stage"><svg id="svg"></svg><div id="card"></div></div>
+<aside><h1 id="title"></h1><div class="sub" id="sub"></div>
+<button id="playall">Riproduci tutto</button>
+<div id="state"></div><h2>Flussi</h2><div id="flows"></div><div id="extras"></div>
+<h2>Invarianti</h2><div id="invs"></div><div id="review"></div></aside>
+<script>
+const D = __DATA__, S = D.spec, R = D.review;
+const P = { flow_ms: 1100, pause_ms: 250, link_len: 200, repulsion: 140000, layout_steps: 500, curve: 30 };
+const HOW = { "grafo": "import o chiamata nel codice", "cli": "chiamata da riga di comando", "non visto": "nessuna traccia nel codice",
+  "da costruire": "un capo non esiste ancora", "esterno": "un capo è fuori dal repo", "extra": "trovato su una riga cambiata, assente nello spec" };
+const NS = "http://www.w3.org/2000/svg", svg = document.getElementById("svg"), card = document.getElementById("card");
+const el = (t, a = {}, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+const div = (id, html) => document.getElementById(id).insertAdjacentHTML("beforeend", html);
+const KIND = { fatto: "chiesto e fatto", manca: "chiesto, non ancora fatto", extra: "fatto, non chiesto", esterno: "fuori dal repo, non verificabile" };
+const col = k => KIND[k] ? `var(--${k})` : "var(--go)";
+document.getElementById("title").textContent = S.feature;
+document.getElementById("sub").textContent = D.overlay ? `grafo al commit ${D.commit}` : "spec";
+const W = svg.clientWidth, H = svg.clientHeight;
+const N = S.entita.map((e, i) => { const a = 2 * Math.PI * i / S.entita.length;
+  return { ...e, x: W / 2 + 240 * Math.cos(a), y: H / 2 + 240 * Math.sin(a), w: e.id.length * 9 + 36, h: 42 }; });
+const byId = Object.fromEntries(N.map(n => [n.id, n]));
+const pairs = S.flussi.map((f, i) => ({ a: f.da, b: f.a, kind: "flow", st: f.st, f, i }));
+(D.extra || []).forEach(x => pairs.push({ a: x.da, b: x.a, kind: "extra", st: "extra", ev: x }));
+N.forEach(n => (n.comanda || []).forEach(t => pairs.push({ a: n.id, b: t, kind: "ctl" })));
+for (let s = 0; s < P.layout_steps; s++) {
+  const cool = 1 - s / P.layout_steps;
+  for (const n of N) { n.fx = (W / 2 - n.x) * 0.01; n.fy = (H / 2 - n.y) * 0.01; }
+  for (const a of N) for (const b of N) if (a !== b) { const dx = a.x - b.x, dy = a.y - b.y, d2 = Math.max(dx * dx + dy * dy, 100), d = Math.sqrt(d2);
+    a.fx += dx / d * P.repulsion / d2; a.fy += dy / d * P.repulsion / d2; }
+  for (const p of pairs) { const a = byId[p.a], b = byId[p.b], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, f = (d - P.link_len) * 0.02;
+    a.fx += dx / d * f; a.fy += dy / d * f; b.fx -= dx / d * f; b.fy -= dy / d * f; }
+  for (const n of N) { n.x = Math.min(Math.max(n.x + n.fx * cool * 4, 80), W - 80); n.y = Math.min(Math.max(n.y + n.fy * cool * 4, 50), H - 50); }
+}
+const groups = {};
+pairs.forEach(p => { const k = [p.a, p.b].sort().join("|"); (groups[k] = groups[k] || []).push(p); });
+Object.values(groups).forEach(g => g.forEach((p, j) => { p.off = (j - (g.length - 1) / 2) * P.curve * (p.a < p.b ? 1 : -1); }));
+const inside = (n, x, y) => Math.abs(x - n.x) < n.w / 2 + 4 && Math.abs(y - n.y) < n.h / 2 + 4;
+function curve(p) {
+  const a = byId[p.a], b = byId[p.b], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, pts = [];
+  const cx = (a.x + b.x) / 2 - dy / d * p.off * 2, cy = (a.y + b.y) / 2 + dx / d * p.off * 2;
+  for (let t = 0; t <= 1.0001; t += 0.025) { const u = 1 - t, x = u * u * a.x + 2 * u * t * cx + t * t * b.x, y = u * u * a.y + 2 * u * t * cy + t * t * b.y;
+    if (!inside(a, x, y) && !inside(b, x, y)) pts.push(x.toFixed(1) + "," + y.toFixed(1)); }
+  return "M" + pts.join(" L");
+}
+const defs = el("defs", {}, svg);
+for (const k of [...Object.keys(KIND), "go", "ctl"]) { const m = el("marker", { id: "m-" + k, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }, defs);
+  el("path", { d: "M0,0 L10,5 L0,10 z", fill: k === "ctl" ? "var(--ctl)" : col(k) }, m); }
+const gE = el("g", {}, svg), gN = el("g", {}, svg), gA = el("g", {}, svg);
+pairs.forEach(p => {
+  const k = p.kind === "ctl" ? "ctl" : p.st || "go";
+  p.path = el("path", { class: "edge " + (p.kind === "ctl" ? "ctl" : p.st || ""), "marker-end": `url(#m-${k})` }, gE);
+  if (p.kind === "ctl") return;
+  p.hit = el("path", { class: "hit" }, gE);
+  p.hit.onpointerenter = ev => edgeCard(p, ev); p.hit.onpointerleave = () => { card.style.display = "none"; focus(); };
+  if (p.kind === "flow") { p.badge = el("g", {}, gE); el("circle", { r: 9, fill: col(p.st) }, p.badge); el("text", { class: "tag" }, p.badge).textContent = p.i + 1; }
+});
+const devs = R ? R.scostamenti || [] : [];
+N.forEach(n => {
+  n.g = el("g", { class: "node " + (n.status || "") }, gN);
+  el("rect", { class: "box", x: -n.w / 2, y: -n.h / 2, width: n.w, height: n.h, rx: 10 }, n.g);
+  el("text", {}, n.g).textContent = n.id;
+  [[S.invarianti, "--inv", n.w / 2 - 2], [devs, "--dev", -n.w / 2 + 2]].forEach(([list, c, x]) => { const k = list.filter(v => (v.su || []).includes(n.id)).length;
+    if (k) { const b = el("g", { transform: `translate(${x},${-n.h / 2 + 2})` }, n.g); el("rect", { x: -9, y: -9, width: 18, height: 18, rx: 4, fill: `var(${c})` }, b); el("text", { class: "tag" }, b).textContent = k; } });
+  n.g.onpointerenter = () => { focus(new Set([n.id, ...pairs.filter(p => p.a === n.id || p.b === n.id).flatMap(p => [p.a, p.b])])); nodeCard(n); };
+  n.g.onpointerleave = () => { focus(); card.style.display = "none"; };
+  n.g.onpointerdown = ev => { n.g.setPointerCapture(ev.pointerId); card.style.display = "none";
+    n.g.onpointermove = e => { const r = svg.getBoundingClientRect(); n.x = e.clientX - r.left; n.y = e.clientY - r.top; draw(); };
+    n.g.onpointerup = () => { n.g.onpointermove = null; }; };
+});
+function draw() {
+  N.forEach(n => n.g.setAttribute("transform", `translate(${n.x},${n.y})`));
+  pairs.forEach(p => { const d = curve(p); p.path.setAttribute("d", d); if (p.hit) p.hit.setAttribute("d", d);
+    if (p.badge) { const q = p.path.getPointAtLength(p.path.getTotalLength() / 2); p.badge.setAttribute("transform", `translate(${q.x},${q.y})`); } });
+}
+draw();
+function focus(set = null, only = null) {
+  N.forEach(n => n.g.classList.toggle("dim", !!set && !set.has(n.id)));
+  pairs.forEach(p => { const on = only ? p === only : !set || (set.has(p.a) && set.has(p.b)); p.path.classList.toggle("dim", !on); if (p.badge) p.badge.classList.toggle("dim", !on); });
+}
+function place(x, y) { card.style.display = "block"; card.style.left = Math.min(x + 14, W - 292) + "px"; card.style.top = Math.min(Math.max(y - 30, 8), H - 220) + "px"; }
+const grid = rows => `<div class="g">${rows.filter(r => r[1] !== undefined).map(([k, v]) => `<em>${k}</em><span>${v}</span>`).join("")}</div>`;
+function nodeCard(n) {
+  const code = { costruito: `${n.nfile} file`, mancante: "nessun file", esterno: "fuori dal repo" }[n.status];
+  const lines = devs.filter(v => (v.su || []).includes(n.id)).map(v => `<code>scostamento: ${v.testo}</code>`).join("");
+  card.innerHTML = `<b>${n.id}</b>` + grid([["stato", n.stato], ["fa", n.fa], ["non fa", n.non_fa], ["serve a", n.serve_a],
+    ["comanda", (n.comanda || []).join(", ") || undefined], ["codice", code]]) + lines;
+  place(n.x + n.w / 2, n.y);
+}
+function edgeCard(p, ev) {
+  focus(new Set([p.a, p.b]), p);
+  const f = p.f || {}, e = p.ev || f.ev;
+  card.innerHTML = `<b>${p.a} → ${p.b}</b>` + grid([["stato", p.st ? `<span style="color:${col(p.st)}">${KIND[p.st]}</span>` : undefined],
+    ["come", p.st ? HOW[p.kind === "extra" ? "extra" : f.prova] : undefined], ["passa", f.passa], ["torna", p.f ? f.torna || "-" : undefined]])
+    + (e ? e.ex.map(x => `<code>${x}</code>`).join("") : "");
+  const r = svg.getBoundingClientRect(); place(ev.clientX - r.left, ev.clientY - r.top);
+}
+function row(id, html, onHover, onClick) {
+  const r = document.createElement("div"); r.className = "row"; r.innerHTML = html;
+  r.onmouseenter = onHover; r.onmouseleave = () => focus(); if (onClick) r.onclick = onClick;
+  document.getElementById(id).appendChild(r); return r;
+}
+if (D.overlay) {
+  const c = {}; pairs.forEach(p => { if (p.st) c[p.st] = (c[p.st] || 0) + 1; });
+  div("state", `<h2>Pianificato contro costruito</h2><div class="bar">${Object.keys(KIND).filter(k => c[k]).map(k => `<span style="flex:${c[k]};background:${col(k)}"></span>`).join("")}</div>
+    <div class="counts">${Object.keys(KIND).filter(k => c[k]).map(k => `<b style="color:${col(k)}">${c[k]}</b><span>${KIND[k]}</span>`).join("")}</div>`);
+}
+const flowRows = pairs.filter(p => p.kind === "flow").map(p => row("flows", `<span class="num" style="background:${col(p.st)}">${p.i + 1}</span><span>${p.a} <span class="arrow">→</span> ${p.b}</span>`,
+  () => focus(new Set([p.a, p.b]), p), () => play([p.i])));
+const ex = pairs.filter(p => p.kind === "extra");
+if (ex.length) div("extras", "<h2>Fatti, non chiesti</h2>");
+ex.forEach(p => row("extras", `<span class="mark" style="background:var(--extra)"></span><span>${p.a} <span class="arrow">→</span> ${p.b}</span>`, () => focus(new Set([p.a, p.b]), p)));
+S.invarianti.forEach(v => row("invs", `<span class="mark" style="background:var(--inv)">!</span><span>${v.testo}</span>`, () => focus(new Set(v.su))));
+if (R) {
+  const t = R.test || {}, m = R.mutanti || [];
+  div("review", `<h2>Test</h2><div class="counts"><b style="color:var(--fatto)">${t.passati ?? "-"}</b><span>passati${t.nuovi ? `, ${t.nuovi} nuovi` : ""}</span>
+    <b style="color:var(--extra)">${t.falliti ?? "-"}</b><span>falliti</span></div>
+    <h2>Mutanti ${m.filter(x => x.ucciso).length}/${m.length}</h2><div class="cells">${m.map(x => `<span class="cell" title="${x.mutazione}" style="background:${x.ucciso ? "var(--fatto)" : "var(--extra)"}"></span>`).join("")}</div>
+    <h2>Metriche</h2><div class="sub">${R.metriche || "-"}</div><h2>Scostamenti</h2><div id="devs"></div>
+    <h2>Contratti derive?</h2><div id="derive"></div><h2>Giri</h2><div id="giri"></div>`);
+  devs.forEach(v => row("devs", `<span class="mark" style="background:var(--dev)"></span><span>${v.testo}</span>`, () => focus(new Set(v.su || []))));
+  (R.derive || []).forEach(v => row("derive", `<span>${v.contratto} <span class="arrow">da ${v.da}, ${v.principio}</span></span>`));
+  (R.giri || []).forEach((g, i, a) => row("giri", `<span style="${i === a.length - 1 ? "font-weight:700" : ""}">${i + 1}. ${g}</span>`));
+  ["devs", "derive", "giri"].forEach(id => { const e = document.getElementById(id); if (!e.children.length) e.textContent = "nessuno"; });
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function trip(path, label, c, back) {
+  return new Promise(done => {
+    const L = path.getTotalLength(), g = el("g", { class: "pill" }, gA), w = label.length * 7 + 20, t0 = performance.now();
+    el("rect", { x: -w / 2, y: -12, width: w, height: 24, rx: 12, fill: c }, g); el("text", {}, g).textContent = label;
+    const step = now => { const t = Math.min((now - t0) / P.flow_ms, 1), e = t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+      const q = path.getPointAtLength((back ? 1 - e : e) * L); g.setAttribute("transform", `translate(${q.x},${q.y})`);
+      if (t < 1) requestAnimationFrame(step); else { g.remove(); done(); } };
+    requestAnimationFrame(step);
+  });
+}
+let busy = false;
+async function play(idx) {
+  if (busy) return; busy = true;
+  for (const i of idx) {
+    const p = pairs[i]; flowRows[i].classList.add("on"); focus(new Set([p.a, p.b]), p); p.path.classList.add("hot");
+    await trip(p.path, p.f.passa, "var(--go)", false);
+    if (p.f.torna) await trip(p.path, p.f.torna, "var(--back)", true);
+    p.path.classList.remove("hot"); flowRows[i].classList.remove("on"); await wait(P.pause_ms);
+  }
+  focus(); busy = false;
+}
+document.getElementById("playall").onclick = () => play(S.flussi.map((_, i) => i));
+</script></body></html>

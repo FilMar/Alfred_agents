@@ -63,7 +63,7 @@ test_dir="$work/test"
 mkdir -p "$src_dir" "$test_dir"
 cp "$todo_file" "$src_dir/$target"
 cp "$todo_file" "$src_dir/$target.todo"
-cp "$spec_file" "$work/spec.md"
+cp "$spec_file" "$work/spec.json"
 
 RULES_TESTS='You write tests from contracts. You never see a body: every body is a todo line.
 An assert above the todo line is a precondition. An assert below it is a postcondition.
@@ -74,7 +74,7 @@ An assert above the todo line is a precondition. An assert below it is a postcon
 - Import only what the file exports. Never import or reach a private member.
 - Use the test framework and style of the project language.
 - The test file holds code only. Write no comment of any kind.
-Read only src/, spec.md and the modules the todo file imports. Never read other test files.
+Read only src/, spec.json and the modules the todo file imports. Never read other test files.
 Write the test file once and stop. You cannot run it.'
 
 RULES_BODY='You write function bodies. Each body replaces one todo line, in that place only.
@@ -82,20 +82,20 @@ RULES_BODY='You write function bodies. Each body replaces one todo line, in that
 - A function with postconditions has no return in its body: assign result and let the postconditions after the todo line run.
 - No recursion. Every loop has a bound.
 - The tests and the spec say what the body must do. The contracts must hold for every test.
-Read only src/, test/ and spec.md. Never read another version of this file.
+Read only src/, test/ and spec.json. Never read another version of this file.
 Edit the file once and stop. You cannot run it.'
 
 if [ "$mode" = tests ]; then
   [ ! -e "$test_file" ] || { echo "test file exists, remove it first: $test_file" >&2; exit 2; }
   hat="$TESTS_HAT"
   system="$RULES_TESTS"
-  task="Read src/$target and spec.md. Write the tests as test/$tests_name. $import_rule"
+  task="Read src/$target and spec.json. Write the tests as test/$tests_name. $import_rule"
 else
   [ -f "$test_file" ] || { echo "no test file: $test_file" >&2; exit 2; }
   cp "$test_file" "$test_dir/$tests_name"
   hat="$BODY_HAT"
   system="$RULES_BODY"
-  task="Read test/$tests_name and spec.md. Replace every todo line of src/$target with its body."
+  task="Read test/$tests_name and spec.json. Replace every todo line of src/$target with its body."
 fi
 
 (cd "$work" && th run --hat "$hat" --model "$MODEL" --thinking "$THINKING" --tools "$TOOLS" \

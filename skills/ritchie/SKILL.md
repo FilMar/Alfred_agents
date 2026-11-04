@@ -49,12 +49,13 @@ spec. `graphify --help` is the authority on the syntax.
 Present the principle that governs the work (usually P1 plus the two
 that bite hardest here) and have the user confirm or amend it.
 
-Then write `SPEC.md` in the project root, next to `.wiki/` and `.design/`, never in the code: the domain in
-the user's words, in Italian, on the shape of
-`references/spec-template.md`. It is committed with the branch. While
-the run is open, it is the decision log the work resumes from.
-
-The user says "ok". No other approval comes until the review.
+Then write `spec.json` in the project root, next to `.wiki/` and
+`.design/`, never in the code: the domain in the user's words, in
+Italian, on the shape of `references/spec-template.md`. It is committed
+with the branch. While the run is open, it is the decision log the work
+resumes from. Show it with `scripts/render_page.py --spec spec.json
+--open`. The user looks at the page and says "ok". No other approval
+comes until the review.
 
 ### 2. Work — the user is absent
 
@@ -85,11 +86,10 @@ scripts/contract_report.py <path>
 Then the project's formatter and linter at their strictest setting,
 then the test suite. All three green before commit.
 
-Write `REVIEW.md` in the project root, in Italian, on the shape of
-`references/review-template.md`. With graphify, refresh the graph and
-add `GRAPHIFY_OUT=.graph graphify affected` for each changed public
-symbol. Present it: the user reads the code here, and keeps the ability
-to judge it. The user approves, or sends the work back with one
+Write `review.json` in the project root, in Italian, on the shape of
+`references/review-template.md`. Before the commit, draw the page with
+`scripts/review_page.sh` (it runs `scripts/overlay.py`) and present it:
+the user reads the code here, and keeps the ability to judge it. The user approves, or sends the work back with one
 comment; only that part repeats, and the review is updated each round.
 
 On approval, the scaffolding is removed. With a `.wiki/`, omero files

@@ -23,8 +23,8 @@ wait for it.
 Write down the facts the contracts cannot carry: the rule of each
 classifier (a regex, a word list, an order of checks), a field value of a
 foreign type, how to build the input of a test, how a test reaches an
-edge that needs I/O. The spec is a file in the project root, never in the
-code. A run knows only the todo file, the spec and, for the body, the
+edge that needs I/O. They go in the `fatti` list of `spec.json`, never in
+the code. A run knows only the todo file, the spec and, for the body, the
 tests: what is not written there, the run does not know.
 
 ## 2. Tests, before the body
