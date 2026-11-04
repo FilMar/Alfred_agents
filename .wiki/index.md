@@ -155,6 +155,7 @@ updated: 2026-10-16
 | [skill_ritchie_may_parse_external_data_at_boundary](skill_ritchie_may_parse_external_data_at_boundary) | Idea: external data is parsed once at the boundary, no unknown or typeof inside |
 | [skill_ritchie_may_allow_casts_only_after_assert](skill_ritchie_may_allow_casts_only_after_assert) | Idea: a cast only in the constructor, right after an assert that proves it |
 | [skill_ritchie_review_shows_plan_against_built](skill_ritchie_review_shows_plan_against_built) | The review lays spec.json over the graphify graph in four states: built, missing, not asked, outside |
+| [skill_dijkstra_report_is_a_before_after_page](skill_dijkstra_report_is_a_before_after_page) | The report is a page: tree-sitter stamps, a table of free holes, Prima and Dopo, no animations |
 
 ## orchestrator
 
