@@ -14,7 +14,8 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;display:flex;height:100vh;overflow:hidden}
 #stage{flex:1;position:relative}svg{width:100%;height:100%;display:block}
-aside{width:320px;background:var(--panel);border-left:1px solid var(--line);padding:16px;overflow:auto}
+#grip{flex:none;width:6px;cursor:col-resize;background:var(--line);opacity:.4}#grip:hover{opacity:1}
+aside{width:400px;flex:none;background:var(--panel);border-left:1px solid var(--line);padding:16px;overflow:auto}
 h1{font-size:16px;margin:0 0 4px}.sub{font-size:12px;color:var(--mute);margin-bottom:12px}
 h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin:16px 0 6px}
 button{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
@@ -42,11 +43,15 @@ padding:10px 12px;font-size:12px;width:280px;box-shadow:0 6px 20px rgba(0,0,0,.1
 .pill text{font-size:12px;font-weight:600;fill:#fff;dominant-baseline:central;text-anchor:middle}
 </style></head><body>
 <div id="stage"><svg id="svg"></svg><div id="card"></div></div>
+<div id="grip"></div>
 <aside><h1 id="title"></h1><div class="sub" id="sub"></div>
 <button id="playall">Riproduci tutto</button>
 <div id="state"></div><h2>Flussi</h2><div id="flows"></div><div id="extras"></div>
 <h2>Invarianti</h2><div id="invs"></div><div id="review"></div></aside>
 <script>
+document.getElementById("grip").onpointerdown = e => { const g = e.target, a = g.nextElementSibling; g.setPointerCapture(e.pointerId);
+  g.onpointermove = m => a.style.width = Math.min(Math.max(innerWidth - m.clientX, 240), innerWidth * .7) + "px";
+  g.onpointerup = () => g.onpointermove = null; };
 const D = __DATA__, S = D.spec, R = D.review;
 const P = { flow_ms: 1100, pause_ms: 250, link_len: 200, repulsion: 140000, layout_steps: 500, curve: 30 };
 const HOW = { "grafo": "import o chiamata nel codice", "cli": "chiamata da riga di comando", "non visto": "nessuna traccia nel codice",
