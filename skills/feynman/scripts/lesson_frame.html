@@ -1,0 +1,56 @@
+<!doctype html>
+<script>
+// desc: page frame that lesson_page.py fills with a lesson: tokens, dark mode, cites, sources
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+const cite = (src, q) => `<cite data-src="${src}" data-q="${esc(q)}"></cite>`;
+</script>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feynman</title>
+<style>
+:root{--bg:#f6f5f2;--panel:#fff;--ink:#1d1d1f;--mute:#77777c;--line:#d5d3cc;--a:#2f6fdf;--b:#d9822b;--c:#2e9e5b;--d:#d23c3c;--e:#8a5cd6}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--panel:#1d1d21;--ink:#ececef;--mute:#8d8d95;--line:#3a3a40;--a:#6a9cff;--b:#f0a35a;--c:#4cc97f;--d:#ff5c5c;--e:#b18cff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+button{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
+cite{font-style:normal}
+cite a{font-size:10px;vertical-align:super;margin-left:2px;color:var(--a);text-decoration:none;cursor:pointer}
+#sources{margin-top:28px;border-top:1px solid var(--line);padding-top:12px;font-size:12px;color:var(--mute)}
+#sources li{margin:6px 0;max-width:900px}
+#sources li.hit{color:var(--ink)}
+#sources a{color:var(--a)}
+#sources mark{background:color-mix(in srgb,var(--a) 25%,transparent);color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+__LESSON__
+<ol id="sources"></ol>
+</main>
+<script>
+const SRC = __DATA__;
+const keys = Object.keys(SRC.used);
+const list = document.getElementById("sources");
+list.innerHTML = keys.map((k, i) =>
+  `<li id="s${i}" value="${i + 1}" hidden>${esc(SRC.used[k])} <a href="${esc(SRC.urls[k.split(":")[0]])}">${k}</a></li>`).join("");
+const resolve = () => document.querySelectorAll("cite[data-src]:not([data-done])").forEach(c => {
+  const i = keys.indexOf(c.dataset.src), q = c.dataset.q;
+  c.dataset.done = 1;
+  document.getElementById("s" + i).hidden = false;
+  c.innerHTML = `<a title="${esc(q)}">[${i + 1}]</a>`;
+  c.onclick = () => {
+    list.querySelectorAll("li").forEach(l => l.classList.remove("hit"));
+    const li = document.getElementById("s" + i);
+    li.innerHTML = li.innerHTML.replace(/<\/?mark>/g, "").replace(esc(q), `<mark>${esc(q)}</mark>`);
+    li.classList.add("hit");
+    li.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+});
+new MutationObserver(resolve).observe(document.querySelector("main"), { childList: true, subtree: true });
+resolve();
+</script>
+</body>
+</html>
