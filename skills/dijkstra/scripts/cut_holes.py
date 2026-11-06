@@ -1,5 +1,5 @@
 #!/usr/bin/env -S uv run --script
-# desc: find the holes of each stamp in cuts.json with tree-sitter; print cuts to draw
+# desc: fill cuts.json with stamp holes, code to read and dead-code proof; print it
 # usage: cut_holes.py --cuts <file>
 # /// script
 # requires-python = ">=3.12"
@@ -7,6 +7,9 @@
 # ///
 import argparse
 import json
+import os
+import shutil
+import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
@@ -16,11 +19,13 @@ import tree_sitter_language_pack as tsl
 from tree_sitter import Node
 
 CUT_KEYS = {"id", "tipo", "cosa", "dove", "delta"}
-VIEWS = {"stampo", "cerimonia", "matrice"}
+VIEWS = {"stampo", "codice", "matrice"}
 SKELETON_MIN = 0.5
 HOLES_MAX = 20
 COPIES_MAX = 50
 COPY_LINES_MAX = 400
+HITS_MAX = 20
+GRAPH = Path(".graph")
 STRING_DEPTH = 3
 STRINGS = {"string", "template_string", "string_literal", "raw_string_literal"}
 STRINGS |= {"char_literal"}
@@ -122,11 +127,15 @@ def read_copy(copy: Json) -> str:
     return "\n".join(lines[start - 1 : end])
 
 
-def stamp(spec: Json) -> Json:
+def grammar(lang: str) -> Any:
     try:
-        parser = tsl.get_parser(spec["lingua"])
+        return tsl.get_parser(lang)
     except tsl.Error as error:
-        die(f"no tree-sitter grammar for {spec['lingua']}: {error}")
+        die(f"no tree-sitter grammar for {lang}: {error}")
+
+
+def stamp(spec: Json) -> Json:
+    parser = grammar(spec["lingua"])
     if not 1 < len(spec["copie"]) <= COPIES_MAX:
         die(f"a stamp needs 2 to {COPIES_MAX} copies")
     wrap = spec.get("involucro")
@@ -156,6 +165,68 @@ def stamp(spec: Json) -> Json:
         "after": paint(after, parser.parse(after).root_node, [], range(len(after))),
         "prima": sum(len(b.splitlines()) for b in blocks),
     }
+
+
+def by_line(segs: list[Json]) -> list[list[Json]]:
+    rows: list[list[Json]] = [[]]
+    for seg in segs:
+        for i, part in enumerate(seg["t"].split("\n")):
+            if i:
+                rows.append([])
+            rows[-1].append(seg | {"t": part})
+    return rows
+
+
+def run(cmd: list[str], **opts: Any) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(cmd, capture_output=True, text=True, check=False, **opts)
+
+
+def mentions(symbol: str, pieces: list[Json]) -> list[str]:
+    if not shutil.which("rg"):
+        die("rg not found: it proves dead code")
+    found = run(["rg", "-n", "-w", "-F", "--no-heading", "--", symbol, "."])
+    if found.returncode > 1:
+        die(f"rg failed: {found.stderr.strip()}")
+    spans = [(Path(p["file"]).resolve(), *p["righe"]) for p in pieces]
+    hits = []
+    for line in found.stdout.splitlines():
+        path, num, text = line.split(":", 2)
+        here = Path(path).resolve()
+        if not any(here == f and a <= int(num) <= b for f, a, b in spans):
+            hits.append(f"{path.removeprefix('./')}:{num} {text.strip()}")
+    return hits
+
+
+def callers(symbol: str, file: str) -> Json | None:
+    if not (GRAPH.is_dir() and shutil.which("graphify")):
+        return None
+    env, target = os.environ | {"GRAPHIFY_OUT": str(GRAPH)}, f"{file}::{symbol}"
+    told = run(["graphify", "explain", target, "--all"], env=env, timeout=60)
+    if "No node matching" in told.stdout + told.stderr:
+        return {"node": None, "in": []}
+    if told.returncode:
+        die(f"graphify explain {symbol}: {(told.stderr or told.stdout).strip()}")
+    lines = [line.strip() for line in told.stdout.splitlines()]
+    node = next((x[5:].strip() for x in lines if x.startswith("Node:")), symbol)
+    edges = [x[4:] for x in lines if x.startswith("<--") and "[contains]" not in x]
+    return {"node": node, "in": edges}
+
+
+def code(spec: Json) -> Json:
+    parser, pieces = grammar(spec["lingua"]), spec["pezzi"]
+    for piece in pieces:
+        block = read_copy(piece).encode()
+        start, end = piece["righe"]
+        gone = set(piece.get("via") or range(start, end + 1))
+        segs = paint(block, parser.parse(block).root_node, [], range(len(block)))
+        rows = enumerate(by_line(segs), start)
+        piece["lines"] = [{"n": n, "gone": n in gone, "segs": r} for n, r in rows]
+        if symbol := piece.get("simbolo"):
+            hits, graph = mentions(symbol, pieces), callers(symbol, piece["file"])
+            piece |= {"grafo": graph, "quante": len(hits)}
+            piece["occorrenze"] = hits[:HITS_MAX]
+            piece["vivo"] = bool(hits or (graph and graph["in"]))
+    return spec
 
 
 def matrix(spec: Json) -> Json:
@@ -190,6 +261,8 @@ def main() -> None:
             die(f"{cut['id']} has more than one view: {', '.join(sorted(VIEWS))}", 2)
         if "stampo" in cut:
             cut["stampo"] = stamp(cut["stampo"])
+        if "codice" in cut:
+            cut["codice"] = code(cut["codice"])
         if "matrice" in cut:
             cut["matrice"] = matrix(cut["matrice"])
     json.dump(data, sys.stdout, ensure_ascii=False)

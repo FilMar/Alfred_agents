@@ -110,9 +110,12 @@ Write the proposals as `cuts.json` in `${TMPDIR:-/tmp}`, never in the
 tree (the size gate counts new files), on the shape of
 `references/cuts-template.md`. The values are in Italian. Then draw the
 page with `scripts/cuts_page.sh --cuts <file>` (it runs
-`scripts/cut_holes.py` and `scripts/render_cuts.py`). Each cut shows
-Prima and Dopo; the user ticks the cuts and copies the choice. Chat
-carries only the total and the path of the page.
+`scripts/cut_holes.py` and `scripts/render_cuts.py`). One cut is one
+decision: the same change in many files is one cut. A merge shows
+Prima and Dopo. A cut that only deletes shows the code that goes, so
+the user reads it and judges. A dead symbol carries its proof. The
+user ticks the cuts and copies the choice. Chat carries only the total
+and the path of the page.
 
 A proposal that changes a signature, renames or removes a public
 symbol needs `graphify affected "<symbol>"` before it goes in the

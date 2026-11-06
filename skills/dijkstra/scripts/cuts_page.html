@@ -39,8 +39,9 @@ table.m{border-collapse:separate;border-spacing:3px;font:12px ui-monospace,monos
 table.m th{font:600 11px system-ui;color:var(--mute);text-align:left;padding:0 6px}
 table.m td{background:var(--bg);border-radius:4px;padding:3px 6px;white-space:nowrap}table.m td.def{opacity:.35}table.m td.diff{background:var(--h1);color:#fff}
 .defs{font:12px ui-monospace,monospace;border:1px dashed var(--mute);border-radius:8px;padding:6px 10px;margin-bottom:8px}
-.fn{display:flex;gap:10px;align-items:center;font:12px ui-monospace,monospace;padding:3px 0}.fn span.n{width:230px}
-.badge{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:3px}.badge.g{background:var(--gone)}.badge.k{background:var(--cut)}
+.ln{display:block}.ln i{display:inline-block;width:3.5em;color:var(--mute);font-style:normal;user-select:none}
+.ln.gone{background:color-mix(in srgb,var(--gone) 16%,transparent);box-shadow:inset 3px 0 var(--gone)}
+.proof{font-size:12px;color:var(--mute);margin:4px 0 2px}.proof.live{color:var(--gone);font-weight:600}
 </style></head><body>
 <header><div><div class="big" id="total"></div><div class="mute">righe con la scelta</div></div>
 <div class="mute" id="pick"></div><button id="copy">Copia la scelta</button><button id="allbefore">Tutto prima</button><button id="allafter">Tutto dopo</button>
@@ -90,10 +91,17 @@ function matrixView(d) {
   return `<div class="prima">${legend([["background:var(--h1)", "diverso dal default"], ["background:var(--line)", "uguale al default"]])}<table class="m">${head}${rows(false)}</table></div>
     <div class="dopo">${defs}<table class="m">${head}${rows(true)}</table></div>`;
 }
-function ceremonyView(d) {
-  const line = (f, gone) => `<div class="fn"><span class="n">${esc(f.nome)}</span><span>${gone ? f.via.map(g => `<span class="badge g" title="${esc(g)}"></span>`).join("") : ""}${"<span class='badge k'></span>".repeat(f.restano || 0)}</span></div>`;
-  return `<div class="prima">${legend([["background:var(--gone)", "assert che non può fallire"], ["background:var(--cut)", "assert che resta"]])}${d.funzioni.map(f => line(f, true)).join("")}</div>
-    <div class="dopo">${d.funzioni.map(f => line(f, false)).join("")}</div>`;
+function proof(p) {
+  if (!p.simbolo) return "";
+  const g = p.grafo, n = g && g.node ? esc(g.node) : "";
+  const graph = !g ? "grafo assente" : !g.node ? "non nel grafo, non prova nulla" : `${g.in.length} chiamanti di ${n}`;
+  const more = p.quante > p.occorrenze.length ? `<div>… altre ${p.quante - p.occorrenze.length}</div>` : "";
+  const hits = [...p.occorrenze, ...(g ? g.in : [])].map(h => `<div>↳ ${esc(h)}</div>`).join("");
+  return `<div class="proof${p.vivo ? " live" : ""}">${esc(p.simbolo)} · rg: ${p.quante} occorrenze fuori dal taglio · graphify: ${graph}<div class="calls">${hits}${more}</div></div>`;
+}
+function codeView(d) {
+  const lines = p => p.lines.map(l => `<span class="ln${l.gone ? " gone" : ""}"><i>${l.n}</i>${segs(l.segs)}</span>`).join("");
+  return d.pezzi.map(p => `<div class="code"><b>${esc(p.nome || "")} · ${esc(p.file)}</b><pre>${lines(p)}</pre>${proof(p)}</div>`).join("");
 }
 const on = Object.fromEntries(D.tagli.map(c => [c.id, true]));
 function total() {
@@ -106,8 +114,8 @@ function show(box, state) {
   box.querySelectorAll("button[data-s]").forEach(b => b.classList.toggle("on", b.dataset.s === state));
 }
 const boxes = D.tagli.map(c => {
-  const view = c.stampo ? stampView(c.stampo, c.delta) : c.matrice ? matrixView(c.matrice) : c.cerimonia ? ceremonyView(c.cerimonia) : "";
-  const buttons = view ? `<button data-s="prima">Prima</button><button data-s="dopo">Dopo</button>` : "";
+  const view = c.stampo ? stampView(c.stampo, c.delta) : c.matrice ? matrixView(c.matrice) : c.codice ? codeView(c.codice) : "";
+  const buttons = view && !c.codice ? `<button data-s="prima">Prima</button><button data-s="dopo">Dopo</button>` : "";
   const box = $(`<section class="cut"><div class="head"><input type="checkbox" checked><span class="id">${esc(c.id)}</span><span class="kind">${esc(c.tipo)}</span>
     <span>${esc(c.cosa)}</span><span class="mute">${esc(c.dove)}</span>${buttons}<span class="delta">${c.delta}</span></div><div class="stage">${view}</div></section>`);
   const cb = box.querySelector("input");
