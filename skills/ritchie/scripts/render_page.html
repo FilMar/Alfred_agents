@@ -12,7 +12,22 @@
 @media (prefers-color-scheme:dark){:root{--bg:#141416;--panel:#1d1d21;--ink:#ececef;--mute:#8d8d95;--line:#55555c;--node:#232328;--nodeb:#c9c9d0;
 --go:#6a9cff;--back:#f0a35a;--ctl:#77777f;--inv:#ff6b6b;--dev:#b08cff;--hl:#4a4020;--fatto:#4cc97f;--manca:#f0c419;--extra:#ff5c5c;--esterno:#7a7a82}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;display:flex;height:100vh;overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#tabs{flex:none;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line)}#tabs button.on{border-color:var(--ink);font-weight:600}
+#schema{flex:1;display:flex;min-height:0}#code{flex:1;overflow:auto;min-height:0}
+.chead{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--mute)}
+.chead button{margin-left:auto;color:var(--ink);font-size:14px}.chead i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:4px}
+.file{max-width:1100px;margin:14px auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto}
+.file b{font:600 12px ui-monospace,monospace;display:block;margin-bottom:8px}
+.ln{display:block;white-space:pre;font:12px/1.55 ui-monospace,monospace;cursor:pointer;padding-left:8px}.ln:hover{background:var(--hl)}
+.ln i{display:inline-block;width:3.5em;color:var(--mute);font-style:normal;user-select:none}
+.ln.k-ctx{opacity:.5}.gap{color:var(--mute);font:12px ui-monospace,monospace;padding-left:3.5em}
+.ln.k-extra{background:color-mix(in srgb,var(--manca) 22%,transparent);box-shadow:inset 3px 0 var(--manca)}
+.ln.k-tolta{background:color-mix(in srgb,var(--extra) 16%,transparent);box-shadow:inset 3px 0 var(--extra);text-decoration:line-through}
+.ln.k-corpo{box-shadow:inset 3px 0 var(--go)}
+.note{margin:4px 0 8px 3.5em;display:flex;gap:6px;align-items:flex-start}.note textarea{flex:1;font:13px/1.4 system-ui,sans-serif;min-height:48px;color:var(--ink);background:var(--bg);border:1px solid var(--dev);border-radius:6px;padding:6px 8px}
+.t-kw{color:#a626a4}.t-str{color:#2e8b57}.t-num{color:#c76b00}.t-type{color:#0f8a9a}.t-prop{color:#3b6fd4}.t-com{color:var(--mute);font-style:italic}.t-pun{color:var(--mute)}
+@media (prefers-color-scheme:dark){.t-kw{color:#d58cf0}.t-str{color:#7fd39a}.t-num{color:#f2a65a}.t-type{color:#5fd0de}.t-prop{color:#8db2ff}}
 #stage{flex:1;position:relative}svg{width:100%;height:100%;display:block}
 #grip{flex:none;width:6px;cursor:col-resize;background:var(--line);opacity:.4}#grip:hover{opacity:1}
 aside{width:400px;flex:none;background:var(--panel);border-left:1px solid var(--line);padding:16px;overflow:auto}
@@ -42,12 +57,16 @@ padding:10px 12px;font-size:12px;width:280px;box-shadow:0 6px 20px rgba(0,0,0,.1
 .tag{font-size:10px;fill:#fff;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none}
 .pill text{font-size:12px;font-weight:600;fill:#fff;dominant-baseline:central;text-anchor:middle}
 </style></head><body>
+<nav id="tabs" hidden><button data-t="schema" class="on">Schema</button> <button data-t="code">Codice</button></nav>
+<div id="schema">
 <div id="stage"><svg id="svg"></svg><div id="card"></div></div>
 <div id="grip"></div>
 <aside><h1 id="title"></h1><div class="sub" id="sub"></div>
 <button id="playall">Riproduci tutto</button>
 <div id="state"></div><h2>Flussi</h2><div id="flows"></div><div id="extras"></div>
 <h2>Invarianti</h2><div id="invs"></div><div id="review"></div></aside>
+</div>
+<div id="code" hidden></div>
 <script>
 document.getElementById("grip").onpointerdown = e => { const g = e.target, a = g.nextElementSibling; g.setPointerCapture(e.pointerId);
   g.onpointermove = m => a.style.width = Math.min(Math.max(innerWidth - m.clientX, 240), innerWidth * .7) + "px";
@@ -193,4 +212,33 @@ async function play(idx) {
   focus(); busy = false;
 }
 document.getElementById("playall").onclick = () => play(S.flussi.map((_, i) => i));
+if (D.code) {
+  const V = D.code, box = document.getElementById("code"), tabs = document.getElementById("tabs");
+  const MARK = { extra: "non concordata", tolta: "concordata, tolta", corpo: "corpo" };
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const rows = V.file.flatMap(f => f.rows), many = k => rows.filter(r => r.k === k).length;
+  const key = V.modo === "finale" ? `<span><i style="background:var(--manca)"></i>${many("extra")} non concordate</span>
+    <span><i style="background:var(--extra)"></i>${many("tolta")} tolte</span><span><i style="background:var(--go)"></i>corpo</span>` : "<span>clicca una riga per commentarla</span>";
+  const line = (r, f, i) => r.gap ? `<div class="gap">…</div>` : `<div class="ln k-${r.k}" data-f="${f}" data-r="${i}"><i>${r.n}</i>${r.segs.map(s => `<span class="t-${s.c}">${esc(s.t)}</span>`).join("")}</div>`;
+  box.innerHTML = `<div class="chead">${key}<button id="copy"></button></div>` + (V.file.map((f, n) => `<section class="file"><b>${esc(f.path)}</b>${f.rows.map((r, i) => line(r, n, i)).join("")}</section>`).join("") || `<section class="file">nessun file cambiato sotto i path di codice</section>`);
+  const filled = () => [...box.querySelectorAll(".note")].filter(n => n.querySelector("textarea").value.trim());
+  const copy = document.getElementById("copy"), label = () => copy.textContent = `Copia i commenti (${filled().length})`;
+  label();
+  box.addEventListener("input", label);
+  box.addEventListener("click", e => {
+    const ln = e.target.closest(".ln");
+    if (!ln || !getSelection().isCollapsed) return;
+    if (ln.nextElementSibling?.classList.contains("note")) return ln.nextElementSibling.querySelector("textarea").focus();
+    ln.insertAdjacentHTML("afterend", `<div class="note"><textarea></textarea></div>`);
+    const ta = ln.nextElementSibling.querySelector("textarea"); ta.focus();
+    ta.onblur = () => { if (!ta.value.trim()) { ta.parentElement.remove(); label(); } };
+  });
+  const quote = n => { const ln = n.previousElementSibling, f = V.file[ln.dataset.f], r = f.rows[ln.dataset.r], gone = r.k === "tolta";
+    return `${f.path}${gone ? " (concordato)" : ""}:${r.n}${MARK[r.k] ? ` [${MARK[r.k]}]` : ""}\n    ${r.segs.map(s => s.t).join("").trim()}\n${n.querySelector("textarea").value.trim()}`; };
+  copy.onclick = () => navigator.clipboard.writeText(filled().map(quote).join("\n\n")).then(() => copy.textContent = `Copiati ${filled().length}`, () => copy.textContent = "Copia fallita");
+  tabs.hidden = false;
+  tabs.onclick = e => { const t = e.target.dataset.t; if (!t) return;
+    tabs.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === e.target));
+    document.getElementById("schema").style.display = t === "schema" ? "" : "none"; box.hidden = t !== "code"; };
+}
 </script></body></html>

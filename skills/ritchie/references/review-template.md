@@ -24,5 +24,14 @@ itself: green, yellow, red, grey.
 
 `overlay.py` marks a link red only when it sits on a line the work
 changed, so draw the page while the diff is still open. Without
-graphify, pass `spec.json` to `render_page.py` as it is: the page shows
-the spec and the review, with no states.
+graphify, `review_page.sh` shows the spec and the review, with no states.
+
+The Codice tab compares the code with `concordato.json`:
+
+- yellow: a line that was not agreed, or an assert added inside a body
+- red, struck through: an agreed line that is gone
+- blue edge: a body that replaced a todo line
+- no mark: an agreed line, unchanged
+
+A body that touches a changed contract is all yellow, because the two
+are one change. Test files are not shown.

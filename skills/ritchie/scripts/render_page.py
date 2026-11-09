@@ -68,8 +68,9 @@ def main() -> None:
         die(f"names not among the entities: {', '.join(sorted(unknown))}")
 
     data = {"spec": spec, "review": review, "extra": spec.get("extra", [])}
-    data |= {"overlay": "commit" in spec, "commit": spec.get("commit", "-")}
-    blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    data |= {"overlay": "commit" in spec, "commit": spec.get("commit", "-"), "code": spec.get("vista")}
+    # Real code holds any text: no "<" may reach the script tag as markup.
+    blob = json.dumps(data, ensure_ascii=False).replace("<", "\\u003c")
     out = args.out or Path(tempfile.gettempdir()) / f"{args.spec.stem}-page.html"
     write(out, TEMPLATE.read_text().replace("__DATA__", blob))
     print(out)

@@ -69,8 +69,9 @@ broke a rule above. Otherwise the body is wrong: Ritchie fixes it in the
 copy of the todo file.
 
 A contract that turns out weak, or a signature that is missing, sends the
-work back to step 4 or 5 in the file. Then save a new todo copy and run
-the tests against it again.
+work back to the skeleton in the file. Then save a new todo copy and run
+the tests against it again. The review page shows this change as not
+agreed, and `scostamenti` names it.
 
 ## 4. Mutants
 

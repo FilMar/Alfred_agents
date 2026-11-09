@@ -5,8 +5,8 @@ Values are in Italian: the spec is the domain in the user's words, and
 the user is Italian.
 
 One short line per value. Drop the optional fields this domain does not
-need. The user does not read this file: `scripts/render_page.py` draws
-it as a page, and the user looks at the page.
+need. The user does not read this file: `scripts/spec_page.sh` draws it
+as a page, next to the skeleton, and the user looks at the page.
 
 ```json
 {
@@ -42,3 +42,20 @@ it as a page, and the user looks at the page.
 - `fatti`: optional. See `tests-and-body.md`, step 1.
 - Every name in `da`, `a`, `comanda` and `su` is an `id` of `entita`.
   `render_page.py` stops on a name it does not know.
+
+## The round
+
+`spec_page.sh` runs `code_view.py`, which reads the changed files under
+the `codice` paths and colours them with `code_paint.py`. Then it runs
+`render_page.py`. The page has two tabs: Schema and Codice.
+
+1. The user clicks a line in Codice, writes a comment, and copies all the
+   comments into chat. Each comment is a question.
+2. Answer each one in chat. Update the spec and the skeleton.
+3. Draw the page again. Repeat until the user says "ok".
+
+On "ok", freeze what was agreed. The review compares the code with it:
+
+```
+scripts/code_view.py --spec spec.json --freeze concordato.json
+```

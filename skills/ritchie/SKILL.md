@@ -1,6 +1,6 @@
 ---
 name: ritchie
-description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison) or a short script (that is pike), it is ritchie. Three phases: the user approves the principles and the domain spec once, then Ritchie works alone — structs, contracts, tests, bodies — then the user reviews the result against a report."
+description: "Ritchie writes production code in the user's style, in any project and any language. Use it whenever the code is meant to stay: a feature, a module, a fix, a refactor, a spike that becomes a feature. Strong triggers: 'implementiamo', 'scriviamo la feature', 'aggiungi', 'facciamolo bene', 'codice vero', 'mettiamolo nel progetto', 'ora per davvero', 'production'. Use it even when the user does not name it: if the code is not a throwaway spike (that is edison) or a short script (that is pike), it is ritchie. Three phases: the user comments on the spec and on the skeleton of structs, signatures and contracts until they agree, then Ritchie works alone — tests, bodies — then the user reviews the code marked against what was agreed."
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
@@ -53,14 +53,10 @@ Then write `spec.json` in the project root, next to `.wiki/` and
 `.design/`, never in the code: the domain in the user's words, in
 Italian, on the shape of `references/spec-template.md`. It is committed
 with the branch. While the run is open, it is the decision log the work
-resumes from. Show it with `scripts/render_page.py --spec spec.json
---open`. The user looks at the page and says "ok". No other approval
-comes until the review.
+resumes from.
 
-### 2. Work — the user is absent
-
-Translate the language sheet into code, in this order, all in the
-target file:
+Translate the language sheet into a skeleton, in this order, in the
+target files that `codice` names:
 
 1. **Structs.** Private fields where the language needs privacy to stop
    the write; plain read-only shapes where the type system already
@@ -70,12 +66,17 @@ target file:
    invariants the user stated in the spec, at most five per function,
    one assert per invariant. A contract that does not derive from the
    spec is marked `derive?` and reported, never written silently.
-4. **Tests, then body, by two th runs.** `scripts/th_write.sh` writes
-   the tests, then the bodies, one run each. The test run never sees a
-   body; `scripts/check_body_diff.py` checks the body run. Details:
-   `references/tests-and-body.md`.
 
-The file is the work. Chat carries no code text from here on.
+The skeleton must compile. Show it with `scripts/spec_page.sh` (it runs
+`scripts/code_view.py`, `scripts/code_paint.py`, `scripts/render_page.py`)
+and repeat until the user says "ok": `references/spec-template.md`, "The
+round". No other approval comes until the review.
+
+### 2. Work — the user is absent
+
+`scripts/th_write.sh` writes the tests, then the bodies, one run each;
+`scripts/check_body_diff.py` checks the body run: details in
+`references/tests-and-body.md`. Chat carries no code text from here on.
 
 ### 3. Review — the user is present
 
@@ -89,16 +90,15 @@ then the test suite. All three green before commit.
 Write `review.json` in the project root, in Italian, on the shape of
 `references/review-template.md`. Before the commit, draw the page with
 `scripts/review_page.sh` (it runs `scripts/overlay.py`) and present it:
-the user reads the code here, and keeps the ability to judge it. The user approves, or sends the work back with one
-comment; only that part repeats, and the review is updated each round.
+the user reads the code here, marked against `concordato.json`, and
+keeps the ability to judge it. The user approves, or sends the work back
+with the copied comments; only those parts repeat, and the review is
+updated each round.
 
-On approval, the scaffolding is removed. With a `.wiki/`, omero files
-the decision as a wiki page (the why, in English, `sources` pointing at
-the pair) and the pair leaves the tree; git keeps it in the branch
-history. Without a `.wiki/`, the pair stays as the only record.
-
-Then offer dijkstra: it makes the code shorter under these same rules,
-and never longer.
+On approval, `concordato.json` leaves the tree. With a `.wiki/`, omero
+files the decision as a wiki page (the why, in English, `sources` at the
+pair) and the pair leaves too; git keeps it. Without a `.wiki/`, the pair
+stays as the only record. Then offer dijkstra: shorter code, same rules.
 
 ## The rules
 
