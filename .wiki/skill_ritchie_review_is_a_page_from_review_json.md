@@ -12,7 +12,7 @@ Ritchie writes the review as `review.json`, not `REVIEW.md`. The model writes on
 - `derive`: the contracts that do not derive from the spec. Contract, source, principle.
 - `giri`: one entry per review round, with the user's comment. The last one is the verdict in force.
 
-Scripts give the rest: metrics from `contract_report.py`, test counts from the test runner, the mutants and whether each one was killed. The same fixed renderer that draws the spec puts all of it on one page, next to the planned-against-built graph. A deviation shows on the node it names. The user gives the verdict in chat: "ok", or one comment.
+Scripts give the rest: metrics from `contract_report.py`, test counts from the test runner, the mutants and whether each one was killed. The same fixed renderer that draws the spec puts all of it on one page, next to the planned-against-built graph. A deviation shows on the node it names. The user gives the verdict in chat: "ok", or the comments copied from the [Codice tab](skill_ritchie_review_marks_code_against_agreement).
 
 ## Why
 

@@ -156,6 +156,8 @@ updated: 2026-10-16
 | [skill_ritchie_may_allow_casts_only_after_assert](skill_ritchie_may_allow_casts_only_after_assert) | Idea: a cast only in the constructor, right after an assert that proves it |
 | [skill_ritchie_review_shows_plan_against_built](skill_ritchie_review_shows_plan_against_built) | The review lays spec.json over the graphify graph in four states: built, missing, not asked, outside |
 | [skill_dijkstra_report_is_a_before_after_page](skill_dijkstra_report_is_a_before_after_page) | The report is a page: tree-sitter stamps, a table of free holes, Prima and Dopo, no animations |
+| [skill_ritchie_setup_agrees_on_commented_skeleton](skill_ritchie_setup_agrees_on_commented_skeleton) | At setup the user comments on the real skeleton, line by line, until ok; it is frozen in concordato.json |
+| [skill_ritchie_review_marks_code_against_agreement](skill_ritchie_review_marks_code_against_agreement) | The review marks each line of the final code against concordato.json: not agreed, gone, body, agreed |
 
 ## orchestrator
 

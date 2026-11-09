@@ -8,7 +8,7 @@ replaces: [skill_ritchie_spec_is_a_minimal_italian_document@86b2f64]
 
 Ritchie writes the spec as `spec.json`, not `SPEC.md`. The fields stay the same: entities (`stato`, `fa`, `non_fa`, `serve_a`, `comanda`), flows (`da`, `a`, `passa`, `torna`) and invariants. The values are in Italian. Each invariant gets one new field, `su`: the entities it binds.
 
-A fixed renderer turns `spec.json` into one local HTML page. Entities are the nodes of a graph. Flows are animated edges: one pill goes out with what passes and one comes back with what returns. Invariants are badges on the nodes they bind. Text shows only on hover. The user approves by looking at the page, then says "ok" in chat.
+A fixed renderer turns `spec.json` into one local HTML page. Entities are the nodes of a graph. Flows are animated edges: one pill goes out with what passes and one comes back with what returns. Invariants are badges on the nodes they bind. Text shows only on hover. The graph is the Schema tab of the setup page. The user says "ok" in chat after the [commented skeleton](skill_ritchie_setup_agrees_on_commented_skeleton) next to it is agreed.
 
 The model writes data only. It never writes HTML. `skills/ritchie/scripts/render_page.py` fills one fixed template, `render_page.html`. A pike script, so it has no tests: the real runs are the test.
 
@@ -20,7 +20,7 @@ The old markdown spec already had a strict shape, so it was data in disguise. JS
 
 Rejected: the model writes the HTML page each run. It costs five to ten times the tokens. The layout changes every time. A verbose model just makes verbose paragraphs with nicer styling. A fixed renderer gives the same shape every time, so the user learns where to look.
 
-The old reasons still hold: the user approves the domain before code exists, in Italian, with the fewest words possible.
+The old reasons still hold: the user approves the domain before tests and bodies exist, in Italian, with the fewest words possible.
 
 ## Cross-references
 
