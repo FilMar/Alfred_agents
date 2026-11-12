@@ -4,7 +4,10 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 use alfred::client::Client;
+use alfred::rules::cli::RulesCommand;
+use alfred::rules::store::Rules;
 use alfred::serve;
+use alfred::serve::App;
 use alfred::vault::cli;
 use alfred::vault::store::Vault;
 
@@ -27,6 +30,10 @@ enum Command {
         #[command(subcommand)]
         command: VaultCommand,
     },
+    Rules {
+        #[command(subcommand)]
+        command: RulesCommand,
+    },
 }
 
 #[derive(Subcommand)]
@@ -46,10 +53,16 @@ async fn main() -> ExitCode {
             .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join("notes")))
         {
             None => Err("set ALFRED_VAULT or HOME".to_string()),
-            Some(root) => serve::run(Vault::new(root), port)
-                .await
-                .map(|()| String::new())
-                .map_err(|e| e.to_string()),
+            Some(root) => serve::run(
+                App {
+                    vault: Vault::new(root),
+                    rules: Rules::from_env(),
+                },
+                port,
+            )
+            .await
+            .map(|()| String::new())
+            .map_err(|e| e.to_string()),
         },
         Command::Vault { command } => {
             let reply = match Client::from_env() {
@@ -62,6 +75,9 @@ async fn main() -> ExitCode {
             };
             reply.map_err(|e| e.to_string())
         }
+        Command::Rules { command } => alfred::rules::cli::run(command)
+            .await
+            .map_err(|e| e.to_string()),
     };
     let result: ExitCode = match output {
         Ok(text) => {

@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 
-use crate::serve::status_of;
 use crate::vault::VaultError;
+use crate::vault::routes::status_of;
 
 #[test]
 fn status_table() {

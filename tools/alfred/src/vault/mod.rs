@@ -1,5 +1,6 @@
 pub mod cli;
 pub mod page;
+pub mod routes;
 pub mod store;
 
 use serde::{Deserialize, Serialize};

@@ -1,0 +1,141 @@
+{
+ "scostamenti": [
+  {
+   "testo": "serve.rs ora tiene App {vault, rules} e un ApiError generico; le rotte del vault sono in vault/routes.rs, senza cambi di comportamento.",
+   "su": [
+    "RulesRoutes"
+   ]
+  },
+  {
+   "testo": "Client: get, post, delete passano da un solo send; with_timeout per l'hook; nuovo errore Input per lo stdin di reach.",
+   "su": [
+    "RulesCli"
+   ]
+  },
+  {
+   "testo": "Qdrant riscritto da me: tipi serde per le risposte e un solo helper call. La run aveva scritto a mano il parsing del JSON tre volte (512 righe, ora 297).",
+   "su": [
+    "Qdrant"
+   ]
+  },
+  {
+   "testo": "Rules diviso in store/mod.rs e store/curation.rs (refine, near, reach): il file superava le 350 righe.",
+   "su": [
+    "Rules"
+   ]
+  },
+  {
+   "testo": "Rules.add: la run generava l'id con un hash della data; ora uuid v4.",
+   "su": [
+    "Rules"
+   ]
+  },
+  {
+   "testo": "Filtro delle archiviate: la run aveva scritto {key, is_empty: true}, che Qdrant non capisce; ora {is_empty: {key: archived_at}} come ti.",
+   "su": [
+    "Rules"
+   ]
+  },
+  {
+   "testo": "Rules.warm ora stampa l'errore nel log invece di ignorarlo; Embedder.warm usa il prefisso di ricerca, perche' Ollama non restituisce vettori per un testo vuoto.",
+   "su": [
+    "Rules",
+    "Embedder"
+   ]
+  },
+  {
+   "testo": "Client search: la run usava POST /rules/search, la rotta e' GET; ora i parametri vanno in query.",
+   "su": [
+    "RulesCli"
+   ]
+  },
+  {
+   "testo": "render_blocks finisce con un a capo, come ti.",
+   "su": [
+    "RulesCli"
+   ]
+  },
+  {
+   "testo": "refine.rs: i corpi li ho scritti io, la run e' andata in timeout dopo 20 minuti.",
+   "su": [
+    "Trust"
+   ]
+  },
+  {
+   "testo": "run diviso in run + dispatch: il match era di 69 righe. reach con stdin non valido ora esce con errore.",
+   "su": [
+    "RulesCli"
+   ]
+  },
+  {
+   "testo": "Cargo.toml: spenti i lint pedantic sui cast numerici (vettori f64->f32 da JSON, conteggi limitati a 10 000) e missing_panics_doc / return_self_not_must_use (chiedono doc comment). Nei test: letterali lunghi, confronto tra float, funzioni lunghe.",
+   "su": [
+    "Rules"
+   ]
+  },
+  {
+   "testo": "I test di refine superavano le 350 righe: divisi in tests/rules_refine/ (signals, spread, report).",
+   "su": [
+    "Trust"
+   ]
+  },
+  {
+   "testo": "search --timeout: il limite e' passato al server (SearchOptions.timeout). Rules.search mette il limite solo su embedding e query, poi conta gli hit; se scade risponde 504 senza contare. Il client aggiunge 500 ms di margine di rete. Prima un timeout del client lasciava contare gli hit al server.",
+   "su": [
+    "Rules",
+    "RulesCli",
+    "RulesRoutes"
+   ]
+  }
+ ],
+ "derive": [],
+ "giri": [
+  "perfetto, procedi",
+  "vai",
+  "togli il timer di default allora, oppure va messo lato server"
+ ],
+ "metriche": "tools/alfred/src/client.rs:28  from_env                     logic=7   inv=1  computes\ntools/alfred/src/rules/cli.rs:143  prompts_of                   logic=15  inv=1  computes\ntools/alfred/src/rules/embed.rs:34  embed                        logic=33  inv=1  computes\ntools/alfred/src/rules/mod.rs:106  normalize_tags               logic=8   inv=1  compound computes\ntools/alfred/src/rules/mod.rs:135  match_prefix                 logic=6   inv=1  computes\ntools/alfred/src/rules/near.rs:36  near_pairs                   logic=23  inv=4  compound computes\ntools/alfred/src/rules/qdrant.rs:61  query                        logic=15  inv=2  computes\ntools/alfred/src/rules/qdrant.rs:113  scroll_all                   logic=19  inv=1  computes\ntools/alfred/src/rules/qdrant.rs:149  get                          logic=7   inv=1  computes\ntools/alfred/src/rules/reach.rs:28  reach_of                     logic=19  inv=4  computes\ntools/alfred/src/rules/refine.rs:100  spread_of                    logic=11  inv=4  computes\ntools/alfred/src/rules/refine.rs:132  refine_report                logic=22  inv=4  computes\ntools/alfred/src/rules/store/curation.rs:19  refine_apply                 logic=29  inv=2  computes\ntools/alfred/src/rules/store/mod.rs:49  search                       logic=30  inv=2  computes\ntools/alfred/src/rules/store/mod.rs:104  add                          logic=15  inv=2  computes\ntools/alfred/src/rules/store/mod.rs:151  get                          logic=5   inv=1  computes\ntools/alfred/src/rules/store/mod.rs:178  append_do                    logic=15  inv=1  computes\ntools/alfred/src/rules/store/mod.rs:206  resolve                      logic=20  inv=1  computes\ntools/alfred/src/tests/cli.rs:28  render_toc_table             logic=4   inv=1  test-assert\ntools/alfred/src/tests/cli.rs:41  is_index_table               logic=0   inv=6  asserts>5 test-assert\ntools/alfred/src/tests/cli.rs:51  shows_whole_table            logic=1   inv=4  test-assert\ntools/alfred/src/tests/cli.rs:60  clean_table                  logic=0   inv=3  test-assert\ntools/alfred/src/tests/page.rs:161  heading_id_table             logic=0   inv=9  asserts>5 test-assert\ntools/alfred/src/tests/page.rs:186  is_draft_table               logic=0   inv=6  asserts>5 test-assert\ntools/alfred/src/tests/page.rs:198  section_table                logic=1   inv=7  asserts>5 test-assert\ntools/alfred/src/tests/page.rs:219  toc_table                    logic=5   inv=1  test-assert\ntools/alfred/src/tests/page.rs:238  parse_drops_the_frontmatter  logic=0   inv=2  test-assert\ntools/alfred/src/tests/page.rs:250  toc_skips_hashes_in_code_and_reads_setext logic=6   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:4  guide_is_compiled_in         logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:9  render_blocks_no_rules_gives_no_output logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:19  prompts_of_empty_list_gives_no_prompts logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:24  prompts_of_single_text       logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:29  prompts_of_keeps_order       logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:37  prompts_of_trims_each_text   logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:45  prompts_of_discards_blank_texts logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:53  prompts_of_all_blank_gives_no_prompts logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:61  prompts_of_keeps_duplicates  logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:69  prompts_of_tolerates_trailing_newline logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:77  prompts_of_rejects_not_json  logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:82  prompts_of_rejects_object_instead_of_list logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:87  prompts_of_rejects_list_of_strings logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_cli.rs:92  prompts_of_rejects_null      logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_mod.rs:4  normalize_tags_outcome_table logic=15  inv=1  test-assert\ntools/alfred/src/tests/rules_mod.rs:33  is_full_id_outcome_table     logic=19  inv=1  test-assert\ntools/alfred/src/tests/rules_mod.rs:59  match_prefix_outcome_table   logic=15  inv=1  test-assert\ntools/alfred/src/tests/rules_mod.rs:89  iso_outcome_table            logic=8   inv=1  test-assert\ntools/alfred/src/tests/rules_near.rs:135  near_pairs_matches_the_pairs_of_hand_built_vectors logic=49  inv=0  lines>40\ntools/alfred/src/tests/rules_reach.rs:34  reach_of_outcome_table       logic=50  inv=1  lines>40 test-assert\ntools/alfred/src/tests/rules_reach.rs:132  reach_limits_match_spec      logic=0   inv=2  test-assert\ntools/alfred/src/tests/rules_refine/report.rs:38  refine_report_archive_live_restore_archived logic=46  inv=0  lines>40\ntools/alfred/src/tests/rules_refine/report.rs:141  refine_report_no_rules       logic=2   inv=6  asserts>5 test-assert\ntools/alfred/src/tests/rules_refine/report.rs:153  refine_report_table          logic=103 inv=34 asserts>5 computes lines>40 test-assert\ntools/alfred/src/tests/rules_refine/signals.rs:6  counters_start_is_2026_10_20 logic=0   inv=1  test-assert\ntools/alfred/src/tests/rules_refine/signals.rs:17  signals_of_table             logic=47  inv=12 asserts>5 lines>40 test-assert\ntools/alfred/src/tests/rules_refine/signals.rs:107  trust_of_table               logic=66  inv=0  lines>40\ntools/alfred/src/tests/rules_refine/spread.rs:25  spread_of_table              logic=12  inv=33 asserts>5 test-assert\ntools/alfred/src/tests/rules_routes.rs:9  tags_query_takes_tags_or_nothing logic=2   inv=2  test-assert\ntools/alfred/src/tests/rules_routes.rs:17  near_query_takes_min_and_optional_limit logic=2   inv=4  test-assert\ntools/alfred/src/tests/rules_routes.rs:27  near_query_holds_the_edges_of_its_inputs logic=6   inv=4  test-assert\ntools/alfred/src/tests/rules_routes.rs:51  status_of_marks_an_ambiguous_prefix_as_conflict logic=6   inv=1  test-assert\ntools/alfred/src/tests/rules_routes.rs:64  an_ambiguous_prefix_carries_the_candidates_in_paths logic=10  inv=3  test-assert\ntools/alfred/src/tests/serve.rs:7  status_table                 logic=6   inv=6  asserts>5 test-assert\ntools/alfred/src/tests/store.rs:30  is_published_classifies_quartz_exclusions logic=0   inv=19 asserts>5 test-assert\ntools/alfred/src/tests/store.rs:53  check_name_classifies_bad_names logic=0   inv=10 asserts>5 test-assert\ntools/alfred/src/tests/store.rs:103  read_outcome_table           logic=10  inv=9  asserts>5 test-assert\ntools/alfred/src/vault/page.rs:76  section                      logic=9   inv=1  computes\ntools/alfred/src/vault/page.rs:93  spans                        logic=31  inv=1  computes\ntools/alfred/src/vault/store.rs:43  page                         logic=11  inv=1  computes\ntools/alfred/src/vault/store.rs:62  find                         logic=31  inv=2  computes\ntools/alfred/src/vault/store.rs:114  pages                        logic=30  inv=1  computes\n\n242 functions  median=4  mean=7.6  max=103  over40=6  flagged=70  files over350=0\n",
+ "test": {
+  "passati": 99,
+  "falliti": 0,
+  "nuovi": 63
+ },
+ "mutanti": [
+  {
+   "mutazione": "trust_of: tolto il tetto di 10 hit (equivalente: 0.5+0.05*10 = 1, il min(1) lo copre)",
+   "ucciso": false
+  },
+  {
+   "mutazione": "trust_of: tolto min(1) (equivalente: il tetto di 10 hit lo copre)",
+   "ucciso": false
+  },
+  {
+   "mutazione": "spread_of: sotto soglia con <= invece di <",
+   "ucciso": true
+  },
+  {
+   "mutazione": "refine: restore con > invece di >=",
+   "ucciso": true
+  },
+  {
+   "mutazione": "signals_of: when senza max con l'inizio dei contatori",
+   "ucciso": true
+  },
+  {
+   "mutazione": "near_pairs: > invece di >=",
+   "ucciso": true
+  },
+  {
+   "mutazione": "reach_of: ordine senza id a parita'",
+   "ucciso": true
+  },
+  {
+   "mutazione": "normalize_tags: split su ; invece di ,",
+   "ucciso": true
+  },
+  {
+   "mutazione": "is_full_id: alfanumerico invece di esadecimale",
+   "ucciso": true
+  }
+ ]
+}
