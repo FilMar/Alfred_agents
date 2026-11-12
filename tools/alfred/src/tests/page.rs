@@ -192,7 +192,7 @@ fn is_draft_table() {
     assert!(!Page::parse("# Nota\n").is_draft());
 }
 
-const SECTIONS: &str = "Intro.\n\n# Alpha\n\nPrima.\n\n## Beta\n\nSeconda.\n\n# Gamma\n\nTerza.\n";
+const SECTIONS: &str = "Intro.\n\n# Alpha\n\nPrima.\n\n## Beta\n\nSeconda.\n\n# Gamma\n\nTerza.\n\n## Titolo Doppio\n\nUno.\n\n## Titolo Doppio\n\nDue.\n";
 
 #[test]
 fn section_table() {
@@ -202,8 +202,17 @@ fn section_table() {
         Some("# Alpha\n\nPrima.\n\n## Beta\n\nSeconda.\n\n")
     );
     assert_eq!(page.section("beta"), Some("## Beta\n\nSeconda.\n\n"));
-    assert_eq!(page.section("gamma"), Some("# Gamma\n\nTerza.\n"));
+    assert_eq!(page.section("titolo-doppio"), page.section("Titolo Doppio"));
     assert_eq!(page.section("intro"), None);
+    assert_eq!(page.section("Beta"), page.section("beta"));
+    assert_eq!(
+        page.section("Titolo Doppio"),
+        Some("## Titolo Doppio\n\nUno.\n\n")
+    );
+    assert_eq!(
+        page.section("titolo-doppio-1"),
+        Some("## Titolo Doppio\n\nDue.\n")
+    );
 }
 
 #[test]
@@ -218,7 +227,9 @@ fn toc_table() {
         vec![
             (1, "alpha".into(), "Alpha".into(), 36),
             (2, "beta".into(), "Beta".into(), 19),
-            (1, "gamma".into(), "Gamma".into(), 16),
+            (1, "gamma".into(), "Gamma".into(), 64),
+            (2, "titolo-doppio".into(), "Titolo Doppio".into(), 24),
+            (2, "titolo-doppio-1".into(), "Titolo Doppio".into(), 23),
         ]
     );
 }

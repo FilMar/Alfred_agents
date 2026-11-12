@@ -8,14 +8,14 @@ replaces: [memory_vault_read_by_toc_then_section@f5765ae]
 
 `alfred vault` has two commands:
 
-- `alfred vault toc <name>`: the headings of one page, each with its level, its id, its title and the length of its section in characters.
-- `alfred vault read <name> [id]`: the markdown of the page, without the frontmatter. With an id, only that section and its subsections.
+- `alfred vault toc <name>`: one line per heading, such as `## tavola-di-verità  211`. The hashes give the level. The number is the length of the section in characters.
+- `alfred vault read <name> [heading]`: the markdown of the page, without the frontmatter. With a heading, only that section and its subsections. The heading can be its id or its title.
 
 `<name>` is the name used in a vault link `[[name]]`: the file name without `.md`. A path such as `wandering_sun/world/storia` also works. A name that matches more than one page is an error that lists the paths.
 
 There is no list of pages. The agent starts from `read index` and follows the project indexes and their links.
 
-The id of a section is made from its heading text, the way Quartz makes it: `## 2. I Pianeti Gemelli` gives `2-i-pianeti-gemelli`.
+The id of a section is made from its heading text, the way Quartz makes it: `## 2. I Pianeti Gemelli` gives `2-i-pianeti-gemelli`. `read` turns what it gets into an id by the same rule. An id stays the same, and a title becomes its id. So a vault link such as `[[logic_propositional_xor#Tavola di verità]]` works as written. A title used twice in a page gives the first section.
 
 ## Why
 

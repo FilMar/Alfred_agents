@@ -74,10 +74,11 @@ impl Page {
     }
 
     pub fn section(&self, id: &str) -> Option<&str> {
+        let key = heading_id(id, &HashSet::new());
         let result: Option<&str> = self
             .spans()
             .into_iter()
-            .find(|span| span.heading.id == id)
+            .find(|span| span.heading.id == key)
             .map(|span| {
                 let range = span.range;
                 &self.body[range.start..range.end]

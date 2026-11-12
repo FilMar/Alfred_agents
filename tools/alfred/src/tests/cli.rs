@@ -21,8 +21,5 @@ fn render_toc_table() {
         heading(1, "alpha", "Alpha", 37),
         heading(2, "beta", "Beta", 19),
     ];
-    assert_eq!(
-        render_toc(&rows),
-        "1      37  alpha  Alpha\n2      19  beta  Beta\n"
-    );
+    assert_eq!(render_toc(&rows), "# alpha  37\n## beta  19\n");
 }

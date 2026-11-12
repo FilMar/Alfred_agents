@@ -22,8 +22,8 @@ pub async fn read(client: &Client, name: &str, id: Option<&str>) -> Result<Strin
 pub(crate) fn render_toc(headings: &[Heading]) -> String {
     let mut result = String::new();
     for h in headings {
-        let (level, id, title, chars) = (h.level, &h.id, &h.title, h.chars);
-        let _ = writeln!(result, "{level}  {chars:>6}  {id}  {title}");
+        let (hashes, id, chars) = ("#".repeat(usize::from(h.level)), &h.id, h.chars);
+        let _ = writeln!(result, "{hashes} {id}  {chars}");
     }
     debug_assert!(
         result.lines().count() == headings.len(),
