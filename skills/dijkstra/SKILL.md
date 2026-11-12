@@ -78,7 +78,10 @@ Look for these, in this order. The first ones save the most lines.
    fails, it was ceremony. An assert that cannot fail is ceremony too:
    see "An assert must be able to fail" in
    `~/.pi/agent/skills/ritchie/references/rules.md`. An assert that
-   states a decision of the body in another form stays.
+   states a decision of the body in another form stays. A union whose
+   users all check the variant and then do the same work is ceremony
+   too: merge it into one type with a field. A union whose branches do
+   different work stays. See "When a union pays" in the same file.
 4. **A shorter way.** Walk the language sheet tool by tool, and look
    for the code each one replaces: a macro, a derive, a generic, a
    table, a decorator, a comprehension. Each tool states when it pays

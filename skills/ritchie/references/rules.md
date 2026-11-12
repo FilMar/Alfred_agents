@@ -371,6 +371,18 @@ express. What makes a backend swap cheap is confinement, not indirection:
 domain types never carry backend concepts, so backend types die at the
 edges.
 
+**When a union pays.** A union earns its place when each variant leads
+to different work: a state machine where an operation exists in one
+state only, so the illegal call cannot be written. It is ceremony when
+every user checks the variant and then does the same thing. The case
+that shows it: `OwnDockerfile(path)` and `GeneratedDockerfile(text)`.
+Each caller checked which one it had, and each only wanted a Dockerfile
+to build. The build reads the file from stdin either way, so the union
+became `Dockerfile(text, own)` and every type check went away. The test:
+write down what each branch of each user does. If all branches end in
+the same operation, merge the variants and keep the difference as a
+field.
+
 **DRY at the second copy.** The case that shows the cost: one constant
 defined in two places, `0.1` in tests and `0.15` in production. Both
 compiled, both passed, and the tests verified a different physics than

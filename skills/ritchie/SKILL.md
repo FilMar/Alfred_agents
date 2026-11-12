@@ -194,7 +194,7 @@ deviates: `references/rules.md`.
 - An abstraction must make sense of the domain, not of the code.
 - A helper lives where its knowledge lives, not where it looks most
   reusable.
-- A trait or interface pays only with one consumer and many
-  implementors. Never over a backend that has one implementation.
+- A trait pays only with one consumer and many implementors.
+- A union pays only when each variant leads to different work.
 - DRY at the second copy, not the third.
 - A dependency arrives with the commit that uses it.
