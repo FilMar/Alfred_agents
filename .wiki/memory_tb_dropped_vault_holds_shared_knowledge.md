@@ -33,6 +33,6 @@ Two defects were found and are still open:
 
 ## Cross-references
 
-- [memory_vault_read_only_from_published_site](memory_vault_read_only_from_published_site) — how agents read the vault
+- [memory_vault_read_from_the_deck_checkout](memory_vault_read_from_the_deck_checkout) — how agents read the vault
 - [memory_hook_two_stage_tl_then_ti_rejected](memory_hook_two_stage_tl_then_ti_rejected) — the hook variant tried in the same spike
 - [core_alfred_v2_one_binary_serve_on_the_deck](core_alfred_v2_one_binary_serve_on_the_deck) — where the stores live

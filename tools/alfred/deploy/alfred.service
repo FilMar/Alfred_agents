@@ -1,0 +1,23 @@
+# alfred serve on the Deck (filcloud). A user unit.
+#
+# Build and install:
+#   cd ~/Alfred_agents/tools/alfred && cargo build --profile release-checked
+#   cp deploy/alfred.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now alfred
+#
+# The vault is ~/notes, the folder Quartz publishes. Port 8791.
+# Clients set ALFRED_URL=http://filcloud:8791
+
+[Unit]
+Description=alfred serve
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%h/Alfred_agents/tools/alfred/target/release-checked/alfred serve
+Environment=ALFRED_VAULT=%h/notes
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

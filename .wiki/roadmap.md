@@ -12,7 +12,23 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 The first piece of alfred v2. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
-- [A] `alfred serve` on the Deck with the vault service only, and the client `alfred vault` with `ls`, `toc` and `read`. [detail](memory_vault_read_by_toc_then_section)
+- [A] `alfred serve` on the Deck with the vault service only, and the client `alfred vault` with `toc` and `read`. [detail](memory_vault_read_by_name_from_the_indexes)
+
+## alfred v2: rules
+
+`ti` moves into `alfred serve` as `alfred rules`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
+
+- [A] Serve the rules API on the same Qdrant data.
+- [A] Client `alfred rules`, and the prompt hook with a short timeout.
+- [M] Rewrite every file that calls `ti`, then remove `tools/ti`.
+
+## alfred v2: hist
+
+`tl` moves into `alfred serve` as `alfred hist`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
+
+- [A] Serve the sessions, episodes and distill queue API.
+- [A] Client `alfred hist`, and the session upload from the laptop.
+- [M] Rewrite every file that calls `tl`, then remove `tools/tl`.
 
 ## Ideas
 
@@ -26,8 +42,6 @@ One line each. An idea becomes blocks only when it is the next goal.
 - A limit on the extractions API and on `tl extractions`.
 - One home for `requireServices`, or leave it. [detail](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags)
 - The distiller runs inside `alfred serve` on a schedule. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
-- Move `ti` to `alfred serve` as `alfred rules`, and rewrite the files that call `ti`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
-- Move `tl` to `alfred serve` as `alfred hist`, and rewrite the files that call `tl`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 - `th` becomes `alfred command`, local, with no API.
 - A generic runner of scheduled jobs inside `alfred serve`, agentic or not: sort the mail, check the state of the Deck. It may meet the `tp` design below.
 - Fix the generic `ti` rules that score 0.5-0.6 on every prompt. [detail](memory_tb_dropped_vault_holds_shared_knowledge)

@@ -122,8 +122,8 @@ updated: 2026-10-16
 | [memory_near_and_reach_find_what_aristotele_judges](memory_near_and_reach_find_what_aristotele_judges) | tb near and ti near list close pairs; tl prompts piped into ti reach counts which rules real prompts reach; code finds, Aristotele judges |
 | [memory_td_extractor_row_3_drops_generic_rules_and_bad_appends](memory_td_extractor_row_3_drops_generic_rules_and_bad_appends) | Row 3: a critic check drops generic rules; an append must fit the if of its rule and be an order |
 | [memory_tb_dropped_vault_holds_shared_knowledge](memory_tb_dropped_vault_holds_shared_knowledge) | v2 memory is rules, episodes and the vault; tb is not migrated |
-| [memory_vault_read_only_from_published_site](memory_vault_read_only_from_published_site) | Agents read the vault only from the published site and fail when it is down |
-| [memory_vault_read_by_toc_then_section](memory_vault_read_by_toc_then_section) | alfred vault ls, toc and read: one section at a time, by heading id |
+| [memory_vault_read_from_the_deck_checkout](memory_vault_read_from_the_deck_checkout) | serve reads the vault markdown in ~/notes on the Deck and skips what Quartz skips |
+| [memory_vault_read_by_name_from_the_indexes](memory_vault_read_by_name_from_the_indexes) | alfred vault toc and read by link name; the agent starts from the index pages |
 | [memory_hook_two_stage_tl_then_ti_rejected](memory_hook_two_stage_tl_then_ti_rejected) | No second ti search enriched with the best tl episode |
 
 ## skill
