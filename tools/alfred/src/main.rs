@@ -31,8 +31,12 @@ enum Command {
 
 #[derive(Subcommand)]
 enum VaultCommand {
-    Toc { name: String },
-    Read { name: String, id: Option<String> },
+    Read {
+        name: String,
+        heading: Option<String>,
+        #[arg(long)]
+        all: bool,
+    },
 }
 
 #[tokio::main]
@@ -51,9 +55,8 @@ async fn main() -> ExitCode {
             let reply = match Client::from_env() {
                 Err(e) => Err(e),
                 Ok(client) => match command {
-                    VaultCommand::Toc { name } => cli::toc(&client, &name).await,
-                    VaultCommand::Read { name, id } => {
-                        cli::read(&client, &name, id.as_deref()).await
+                    VaultCommand::Read { name, heading, all } => {
+                        cli::read(&client, &name, heading.as_deref(), all).await
                     }
                 },
             };

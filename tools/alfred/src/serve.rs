@@ -39,10 +39,7 @@ async fn toc(
     State(vault): State<Arc<Vault>>,
     Query(q): Query<TocQuery>,
 ) -> Result<Json<TocReply>, ApiError> {
-    let result: Result<Json<TocReply>, ApiError> = vault
-        .toc(&q.name)
-        .map(|headings| Json(TocReply { headings }))
-        .map_err(ApiError);
+    let result: Result<Json<TocReply>, ApiError> = vault.toc(&q.name).map(Json).map_err(ApiError);
     result
 }
 

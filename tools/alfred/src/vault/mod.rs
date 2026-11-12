@@ -8,6 +8,8 @@ use page::Heading;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TocReply {
+    pub path: String,
+    pub chars: u32,
     pub headings: Vec<Heading>,
 }
 

@@ -6,10 +6,15 @@ replaces: [memory_vault_read_by_toc_then_section@f5765ae]
 
 ## Decision
 
-`alfred vault` has two commands:
+`alfred vault` has one command, `alfred vault read <name> [heading] [--all]`:
 
-- `alfred vault toc <name>`: one line per heading, such as `## tavola-di-verità  211`. The hashes give the level. The number is the length of the section in characters.
-- `alfred vault read <name> [heading]`: the markdown of the page, without the frontmatter. With a heading, only that section and its subsections. The heading can be its id or its title.
+- an index page (`index`, or a file named like its folder, such as `MoP/MoP`): the whole page;
+- a page of 4000 characters or less, or with no headings: the whole page;
+- a longer page with headings: its outline, one line per heading, such as `## tavola-di-verità  211`. The hashes give the level, the number is the length of the section in characters;
+- with a heading: that section and its subsections. The heading can be its id or its title;
+- with `--all`: the whole page, whatever its size.
+
+The client prints a page without the frontmatter and without blank lines at the ends. A link `[[MoP|Meaning of Power]]` prints as `Meaning of Power (MoP)`. The API stays raw: `/vault/toc` gives the path, the length and the headings, `/vault/read` gives the markdown.
 
 `<name>` is the name used in a vault link `[[name]]`: the file name without `.md`. A path such as `wandering_sun/world/storia` also works. A name that matches more than one page is an error that lists the paths.
 
@@ -23,7 +28,7 @@ The vault already has a map written by the user. `index.md` links each project i
 
 The vault `CLAUDE.md` asks for file names unique in the whole vault. So the link name is already the address of a page, and the agent follows a `[[link]]` with no translation. Three names repeat today (`storia`, `razze_umani`, `plenarmonia`, in `000_old/` and `world/`). The vault writes those links with the path too.
 
-The largest page has 62 783 characters, about 15-20k tokens. The lengths in `toc` let the agent pick a section before it reads. No length limit is needed.
+The largest page has about 70 000 characters, 15-20k tokens. The outline lets the agent pick a section before it reads. A separate `toc` command cost the agent a call on every page, short ones included. One command that answers with the page or with its outline costs one call, and the answer says what to do next.
 
 An id is unique within a page. A title is not: "Indice" and "Note" repeat.
 

@@ -1,7 +1,8 @@
 use std::path::{Path, PathBuf};
 
+use super::TocReply;
 use super::VaultError;
-use super::page::{Heading, Page};
+use super::page::Page;
 
 const MAX_ENTRIES: u32 = 10_000;
 
@@ -16,49 +17,43 @@ impl Vault {
         Vault { root }
     }
 
-    pub fn toc(&self, name: &str) -> Result<Vec<Heading>, VaultError> {
-        let result: Result<Vec<Heading>, VaultError> = self.page(name).map(|page| page.toc());
+    pub fn toc(&self, name: &str) -> Result<TocReply, VaultError> {
+        let result: Result<TocReply, VaultError> = self.page(name).map(|(path, page)| TocReply {
+            path,
+            chars: u32::try_from(page.body().chars().count()).unwrap_or(u32::MAX),
+            headings: page.toc(),
+        });
         result
     }
 
     pub fn read(&self, name: &str, id: Option<&str>) -> Result<String, VaultError> {
-        let result: Result<String, VaultError>;
-        match self.page(name) {
-            Err(e) => result = Err(e),
-            Ok(page) => match id {
-                None => result = Ok(page.body().to_string()),
-                Some(id) => match page.section(id) {
-                    Some(section) => result = Ok(section.to_string()),
-                    None => {
-                        result = Err(VaultError::NoSection {
-                            name: name.to_string(),
-                            id: id.to_string(),
-                        });
-                    }
-                },
-            },
-        }
+        let result: Result<String, VaultError> = self.page(name).and_then(|(_, page)| match id {
+            None => Ok(page.body().to_string()),
+            Some(id) => page
+                .section(id)
+                .map(str::to_string)
+                .ok_or_else(|| VaultError::NoSection {
+                    name: name.to_string(),
+                    id: id.to_string(),
+                }),
+        });
         result
     }
 
-    fn page(&self, name: &str) -> Result<Page, VaultError> {
-        let result: Result<Page, VaultError>;
-        match self.find(name) {
-            Err(e) => result = Err(e),
-            Ok(path) => match std::fs::read_to_string(path) {
-                Err(e) => result = Err(VaultError::Io(e)),
-                Ok(text) => {
-                    let page = Page::parse(&text);
-                    if page.is_draft() {
-                        result = Err(VaultError::NoPage(name.to_string()));
-                    } else {
-                        result = Ok(page);
-                    }
-                }
-            },
-        }
+    fn page(&self, name: &str) -> Result<(String, Page), VaultError> {
+        let path = self.find(name)?;
+        let page = Page::parse(&std::fs::read_to_string(&path)?);
+        let rel = path
+            .strip_prefix(&self.root)
+            .unwrap_or(&path)
+            .with_extension("");
+        let result: Result<(String, Page), VaultError> = if page.is_draft() {
+            Err(VaultError::NoPage(name.to_string()))
+        } else {
+            Ok((rel.display().to_string(), page))
+        };
         debug_assert!(
-            result.as_ref().map_or(true, |p| !p.is_draft()),
+            result.as_ref().map_or(true, |(_, p)| !p.is_draft()),
             "Vault.page: never a draft"
         );
         result
