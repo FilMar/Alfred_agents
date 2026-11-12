@@ -16,7 +16,8 @@ updated: 2026-10-16
 |------|---------|
 | [core_orthogonal_layers_no_overlap](core_orthogonal_layers_no_overlap) | The five layers and the no-overlap boundary |
 | [core_mcp_not_adopted_cli_json_schemas_first](core_mcp_not_adopted_cli_json_schemas_first) | No MCP migration; contract layer with JSON Schemas first, MCP shim behind a trigger |
-| [core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp](core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp) | tb and ti keep no local state; every client points to the Qdrant and Ollama on the Rasp |
+| [core_alfred_v2_one_binary_serve_on_the_deck](core_alfred_v2_one_binary_serve_on_the_deck) | One alfred binary: serve on the Deck holds logic and data, the rest are thin API clients |
+| [core_alfred_v2_written_in_rust](core_alfred_v2_written_in_rust) | alfred v2 is in Rust for trust and ownership, not speed |
 
 ## th
 
@@ -120,6 +121,10 @@ updated: 2026-10-16
 | [memory_aristotele_is_a_manual_curator_of_tb_and_ti](memory_aristotele_is_a_manual_curator_of_tb_and_ti) | Aristotele curates tb and ti when the user starts it: merges, refs, hubs, ghost rules, no approval, a web report after |
 | [memory_near_and_reach_find_what_aristotele_judges](memory_near_and_reach_find_what_aristotele_judges) | tb near and ti near list close pairs; tl prompts piped into ti reach counts which rules real prompts reach; code finds, Aristotele judges |
 | [memory_td_extractor_row_3_drops_generic_rules_and_bad_appends](memory_td_extractor_row_3_drops_generic_rules_and_bad_appends) | Row 3: a critic check drops generic rules; an append must fit the if of its rule and be an order |
+| [memory_tb_dropped_vault_holds_shared_knowledge](memory_tb_dropped_vault_holds_shared_knowledge) | v2 memory is rules, episodes and the vault; tb is not migrated |
+| [memory_vault_read_only_from_published_site](memory_vault_read_only_from_published_site) | Agents read the vault only from the published site and fail when it is down |
+| [memory_vault_read_by_toc_then_section](memory_vault_read_by_toc_then_section) | alfred vault ls, toc and read: one section at a time, by heading id |
+| [memory_hook_two_stage_tl_then_ti_rejected](memory_hook_two_stage_tl_then_ti_rejected) | No second ti search enriched with the best tl episode |
 
 ## skill
 

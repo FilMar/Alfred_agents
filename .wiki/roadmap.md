@@ -1,12 +1,18 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-11-03
+updated: 2026-11-12
 ---
 
 A block is one run of ritchie (code) or efesto (skill). [A] is architecture: small, read it closely in review. [M] is mechanical: big, the first piece shows the rest.
 
 Only the next goals have blocks. When a goal is done, pick the next one from Ideas and cut it into blocks then.
+
+## alfred v2: serve and vault
+
+The first piece of alfred v2. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
+
+- [A] `alfred serve` on the Deck with the vault service only, and the client `alfred vault` with `ls`, `toc` and `read`. [detail](memory_vault_read_by_toc_then_section)
 
 ## Ideas
 
@@ -19,7 +25,13 @@ One line each. An idea becomes blocks only when it is the next goal.
 - `browse` and `random` print text, as `search` does. [detail](memory_search_prints_text_blocks_by_default)
 - A limit on the extractions API and on `tl extractions`.
 - One home for `requireServices`, or leave it. [detail](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags)
-- The distiller runs on the Rasp. It needs Ollama there. [detail](memory_td_distills_by_itself_at_session_start)
+- The distiller runs inside `alfred serve` on a schedule. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
+- Move `ti` to `alfred serve` as `alfred rules`, and rewrite the files that call `ti`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
+- Move `tl` to `alfred serve` as `alfred hist`, and rewrite the files that call `tl`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
+- `th` becomes `alfred command`, local, with no API.
+- A generic runner of scheduled jobs inside `alfred serve`, agentic or not: sort the mail, check the state of the Deck. It may meet the `tp` design below.
+- Fix the generic `ti` rules that score 0.5-0.6 on every prompt. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
+- Drop empty `tl` episodes from the search. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
 - A test for the hook script of the distiller. [detail](memory_td_distills_by_itself_at_session_start)
 - `th` cleans up zombie processes.
 - Ritchie: the mutant run as a script; a fixture helper; contract messages carry values; an integration net. [detail](skill_ritchie_contract_messages_carry_values)
@@ -43,7 +55,7 @@ One line each. An idea becomes blocks only when it is the next goal.
 To discuss with Piano before any block.
 
 - analisi: `.design/analisi.md`. `polo` reads sources. Missing: official and independent sources, the chart (`atlante` is in git), the stop when there are none. The expense CSV (`.bank.csv` in `essays`, read with `xan`) is a case too. On request only, or a monthly summary.
-- memory: discuss `.design/memory.md`.
+- memory: discuss `.design/memory.md`. It says "Io non la curo", "Non è ciò che so io" and "Non è un wiki che leggo io". The v2 memory contradicts these lines: the vault is written with the user. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
 - Procedural memory: `tp`, a runner of procedures (decided 2026-10-20, shape still moving, so no decision page yet). A procedure is a script in a folder; the folder is the registry, there is no register command. The script does the deterministic steps and asks `th` one structured question where judgment is needed: one branch per verdict, no loop. Every run writes a row in `tl` with its outcome, so skill telemetry comes from the runner. Two sources of procedures: a flow over `tl` that finds the operations done often and proposes the script; the agent itself, when it sees that a script it just wrote is generic, saves it in `tp`. The trigger is a `ti` rule whose `do` says `tp run <name>`. Use is the judge: a procedure never run again is archived like a note. Runs under the `th` bwrap profile. Replaces the "tb note of kind protocollo" step in [detail](memory_procedural_memory_grows_on_data); that page is rewritten when the design ends. To Piano first.
 - From the MCP audit: a JSON Schema layer for CLI output, a command whitelist with audit log, the binary trigger rule and an MCP shim for `ti`. [detail](core_mcp_not_adopted_cli_json_schemas_first)
 

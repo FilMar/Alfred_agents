@@ -31,4 +31,4 @@ The old `ensureCollection()` was the real risk of this plan. A migration creates
 ## Cross-references
 
 - `memory_keep_raw_source_for_reingest@08e919f` — the other half of a migration that can be redone
-- [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp) — where the collections live, and where mass re-embedding runs from
+- [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](core_alfred_v2_one_binary_serve_on_the_deck) — where the collections live, and where mass re-embedding runs from

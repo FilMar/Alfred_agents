@@ -17,6 +17,8 @@ pi is a personal cognitive augmentation system built as five orthogonal layers t
 
 `td` is not a layer. It is a worker that reads `tl` and writes to `tb` and `ti`.
 
+In alfred v2 the vault (the published FilWiki site) takes the place of `tb`, and `td` writes only to `ti` and `tl`: see [memory_tb_dropped_vault_holds_shared_knowledge](memory_tb_dropped_vault_holds_shared_knowledge).
+
 The boundary that keeps them apart: the Third Brain holds ideas that have value beyond the project — principles, patterns, cognitive tensions. No code, no technical documentation. The local wiki holds project-specific documentation — commands, flows, architecture, conventions. The two complement each other. They never overlap.
 
 ## Why
@@ -25,6 +27,6 @@ A fact with two homes drifts: one copy is updated, the other lies. Each layer an
 
 ## Cross-references
 
-- [core_tb_stateless_single_source](core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp) — how the CLIs stay stateless
+- [core_tb_stateless_single_source](core_alfred_v2_one_binary_serve_on_the_deck) — how the CLIs stay stateless
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the layer that replaces `th`'s local tracking
 - [memory_ti_context_action_rules](memory_ti_context_action_rules) — the `ti` layer in detail
