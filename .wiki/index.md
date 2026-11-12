@@ -18,6 +18,8 @@ updated: 2026-10-16
 | [core_mcp_not_adopted_cli_json_schemas_first](core_mcp_not_adopted_cli_json_schemas_first) | No MCP migration; contract layer with JSON Schemas first, MCP shim behind a trigger |
 | [core_alfred_v2_one_binary_serve_on_the_deck](core_alfred_v2_one_binary_serve_on_the_deck) | One alfred binary: serve on the Deck holds logic and data, the rest are thin API clients |
 | [core_alfred_v2_written_in_rust](core_alfred_v2_written_in_rust) | alfred v2 is in Rust for trust and ownership, not speed |
+| [core_alfred_api_speaks_json_cli_prints_text](core_alfred_api_speaks_json_cli_prints_text) | Every API reply is JSON with shared serde types; the CLI prints text |
+| [core_alfred_serve_runs_on_axum_and_tokio](core_alfred_serve_runs_on_axum_and_tokio) | axum, tokio and reqwest; pulldown-cmark for vault headings |
 
 ## th
 

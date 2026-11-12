@@ -8,12 +8,6 @@ A block is one run of ritchie (code) or efesto (skill). [A] is architecture: sma
 
 Only the next goals have blocks. When a goal is done, pick the next one from Ideas and cut it into blocks then.
 
-## alfred v2: serve and vault
-
-The first piece of alfred v2. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
-
-- [A] `alfred serve` on the Deck with the vault service only, and the client `alfred vault` with `toc` and `read`. [detail](memory_vault_read_by_name_from_the_indexes)
-
 ## alfred v2: rules
 
 `ti` moves into `alfred serve` as `alfred rules`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)

@@ -6,7 +6,7 @@ replaces: [core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp@c517871
 
 ## Decision
 
-alfred v2 is one binary, `alfred`. This is a design target. No code exists yet.
+alfred v2 is one binary, `alfred`, in `tools/alfred`. `alfred serve` with the vault service and `alfred vault` exist. The rest is a design target.
 
 - `alfred serve` runs only on the Steam Deck (filcloud). It holds all the logic and reaches all the data: Qdrant, the episode archive and the vault site. The distiller (`td` today) is part of it and runs there on a schedule.
 - Every other subcommand is a thin client of the `alfred serve` API: `alfred vault`, `alfred rules` (`ti` today), `alfred hist` (`tl` today).
