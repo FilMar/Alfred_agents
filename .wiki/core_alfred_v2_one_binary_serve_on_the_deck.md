@@ -12,7 +12,7 @@ alfred v2 is one binary, `alfred`, in `tools/alfred`. `alfred serve` with the va
 - Every other subcommand is a thin client of the `alfred serve` API: `alfred vault`, `alfred rules` (`ti` today), `alfred hist` (`tl` today).
 - `alfred command` (`th` today) runs on the local machine and does not use the API. It works on local files, inside the bwrap sandbox.
 - The prompt hook calls the API with a short timeout, about 1 second. When the call fails, the hook injects nothing and stays silent. It never blocks the prompt.
-- The old names are not kept as aliases. When a service moves to `alfred serve`, a single pass rewrites the files that call its old name: skills, hooks, `CLAUDE.md` and extensions.
+- The old names are not kept as aliases. The code of every service comes first, then the deploy on the Deck. Then one pass rewrites every file that calls an old name: skills, hooks, `CLAUDE.md` and extensions.
 
 ## Why
 

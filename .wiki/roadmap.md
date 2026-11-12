@@ -12,9 +12,8 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 `ti` moves into `alfred serve` as `alfred rules`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
-- [A] Serve the rules API on the same Qdrant data.
-- [A] Client `alfred rules`, and the prompt hook with a short timeout.
-- [M] Rewrite every file that calls `ti`, then remove `tools/ti`.
+- [A] Serve the rules API on the same Qdrant data, embeddings from the Deck Ollama.
+- [A] Client `alfred rules` with all the `ti` commands, and the prompt hook with a short timeout.
 
 ## alfred v2: hist
 
@@ -22,7 +21,14 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 - [A] Serve the sessions, episodes and distill queue API.
 - [A] Client `alfred hist`, and the session upload from the laptop.
-- [M] Rewrite every file that calls `tl`, then remove `tools/tl`.
+
+## alfred v2: deploy and switch
+
+The server goes on the Deck, then every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
+
+- [A] Install `alfred serve` on the Deck as a user unit.
+- [M] Rewrite skills, hooks, `CLAUDE.md` and extensions to call `alfred`.
+- [M] `tools/ti` and `tools/tl` stay only as the library of `td`.
 
 ## Ideas
 
