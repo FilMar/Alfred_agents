@@ -8,13 +8,6 @@ A block is one run of ritchie (code) or efesto (skill). [A] is architecture: sma
 
 Only the next goals have blocks. When a goal is done, pick the next one from Ideas and cut it into blocks then.
 
-## alfred v2: rules
-
-`ti` moves into `alfred serve` as `alfred rules`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
-
-- [A] Serve the rules API on the same Qdrant data, embeddings from the Deck Ollama.
-- [A] Client `alfred rules` with all the `ti` commands, and the prompt hook with a short timeout.
-
 ## alfred v2: hist
 
 `tl` moves into `alfred serve` as `alfred hist`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)

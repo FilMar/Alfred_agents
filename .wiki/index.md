@@ -127,6 +127,8 @@ updated: 2026-10-16
 | [memory_vault_read_from_the_deck_checkout](memory_vault_read_from_the_deck_checkout) | serve reads the vault markdown in ~/notes on the Deck and skips what Quartz skips |
 | [memory_vault_read_by_name_from_the_indexes](memory_vault_read_by_name_from_the_indexes) | alfred vault toc and read by link name; the agent starts from the index pages |
 | [memory_hook_two_stage_tl_then_ti_rejected](memory_hook_two_stage_tl_then_ti_rejected) | No second ti search enriched with the best tl episode |
+| [memory_rules_served_on_the_same_qdrant_data](memory_rules_served_on_the_same_qdrant_data) | alfred serve serves ti rules on the same pi_identity data, embeddings from the Deck Ollama kept loaded |
+| [memory_rules_search_deadline_is_kept_by_the_server](memory_rules_search_deadline_is_kept_by_the_server) | search --timeout is applied by the server before hits are counted; the client adds a network margin |
 
 ## skill
 
