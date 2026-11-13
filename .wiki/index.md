@@ -133,6 +133,9 @@ updated: 2026-10-16
 | [memory_hist_ingest_reads_every_harness_through_one_format](memory_hist_ingest_reads_every_harness_through_one_format) | ingest reads Claude and pi through one Format table; rows identical to tl; prompts and cost on the server |
 | [memory_distill_starts_on_ingest_by_threshold](memory_distill_starts_on_ingest_by_threshold) | No timer: a distill run starts after an ingest when 50 exchanges are pending or the oldest is 24 hours old |
 | [memory_extractor_row_4_has_rules_only_roles](memory_extractor_row_4_has_rules_only_roles) | Row 4: roles are model, think, temperature, system; prompts for rules only; ALFRED_DISTILL_MODEL overrides the model |
+| [memory_distill_tag_vocabulary_comes_from_ti_rules](memory_distill_tag_vocabulary_comes_from_ti_rules) | The Rust distiller takes its tag vocabulary from the ti rules, by count, ties by name |
+| [memory_distill_tag_key_strips_accents_by_nfd](memory_distill_tag_key_strips_accents_by_nfd) | tag_key strips accents with NFD, as td does, via unicode-normalization |
+| [memory_distill_extraction_body_keeps_five_keys](memory_distill_extraction_body_keeps_five_keys) | An extractions body holds only if, do, tags, proposedTags, quote |
 
 ## skill
 
