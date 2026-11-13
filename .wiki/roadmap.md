@@ -12,7 +12,6 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 `tl` moves into `alfred serve` as `alfred hist`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
-- [A] Serve the sessions, episodes and distill queue API.
 - [A] Client `alfred hist`, and the session upload from the laptop.
 
 ## alfred v2: deploy and switch

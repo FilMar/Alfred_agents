@@ -129,6 +129,7 @@ updated: 2026-10-16
 | [memory_hook_two_stage_tl_then_ti_rejected](memory_hook_two_stage_tl_then_ti_rejected) | No second ti search enriched with the best tl episode |
 | [memory_rules_served_on_the_same_qdrant_data](memory_rules_served_on_the_same_qdrant_data) | alfred serve serves ti rules on the same pi_identity data, embeddings from the Deck Ollama kept loaded |
 | [memory_rules_search_deadline_is_kept_by_the_server](memory_rules_search_deadline_is_kept_by_the_server) | search --timeout is applied by the server before hits are counted; the client adds a network margin |
+| [memory_hist_serves_the_tl_archive_unchanged](memory_hist_serves_the_tl_archive_unchanged) | alfred serve keeps the tl routes, JSON and SQLite file under /hist, so td and th switch with one URL |
 
 ## skill
 
