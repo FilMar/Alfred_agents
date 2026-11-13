@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::hist::db::HistDb;
 use crate::hist::{Contents, Exchange, HistError};
+use crate::sorted::sorted_by_key;
 
 // Longest session seen: 210 exchanges.
 pub const PENDING_CAP: i64 = 1000;
@@ -227,11 +228,6 @@ fn sorted<T: std::borrow::Borrow<Turn>>(turns: Vec<T>) -> Vec<T> {
         let turn: &Turn = t.borrow();
         (turn.timestamp().to_string(), turn.id().to_string())
     })
-}
-
-fn sorted_by_key<T, K: Ord>(mut items: Vec<T>, key: impl Fn(&T) -> K) -> Vec<T> {
-    items.sort_by_key(key);
-    items
 }
 
 fn belong(turns: &[Turn], session: &str) -> bool {

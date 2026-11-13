@@ -2,6 +2,7 @@ use jiff::Timestamp;
 use serde::{Deserialize, Serialize};
 
 use super::Rule;
+use crate::sorted::sorted_by;
 
 pub const TRUST_BASE: f64 = 0.5;
 pub const HIT_WEIGHT: f64 = 0.05;
@@ -102,13 +103,14 @@ pub fn spread_of(trusts: &[f64]) -> Spread {
         trusts.iter().all(|t| (0.0..=1.0).contains(t)),
         "spread_of: every trust is between 0 and 1"
     );
-    let mut bins = vec![0_u32; BIN_COUNT];
-    let mut below_floor = 0_u32;
-    for trust in trusts {
-        bins[bin_of(*trust)] += 1;
-        below_floor += u32::from(*trust < TRUST_FLOOR);
-    }
-    let total = u32::try_from(trusts.len()).unwrap_or(u32::MAX);
+    let count = |keep: &dyn Fn(f64) -> bool| {
+        u32::try_from(trusts.iter().filter(|t| keep(**t)).count()).unwrap_or(u32::MAX)
+    };
+    let bins: Vec<u32> = (0..BIN_COUNT)
+        .map(|bin| count(&|t| bin_of(t) == bin))
+        .collect();
+    let below_floor = count(&|t| t < TRUST_FLOOR);
+    let total = count(&|_| true);
     let result = Spread {
         bins,
         total,
@@ -128,13 +130,14 @@ pub fn refine_report(rules: &[Rule], now: Timestamp) -> RefineReport {
         .map(|r| (r, trust_of(signals_of(r, start), now)))
         .collect();
     let pick = |keep: &dyn Fn(&Rule, f64) -> bool| -> Vec<LowRule> {
-        let mut list: Vec<LowRule> = scored
+        let list: Vec<LowRule> = scored
             .iter()
             .filter(|(r, t)| keep(r, *t))
             .map(|(r, t)| low_rule(r, *t, start))
             .collect();
-        list.sort_by(|a, b| a.trust.total_cmp(&b.trust).then_with(|| a.id.cmp(&b.id)));
-        list
+        sorted_by(list, |a, b| {
+            a.trust.total_cmp(&b.trust).then_with(|| a.id.cmp(&b.id))
+        })
     };
     let low = pick(&|_, t| t < TRUST_FLOOR);
     let archive = pick(&|r, t| t < TRUST_FLOOR && r.body.archived_at.is_none());

@@ -1,6 +1,9 @@
+use std::collections::{HashMap, HashSet};
+
 use serde::{Deserialize, Serialize};
 
 use super::Exchange;
+use crate::sorted::sorted_by_key;
 
 pub const PROMPTS_LIMIT: i64 = 100_000;
 pub const COST_LIMIT: i64 = 5_000;
@@ -31,7 +34,7 @@ pub enum By {
 
 pub fn prompts_of(sources: &[(Exchange, String)]) -> Vec<Prompt> {
     let result: Vec<Prompt> = {
-        let mut kept: Vec<Prompt> = sources
+        let kept: Vec<Prompt> = sources
             .iter()
             .filter(|(exchange, input)| {
                 let human = match exchange.meta.as_ref().and_then(|meta| meta.get("trigger")) {
@@ -47,10 +50,17 @@ pub fn prompts_of(sources: &[(Exchange, String)]) -> Vec<Prompt> {
                 text: input.trim().to_string(),
             })
             .collect();
-        kept.sort_by(|a, b| (&a.timestamp, &a.exchange).cmp(&(&b.timestamp, &b.exchange)));
-        let mut seen = std::collections::HashSet::new();
-        kept.retain(|p| seen.insert(p.text.clone()));
-        kept
+        let ordered = sorted_by_key(kept, |p| (p.timestamp.clone(), p.exchange.clone()));
+        let first: HashMap<&str, &str> = ordered
+            .iter()
+            .rev()
+            .map(|p| (p.text.as_str(), p.exchange.as_str()))
+            .collect();
+        ordered
+            .iter()
+            .filter(|p| first[p.text.as_str()] == p.exchange)
+            .cloned()
+            .collect()
     };
     debug_assert!(
         result
@@ -69,29 +79,25 @@ pub fn prompts_of(sources: &[(Exchange, String)]) -> Vec<Prompt> {
 }
 
 pub fn sum_by(exchanges: &[Exchange], by: By) -> Vec<CostRow> {
-    let result: Vec<CostRow> = {
-        let mut rows = std::collections::BTreeMap::<String, CostRow>::new();
-        for exchange in exchanges {
-            let key = match by {
-                By::Day => exchange.timestamp.chars().take(10).collect::<String>(),
-                By::Session => exchange.session.clone(),
-                By::Model => exchange
-                    .model
-                    .clone()
-                    .unwrap_or_else(|| "unknown".to_string()),
-            };
-            let row = rows.entry(key.clone()).or_insert_with(|| CostRow {
-                key,
-                ..Default::default()
-            });
-            row.exchanges += 1;
-            row.tokens_in += exchange.tokens_in.unwrap_or(0);
-            row.tokens_out += exchange.tokens_out.unwrap_or(0);
-            row.tokens_cache_read += exchange.tokens_cache_read.unwrap_or(0);
-            row.tokens_cache_write += exchange.tokens_cache_write.unwrap_or(0);
-        }
-        rows.into_values().collect()
+    let key = |exchange: &Exchange| match by {
+        By::Day => exchange.timestamp.chars().take(10).collect::<String>(),
+        By::Session => exchange.session.clone(),
+        By::Model => exchange
+            .model
+            .clone()
+            .unwrap_or_else(|| "unknown".to_string()),
     };
+    let result: Vec<CostRow> = sorted_by_key(exchanges.iter().collect(), |e| key(e))
+        .chunk_by(|a, b| key(a) == key(b))
+        .map(|group| CostRow {
+            key: key(group[0]),
+            exchanges: i64::try_from(group.len()).unwrap_or(i64::MAX),
+            tokens_in: group.iter().filter_map(|e| e.tokens_in).sum(),
+            tokens_out: group.iter().filter_map(|e| e.tokens_out).sum(),
+            tokens_cache_read: group.iter().filter_map(|e| e.tokens_cache_read).sum(),
+            tokens_cache_write: group.iter().filter_map(|e| e.tokens_cache_write).sum(),
+        })
+        .collect();
     debug_assert!(
         result.iter().map(|r| r.exchanges).sum::<i64>()
             == i64::try_from(exchanges.len()).unwrap_or(i64::MAX),
@@ -114,6 +120,6 @@ pub fn by_of(raw: Option<&str>) -> Option<By> {
 }
 
 fn no_repeat(prompts: &[Prompt]) -> bool {
-    let mut seen = std::collections::HashSet::new();
-    prompts.iter().all(|p| seen.insert(p.text.as_str()))
+    let texts: HashSet<&str> = prompts.iter().map(|p| p.text.as_str()).collect();
+    texts.len() == prompts.len()
 }

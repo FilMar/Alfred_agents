@@ -110,21 +110,21 @@ impl Rules {
                     .prompts
                     .chunks(super::super::reach::SEARCHES_IN_FLIGHT)
                 {
-                    let mut searches = Vec::with_capacity(chunk.len());
-                    for prompt in chunk {
-                        let embedder = self.embedder.clone();
-                        let qdrant = self.qdrant.clone();
-                        let prompt = prompt.clone();
-                        let filter = filter.clone();
-                        searches.push(tokio::spawn(async move {
-                            let vector = embedder.query(&prompt).await?;
-                            let hits = qdrant
-                                .query::<RuleBody>(&vector, limit, filter, Some(min_score))
-                                .await?;
-                            let ids: Vec<String> = hits.into_iter().map(|hit| hit.id).collect();
-                            Ok::<Vec<String>, RulesError>(ids)
-                        }));
-                    }
+                    let searches: Vec<_> = chunk
+                        .iter()
+                        .map(|prompt| {
+                            let (embedder, qdrant) = (self.embedder.clone(), self.qdrant.clone());
+                            let (prompt, filter) = (prompt.clone(), filter.clone());
+                            tokio::spawn(async move {
+                                let vector = embedder.query(&prompt).await?;
+                                let hits = qdrant
+                                    .query::<RuleBody>(&vector, limit, filter, Some(min_score))
+                                    .await?;
+                                let ids: Vec<String> = hits.into_iter().map(|hit| hit.id).collect();
+                                Ok::<Vec<String>, RulesError>(ids)
+                            })
+                        })
+                        .collect();
                     for search in searches {
                         let ids = search
                             .await

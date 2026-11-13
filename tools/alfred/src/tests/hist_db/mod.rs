@@ -22,8 +22,7 @@ pub(super) const T2: &str = "2026-02-03T04:05:06.789Z";
 pub(super) const T3: &str = "2026-03-04T05:06:07.890Z";
 
 pub(super) fn fresh_path(name: &str) -> std::path::PathBuf {
-    let mut path = std::env::temp_dir();
-    path.push(format!("hist_db_{}_{}.db", std::process::id(), name));
+    let path = std::env::temp_dir().join(format!("hist_db_{}_{}.db", std::process::id(), name));
     let _ = std::fs::remove_file(&path);
     let _ = std::fs::remove_file(path.with_extension("db-wal"));
     let _ = std::fs::remove_file(path.with_extension("db-shm"));

@@ -6,6 +6,7 @@ use super::{Found, Rule, RuleBody, RulesError, SearchOptions};
 use crate::embed::Embedder;
 use crate::hist::validate::is_id;
 use crate::qdrant::{Match, Qdrant, Stored};
+use crate::sorted::sorted_by_key;
 
 pub const DEFAULT_LIMIT: u32 = 10;
 pub const DEFAULT_NEAR_LIMIT: u32 = 100;
@@ -42,16 +43,17 @@ impl Rules {
         now: Timestamp,
     ) -> Result<Vec<Found>, RulesError> {
         let find = self.find(opts);
-        let mut found = match opts.timeout {
+        let found = match opts.timeout {
             Some(ms) => tokio::time::timeout(std::time::Duration::from_millis(ms), find)
                 .await
                 .map_err(|_| RulesError::Timeout(ms))??,
             None => find.await?,
         };
-        if opts.hits.unwrap_or(true) {
-            self.record_hits(&mut found, now).await;
-        }
-        let result: Result<Vec<Found>, RulesError> = Ok(found);
+        let result: Result<Vec<Found>, RulesError> = Ok(if opts.hits.unwrap_or(true) {
+            self.record_hits(found, now).await
+        } else {
+            found
+        });
         debug_assert!(
             result.as_ref().map_or(true, |f| f.len()
                 <= opts.limit.unwrap_or(DEFAULT_LIMIT) as usize),
@@ -69,21 +71,20 @@ impl Rules {
     async fn find(&self, opts: &SearchOptions) -> Result<Vec<Found>, RulesError> {
         let vector = self.embedder.query(&opts.q).await?;
         let limit = opts.limit.unwrap_or(DEFAULT_LIMIT);
-        let mut must: Vec<serde_json::Value> = Vec::new();
-        if let Some(raw) = &opts.tags {
-            let tags = super::normalize_tags(std::slice::from_ref(raw));
-            if !tags.is_empty() {
-                must.push(serde_json::json!({ "key": "tags", "match": { "any": tags } }));
-            }
-        }
-        if opts.archived == Some(false) {
-            must.push(serde_json::json!({ "is_empty": { "key": "archived_at" } }));
-        }
-        let filter = if must.is_empty() {
-            None
-        } else {
-            Some(serde_json::json!({ "must": must }))
-        };
+        let tags = opts
+            .tags
+            .as_ref()
+            .map(|raw| super::normalize_tags(std::slice::from_ref(raw)));
+        let must: Vec<serde_json::Value> = [
+            tags.filter(|t| !t.is_empty())
+                .map(|t| serde_json::json!({ "key": "tags", "match": { "any": t } })),
+            (opts.archived == Some(false))
+                .then(|| serde_json::json!({ "is_empty": { "key": "archived_at" } })),
+        ]
+        .into_iter()
+        .flatten()
+        .collect();
+        let filter = (!must.is_empty()).then(|| serde_json::json!({ "must": must }));
         let hits = self
             .qdrant
             .query::<RuleBody>(&vector, limit, filter, opts.min_score)
@@ -232,28 +233,30 @@ impl Rules {
         result
     }
 
-    async fn record_hits(&self, found: &mut [Found], now: Timestamp) {
+    async fn record_hits(&self, found: Vec<Found>, now: Timestamp) -> Vec<Found> {
         let stamp = super::iso(now);
-        let mut groups: std::collections::BTreeMap<(u32, String), Vec<String>> =
-            std::collections::BTreeMap::new();
-        for item in found.iter_mut() {
-            let hits = item.rule.body.hits.unwrap_or(0) + 1;
-            item.rule.body.hits = Some(hits);
-            item.rule.body.last_hit = Some(stamp.clone());
-            groups
-                .entry((hits, stamp.clone()))
-                .or_default()
-                .push(item.rule.id.clone());
+        let hit: Vec<Found> = found
+            .into_iter()
+            .map(|f| {
+                let hits = Some(f.rule.body.hits.unwrap_or(0) + 1);
+                let body = RuleBody {
+                    hits,
+                    last_hit: Some(stamp.clone()),
+                    ..f.rule.body
+                };
+                Found {
+                    rule: Rule { body, ..f.rule },
+                    ..f
+                }
+            })
+            .collect();
+        let by_hits = sorted_by_key(hit.iter().collect(), |f| f.rule.body.hits);
+        for group in by_hits.chunk_by(|a, b| a.rule.body.hits == b.rule.body.hits) {
+            let ids: Vec<String> = group.iter().map(|f| f.rule.id.clone()).collect();
+            let body = serde_json::json!({ "hits": group[0].rule.body.hits, "last_hit": stamp });
+            let _ = self.qdrant.set_payload(&ids, body).await;
         }
-        for ((hits, last_hit), ids) in groups {
-            let _ = self
-                .qdrant
-                .set_payload(
-                    &ids,
-                    serde_json::json!({ "hits": hits, "last_hit": last_hit }),
-                )
-                .await;
-        }
+        hit
     }
 }
 

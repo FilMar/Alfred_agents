@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::sorted::sorted_by_key;
+
 pub const MAX_PROMPTS: usize = 10_000;
 pub const SEARCHES_IN_FLIGHT: usize = 8;
 
@@ -26,22 +28,18 @@ pub struct ReachReply {
 }
 
 pub fn reach_of(rules: &[(String, String)], found: &[Vec<String>]) -> ReachReply {
-    use std::collections::HashMap;
-    let mut counts = HashMap::new();
-    for ids in found {
-        for id in ids {
-            *counts.entry(id.as_str()).or_insert(0) += 1;
-        }
-    }
-    let mut counted: Vec<ReachRule> = rules
-        .iter()
-        .map(|(id, if_)| ReachRule {
-            id: id.clone(),
-            if_: if_.clone(),
-            reached: counts.get(id.as_str()).copied().unwrap_or(0),
-        })
-        .collect();
-    counted.sort_by(|a, b| a.reached.cmp(&b.reached).then_with(|| a.id.cmp(&b.id)));
+    let counted = sorted_by_key(
+        rules
+            .iter()
+            .map(|(id, if_)| ReachRule {
+                id: id.clone(),
+                if_: if_.clone(),
+                reached: u32::try_from(found.iter().flatten().filter(|x| *x == id).count())
+                    .unwrap_or(u32::MAX),
+            })
+            .collect(),
+        |r| (r.reached, r.id.clone()),
+    );
     let unreached: Vec<ReachRule> = counted.iter().filter(|r| r.reached == 0).cloned().collect();
     let result: ReachReply = ReachReply {
         prompts: found.len() as u32,

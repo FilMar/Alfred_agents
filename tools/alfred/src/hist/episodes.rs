@@ -152,10 +152,11 @@ pub fn derived_id(left: &str, right: &str) -> String {
     let result: String = {
         let digest = <sha2::Sha256 as sha2::Digest>::digest(format!("{left}:{right}").as_bytes());
         let bytes: &[u8] = std::convert::AsRef::as_ref(&digest);
-        let hex: String = bytes.iter().fold(String::new(), |mut acc, byte| {
-            let _ = std::fmt::Write::write_fmt(&mut acc, format_args!("{byte:02x}"));
-            acc
-        });
+        let hex: String = bytes
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect::<Vec<_>>()
+            .concat();
         format!(
             "{}-{}-{}-{}-{}",
             &hex[0..8],
@@ -239,35 +240,25 @@ fn checked(id: &str, p: Payload) -> Result<Episode, String> {
 }
 
 pub fn period_filter(since: Option<&str>, until: Option<&str>) -> Result<Option<Value>, HistError> {
-    (|| {
-        let mut must: Vec<Value> = Vec::new();
-        if let Some(day) = since {
-            if !super::validate::is_day(day) {
-                return Err(HistError::BadInput(format!("since is not a day: {day}")));
-            }
-            must.push(serde_json::json!({
-                "key": "to",
-                "range": { "gte": format!("{day}T00:00:00.000Z") }
-            }));
-        }
-        if let Some(day) = until {
-            if !super::validate::is_day(day) {
-                return Err(HistError::BadInput(format!("until is not a day: {day}")));
-            }
-            must.push(serde_json::json!({
-                "key": "from",
-                "range": { "lte": format!("{day}T23:59:59.999Z") }
-            }));
-        }
-        if let (Some(from), Some(to)) = (since, until)
-            && from > to
-        {
-            return Err(HistError::BadInput("since is after until".to_string()));
-        }
-        if must.is_empty() {
-            Ok(None)
-        } else {
-            Ok(Some(serde_json::json!({ "must": must })))
-        }
-    })()
+    let bad = [("since", since), ("until", until)]
+        .into_iter()
+        .find_map(|(name, day)| {
+            day.filter(|d| !super::validate::is_day(d))
+                .map(|d| format!("{name} is not a day: {d}"))
+        })
+        .or_else(|| {
+            matches!((since, until), (Some(from), Some(to)) if from > to)
+                .then(|| "since is after until".to_string())
+        });
+    let must: Vec<Value> = [
+        since.map(|day| serde_json::json!({ "key": "to", "range": { "gte": format!("{day}T00:00:00.000Z") } })),
+        until.map(|day| serde_json::json!({ "key": "from", "range": { "lte": format!("{day}T23:59:59.999Z") } })),
+    ]
+    .into_iter()
+    .flatten()
+    .collect();
+    bad.map_or_else(
+        || Ok((!must.is_empty()).then(|| serde_json::json!({ "must": must }))),
+        |m| Err(HistError::BadInput(m)),
+    )
 }

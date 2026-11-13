@@ -206,7 +206,7 @@ async fn search(
 
 async fn show(id: &str, tools: bool) -> Result<String, ClientError> {
     let client = Client::from_env()?;
-    let mut exchange: serde_json::Value =
+    let exchange: serde_json::Map<String, serde_json::Value> =
         get_json(&client, &format!("/hist/exchanges/{id}"), &[]).await?;
     let query: Vec<(&str, String)> = if tools {
         vec![("tools", "true".into())]
@@ -215,14 +215,20 @@ async fn show(id: &str, tools: bool) -> Result<String, ClientError> {
     };
     let contents: super::Contents =
         get_json(&client, &format!("/hist/contents/{id}"), &query).await?;
-    if let serde_json::Value::Object(map) = &mut exchange {
-        map.insert("input".into(), contents.input.into());
-        map.insert("output".into(), contents.output.into());
-        if let Some(text) = contents.tools {
-            map.insert("tools".into(), text.into());
-        }
-    }
-    Ok(pretty(&exchange))
+    let texts = [
+        ("input", Some(contents.input)),
+        ("output", Some(contents.output)),
+    ];
+    let shown: serde_json::Map<String, serde_json::Value> = exchange
+        .into_iter()
+        .chain(
+            texts
+                .into_iter()
+                .chain([("tools", contents.tools)])
+                .filter_map(|(k, v)| Some((k.to_string(), v?.into()))),
+        )
+        .collect();
+    Ok(pretty(&shown))
 }
 
 async fn distilled(ids: &[String]) -> Result<String, ClientError> {
@@ -246,19 +252,15 @@ fn input(message: &str) -> ClientError {
 }
 
 pub(crate) fn render_episodes(hits: &[EpisodeHit]) -> String {
-    let result: String = {
-        let mut blocks: Vec<String> = Vec::new();
-        for hit in hits {
+    let result: String = hits
+        .iter()
+        .map(|hit| {
             let short: String = hit.episode.id.chars().take(SHORT_ID).collect();
             let day: String = hit.episode.from.chars().take(10).collect();
-            blocks.push(format!("-- {short} {day}\n{}", hit.episode.summary));
-        }
-        let mut joined = blocks.join("\n");
-        if !joined.is_empty() {
-            joined.push('\n');
-        }
-        joined
-    };
+            format!("-- {short} {day}\n{}\n", hit.episode.summary)
+        })
+        .collect::<Vec<String>>()
+        .concat();
     debug_assert!(
         hits.is_empty() == result.is_empty(),
         "render_episodes: empty only for no hits"

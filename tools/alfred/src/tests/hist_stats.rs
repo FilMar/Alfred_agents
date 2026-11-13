@@ -51,10 +51,8 @@ fn limits_match_the_spec() {
 #[test]
 fn prompts_keep_only_human_triggers() {
     let exchange = |id: &str, trigger: Option<&str>| {
-        let mut row = serde_json::json!({"id": id, "session": "s", "timestamp": format!("2026-01-01T00:00:0{}.000Z", &id[1..]), "kind": "chat", "actor": "a"});
-        if let Some(t) = trigger {
-            row["meta"] = serde_json::json!({"trigger": t});
-        }
+        let meta = trigger.map(|t| serde_json::json!({"trigger": t}));
+        let row = serde_json::json!({"id": id, "session": "s", "timestamp": format!("2026-01-01T00:00:0{}.000Z", &id[1..]), "kind": "chat", "actor": "a", "meta": meta});
         serde_json::from_value::<crate::hist::Exchange>(row).unwrap()
     };
     let sources = vec![

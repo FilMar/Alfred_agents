@@ -24,28 +24,34 @@ pub(crate) fn js(value: Option<&Value>) -> String {
                 Value::Bool(flag) => flag.to_string(),
                 Value::Number(number) => number_text(number),
                 Value::Object(_) => "[object Object]".to_string(),
-                // an array never reaches plain: the walk below flattens nested ones
+                // an empty nested array prints nothing
                 Value::Array(_) => String::new(),
             }
         }
         match value {
             None => "undefined".to_string(),
             Some(Value::Array(items)) => {
-                let mut parts: Vec<String> = Vec::new();
-                let mut stack = vec![items.iter()];
-                while let Some(mut iter) = stack.pop() {
-                    if let Some(item) = iter.next() {
-                        stack.push(iter);
-                        match item {
-                            Value::Array(inner) if inner.is_empty() => {
-                                parts.push(String::new());
-                            }
-                            Value::Array(inner) => stack.push(inner.iter()),
-                            Value::Null => parts.push(String::new()),
-                            other => parts.push(plain(other)),
-                        }
-                    }
-                }
+                let nested = |v: &Value| matches!(v, Value::Array(inner) if !inner.is_empty());
+                let flat = std::iter::successors(Some(items.clone()), |level| {
+                    level.iter().any(nested).then(|| {
+                        level
+                            .iter()
+                            .flat_map(|v| {
+                                if nested(v) {
+                                    v.as_array().cloned().unwrap_or_default()
+                                } else {
+                                    vec![v.clone()]
+                                }
+                            })
+                            .collect()
+                    })
+                });
+                let parts: Vec<String> = flat
+                    .last()
+                    .unwrap_or_default()
+                    .iter()
+                    .map(|v| if v.is_null() { String::new() } else { plain(v) })
+                    .collect();
                 parts.join(",")
             }
             Some(other) => plain(other),

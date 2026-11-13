@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::sorted::sorted_by;
+
 pub const NEAR_ITEMS_LIMIT: usize = 3000;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -38,26 +40,27 @@ pub fn near_pairs(items: &[(String, Vec<f32>)], min: f32, limit: usize) -> Vec<P
         items.len() <= NEAR_ITEMS_LIMIT,
         "near_pairs: at most 3000 items"
     );
-    let mut result: Vec<Pair> = Vec::new();
-    for (i, (a, left)) in items.iter().enumerate() {
-        for (b, right) in items[i + 1..].iter().filter(|(b, _)| b != a) {
-            let score = cosine(left, right);
-            if score >= min {
-                result.push(Pair {
-                    a: a.clone(),
-                    b: b.clone(),
-                    score,
-                });
-            }
-        }
-    }
-    result.sort_by(|x, y| {
-        y.score
-            .total_cmp(&x.score)
-            .then_with(|| x.a.cmp(&y.a))
-            .then_with(|| x.b.cmp(&y.b))
+    let close: Vec<Pair> = items
+        .iter()
+        .enumerate()
+        .flat_map(|(i, (a, left))| {
+            items[i + 1..]
+                .iter()
+                .filter(move |(b, _)| b != a)
+                .filter_map(move |(b, right)| {
+                    let score = cosine(left, right);
+                    (score >= min).then(|| Pair {
+                        a: a.clone(),
+                        b: b.clone(),
+                        score,
+                    })
+                })
+        })
+        .collect();
+    let ranked_all = sorted_by(close, |x, y| {
+        (y.score.total_cmp(&x.score)).then_with(|| (&x.a, &x.b).cmp(&(&y.a, &y.b)))
     });
-    result.truncate(limit);
+    let result: Vec<Pair> = ranked_all.into_iter().take(limit).collect();
     debug_assert!(result.len() <= limit, "near_pairs: at most limit pairs");
     debug_assert!(
         result.iter().all(|p| p.a != p.b && p.score >= min),

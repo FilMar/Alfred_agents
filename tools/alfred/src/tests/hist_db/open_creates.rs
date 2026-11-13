@@ -13,10 +13,8 @@ fn open_creates_the_archive() {
 
 #[test]
 fn open_returns_a_world_error_as_a_value() {
-    let mut path = std::env::temp_dir();
-    path.push(format!("hist_db_{}_missing_directory", std::process::id()));
-    path.push("tl.db");
-    HistDb::open(&path).unwrap_err();
+    let dir = format!("hist_db_{}_missing_directory", std::process::id());
+    HistDb::open(&std::env::temp_dir().join(dir).join("tl.db")).unwrap_err();
 }
 
 #[test]
@@ -216,14 +214,18 @@ fn list_sessions_accepts_a_negative_limit() {
 fn upsert_exchanges_updates_the_row_but_never_distilled() {
     let db = db("upsert_exchanges_updates_the_row_but_never_distilled");
     write_session(&db, SID1, T1);
-    let mut first = exchange_row(XID1, SID1, T1, "chat");
-    first.distilled = Some(T2.into());
-    first.meta = Some(serde_json::json!({"step": 1}));
+    let first = crate::hist::Exchange {
+        distilled: Some(T2.into()),
+        meta: Some(serde_json::json!({"step": 1})),
+        ..exchange_row(XID1, SID1, T1, "chat")
+    };
     db.upsert_exchanges(&[first]).unwrap();
-    let mut second = exchange_row(XID1, SID1, T3, "subtask");
-    second.model = Some("llama".into());
-    second.meta = Some(serde_json::json!({"step": 2}));
-    second.distilled = Some(T3.into());
+    let second = crate::hist::Exchange {
+        model: Some("llama".into()),
+        meta: Some(serde_json::json!({"step": 2})),
+        distilled: Some(T3.into()),
+        ..exchange_row(XID1, SID1, T3, "subtask")
+    };
     db.upsert_exchanges(&[second]).unwrap();
     let row = db.get_exchange(XID1).unwrap().expect("the exchange");
     assert_eq!(row.distilled.as_deref(), Some(T2));

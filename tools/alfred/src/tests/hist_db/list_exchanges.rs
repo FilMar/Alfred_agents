@@ -57,8 +57,10 @@ fn list_exchanges_filters_by_since_and_until() {
 fn list_exchanges_filters_by_distilled() {
     let db = db("list_exchanges_filters_by_distilled");
     write_session(&db, SID1, T1);
-    let mut marked = exchange_row(XID1, SID1, T1, "chat");
-    marked.distilled = Some(T3.into());
+    let marked = crate::hist::Exchange {
+        distilled: Some(T3.into()),
+        ..exchange_row(XID1, SID1, T1, "chat")
+    };
     db.upsert_exchanges(&[marked]).unwrap();
     write_exchange(&db, XID2, SID1, T2, "chat");
     write_exchange(&db, XID3, SID1, T3, "chat");

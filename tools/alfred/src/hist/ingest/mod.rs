@@ -69,19 +69,21 @@ impl Roots {
 
     pub fn find(&self, session: &str) -> Option<PathBuf> {
         let (exact, suffix) = (format!("{session}.jsonl"), format!("_{session}.jsonl"));
-        let mut loose: Option<PathBuf> = None;
-        self.files()
-            .find(|file| {
-                let name = file
-                    .file_name()
-                    .and_then(|raw| raw.to_str())
-                    .unwrap_or_default();
-                if loose.is_none() && name.ends_with(suffix.as_str()) {
-                    loose = Some(file.clone());
-                }
-                name == exact
-            })
-            .or(loose)
+        let name = |file: &PathBuf| {
+            file.file_name()
+                .and_then(|raw| raw.to_str())
+                .unwrap_or_default()
+                .to_string()
+        };
+        let named: Vec<PathBuf> = self
+            .files()
+            .filter(|file| name(file) == exact || name(file).ends_with(suffix.as_str()))
+            .collect();
+        named
+            .iter()
+            .find(|file| name(file) == exact)
+            .or(named.first())
+            .cloned()
     }
 
     fn files(&self) -> impl Iterator<Item = PathBuf> + '_ {

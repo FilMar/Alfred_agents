@@ -53,20 +53,18 @@ pub async fn search(
 }
 
 pub(crate) fn render_blocks(found: &[Found]) -> String {
-    let mut blocks: Vec<String> = Vec::new();
-    for found in found {
-        let short: String = found.rule.id.chars().take(SHORT_ID).collect();
-        let mut block = format!("-- {short}");
-        for line in &found.rule.body.do_ {
-            block.push('\n');
-            block.push_str(line);
-        }
-        blocks.push(block);
-    }
-    let mut result = blocks.join("\n");
-    if !result.is_empty() {
-        result.push('\n');
-    }
+    let result: String = found
+        .iter()
+        .map(|found| {
+            let short: String = found.rule.id.chars().take(SHORT_ID).collect();
+            let head = std::iter::once(format!("-- {short}"));
+            head.chain(found.rule.body.do_.iter().cloned())
+                .collect::<Vec<_>>()
+                .join("\n")
+                + "\n"
+        })
+        .collect::<Vec<String>>()
+        .concat();
     debug_assert!(
         found.is_empty() == result.is_empty(),
         "render_blocks: empty only for no rules"
@@ -83,18 +81,17 @@ pub(crate) fn prompts_of(stdin: &str) -> Result<Vec<String>, String> {
         .map_err(|error| error.to_string())
         .and_then(|value| {
             let items = value.as_array().ok_or("expected a list of {text}")?;
-            let mut prompts = Vec::new();
-            for item in items {
-                let text = item
-                    .get("text")
-                    .and_then(|text| text.as_str())
-                    .ok_or("expected a list of {text}")?;
-                let text = text.trim();
-                if !text.is_empty() {
-                    prompts.push(text.to_string());
-                }
-            }
-            Ok(prompts)
+            items
+                .iter()
+                .map(|item| {
+                    item.get("text")
+                        .and_then(|text| text.as_str())
+                        .map(str::trim)
+                })
+                .filter(|text| *text != Some(""))
+                .map(|text| text.map(str::to_string).ok_or("expected a list of {text}"))
+                .collect::<Result<Vec<String>, &str>>()
+                .map_err(str::to_string)
         });
     debug_assert!(
         result
@@ -231,20 +228,23 @@ async fn dispatch(client: &Client, command: RulesCommand) -> Result<String, Clie
 }
 
 fn search_query(opts: &SearchOptions) -> Vec<(&'static str, String)> {
-    let mut query = vec![("q", opts.q.clone())];
-    query.extend(opts.limit.map(|v| ("limit", v.to_string())));
-    query.extend(opts.tags.clone().map(|v| ("tags", v)));
-    query.extend(opts.min_score.map(|v| ("min_score", v.to_string())));
-    query.extend(opts.hits.map(|v| ("hits", v.to_string())));
-    query.extend(opts.archived.map(|v| ("archived", v.to_string())));
-    query.extend(opts.timeout.map(|v| ("timeout", v.to_string())));
-    query
+    [
+        ("q", Some(opts.q.clone())),
+        ("limit", opts.limit.map(|v| v.to_string())),
+        ("tags", opts.tags.clone()),
+        ("min_score", opts.min_score.map(|v| v.to_string())),
+        ("hits", opts.hits.map(|v| v.to_string())),
+        ("archived", opts.archived.map(|v| v.to_string())),
+        ("timeout", opts.timeout.map(|v| v.to_string())),
+    ]
+    .into_iter()
+    .filter_map(|(key, value)| Some((key, value?)))
+    .collect()
 }
 
 fn reach_request(limit: u32, min_score: f32) -> Result<ReachRequest, ClientError> {
-    let mut stdin = String::new();
-    std::io::Read::read_to_string(&mut std::io::stdin(), &mut stdin)
-        .map_err(|e| ClientError::Input(e.to_string()))?;
+    let stdin =
+        std::io::read_to_string(std::io::stdin()).map_err(|e| ClientError::Input(e.to_string()))?;
     let prompts = prompts_of(&stdin).map_err(ClientError::Input)?;
     Ok(ReachRequest {
         prompts,

@@ -117,28 +117,29 @@ impl Harness {
                 .filter(|k| !k.is_empty())
                 .map(|k| serde_json::json!({ "trigger": k })),
             Harness::Pi => {
-                let mut meta = serde_json::Map::new();
-                meta.insert("source_id".into(), opener.id.clone()?.into());
-                if let Some(provider) = self.last_answer(body, Line::provider).next() {
-                    meta.insert("provider".into(), provider.into());
-                }
                 let cost: f64 = body
                     .iter()
                     .filter_map(|l| self.usage(l)?.cost.as_ref()?.total)
                     .sum();
-                if cost > 0.0 {
-                    meta.insert("cost_usd".into(), cost.into());
-                }
-                Some(Value::Object(meta))
+                let meta = serde_json::json!({
+                    "source_id": opener.id.clone()?,
+                    "provider": self.last_answer(body, Line::provider).next(),
+                    "cost_usd": (cost > 0.0).then_some(cost),
+                });
+                let set = meta.as_object()?.iter().filter(|(_, v)| !v.is_null());
+                Some(Value::Object(
+                    set.map(|(k, v)| (k.clone(), v.clone())).collect(),
+                ))
             }
         }
     }
 
     pub fn model(self, body: &[&Line]) -> Option<String> {
-        let mut models = self.last_answer(body, Line::model);
         let model = match self {
-            Harness::Claude => models.find(|m| !m.starts_with('<')),
-            Harness::Pi => models.next(),
+            Harness::Claude => self
+                .last_answer(body, Line::model)
+                .find(|m| !m.starts_with('<')),
+            Harness::Pi => self.last_answer(body, Line::model).next(),
         };
         model.map(str::to_string)
     }

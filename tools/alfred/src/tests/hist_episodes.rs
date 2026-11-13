@@ -25,18 +25,13 @@ fn valid_id() -> String {
 }
 
 fn with(payload: &serde_json::Value, key: &str, value: serde_json::Value) -> serde_json::Value {
-    let mut payload = payload.clone();
-    payload
-        .as_object_mut()
-        .unwrap()
-        .insert(key.to_string(), value);
-    payload
+    let rest = payload.as_object().cloned().unwrap_or_default().into_iter();
+    serde_json::Value::Object(rest.chain([(key.to_string(), value)]).collect())
 }
 
 fn without(payload: &serde_json::Value, key: &str) -> serde_json::Value {
-    let mut payload = payload.clone();
-    payload.as_object_mut().unwrap().remove(key);
-    payload
+    let rest = payload.as_object().cloned().unwrap_or_default().into_iter();
+    serde_json::Value::Object(rest.filter(|(k, _)| k != key).collect())
 }
 
 fn filter_text(since: Option<&str>, until: Option<&str>) -> String {

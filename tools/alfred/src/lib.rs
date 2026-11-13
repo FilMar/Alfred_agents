@@ -7,6 +7,7 @@ pub mod hist;
 pub mod qdrant;
 pub mod rules;
 pub mod serve;
+pub mod sorted;
 pub mod upstream;
 pub mod vault;
 
