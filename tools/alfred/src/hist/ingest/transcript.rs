@@ -118,8 +118,7 @@ pub struct Span<'a> {
 }
 
 pub fn parse_lines(text: &str) -> Vec<Value> {
-    let result: Vec<Value> = text
-        .lines()
+    text.lines()
         .filter_map(|line| {
             let trimmed = line.trim();
             if trimmed.is_empty() {
@@ -128,8 +127,7 @@ pub fn parse_lines(text: &str) -> Vec<Value> {
                 serde_json::from_str(trimmed).ok()
             }
         })
-        .collect();
-    result
+        .collect()
 }
 
 pub fn spans<'a>(
@@ -206,23 +204,21 @@ pub fn join_tools(parts: &[String]) -> Option<String> {
 }
 
 pub fn stringify(value: Option<&Value>) -> String {
-    let result: String = match value {
+    match value {
         None | Some(Value::Null) => String::new(),
         Some(Value::String(text)) => text.clone(),
         Some(other) => serde_json::to_string(other).unwrap_or_default(),
-    };
-    result
+    }
 }
 
 pub fn text_of(line: &Value, path: &[&str]) -> Option<String> {
-    let result: Option<String> = {
+    {
         let mut value: Option<&Value> = Some(line);
         for key in path {
             value = value.and_then(|current| current.get(*key));
         }
         value.and_then(Value::as_str).map(String::from)
-    };
-    result
+    }
 }
 
 fn session_of(format: &Format, head: SessionHead, host: Option<&str>) -> Session {

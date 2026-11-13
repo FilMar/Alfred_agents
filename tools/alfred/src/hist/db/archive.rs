@@ -71,8 +71,7 @@ impl HistDb {
             "UPDATE exchanges SET distilled = ?1 WHERE id = ?2",
             params![distilled, id],
         )?;
-        let result: Result<bool, HistError> = Ok(changed > 0);
-        result
+        Ok(changed > 0)
     }
 
     pub fn list_sessions(

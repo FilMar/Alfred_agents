@@ -97,7 +97,7 @@ impl Client {
             Some(timeout) => request.timeout(timeout),
             None => request,
         };
-        let result: Result<T, ClientError> = match request.send().await {
+        match request.send().await {
             Err(source) => Err(ClientError::Unreachable { url, source }),
             Ok(response) if response.status().is_success() => response
                 .json()
@@ -110,7 +110,10 @@ impl Client {
                     Err(source) => Err(ClientError::BadReply { url, source }),
                 }
             }
-        };
-        result
+        }
     }
+}
+
+pub fn pretty<T: Serialize>(value: &T) -> String {
+    serde_json::to_string_pretty(value).map_or_else(|e| e.to_string(), |s| s + "\n")
 }

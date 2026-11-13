@@ -2,10 +2,11 @@ mod reads;
 
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde_json::Value;
 
+use super::validate;
 use super::{
     Contents, Exchange, ExchangeQuery, Extraction, ExtractionQuery, Extractor, Health, HistError,
     Session, SessionQuery,
@@ -24,9 +25,9 @@ pub fn router() -> Router<Shared> {
             "/hist/exchanges/{id}",
             get(get_exchange).patch(patch_exchange),
         )
-        .route("/hist/contents", axum::routing::post(post_contents))
+        .route("/hist/contents", post(post_contents))
         .route("/hist/contents/{id}", get(get_contents))
-        .route("/hist/extractors", axum::routing::post(post_extractor))
+        .route("/hist/extractors", post(post_extractor))
         .route(
             "/hist/extractors/{id}",
             get(get_extractor).patch(patch_extractor),
@@ -65,15 +66,10 @@ async fn list_sessions(
 }
 
 async fn post_sessions(State(app): State<Shared>, body: String) -> Result<Json<Value>, ApiError> {
-    let rows = rows_of(&body, super::validate::session)?;
-    let mut sessions = Vec::with_capacity(rows.len());
-    for row in rows {
-        let session: Session =
-            serde_json::from_value(row).map_err(|err| HistError::BadInput(err.to_string()))?;
-        sessions.push(session);
-    }
-    let written = app.hist.upsert_sessions(&sessions)?;
-    Ok(Json(serde_json::json!({ "written": written })))
+    Ok(written(
+        app.hist
+            .upsert_sessions(&rows_of(&body, validate::session)?)?,
+    ))
 }
 
 async fn list_exchanges(
@@ -91,15 +87,10 @@ async fn list_exchanges(
 }
 
 async fn post_exchanges(State(app): State<Shared>, body: String) -> Result<Json<Value>, ApiError> {
-    let rows = rows_of(&body, super::validate::exchange)?;
-    let mut exchanges = Vec::with_capacity(rows.len());
-    for row in rows {
-        let exchange: Exchange =
-            serde_json::from_value(row).map_err(|err| HistError::BadInput(err.to_string()))?;
-        exchanges.push(exchange);
-    }
-    let written = app.hist.upsert_exchanges(&exchanges)?;
-    Ok(Json(serde_json::json!({ "written": written })))
+    Ok(written(
+        app.hist
+            .upsert_exchanges(&rows_of(&body, validate::exchange)?)?,
+    ))
 }
 
 async fn get_exchange(
@@ -120,41 +111,28 @@ async fn patch_exchange(
 ) -> Result<Json<Value>, ApiError> {
     let parsed: Value = serde_json::from_str(&body).unwrap_or(Value::Null);
     let distilled = match parsed.get("distilled") {
-        None => return Err(HistError::BadInput("distilled is required".to_string()).into()),
-        Some(Value::Null) => None,
-        Some(Value::String(text)) => {
-            if !super::validate::is_timestamp(text) {
-                return Err(
-                    HistError::BadInput("distilled is not ISO-8601 UTC".to_string()).into(),
-                );
-            }
-            Some(text.as_str())
-        }
-        Some(_) => {
-            return Err(HistError::BadInput("distilled is not ISO-8601 UTC".to_string()).into());
-        }
-    };
-    if app.hist.get_exchange(&id)?.is_none() {
-        return Err(HistError::NotFound("exchange not found".to_string()).into());
+        None => Err("distilled is required"),
+        Some(Value::Null) => Ok(None),
+        Some(value) => value
+            .as_str()
+            .filter(|t| validate::is_timestamp(t))
+            .map(Some)
+            .ok_or("distilled is not ISO-8601 UTC"),
     }
-    app.hist.set_distilled(&id, distilled)?;
-    let reply = match distilled {
-        Some(text) => serde_json::json!({ "id": id, "distilled": text }),
-        None => serde_json::json!({ "id": id, "distilled": Value::Null }),
-    };
-    Ok(Json(reply))
+    .map_err(|message| HistError::BadInput(message.to_string()))?;
+    if !app.hist.set_distilled(&id, distilled)? {
+        return Err(not_found("exchange not found"));
+    }
+    Ok(Json(
+        serde_json::json!({ "id": id, "distilled": distilled }),
+    ))
 }
 
 async fn post_contents(State(app): State<Shared>, body: String) -> Result<Json<Value>, ApiError> {
-    let rows = rows_of(&body, super::validate::contents)?;
-    let mut contents = Vec::with_capacity(rows.len());
-    for row in rows {
-        let content: Contents =
-            serde_json::from_value(row).map_err(|err| HistError::BadInput(err.to_string()))?;
-        contents.push(content);
-    }
-    let written = app.hist.upsert_contents(&contents)?;
-    Ok(Json(serde_json::json!({ "written": written })))
+    Ok(written(
+        app.hist
+            .upsert_contents(&rows_of(&body, validate::contents)?)?,
+    ))
 }
 
 async fn get_contents(
@@ -207,24 +185,18 @@ async fn patch_extractor(
     body: String,
 ) -> Result<Json<Value>, ApiError> {
     let value: Value = serde_json::from_str(&body).unwrap_or(Value::Null);
-    let allowed = match value.as_object() {
-        Some(object) if object.len() == 1 => {
-            matches!(object.get("active"), Some(Value::Bool(true)))
-        }
-        _ => false,
-    };
-    if !allowed {
+    if value
+        .as_object()
+        .is_none_or(|o| o.len() != 1 || o.get("active") != Some(&Value::Bool(true)))
+    {
         return Err(
             HistError::BadInput("active: true is the only change allowed".to_string()).into(),
         );
     }
-    let id: i64 = id
-        .parse()
-        .map_err(|_| HistError::NotFound("extractor not found".to_string()))?;
-    if app.hist.get_extractor(Some(id))?.is_none() {
-        return Err(HistError::NotFound("extractor not found".to_string()).into());
+    let id: i64 = id.parse().map_err(|_| not_found("extractor not found"))?;
+    if !app.hist.set_active_extractor(id)? {
+        return Err(not_found("extractor not found"));
     }
-    app.hist.set_active_extractor(id)?;
     Ok(Json(serde_json::json!({ "id": id, "active": true })))
 }
 
@@ -232,15 +204,10 @@ async fn post_extractions(
     State(app): State<Shared>,
     body: String,
 ) -> Result<Json<Value>, ApiError> {
-    let rows = rows_of(&body, super::validate::new_extraction)?;
-    let mut extractions = Vec::with_capacity(rows.len());
-    for row in rows {
-        let extraction: super::NewExtraction =
-            serde_json::from_value(row).map_err(|err| HistError::BadInput(err.to_string()))?;
-        extractions.push(extraction);
-    }
-    let written = app.hist.insert_extractions(&extractions)?;
-    Ok(Json(serde_json::json!({ "written": written })))
+    Ok(written(app.hist.insert_extractions(&rows_of(
+        &body,
+        validate::new_extraction,
+    )?)?))
 }
 
 async fn list_extractions(
@@ -250,41 +217,40 @@ async fn list_extractions(
     Ok(Json(app.hist.list_extractions(&q)?))
 }
 
-pub(crate) fn rows_of(
+pub(crate) fn rows_of<T: serde::de::DeserializeOwned>(
     body: &str,
     validate: fn(&Value) -> Option<String>,
-) -> Result<Vec<Value>, HistError> {
-    let result: Result<Vec<Value>, HistError> = serde_json::from_str(body)
-        .map_err(|_| HistError::BadInput("body is not JSON".to_string()))
-        .and_then(|parsed| {
-            let rows = match parsed {
-                Value::Array(rows) => rows,
-                row => vec![row],
-            };
-            let invalid = rows.iter().find_map(validate);
-            match invalid {
-                Some(message) => Err(HistError::BadInput(message)),
-                None => Ok(rows),
-            }
-        });
-    debug_assert!(
-        result
-            .as_ref()
-            .map_or(true, |rows| rows.iter().all(|r| validate(r).is_none())),
-        "rows_of: every row is valid"
-    );
-    result
+) -> Result<Vec<T>, HistError> {
+    let parsed: Value = serde_json::from_str(body)
+        .map_err(|_| HistError::BadInput("body is not JSON".to_string()))?;
+    let rows = match parsed {
+        Value::Array(rows) => rows,
+        row => vec![row],
+    };
+    if let Some(message) = rows.iter().find_map(validate) {
+        return Err(HistError::BadInput(message));
+    }
+    rows.into_iter()
+        .map(|row| serde_json::from_value(row).map_err(|e| HistError::BadInput(e.to_string())))
+        .collect()
+}
+
+fn written(count: usize) -> Json<Value> {
+    Json(serde_json::json!({ "written": count }))
+}
+
+fn not_found(what: &str) -> ApiError {
+    HistError::NotFound(what.to_string()).into()
 }
 
 pub(crate) fn status_of(error: &HistError) -> StatusCode {
-    let result: StatusCode = match error {
+    match error {
         HistError::BadInput(_) => StatusCode::BAD_REQUEST,
         HistError::NotFound(_) => StatusCode::NOT_FOUND,
         HistError::Ambiguous { .. } => StatusCode::CONFLICT,
         HistError::Db(_) => StatusCode::INTERNAL_SERVER_ERROR,
         HistError::BadEpisode { .. } | HistError::Upstream(_) => StatusCode::BAD_GATEWAY,
-    };
-    result
+    }
 }
 
 impl From<HistError> for ApiError {

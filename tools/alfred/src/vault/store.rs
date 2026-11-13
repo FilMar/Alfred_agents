@@ -18,16 +18,15 @@ impl Vault {
     }
 
     pub fn toc(&self, name: &str) -> Result<TocReply, VaultError> {
-        let result: Result<TocReply, VaultError> = self.page(name).map(|(path, page)| TocReply {
+        self.page(name).map(|(path, page)| TocReply {
             path,
             chars: u32::try_from(page.body().chars().count()).unwrap_or(u32::MAX),
             headings: page.toc(),
-        });
-        result
+        })
     }
 
     pub fn read(&self, name: &str, id: Option<&str>) -> Result<String, VaultError> {
-        let result: Result<String, VaultError> = self.page(name).and_then(|(_, page)| match id {
+        self.page(name).and_then(|(_, page)| match id {
             None => Ok(page.body().to_string()),
             Some(id) => page
                 .section(id)
@@ -36,8 +35,7 @@ impl Vault {
                     name: name.to_string(),
                     id: id.to_string(),
                 }),
-        });
-        result
+        })
     }
 
     fn page(&self, name: &str) -> Result<(String, Page), VaultError> {
@@ -163,7 +161,7 @@ impl Vault {
 
 pub(crate) fn is_published(rel: &Path) -> bool {
     debug_assert!(rel.is_relative(), "is_published: path is relative");
-    let result: bool = rel.extension().and_then(|ext| ext.to_str()) == Some("md")
+    rel.extension().and_then(|ext| ext.to_str()) == Some("md")
         && rel.components().all(|c| {
             !matches!(
                 c.as_os_str().to_str(),
@@ -173,8 +171,7 @@ pub(crate) fn is_published(rel: &Path) -> bool {
         && !matches!(
             rel.file_name().and_then(|f| f.to_str()),
             Some("README.md" | "CLAUDE.md" | "ROADMAP.md")
-        );
-    result
+        )
 }
 
 pub(crate) fn check_name(name: &str) -> Result<(), VaultError> {

@@ -3,14 +3,14 @@ use std::path::PathBuf;
 use super::EpisodeHit;
 pub use super::command::HistCommand;
 use super::ingest::{self, Roots, Summary, hostname, modified_at};
-use crate::client::{Client, ClientError};
+use crate::client::{Client, ClientError, pretty};
 
 pub const SHORT_ID: usize = 8;
 
 type Request = (String, Vec<(&'static str, String)>);
 
 pub async fn run(command: HistCommand) -> Result<String, ClientError> {
-    let result: Result<String, ClientError> = match command {
+    match command {
         HistCommand::Ingest {
             transcript,
             session,
@@ -33,8 +33,7 @@ pub async fn run(command: HistCommand) -> Result<String, ClientError> {
             let reply: serde_json::Value = get_json(&Client::from_env()?, &path, &query).await?;
             Ok(pretty(&reply))
         }
-    };
-    result
+    }
 }
 
 pub(crate) fn request_of(command: HistCommand) -> Result<Request, ClientError> {
@@ -283,10 +282,6 @@ pub(crate) fn low_score_hint(min_score: f32, best: f32) -> String {
         "low_score_hint: the tl wording"
     );
     result
-}
-
-pub(crate) fn pretty<T: serde::Serialize>(value: &T) -> String {
-    serde_json::to_string_pretty(value).map_or_else(|e| e.to_string(), |s| s + "\n")
 }
 
 pub(crate) async fn get_json<T: serde::de::DeserializeOwned>(

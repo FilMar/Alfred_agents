@@ -45,7 +45,7 @@ impl Summary {
 
 impl Roots {
     pub fn from_env() -> Roots {
-        let result: Roots = {
+        {
             let home = std::env::var_os("HOME")
                 .map(PathBuf::from)
                 .unwrap_or_default();
@@ -58,8 +58,7 @@ impl Roots {
                 None => home.join(".pi").join("agent").join("sessions"),
             };
             Roots { claude, pi }
-        };
-        result
+        }
     }
 
     pub fn all(&self) -> Vec<PathBuf> {
@@ -101,7 +100,7 @@ impl Roots {
     }
 
     pub fn find(&self, session: &str) -> Option<PathBuf> {
-        let result: Option<PathBuf> = 'search: {
+        'search: {
             let exact = format!("{session}.jsonl");
             let suffix = format!("_{session}.jsonl");
             let mut loose: Option<PathBuf> = None;
@@ -135,21 +134,18 @@ impl Roots {
                 }
             }
             loose
-        };
-        result
+        }
     }
 }
 
 pub fn looks_like_pi(text: &str) -> bool {
-    let result: bool = text
-        .lines()
+    text.lines()
         .find_map(|line| serde_json::from_str::<serde_json::Value>(line.trim()).ok())
-        .is_some_and(|first| first.get("type").and_then(|kind| kind.as_str()) == Some("session"));
-    result
+        .is_some_and(|first| first.get("type").and_then(|kind| kind.as_str()) == Some("session"))
 }
 
 pub fn parse(text: &str, host: Option<&str>) -> Parsed {
-    let result: Parsed = transcript::parse(
+    transcript::parse(
         if looks_like_pi(text) {
             &formats::PI
         } else {
@@ -157,8 +153,7 @@ pub fn parse(text: &str, host: Option<&str>) -> Parsed {
         },
         &transcript::parse_lines(text),
         host,
-    );
-    result
+    )
 }
 
 pub async fn transcript(

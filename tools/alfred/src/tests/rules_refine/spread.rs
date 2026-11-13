@@ -7,21 +7,6 @@ fn spread_of_rejects_trust_out_of_range() {
 }
 
 #[test]
-fn spread_of_one_bin_per_tenth() {
-    let _ = spread_of(&[0.05, 0.15, 0.95]);
-}
-
-#[test]
-fn spread_of_bins_add_up_to_total() {
-    let _ = spread_of(&[0.25, 0.75, 1.0]);
-}
-
-#[test]
-fn spread_of_total_counts_every_trust() {
-    let _ = spread_of(&[0.1, 0.2, 0.3, 0.9]);
-}
-
-#[test]
 fn spread_of_table() {
     let no_trusts: [f64; 0] = [];
     let empty = spread_of(&no_trusts);

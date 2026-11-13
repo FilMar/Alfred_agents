@@ -60,8 +60,7 @@ impl HistDb {
             tx.execute("UPDATE extractor SET active = 1 WHERE id = ?1", params![id])?;
             tx.commit()?;
         }
-        let result: Result<bool, HistError> = Ok(exists);
-        result
+        Ok(exists)
     }
 
     pub fn insert_extractions(&self, rows: &[NewExtraction]) -> Result<usize, HistError> {

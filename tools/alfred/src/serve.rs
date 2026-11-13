@@ -34,8 +34,7 @@ pub async fn run(app: App, port: u16) -> std::io::Result<()> {
         .merge(crate::hist::routes::router())
         .with_state(Arc::new(app));
     let listener = tokio::net::TcpListener::bind(("0.0.0.0", port)).await?;
-    let result: std::io::Result<()> = axum::serve(listener, router).await;
-    result
+    axum::serve(listener, router).await
 }
 
 impl IntoResponse for ApiError {

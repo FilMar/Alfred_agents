@@ -20,6 +20,13 @@ impl Embedder {
         Embedder { base, http }
     }
 
+    pub fn from_env() -> Embedder {
+        Embedder::new(
+            crate::qdrant::env_base("OLLAMA_URL", "http://localhost:11434"),
+            reqwest::Client::new(),
+        )
+    }
+
     pub async fn document(&self, text: &str) -> Result<Vec<f32>, Upstream> {
         self.embed(&format!("{DOCUMENT_PREFIX}{text}")).await
     }
@@ -33,42 +40,37 @@ impl Embedder {
     }
 
     async fn embed(&self, input: &str) -> Result<Vec<f32>, Upstream> {
-        let result: Result<Vec<f32>, Upstream> = async {
-            let upstream = |error: reqwest::Error| Upstream {
-                service: "Ollama",
-                message: error.to_string(),
-            };
-            let request = serde_json::json!({
-                "model": MODEL,
-                "input": input,
-                "keep_alive": -1,
-            });
-            let response = self
-                .http
-                .post(format!("{}/api/embed", self.base))
-                .json(&request)
-                .send()
-                .await
-                .and_then(reqwest::Response::error_for_status)
-                .map_err(upstream)?;
-            let reply: serde_json::Value = response.json().await.map_err(upstream)?;
-            let vector = reply
-                .pointer("/embeddings/0")
-                .and_then(serde_json::Value::as_array)
-                .and_then(|values| {
-                    values
-                        .iter()
-                        .map(|value| value.as_f64().map(|number| number as f32))
-                        .collect::<Option<Vec<f32>>>()
-                })
-                .filter(|values| values.len() == VECTOR_SIZE)
-                .ok_or_else(|| Upstream {
-                    service: "Ollama",
-                    message: format!("no embedding of {VECTOR_SIZE} values in response"),
-                })?;
-            Ok(vector)
+        #[derive(serde::Deserialize)]
+        struct Reply {
+            embeddings: Vec<Vec<f32>>,
         }
-        .await;
+        let upstream = |message: String| Upstream {
+            service: "Ollama",
+            message,
+        };
+        let request = serde_json::json!({ "model": MODEL, "input": input, "keep_alive": -1 });
+        let sent = self
+            .http
+            .post(format!("{}/api/embed", self.base))
+            .json(&request)
+            .send()
+            .await;
+        let reply = match sent.and_then(reqwest::Response::error_for_status) {
+            Ok(response) => response
+                .json::<Reply>()
+                .await
+                .map_err(|e| upstream(e.to_string())),
+            Err(error) => Err(upstream(error.to_string())),
+        };
+        let result = reply.and_then(|r| {
+            r.embeddings
+                .into_iter()
+                .next()
+                .filter(|v| v.len() == VECTOR_SIZE)
+                .ok_or_else(|| {
+                    upstream(format!("no embedding of {VECTOR_SIZE} values in response"))
+                })
+        });
         debug_assert!(
             result.as_ref().map_or(true, |v| v.len() == VECTOR_SIZE),
             "Embedder.embed: vector has 768 values"

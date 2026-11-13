@@ -85,10 +85,9 @@ impl HistDb {
                 conn.execute_batch(&format!("ALTER TABLE {table} ADD COLUMN {column} TEXT"))?;
             }
         }
-        let result: Result<HistDb, HistError> = Ok(HistDb {
+        Ok(HistDb {
             conn: Mutex::new(conn),
-        });
-        result
+        })
     }
 
     pub fn count(&self, table: &str) -> Result<i64, HistError> {

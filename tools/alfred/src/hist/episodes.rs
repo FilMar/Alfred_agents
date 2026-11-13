@@ -2,7 +2,7 @@ use serde_json::Value;
 
 use super::{Episode, EpisodeHit, EpisodeQuery, HistError};
 use crate::embed::Embedder;
-use crate::qdrant::Qdrant;
+use crate::qdrant::{Match, Qdrant};
 
 pub const COLLECTION: &str = "tl_episodes";
 pub const DEFAULT_LIMIT: u32 = 10;
@@ -21,26 +21,7 @@ impl Episodes {
     }
 
     pub fn from_env() -> Episodes {
-        let result: Episodes = {
-            fn base(var: &str, fallback: &str) -> String {
-                match std::env::var(var) {
-                    Ok(value) if !value.trim().is_empty() => {
-                        value.trim_end_matches('/').to_string()
-                    }
-                    _ => fallback.to_string(),
-                }
-            }
-            let http = reqwest::Client::new();
-            Episodes::new(
-                Qdrant::new(
-                    base("QDRANT_URL", "http://localhost:6333"),
-                    http.clone(),
-                    COLLECTION,
-                ),
-                Embedder::new(base("OLLAMA_URL", "http://localhost:11434"), http),
-            )
-        };
-        result
+        Episodes::new(Qdrant::from_env(COLLECTION), Embedder::from_env())
     }
 
     pub async fn search(&self, query: &EpisodeQuery) -> Result<Vec<EpisodeHit>, HistError> {
@@ -82,43 +63,15 @@ impl Episodes {
     }
 
     pub async fn get(&self, id_or_prefix: &str) -> Result<Episode, HistError> {
-        let result: Result<Episode, HistError> = async {
-            let id: String = if id_or_prefix.is_empty() {
-                return Err(HistError::BadInput("empty id".to_string()));
-            } else if super::validate::is_id(id_or_prefix) {
-                id_or_prefix.to_string()
-            } else {
-                let points = self.qdrant.scroll_all::<Value>(None, false).await?;
-                let mut ids: Vec<String> = points.into_iter().map(|point| point.id).collect();
-                ids.sort();
-                match ids
-                    .iter()
-                    .filter(|id| id.starts_with(id_or_prefix))
-                    .collect::<Vec<_>>()
-                    .as_slice()
-                {
-                    [] => return Err(HistError::NotFound("episode not found".to_string())),
-                    [only] => (*only).clone(),
-                    many => {
-                        return Err(HistError::Ambiguous {
-                            prefix: id_or_prefix.to_string(),
-                            count: many.len(),
-                            ids: many
-                                .iter()
-                                .take(SHOWN_CANDIDATES)
-                                .map(|id| (*id).clone())
-                                .collect(),
-                        });
-                    }
-                }
-            };
-            match self.qdrant.get::<Value>(&id).await? {
-                Some(point) => episode_of(&id, &point.body)
+        let result = match self.id_of(id_or_prefix).await {
+            Err(error) => Err(error),
+            Ok(id) => match self.qdrant.get::<Value>(&id).await {
+                Err(error) => Err(error.into()),
+                Ok(None) => Err(HistError::NotFound("episode not found".to_string())),
+                Ok(Some(point)) => episode_of(&id, &point.body)
                     .map_err(|reason| HistError::BadEpisode { id, reason }),
-                None => Err(HistError::NotFound("episode not found".to_string())),
-            }
-        }
-        .await;
+            },
+        };
         debug_assert!(
             result
                 .as_ref()
@@ -126,6 +79,24 @@ impl Episodes {
             "Episodes.get: the episode asked"
         );
         result
+    }
+
+    async fn id_of(&self, id_or_prefix: &str) -> Result<String, HistError> {
+        if id_or_prefix.is_empty() {
+            return Err(HistError::BadInput("empty id".to_string()));
+        }
+        if super::validate::is_id(id_or_prefix) {
+            return Ok(id_or_prefix.to_string());
+        }
+        match self.qdrant.resolve(id_or_prefix, SHOWN_CANDIDATES).await? {
+            Match::One(id) => Ok(id),
+            Match::Missing => Err(HistError::NotFound("episode not found".to_string())),
+            Match::Many { count, first } => Err(HistError::Ambiguous {
+                prefix: id_or_prefix.to_string(),
+                count,
+                ids: first,
+            }),
+        }
     }
 }
 
@@ -220,7 +191,7 @@ fn checked(id: &str, p: Payload) -> Result<Episode, String> {
 }
 
 pub fn period_filter(since: Option<&str>, until: Option<&str>) -> Result<Option<Value>, HistError> {
-    let result: Result<Option<Value>, HistError> = (|| {
+    (|| {
         let mut must: Vec<Value> = Vec::new();
         if let Some(day) = since {
             if !super::validate::is_day(day) {
@@ -250,6 +221,5 @@ pub fn period_filter(since: Option<&str>, until: Option<&str>) -> Result<Option<
         } else {
             Ok(Some(serde_json::json!({ "must": must })))
         }
-    })();
-    result
+    })()
 }

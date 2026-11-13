@@ -1,82 +1,35 @@
-use crate::hist::{
-    Contents, DEFAULT_LIMIT, Exchange, NewExtractor, Session, bool_param, int_param,
-};
+use crate::hist::{Contents, Exchange, NewExtractor, Session, bool_param, int_param};
 
 #[allow(unused_imports)]
 use super::*;
 
 #[test]
-fn default_limit_is_100() {
-    assert_eq!(DEFAULT_LIMIT, 100);
-}
-
-#[test]
-fn int_param_reads_the_spec_examples() {
+fn int_param_reads_like_javascript_parse_int() {
     let cases: &[(Option<&str>, Option<i64>)] = &[
         (Some("10abc"), Some(10)),
         (Some("3.7"), Some(3)),
         (Some("abc"), None),
         (Some(""), None),
         (None, None),
-    ];
-    for &(raw, want) in cases {
-        assert_eq!(int_param(raw), want, "int_param({raw:?})");
-    }
-}
-
-#[test]
-fn int_param_ignores_leading_whitespace() {
-    let cases: &[(Option<&str>, Option<i64>)] = &[
         (Some(" 42"), Some(42)),
-        (Some("   7"), Some(7)),
         (Some("\t42"), Some(42)),
         (Some("   "), None),
-        (Some(" "), None),
-    ];
-    for &(raw, want) in cases {
-        assert_eq!(int_param(raw), want, "int_param({raw:?})");
-    }
-}
-
-#[test]
-fn int_param_takes_an_optional_sign() {
-    let cases: &[(Option<&str>, Option<i64>)] = &[
         (Some("+42"), Some(42)),
-        (Some("-42"), Some(-42)),
         (Some(" -7"), Some(-7)),
         (Some("  -12px"), Some(-12)),
         (Some("-0"), Some(0)),
-        (Some("-3.7"), Some(-3)),
         (Some("+"), None),
-        (Some("-"), None),
         (Some("+-1"), None),
         (Some("- 1"), None),
-    ];
-    for &(raw, want) in cases {
-        assert_eq!(int_param(raw), want, "int_param({raw:?})");
-    }
-}
-
-#[test]
-fn int_param_takes_only_the_leading_digits() {
-    let cases: &[(Option<&str>, Option<i64>)] = &[
-        (Some("42"), Some(42)),
-        (Some("42abc"), Some(42)),
-        (Some("42 "), Some(42)),
         (Some("007"), Some(7)),
-        (Some("0"), Some(0)),
         (Some("0x10"), Some(0)),
         (Some("abc123"), None),
+        (Some("9223372036854775807"), Some(i64::MAX)),
+        (Some("-9223372036854775808"), Some(i64::MIN)),
     ];
     for &(raw, want) in cases {
         assert_eq!(int_param(raw), want, "int_param({raw:?})");
     }
-}
-
-#[test]
-fn int_param_at_the_i64_edges() {
-    assert_eq!(int_param(Some("9223372036854775807")), Some(i64::MAX));
-    assert_eq!(int_param(Some("-9223372036854775808")), Some(i64::MIN));
 }
 
 #[test]

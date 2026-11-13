@@ -81,7 +81,7 @@ async fn main() -> ExitCode {
             .await
             .map_err(|e| e.to_string()),
     };
-    let result: ExitCode = match output {
+    match output {
         Ok(text) => {
             print!("{text}");
             ExitCode::SUCCESS
@@ -90,8 +90,7 @@ async fn main() -> ExitCode {
             eprintln!("alfred: {error}");
             ExitCode::FAILURE
         }
-    };
-    result
+    }
 }
 
 async fn start(

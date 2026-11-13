@@ -110,14 +110,13 @@ async fn reach(
 }
 
 pub(crate) fn status_of(error: &RulesError) -> StatusCode {
-    let result: StatusCode = match error {
+    match error {
         RulesError::NoRule(_) => StatusCode::NOT_FOUND,
         RulesError::Ambiguous { .. } => StatusCode::CONFLICT,
         RulesError::BadInput(_) | RulesError::TooMany(_) => StatusCode::BAD_REQUEST,
         RulesError::Upstream(_) => StatusCode::BAD_GATEWAY,
         RulesError::Timeout(_) => StatusCode::GATEWAY_TIMEOUT,
-    };
-    result
+    }
 }
 
 impl From<RulesError> for ApiError {

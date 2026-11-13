@@ -64,7 +64,7 @@ impl Rules {
     }
 
     pub async fn near(&self, min: f32, limit: u32) -> Result<Vec<NearPair>, RulesError> {
-        let result: Result<Vec<NearPair>, RulesError> = if !(-1.0..=1.0).contains(&min) {
+        if !(-1.0..=1.0).contains(&min) {
             Err(RulesError::BadInput(
                 "min must be between -1 and 1".to_string(),
             ))
@@ -96,8 +96,7 @@ impl Rules {
                     })
                     .collect())
             }
-        };
-        result
+        }
     }
 
     pub async fn reach(&self, request: &ReachRequest) -> Result<ReachReply, RulesError> {

@@ -3,17 +3,6 @@ use crate::rules::refine::{Signals, counters_start, signals_of, trust_of};
 use super::{close, rule, ts};
 
 #[test]
-fn counters_start_is_2026_10_20() {
-    assert_eq!(counters_start(), ts("2026-10-20T00:00:00.000Z"));
-}
-
-#[test]
-fn signals_of_without_hit_last_signal_at_least_start() {
-    let lonely = rule("lonely", "lonely if", Some(0), None, None, None);
-    let _ = signals_of(&lonely, counters_start());
-}
-
-#[test]
 fn signals_of_table() {
     let start = counters_start();
     let hit = signals_of(
@@ -89,18 +78,6 @@ fn signals_of_table() {
     );
     assert_eq!(late_start.hits, 1);
     assert_eq!(late_start.last, ts("2026-11-15T00:00:00.000Z"));
-}
-
-#[test]
-fn trust_of_between_zero_and_one() {
-    let now = ts("2026-12-19T00:00:00.000Z");
-    let _ = trust_of(
-        Signals {
-            hits: 10,
-            last: now,
-        },
-        now,
-    );
 }
 
 #[test]

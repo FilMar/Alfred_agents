@@ -105,13 +105,12 @@ pub fn sum_by(exchanges: &[Exchange], by: By) -> Vec<CostRow> {
 }
 
 pub fn by_of(raw: Option<&str>) -> Option<By> {
-    let result: Option<By> = match raw {
+    match raw {
         None | Some("day") => Some(By::Day),
         Some("session") => Some(By::Session),
         Some("model") => Some(By::Model),
         Some(_) => None,
-    };
-    result
+    }
 }
 
 fn no_repeat(prompts: &[Prompt]) -> bool {

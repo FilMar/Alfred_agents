@@ -4,7 +4,8 @@ use jiff::Timestamp;
 
 use super::{Found, Rule, RuleBody, RulesError, SearchOptions};
 use crate::embed::Embedder;
-use crate::qdrant::{Qdrant, Stored};
+use crate::hist::validate::is_id;
+use crate::qdrant::{Match, Qdrant, Stored};
 
 pub const DEFAULT_LIMIT: u32 = 10;
 pub const DEFAULT_NEAR_LIMIT: u32 = 100;
@@ -23,22 +24,7 @@ impl Rules {
     }
 
     pub fn from_env() -> Rules {
-        fn base(var: &str, fallback: &str) -> String {
-            match std::env::var(var) {
-                Ok(value) if !value.trim().is_empty() => value.trim_end_matches('/').to_string(),
-                _ => fallback.to_string(),
-            }
-        }
-        let http = reqwest::Client::new();
-        let result: Rules = Rules::new(
-            Qdrant::new(
-                base("QDRANT_URL", "http://localhost:6333"),
-                http.clone(),
-                super::COLLECTION,
-            ),
-            Embedder::new(base("OLLAMA_URL", "http://localhost:11434"), http),
-        );
-        result
+        Rules::new(Qdrant::from_env(super::COLLECTION), Embedder::from_env())
     }
 
     pub async fn warm(&self) {
@@ -140,7 +126,7 @@ impl Rules {
         self.qdrant.upsert(&id, &vector, &body).await?;
         let result: Result<Rule, RulesError> = Ok(Rule { id, body });
         debug_assert!(
-            result.as_ref().map_or(true, |r| super::is_full_id(&r.id)),
+            result.as_ref().map_or(true, |r| is_id(&r.id)),
             "Rules.add: a new full id"
         );
         debug_assert!(
@@ -180,14 +166,13 @@ impl Rules {
 
     pub async fn delete(&self, id_or_prefix: &str) -> Result<String, RulesError> {
         let id = self.resolve(id_or_prefix).await?;
-        let result: Result<String, RulesError> = match self.qdrant.get::<RuleBody>(&id).await? {
+        match self.qdrant.get::<RuleBody>(&id).await? {
             Some(_) => {
                 self.qdrant.delete(&id).await?;
                 Ok(id)
             }
             None => Err(RulesError::NoRule(id_or_prefix.to_string())),
-        };
-        result
+        }
     }
 
     pub async fn append_do(&self, id_or_prefix: &str, do_: &str) -> Result<Rule, RulesError> {
@@ -219,30 +204,29 @@ impl Rules {
     }
 
     async fn resolve(&self, id_or_prefix: &str) -> Result<String, RulesError> {
-        let result: Result<String, RulesError> = if id_or_prefix.is_empty() {
+        let result = if id_or_prefix.is_empty() {
             Err(RulesError::BadInput("empty id".to_string()))
-        } else if super::is_full_id(id_or_prefix) {
+        } else if is_id(id_or_prefix) {
             Ok(id_or_prefix.to_string())
         } else {
-            let points = self.qdrant.scroll_all::<RuleBody>(None, false).await?;
-            let mut ids: Vec<String> = points.into_iter().map(|point| point.id).collect();
-            ids.sort();
-            match super::match_prefix(id_or_prefix, &ids).as_slice() {
-                [] => Err(RulesError::NoRule(id_or_prefix.to_string())),
-                [only] => Ok(only.to_string()),
-                many => Err(RulesError::Ambiguous {
-                    prefix: id_or_prefix.to_string(),
-                    count: many.len(),
-                    ids: many
-                        .iter()
-                        .take(5)
-                        .map(std::string::ToString::to_string)
-                        .collect(),
-                }),
-            }
+            let found = self
+                .qdrant
+                .resolve(id_or_prefix, super::SHOWN_CANDIDATES)
+                .await;
+            found
+                .map_err(RulesError::from)
+                .and_then(|found| match found {
+                    Match::One(id) => Ok(id),
+                    Match::Missing => Err(RulesError::NoRule(id_or_prefix.to_string())),
+                    Match::Many { count, first } => Err(RulesError::Ambiguous {
+                        prefix: id_or_prefix.to_string(),
+                        count,
+                        ids: first,
+                    }),
+                })
         };
         debug_assert!(
-            result.as_ref().map_or(true, |id| super::is_full_id(id)),
+            result.as_ref().map_or(true, |id| is_id(id)),
             "Rules.resolve: a full id"
         );
         result

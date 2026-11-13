@@ -1,7 +1,7 @@
 use serde_json::Value;
 
 pub(crate) fn js(value: Option<&Value>) -> String {
-    let result: String = {
+    {
         fn number_text(number: &serde_json::Number) -> String {
             match number.as_i64() {
                 Some(int) => int.to_string(),
@@ -50,6 +50,5 @@ pub(crate) fn js(value: Option<&Value>) -> String {
             }
             Some(other) => plain(other),
         }
-    };
-    result
+    }
 }

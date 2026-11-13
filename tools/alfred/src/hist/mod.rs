@@ -187,7 +187,7 @@ pub enum HistError {
 }
 
 pub(crate) fn int_param(raw: Option<&str>) -> Option<i64> {
-    let result: Option<i64> = raw.and_then(|raw| {
+    raw.and_then(|raw| {
         let s = raw.trim_start();
         let skip = usize::from(s.starts_with('+') || s.starts_with('-'));
         let digits = &s[skip..];
@@ -200,8 +200,7 @@ pub(crate) fn int_param(raw: Option<&str>) -> Option<i64> {
         } else {
             s[..skip + end].parse::<i64>().ok()
         }
-    });
-    result
+    })
 }
 
 pub(crate) fn bool_param(raw: Option<&str>) -> Option<bool> {

@@ -17,7 +17,7 @@ pub async fn read(
     } else {
         None
     };
-    let result: Result<String, ClientError> = match toc {
+    match toc {
         Some(toc) if !shows_whole(&toc) => Ok(render_toc(name, &toc)),
         _ => {
             let mut query = vec![("name", name)];
@@ -25,8 +25,7 @@ pub async fn read(
             let reply: ReadReply = client.get("/vault/read", &query).await?;
             Ok(clean(&reply.text))
         }
-    };
-    result
+    }
 }
 
 pub(crate) fn shows_whole(toc: &TocReply) -> bool {

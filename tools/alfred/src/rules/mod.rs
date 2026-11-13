@@ -58,14 +58,18 @@ pub struct SearchOptions {
     pub timeout: Option<u64>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, clap::Args)]
 pub struct AddRequest {
     #[serde(rename = "if")]
+    #[arg(long = "if")]
     pub if_: String,
     #[serde(rename = "do")]
+    #[arg(long = "do")]
     pub do_: String,
     #[serde(default)]
+    #[arg(long)]
     pub tags: Vec<String>,
+    #[arg(long)]
     pub exchange: Option<String>,
 }
 
@@ -112,33 +116,6 @@ pub fn normalize_tags(raw: &[String]) -> Vec<String> {
     debug_assert!(
         result.iter().all(|t| !t.is_empty() && !t.contains(',')),
         "normalize_tags: no empty tag, no comma"
-    );
-    result
-}
-
-pub(crate) fn is_full_id(id: &str) -> bool {
-    let result: bool = {
-        let groups: Vec<&str> = id.split('-').collect();
-        groups.len() == 5
-            && [8usize, 4, 4, 4, 12]
-                .iter()
-                .zip(&groups)
-                .all(|(len, group)| {
-                    group.len() == *len && group.bytes().all(|b| b.is_ascii_hexdigit())
-                })
-    };
-    result
-}
-
-pub(crate) fn match_prefix<'a>(prefix: &str, ids: &'a [String]) -> Vec<&'a str> {
-    let result: Vec<&str> = ids
-        .iter()
-        .map(String::as_str)
-        .filter(|id| id.starts_with(prefix))
-        .collect();
-    debug_assert!(
-        result.iter().all(|id| id.starts_with(prefix)),
-        "match_prefix: every id starts with the prefix"
     );
     result
 }

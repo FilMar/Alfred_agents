@@ -1,4 +1,5 @@
-use crate::hist::cli::{HistCommand, get_json, low_score_hint, pretty, render_episodes, run};
+use crate::client::pretty;
+use crate::hist::cli::{HistCommand, get_json, low_score_hint, render_episodes, run};
 
 fn hit(id: &str, from: &str, summary: &str) -> crate::hist::EpisodeHit {
     crate::hist::EpisodeHit {

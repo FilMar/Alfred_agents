@@ -17,6 +17,13 @@ pub struct Qdrant {
     collection: &'static str,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Match {
+    One(String),
+    Missing,
+    Many { count: usize, first: Vec<String> },
+}
+
 #[derive(Debug, Clone)]
 pub struct Hit<P> {
     pub id: String,
@@ -31,7 +38,22 @@ pub struct Stored<P> {
     pub vector: Option<Vec<f32>>,
 }
 
+pub(crate) fn env_base(var: &str, fallback: &str) -> String {
+    match std::env::var(var) {
+        Ok(value) if !value.trim().is_empty() => value.trim_end_matches('/').to_string(),
+        _ => fallback.to_string(),
+    }
+}
+
 impl Qdrant {
+    pub fn from_env(collection: &'static str) -> Qdrant {
+        Qdrant::new(
+            env_base("QDRANT_URL", "http://localhost:6333"),
+            reqwest::Client::new(),
+            collection,
+        )
+    }
+
     pub fn new(base: String, http: reqwest::Client, collection: &'static str) -> Qdrant {
         debug_assert!(
             !base.ends_with('/'),
@@ -170,6 +192,24 @@ impl Qdrant {
             "Qdrant.get: the point has the id asked"
         );
         result
+    }
+
+    pub async fn resolve(&self, prefix: &str, shown: usize) -> Result<Match, Upstream> {
+        let points = self.scroll_all::<Value>(None, false).await?;
+        let mut ids: Vec<String> = points
+            .into_iter()
+            .map(|p| p.id)
+            .filter(|id| id.starts_with(prefix))
+            .collect();
+        ids.sort();
+        Ok(match ids.len() {
+            0 => Match::Missing,
+            1 => Match::One(ids.remove(0)),
+            count => Match::Many {
+                count,
+                first: ids.into_iter().take(shown).collect(),
+            },
+        })
     }
 
     pub async fn set_payload(&self, ids: &[String], payload: Value) -> Result<(), Upstream> {
