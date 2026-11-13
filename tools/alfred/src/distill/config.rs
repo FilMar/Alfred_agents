@@ -67,46 +67,46 @@ impl CriticCheck {
     }
 }
 
+impl Config {
+    pub fn with_model(self, model: &str) -> Config {
+        let to = |role: Role| Role {
+            model: model.to_string(),
+            ..role
+        };
+        let result = Config {
+            episodes: to(self.episodes),
+            extract: to(self.extract),
+            critic: to(self.critic),
+            novelty: to(self.novelty),
+            ..self
+        };
+        debug_assert!(
+            uses_only(&result, model),
+            "Config.with_model: the model is in every role"
+        );
+        result
+    }
+}
+
 impl Extractor {
     pub fn from_row(row: &Row, model: Option<&str>) -> Result<Extractor, String> {
         debug_assert!(
             model.is_none_or(|m| !m.trim().is_empty()),
             "Extractor.from_row: an override model is not blank"
         );
-        let result: Result<Extractor, String> = match serde_json::from_str(&row.config) {
-            Err(error) => Err(format!(
-                "extractor {}: config is not an extractor: {error}",
-                row.id
-            )),
-            Ok(mut config) => {
-                if let Some(fault) = bad_config(&config) {
-                    Err(fault)
-                } else {
-                    if let Some(model) = model {
-                        for role in [
-                            &mut config.episodes,
-                            &mut config.extract,
-                            &mut config.critic,
-                            &mut config.novelty,
-                        ] {
-                            role.model = model.to_string();
-                        }
-                    }
-                    Ok(Extractor { id: row.id, config })
-                }
-            }
-        };
+        let result: Result<Extractor, String> = serde_json::from_str::<Config>(&row.config)
+            .map_err(|e| format!("extractor {}: config is not an extractor: {e}", row.id))
+            .and_then(|config| bad_config(&config).map_or(Ok(config), Err))
+            .map(|config| match model {
+                None => config,
+                Some(m) => config.with_model(m),
+            })
+            .map(|config| Extractor { id: row.id, config });
         debug_assert!(
             result
                 .as_ref()
                 .map_or(true, |e| bad_config(&e.config).is_none()),
             "Extractor.from_row: the config passes the check"
-        );
-        debug_assert!(
-            result
-                .as_ref()
-                .map_or(true, |e| model.is_none_or(|m| uses_only(&e.config, m))),
-            "Extractor.from_row: the override model is in every role"
         );
         result
     }
@@ -134,9 +134,9 @@ fn bad_shape(config: &Config) -> Option<String> {
         ("vocabularySize", config.vocabulary_size),
         ("topK", config.top_k),
     ];
-    let mut names: Vec<&str> = config.checks.iter().map(|c| c.name.as_str()).collect();
-    names.sort_unstable();
-    let duplicate = names.windows(2).any(|pair| pair[0] == pair[1]);
+    let names: std::collections::HashSet<&str> =
+        config.checks.iter().map(|c| c.name.as_str()).collect();
+    let duplicate = names.len() != config.checks.len();
     let size = sizes.iter().find(|(_, value)| *value == 0);
     if config.checks.is_empty() {
         Some("no critic check".to_string())

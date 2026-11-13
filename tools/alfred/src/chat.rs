@@ -86,68 +86,73 @@ impl Chat {
                 .is_some_and(|m| m.speaker == Speaker::User),
             "Chat.send: the last message is the user's"
         );
-        let result: Result<Reply, Upstream> = async {
-            let upstream = |message: String| Upstream {
-                service: "Ollama",
-                message,
-            };
-            let mut retries = 0;
-            loop {
-                let sent = self
-                    .http
-                    .post(format!("{}/api/chat", self.base))
-                    .timeout(CALL_TIMEOUT)
-                    .json(&body(call))
-                    .send()
-                    .await;
-                let response = match sent {
-                    Ok(response) => response,
-                    Err(error) => return Err(upstream(error.to_string())),
-                };
-                let status = response.status();
-                if is_retried(status.as_u16()) && retries < RETRIES {
-                    retries += 1;
-                    tokio::time::sleep(RETRY_WAIT).await;
-                    continue;
+        let result: Result<Reply, Upstream> = 'send: {
+            for _ in 0..RETRIES {
+                let sent = self.post(call).await;
+                if !sent.as_ref().is_ok_and(|r| is_retried(r.status().as_u16())) {
+                    break 'send reply_of(sent).await;
                 }
-                if !status.is_success() {
-                    return Err(upstream(format!("HTTP {status}")));
-                }
-                let value = match response.json::<Value>().await {
-                    Ok(value) => value,
-                    Err(error) => return Err(upstream(error.to_string())),
-                };
-                let text = value["message"]["content"]
-                    .as_str()
-                    .unwrap_or_default()
-                    .to_string();
-                let input = value["prompt_eval_count"].as_u64().unwrap_or(0);
-                let output = value["eval_count"].as_u64().unwrap_or(0);
-                return Ok(Reply {
-                    text,
-                    tokens: Tokens { input, output },
-                });
+                tokio::time::sleep(RETRY_WAIT).await;
             }
-        }
-        .await;
+            reply_of(self.post(call).await).await
+        };
         result
+    }
+
+    async fn post(&self, call: &Call<'_>) -> reqwest::Result<reqwest::Response> {
+        self.http
+            .post(format!("{}/api/chat", self.base))
+            .timeout(CALL_TIMEOUT)
+            .json(&body(call))
+            .send()
+            .await
     }
 }
 
-pub fn body(call: &Call<'_>) -> Value {
-    let mut messages = vec![serde_json::json!({"role": "system", "content": call.system})];
-    for message in call.messages {
-        let role = match message.speaker {
+impl Speaker {
+    pub fn role(self) -> &'static str {
+        match self {
             Speaker::User => "user",
             Speaker::Assistant => "assistant",
-        };
-        messages.push(serde_json::json!({"role": role, "content": message.content}));
+        }
     }
+}
+
+async fn reply_of(sent: reqwest::Result<reqwest::Response>) -> Result<Reply, Upstream> {
+    let upstream = |message: String| Upstream {
+        service: "Ollama",
+        message,
+    };
+    let response = sent.map_err(|e| upstream(e.to_string()))?;
+    let status = response.status();
+    if !status.is_success() {
+        return Err(upstream(format!("HTTP {status}")));
+    }
+    let value: Value = response.json().await.map_err(|e| upstream(e.to_string()))?;
+    Ok(Reply {
+        text: value["message"]["content"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string(),
+        tokens: Tokens {
+            input: value["prompt_eval_count"].as_u64().unwrap_or(0),
+            output: value["eval_count"].as_u64().unwrap_or(0),
+        },
+    })
+}
+
+pub fn body(call: &Call<'_>) -> Value {
+    let said = |role: &str, content: &str| serde_json::json!({"role": role, "content": content});
+    let messages: Vec<Value> = std::iter::once(said("system", call.system))
+        .chain(
+            call.messages
+                .iter()
+                .map(|m| said(m.speaker.role(), &m.content)),
+        )
+        .collect();
     let think = match call.think {
         Think::Off => Value::Bool(false),
-        Think::Low => Value::String("low".into()),
-        Think::Medium => Value::String("medium".into()),
-        Think::High => Value::String("high".into()),
+        level => serde_json::json!(level),
     };
     let result: Value = serde_json::json!({
         "model": call.model,

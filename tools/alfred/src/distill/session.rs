@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::hist::db::HistDb;
 use crate::hist::{Contents, Exchange, HistError};
 
@@ -104,23 +106,11 @@ impl SessionRead {
                 "session {session} holds too many exchanges"
             )))
         } else {
-            let mut pending: Vec<Turn> = Vec::with_capacity(pending_exchanges.len());
-            for exchange in pending_exchanges {
-                let contents = db.get_contents(&exchange.id, false)?.ok_or_else(|| {
-                    HistError::NotFound(format!("contents not found: {}", exchange.id))
-                })?;
-                pending.push(Turn::of(exchange, contents));
-            }
-            let mut earlier: Vec<Turn> = Vec::with_capacity(distilled_exchanges.len());
-            for exchange in distilled_exchanges {
-                let contents = db.get_contents(&exchange.id, false)?.ok_or_else(|| {
-                    HistError::NotFound(format!("contents not found: {}", exchange.id))
-                })?;
-                let turn = Turn::of(exchange, contents);
-                if turn.noise().is_none() {
-                    earlier.push(turn);
-                }
-            }
+            let pending = turns_of(db, pending_exchanges)?;
+            let earlier = turns_of(db, distilled_exchanges)?
+                .into_iter()
+                .filter(|t| t.noise().is_none())
+                .collect();
             Ok(SessionRead::of(session.to_string(), pending, earlier))
         };
         result
@@ -143,24 +133,14 @@ impl SessionRead {
             earlier.iter().all(|t| t.noise().is_none()),
             "SessionRead.of: an earlier turn is not noise"
         );
-        let mut pending = pending;
-        let mut earlier = earlier;
-        pending.sort_by(|a, b| (a.timestamp(), a.id()).cmp(&(b.timestamp(), b.id())));
-        earlier.sort_by(|a, b| (a.timestamp(), a.id()).cmp(&(b.timestamp(), b.id())));
-        let mut turns: Vec<Turn> = Vec::new();
-        let mut noise: Vec<Turn> = Vec::new();
-        for turn in pending {
-            if turn.noise().is_none() {
-                turns.push(turn);
-            } else {
-                noise.push(turn);
-            }
-        }
+        let (turns, noise): (Vec<Turn>, Vec<Turn>) = sorted(pending)
+            .into_iter()
+            .partition(|t| t.noise().is_none());
         let result: SessionRead = SessionRead {
             session,
             turns,
             noise,
-            earlier,
+            earlier: sorted(earlier),
         };
         debug_assert!(
             in_time(&result.turns),
@@ -182,8 +162,7 @@ impl SessionRead {
     }
 
     pub fn whole(&self) -> Vec<&Turn> {
-        let mut result: Vec<&Turn> = self.earlier.iter().chain(&self.turns).collect();
-        result.sort_by(|a, b| (a.timestamp(), a.id()).cmp(&(b.timestamp(), b.id())));
+        let result: Vec<&Turn> = sorted(self.earlier.iter().chain(&self.turns).collect());
         debug_assert!(
             result.len() == self.turns.len() + self.earlier.len(),
             "SessionRead.whole: the pending and the earlier turns"
@@ -212,20 +191,47 @@ pub fn pending_sessions(db: &HistDb) -> Result<Vec<String>, HistError> {
             PENDING_SESSIONS_CAP,
         )
         .map(|exchanges| {
-            let mut sessions: Vec<String> = Vec::new();
-            let mut seen: std::collections::HashSet<&str> = std::collections::HashSet::new();
-            for exchange in exchanges.iter().rev() {
-                if seen.insert(exchange.session.as_str()) {
-                    sessions.push(exchange.session.clone());
-                }
-            }
-            sessions
+            // newest first: a session's last index is its oldest exchange
+            let oldest: HashMap<&str, usize> = exchanges
+                .iter()
+                .enumerate()
+                .map(|(k, e)| (e.session.as_str(), k))
+                .collect();
+            let by_age: Vec<(&str, usize)> = oldest.into_iter().collect();
+            sorted_by_key(by_age, |(_, k)| std::cmp::Reverse(*k))
+                .into_iter()
+                .map(|(session, _)| session.to_string())
+                .collect()
         });
     debug_assert!(
         result.as_ref().map_or(true, |s| no_repeat(s)),
         "pending_sessions: no session twice"
     );
     result
+}
+
+fn turns_of(db: &HistDb, exchanges: Vec<Exchange>) -> Result<Vec<Turn>, HistError> {
+    exchanges
+        .into_iter()
+        .map(|e| {
+            let contents = db
+                .get_contents(&e.id, false)?
+                .ok_or_else(|| HistError::NotFound(format!("contents not found: {}", e.id)))?;
+            Ok(Turn::of(e, contents))
+        })
+        .collect()
+}
+
+fn sorted<T: std::borrow::Borrow<Turn>>(turns: Vec<T>) -> Vec<T> {
+    sorted_by_key(turns, |t| {
+        let turn: &Turn = t.borrow();
+        (turn.timestamp().to_string(), turn.id().to_string())
+    })
+}
+
+fn sorted_by_key<T, K: Ord>(mut items: Vec<T>, key: impl Fn(&T) -> K) -> Vec<T> {
+    items.sort_by_key(key);
+    items
 }
 
 fn belong(turns: &[Turn], session: &str) -> bool {

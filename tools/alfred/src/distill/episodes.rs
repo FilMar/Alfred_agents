@@ -30,6 +30,24 @@ pub struct Split {
 }
 
 impl Episode {
+    pub fn of(from: u32, to: u32, summary: String, turns: Vec<Turn>) -> Episode {
+        debug_assert!(from <= to, "Episode.of: from is at most to");
+        debug_assert!(
+            !summary.trim().is_empty(),
+            "Episode.of: the summary is not blank"
+        );
+        debug_assert!(
+            turns.len() == (to - from + 1) as usize,
+            "Episode.of: one turn per index"
+        );
+        Episode {
+            from,
+            to,
+            summary,
+            turns,
+        }
+    }
+
     pub fn from(&self) -> u32 {
         self.from
     }
@@ -97,36 +115,28 @@ impl SessionMap {
         debug_assert!(turn_count > 0, "SessionMap.check: turn_count is positive");
         let result: Option<String> = match json.get("episodes").and_then(Value::as_array) {
             Some(episodes) if !episodes.is_empty() => {
-                let mut expected: u64 = 0;
-                let mut error: Option<String> = None;
-                for episode in episodes {
+                let last = turn_count - 1;
+                let end = episodes.iter().try_fold(0_u64, |expected, episode| {
                     let from = episode.get("from").and_then(Value::as_u64);
                     let to = episode.get("to").and_then(Value::as_u64);
-                    let covered = episode.is_object()
-                        && from == Some(expected)
-                        && matches!(to, Some(to) if to >= expected);
-                    if !covered {
-                        error = Some(format!(
-                            "episodes must cover 0..{} in order with no gap: expected from={}",
-                            turn_count - 1,
-                            expected
-                        ));
-                        break;
+                    let summary = episode.get("summary").and_then(Value::as_str);
+                    match to {
+                        Some(to) if episode.is_object() && from == Some(expected) && to >= expected => {
+                            if summary.is_none_or(|s| s.trim().is_empty()) {
+                                Err("every episode needs a summary".to_string())
+                            } else {
+                                Ok(to + 1)
+                            }
+                        }
+                        _ => Err(format!(
+                            "episodes must cover 0..{last} in order with no gap: expected from={expected}"
+                        )),
                     }
-                    if episode
-                        .get("summary")
-                        .and_then(Value::as_str)
-                        .is_none_or(str::is_empty)
-                    {
-                        error = Some("every episode needs a summary".to_string());
-                        break;
-                    }
-                    expected = to.unwrap() + 1;
-                }
-                match error {
-                    Some(error) => Some(error),
-                    None if expected == u64::from(turn_count) => None,
-                    None => Some(format!("the last episode must end at {}", turn_count - 1)),
+                });
+                match end {
+                    Err(error) => Some(error),
+                    Ok(end) if end == u64::from(turn_count) => None,
+                    Ok(_) => Some(format!("the last episode must end at {last}")),
                 }
             }
             _ => Some("need list `episodes`".to_string()),
@@ -150,16 +160,9 @@ impl SessionMap {
                 .map(|episode| {
                     let from = episode.get("from").and_then(Value::as_u64).unwrap() as u32;
                     let to = episode.get("to").and_then(Value::as_u64).unwrap() as u32;
-                    Episode {
-                        from,
-                        to,
-                        summary: episode
-                            .get("summary")
-                            .and_then(Value::as_str)
-                            .unwrap()
-                            .to_string(),
-                        turns: (from..=to).map(|k| whole[k as usize].clone()).collect(),
-                    }
+                    let summary = episode.get("summary").and_then(Value::as_str).unwrap();
+                    let turns = (from..=to).map(|k| whole[k as usize].clone()).collect();
+                    Episode::of(from, to, summary.to_string(), turns)
                 })
                 .collect(),
         };
@@ -179,13 +182,14 @@ impl SessionMap {
     }
 
     pub fn text(&self) -> String {
-        let mut lines = vec![MAP_HEADER.to_string()];
-        lines.extend(
-            self.episodes
-                .iter()
-                .map(|episode| format!("- [{}-{}] {}", episode.from, episode.to, episode.summary)),
-        );
-        let result: String = lines.join("\n");
+        let result: String = std::iter::once(MAP_HEADER.to_string())
+            .chain(
+                self.episodes
+                    .iter()
+                    .map(|e| format!("- [{}-{}] {}", e.from, e.to, e.summary)),
+            )
+            .collect::<Vec<_>>()
+            .join("\n");
         debug_assert!(
             result.starts_with(MAP_HEADER),
             "SessionMap.text: the header first"
@@ -242,11 +246,8 @@ fn turn_count(read: &SessionRead) -> u32 {
 }
 
 fn covers(episodes: &[Episode], turn_count: u32) -> bool {
-    let mut next = 0_u32;
-    let in_order = episodes.iter().all(|e| {
-        let at = e.from == next;
-        next = e.to + 1;
-        at
-    });
-    in_order && next == turn_count
+    episodes
+        .iter()
+        .try_fold(0_u32, |next, e| (e.from == next).then_some(e.to + 1))
+        == Some(turn_count)
 }

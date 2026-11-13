@@ -161,42 +161,26 @@ fn check_rejects_an_episode_that_breaks_the_cover() {
 
 #[test]
 fn check_rejects_an_episode_without_a_summary() {
-    assert_eq!(
-        SessionMap::check(&serde_json::json!({"episodes": [{"from": 0, "to": 2}]}), 3).as_deref(),
-        Some("every episode needs a summary")
-    );
-    assert_eq!(
-        SessionMap::check(
-            &serde_json::json!({"episodes": [{"from": 0, "to": 2, "summary": ""}]}),
-            3
-        )
-        .as_deref(),
-        Some("every episode needs a summary")
-    );
-    assert_eq!(
-        SessionMap::check(
-            &serde_json::json!({"episodes": [{"from": 0, "to": 2, "summary": 7}]}),
-            3
-        )
-        .as_deref(),
-        Some("every episode needs a summary")
-    );
-    assert_eq!(
-        SessionMap::check(
-            &serde_json::json!({"episodes": [{"from": 0, "to": 2, "summary": null}]}),
-            3
-        )
-        .as_deref(),
-        Some("every episode needs a summary")
-    );
-    assert_eq!(
-        SessionMap::check(
-            &serde_json::json!({"episodes": [{"from": 0, "to": 2, "summary": ["a"]}]}),
-            3
-        )
-        .as_deref(),
-        Some("every episode needs a summary")
-    );
+    let summaries = [
+        None,
+        Some(serde_json::json!("")),
+        Some(serde_json::json!("  ")),
+        Some(serde_json::json!(7)),
+        Some(serde_json::Value::Null),
+        Some(serde_json::json!(["a"])),
+    ];
+    for summary in summaries {
+        let episode = match &summary {
+            None => serde_json::json!({"from": 0, "to": 2}),
+            Some(value) => serde_json::json!({"from": 0, "to": 2, "summary": value}),
+        };
+        let json = serde_json::json!({ "episodes": [episode] });
+        assert_eq!(
+            SessionMap::check(&json, 3).as_deref(),
+            Some("every episode needs a summary"),
+            "{summary:?}"
+        );
+    }
 }
 
 #[test]
@@ -255,14 +239,6 @@ fn check_accepts_a_cover_of_every_turn_in_order() {
         SessionMap::check(
             &serde_json::json!({"episodes": [{"from": 0, "to": 0, "summary": "a"}]}),
             1
-        )
-        .as_deref(),
-        None
-    );
-    assert_eq!(
-        SessionMap::check(
-            &serde_json::json!({"episodes": [{"from": 0, "to": 2, "summary": " "}]}),
-            3
         )
         .as_deref(),
         None

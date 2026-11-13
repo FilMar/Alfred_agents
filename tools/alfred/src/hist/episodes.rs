@@ -34,23 +34,25 @@ impl Episodes {
             self.qdrant.ensure().await?;
             for episode in episodes {
                 let vector = self.embedder.document(&episode.summary).await?;
-                let mut payload = serde_json::to_value(episode).unwrap_or_default();
-                if let Some(fields) = payload.as_object_mut() {
-                    fields.remove("id");
-                }
+                let payload: serde_json::Map<String, Value> = serde_json::to_value(episode)
+                    .ok()
+                    .and_then(|v| v.as_object().cloned())
+                    .unwrap_or_default()
+                    .into_iter()
+                    .filter(|(key, _)| key != "id")
+                    .collect();
                 self.qdrant.upsert(&episode.id, &vector, &payload).await?;
             }
-            let mut written: Vec<String> = episodes.iter().map(|e| e.id.clone()).collect();
-            written.sort();
-            written.dedup();
+            let written: std::collections::HashSet<&str> =
+                episodes.iter().map(|e| e.id.as_str()).collect();
             for id in self.ids_of(session).await? {
-                if !written.contains(&id) {
+                if !written.contains(id.as_str()) {
                     self.qdrant.delete(&id).await?;
                 }
             }
-            let mut held = self.ids_of(session).await?;
-            held.sort();
-            if held == written {
+            let held: std::collections::HashSet<String> =
+                self.ids_of(session).await?.into_iter().collect();
+            if held.len() == written.len() && held.iter().all(|id| written.contains(id.as_str())) {
                 Ok(())
             } else {
                 Err(HistError::BadEpisode {

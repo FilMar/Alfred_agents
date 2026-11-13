@@ -110,21 +110,20 @@ pub(super) fn ref_ids(turns: &[&Turn]) -> Vec<String> {
 pub(super) fn cap_db(pending: i64, distilled: i64) -> crate::hist::db::HistDb {
     let db = temp_db();
     let s = session(1);
-    let mut exchanges = Vec::new();
-    let mut rows = Vec::new();
-    let mut tag: u64 = 0;
-    for k in 0..pending {
-        let id = uuid(tag);
-        exchanges.push(exchange(&id, &s, &ts(k), "chat", None, false));
-        rows.push(contents(&id, "in", "out"));
-        tag += 1;
-    }
-    for k in 0..distilled {
-        let id = uuid(tag);
-        exchanges.push(exchange(&id, &s, &ts(k), "chat", None, true));
-        rows.push(contents(&id, "in", "out"));
-        tag += 1;
-    }
+    let tags: Vec<(u64, i64, bool)> = (0..pending)
+        .map(|k| (k, false))
+        .chain((0..distilled).map(|k| (k, true)))
+        .enumerate()
+        .map(|(tag, (k, done))| (tag as u64, k, done))
+        .collect();
+    let exchanges: Vec<_> = tags
+        .iter()
+        .map(|(tag, k, done)| exchange(&uuid(*tag), &s, &ts(*k), "chat", None, *done))
+        .collect();
+    let rows: Vec<_> = tags
+        .iter()
+        .map(|(tag, _, _)| contents(&uuid(*tag), "in", "out"))
+        .collect();
     seed(&db, &exchanges);
     db.upsert_contents(&rows).unwrap();
     db
