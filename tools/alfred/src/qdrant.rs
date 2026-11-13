@@ -2,9 +2,11 @@ use serde::Deserialize;
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
 
-use super::{RuleBody, RulesError, VECTOR_SIZE};
+use serde::Serialize;
 
-pub const COLLECTION: &str = "pi_identity";
+use crate::upstream::Upstream;
+
+pub const VECTOR_SIZE: usize = 768;
 pub const SCROLL_PAGE: u32 = 100;
 pub const MAX_POINTS: u32 = 10_000;
 
@@ -12,33 +14,38 @@ pub const MAX_POINTS: u32 = 10_000;
 pub struct Qdrant {
     base: String,
     http: reqwest::Client,
+    collection: &'static str,
 }
 
 #[derive(Debug, Clone)]
-pub struct Hit {
+pub struct Hit<P> {
     pub id: String,
     pub score: f32,
-    pub body: RuleBody,
+    pub body: P,
 }
 
 #[derive(Debug, Clone)]
-pub struct Stored {
+pub struct Stored<P> {
     pub id: String,
-    pub body: RuleBody,
+    pub body: P,
     pub vector: Option<Vec<f32>>,
 }
 
 impl Qdrant {
-    pub fn new(base: String, http: reqwest::Client) -> Qdrant {
+    pub fn new(base: String, http: reqwest::Client, collection: &'static str) -> Qdrant {
         debug_assert!(
             !base.ends_with('/'),
             "Qdrant.new: base has no trailing slash"
         );
-        Qdrant { base, http }
+        Qdrant {
+            base,
+            http,
+            collection,
+        }
     }
 
-    pub async fn ensure(&self) -> Result<(), RulesError> {
-        let url = format!("{}/collections/{COLLECTION}", self.base);
+    pub async fn ensure(&self) -> Result<(), Upstream> {
+        let url = format!("{}/collections/{}", self.base, self.collection);
         let exists = self
             .http
             .get(&url)
@@ -58,13 +65,13 @@ impl Qdrant {
         }
     }
 
-    pub async fn query(
+    pub async fn query<P: DeserializeOwned>(
         &self,
         vector: &[f32],
         limit: u32,
         filter: Option<Value>,
         threshold: Option<f32>,
-    ) -> Result<Vec<Hit>, RulesError> {
+    ) -> Result<Vec<Hit<P>>, Upstream> {
         debug_assert!(
             vector.len() == VECTOR_SIZE,
             "Qdrant.query: vector has 768 values"
@@ -72,10 +79,10 @@ impl Qdrant {
         let mut body = json!({ "query": vector, "limit": limit, "with_payload": true });
         body["filter"] = filter.unwrap_or(Value::Null);
         body["score_threshold"] = threshold.map_or(Value::Null, Value::from);
-        let reply: Points = self
+        let reply: Points<P> = self
             .call(self.http.post(self.points("query")).json(&body))
             .await?;
-        let result: Result<Vec<Hit>, RulesError> = Ok(reply
+        let result: Result<Vec<Hit<P>>, Upstream> = Ok(reply
             .points
             .into_iter()
             .map(|p| Hit {
@@ -93,12 +100,12 @@ impl Qdrant {
         result
     }
 
-    pub async fn upsert(
+    pub async fn upsert<P: Serialize>(
         &self,
         id: &str,
         vector: &[f32],
-        body: &RuleBody,
-    ) -> Result<(), RulesError> {
+        body: &P,
+    ) -> Result<(), Upstream> {
         debug_assert!(
             vector.len() == VECTOR_SIZE,
             "Qdrant.upsert: vector has 768 values"
@@ -110,17 +117,17 @@ impl Qdrant {
             .map(|_| ())
     }
 
-    pub async fn scroll_all(
+    pub async fn scroll_all<P: DeserializeOwned>(
         &self,
         filter: Option<Value>,
         with_vector: bool,
-    ) -> Result<Vec<Stored>, RulesError> {
-        let mut found: Vec<Stored> = Vec::new();
+    ) -> Result<Vec<Stored<P>>, Upstream> {
+        let mut found: Vec<Stored<P>> = Vec::new();
         let mut offset = Value::Null;
         let mut pages = 0_u32;
         let result = loop {
             let body = json!({ "limit": SCROLL_PAGE, "offset": offset, "filter": filter, "with_payload": true, "with_vector": with_vector });
-            let page: Page = match self
+            let page: Page<P> = match self
                 .call(self.http.post(self.points("scroll")).json(&body))
                 .await
             {
@@ -133,7 +140,10 @@ impl Qdrant {
                 break check_vectors(found, with_vector);
             }
             if pages * SCROLL_PAGE >= MAX_POINTS {
-                break Err(RulesError::TooMany(MAX_POINTS));
+                break Err(Upstream {
+                    service: "Qdrant",
+                    message: format!("more than {MAX_POINTS} points"),
+                });
             }
             offset = page.next_page_offset;
         };
@@ -146,12 +156,12 @@ impl Qdrant {
         result
     }
 
-    pub async fn get(&self, id: &str) -> Result<Option<Stored>, RulesError> {
+    pub async fn get<P: DeserializeOwned>(&self, id: &str) -> Result<Option<Stored<P>>, Upstream> {
         let body = json!({ "ids": [id], "with_payload": true, "with_vector": false });
-        let points: Vec<Point> = self
+        let points: Vec<Point<P>> = self
             .call(self.http.post(self.points_root()).json(&body))
             .await?;
-        let result: Result<Option<Stored>, RulesError> =
+        let result: Result<Option<Stored<P>>, Upstream> =
             Ok(points.into_iter().map(Point::stored).find(|p| p.id == id));
         debug_assert!(
             result
@@ -162,7 +172,7 @@ impl Qdrant {
         result
     }
 
-    pub async fn set_payload(&self, ids: &[String], payload: Value) -> Result<(), RulesError> {
+    pub async fn set_payload(&self, ids: &[String], payload: Value) -> Result<(), Upstream> {
         let body = json!({ "payload": payload, "points": ids });
         let url = format!("{}?wait=true", self.points("payload"));
         self.call::<Value>(self.http.post(url).json(&body))
@@ -170,7 +180,7 @@ impl Qdrant {
             .map(|_| ())
     }
 
-    pub async fn delete_keys(&self, ids: &[String], keys: &[&str]) -> Result<(), RulesError> {
+    pub async fn delete_keys(&self, ids: &[String], keys: &[&str]) -> Result<(), Upstream> {
         let body = json!({ "keys": keys, "points": ids });
         let url = format!("{}?wait=true", self.points("payload/delete"));
         self.call::<Value>(self.http.post(url).json(&body))
@@ -178,7 +188,7 @@ impl Qdrant {
             .map(|_| ())
     }
 
-    pub async fn delete(&self, id: &str) -> Result<(), RulesError> {
+    pub async fn delete(&self, id: &str) -> Result<(), Upstream> {
         let body = json!({ "points": [id] });
         let url = format!("{}?wait=true", self.points("delete"));
         self.call::<Value>(self.http.post(url).json(&body))
@@ -187,7 +197,7 @@ impl Qdrant {
     }
 
     fn points_root(&self) -> String {
-        format!("{}/collections/{COLLECTION}/points", self.base)
+        format!("{}/collections/{}/points", self.base, self.collection)
     }
 
     fn points(&self, action: &str) -> String {
@@ -197,7 +207,7 @@ impl Qdrant {
     async fn call<T: DeserializeOwned>(
         &self,
         request: reqwest::RequestBuilder,
-    ) -> Result<T, RulesError> {
+    ) -> Result<T, Upstream> {
         let response = request.send().await.map_err(|e| upstream(&e))?;
         let status = response.status();
 
@@ -209,7 +219,7 @@ impl Qdrant {
                 .map_err(|e| upstream(&e))
         } else {
             let text = response.text().await.unwrap_or_default();
-            Err(RulesError::Upstream {
+            Err(Upstream {
                 service: "Qdrant",
                 message: format!("{status}: {text}"),
             })
@@ -223,30 +233,30 @@ struct Reply<T> {
 }
 
 #[derive(Deserialize)]
-struct Points {
-    points: Vec<Point>,
+struct Points<P> {
+    points: Vec<Point<P>>,
 }
 
 #[derive(Deserialize)]
-struct Page {
-    points: Vec<Point>,
+struct Page<P> {
+    points: Vec<Point<P>>,
     #[serde(default)]
     next_page_offset: Value,
 }
 
 #[derive(Deserialize)]
-struct Point {
+struct Point<P> {
     #[serde(deserialize_with = "id_text")]
     id: String,
     #[serde(default)]
     score: Option<f32>,
-    payload: RuleBody,
+    payload: P,
     #[serde(default)]
     vector: Option<Vec<f32>>,
 }
 
-impl Point {
-    fn stored(self) -> Stored {
+impl<P> Point<P> {
+    fn stored(self) -> Stored<P> {
         Stored {
             id: self.id,
             body: self.payload,
@@ -262,34 +272,25 @@ fn id_text<'de, D: serde::Deserializer<'de>>(de: D) -> Result<String, D::Error> 
         .map_or_else(|| value.to_string(), str::to_string))
 }
 
-fn upstream(error: &reqwest::Error) -> RulesError {
-    RulesError::Upstream {
+fn upstream(error: &reqwest::Error) -> Upstream {
+    Upstream {
         service: "Qdrant",
         message: error.to_string(),
     }
 }
 
-fn check_vectors(points: Vec<Stored>, with_vector: bool) -> Result<Vec<Stored>, RulesError> {
+fn check_vectors<P>(points: Vec<Stored<P>>, with_vector: bool) -> Result<Vec<Stored<P>>, Upstream> {
     if !with_vector || points.iter().all(has_full_vector) {
         Ok(points)
     } else {
-        Err(RulesError::Upstream {
+        Err(Upstream {
             service: "Qdrant",
             message: "a stored vector does not have 768 values".into(),
         })
     }
 }
 
-impl Stored {
-    pub fn rule(self) -> super::Rule {
-        super::Rule {
-            id: self.id,
-            body: self.body,
-        }
-    }
-}
-
-fn has_full_vector(point: &Stored) -> bool {
+fn has_full_vector<P>(point: &Stored<P>) -> bool {
     point
         .vector
         .as_ref()

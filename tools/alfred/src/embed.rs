@@ -1,4 +1,5 @@
-use super::{RulesError, VECTOR_SIZE};
+use crate::qdrant::VECTOR_SIZE;
+use crate::upstream::Upstream;
 
 pub const MODEL: &str = "nomic-embed-text-v2-moe";
 const DOCUMENT_PREFIX: &str = "search_document: ";
@@ -19,21 +20,21 @@ impl Embedder {
         Embedder { base, http }
     }
 
-    pub async fn document(&self, text: &str) -> Result<Vec<f32>, RulesError> {
+    pub async fn document(&self, text: &str) -> Result<Vec<f32>, Upstream> {
         self.embed(&format!("{DOCUMENT_PREFIX}{text}")).await
     }
 
-    pub async fn query(&self, text: &str) -> Result<Vec<f32>, RulesError> {
+    pub async fn query(&self, text: &str) -> Result<Vec<f32>, Upstream> {
         self.embed(&format!("{QUERY_PREFIX}{text}")).await
     }
 
-    pub async fn warm(&self) -> Result<(), RulesError> {
+    pub async fn warm(&self) -> Result<(), Upstream> {
         self.embed(QUERY_PREFIX).await.map(|_| ())
     }
 
-    async fn embed(&self, input: &str) -> Result<Vec<f32>, RulesError> {
-        let result: Result<Vec<f32>, RulesError> = async {
-            let upstream = |error: reqwest::Error| RulesError::Upstream {
+    async fn embed(&self, input: &str) -> Result<Vec<f32>, Upstream> {
+        let result: Result<Vec<f32>, Upstream> = async {
+            let upstream = |error: reqwest::Error| Upstream {
                 service: "Ollama",
                 message: error.to_string(),
             };
@@ -61,7 +62,7 @@ impl Embedder {
                         .collect::<Option<Vec<f32>>>()
                 })
                 .filter(|values| values.len() == VECTOR_SIZE)
-                .ok_or_else(|| RulesError::Upstream {
+                .ok_or_else(|| Upstream {
                     service: "Ollama",
                     message: format!("no embedding of {VECTOR_SIZE} values in response"),
                 })?;

@@ -2,9 +2,9 @@ mod curation;
 
 use jiff::Timestamp;
 
-use super::embed::Embedder;
-use super::qdrant::{Qdrant, Stored};
-use super::{Found, Rule, RulesError, SearchOptions};
+use super::{Found, Rule, RuleBody, RulesError, SearchOptions};
+use crate::embed::Embedder;
+use crate::qdrant::{Qdrant, Stored};
 
 pub const DEFAULT_LIMIT: u32 = 10;
 pub const DEFAULT_NEAR_LIMIT: u32 = 100;
@@ -31,7 +31,11 @@ impl Rules {
         }
         let http = reqwest::Client::new();
         let result: Rules = Rules::new(
-            Qdrant::new(base("QDRANT_URL", "http://localhost:6333"), http.clone()),
+            Qdrant::new(
+                base("QDRANT_URL", "http://localhost:6333"),
+                http.clone(),
+                super::COLLECTION,
+            ),
             Embedder::new(base("OLLAMA_URL", "http://localhost:11434"), http),
         );
         result
@@ -96,7 +100,7 @@ impl Rules {
         };
         let hits = self
             .qdrant
-            .query(&vector, limit, filter, opts.min_score)
+            .query::<RuleBody>(&vector, limit, filter, opts.min_score)
             .await?;
         let found: Vec<Found> = hits
             .into_iter()
@@ -127,7 +131,7 @@ impl Rules {
             do_: vec![do_.to_string()],
             tags: super::normalize_tags(&tags),
             exchange,
-            embed_model: Some(super::embed::MODEL.to_string()),
+            embed_model: Some(crate::embed::MODEL.to_string()),
             when: Some(super::iso(now)),
             hits: None,
             last_hit: None,
@@ -153,7 +157,7 @@ impl Rules {
         } else {
             Some(serde_json::json!({ "must": [ { "key": "tags", "match": { "any": tags } } ] }))
         };
-        let points = self.qdrant.scroll_all(filter, false).await?;
+        let points = self.qdrant.scroll_all::<RuleBody>(filter, false).await?;
         let result: Result<Vec<Rule>, RulesError> =
             Ok(points.into_iter().map(Stored::rule).collect());
         result
@@ -161,7 +165,7 @@ impl Rules {
 
     pub async fn get(&self, id_or_prefix: &str) -> Result<Rule, RulesError> {
         let id = self.resolve(id_or_prefix).await?;
-        let result: Result<Rule, RulesError> = match self.qdrant.get(&id).await? {
+        let result: Result<Rule, RulesError> = match self.qdrant.get::<RuleBody>(&id).await? {
             Some(point) => Ok(point.rule()),
             None => Err(RulesError::NoRule(id_or_prefix.to_string())),
         };
@@ -176,7 +180,7 @@ impl Rules {
 
     pub async fn delete(&self, id_or_prefix: &str) -> Result<String, RulesError> {
         let id = self.resolve(id_or_prefix).await?;
-        let result: Result<String, RulesError> = match self.qdrant.get(&id).await? {
+        let result: Result<String, RulesError> = match self.qdrant.get::<RuleBody>(&id).await? {
             Some(_) => {
                 self.qdrant.delete(&id).await?;
                 Ok(id)
@@ -188,7 +192,7 @@ impl Rules {
 
     pub async fn append_do(&self, id_or_prefix: &str, do_: &str) -> Result<Rule, RulesError> {
         let id = self.resolve(id_or_prefix).await?;
-        let result: Result<Rule, RulesError> = match self.qdrant.get(&id).await? {
+        let result: Result<Rule, RulesError> = match self.qdrant.get::<RuleBody>(&id).await? {
             Some(mut point) => {
                 point.body.do_.push(do_.to_string());
                 let do_list = point.body.do_.clone();
@@ -220,7 +224,7 @@ impl Rules {
         } else if super::is_full_id(id_or_prefix) {
             Ok(id_or_prefix.to_string())
         } else {
-            let points = self.qdrant.scroll_all(None, false).await?;
+            let points = self.qdrant.scroll_all::<RuleBody>(None, false).await?;
             let mut ids: Vec<String> = points.into_iter().map(|point| point.id).collect();
             ids.sort();
             match super::match_prefix(id_or_prefix, &ids).as_slice() {

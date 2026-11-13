@@ -1,0 +1,160 @@
+{
+  "feature": "alfred hist, parte server: l'archivio di tl servito da alfred serve sotto /hist, con le stesse rotte, lo stesso JSON e lo stesso file SQLite",
+  "entita": [
+    {
+      "id": "Rows",
+      "codice": [
+        "tools/alfred/src/hist/mod.rs"
+      ],
+      "stato": "le righe come le scrive tl: Session, Exchange, Contents, Extractor, NewExtractor, Extraction, NewExtraction, Episode, e i filtri delle liste",
+      "fa": "niente: sono dati con lo stesso JSON di tl; un campo nullo non si scrive",
+      "non_fa": "non valida",
+      "serve_a": "HistDb, Episodes, HistRoutes"
+    },
+    {
+      "id": "Validate",
+      "codice": [
+        "tools/alfred/src/hist/validate.rs"
+      ],
+      "stato": "nessuno",
+      "fa": "per ogni riga in arrivo restituisce il primo messaggio di errore di tl, testo identico, o niente se la riga va bene",
+      "non_fa": "nessun I/O",
+      "serve_a": "HistRoutes, prima di ogni scrittura"
+    },
+    {
+      "id": "HistDb",
+      "codice": [
+        "tools/alfred/src/hist/db.rs"
+      ],
+      "stato": "una connessione SQLite al file di tl (~/.tl/tl.db), in WAL e con le chiavi esterne attive",
+      "fa": "crea le tabelle se mancano e aggiunge le colonne harness e tools ai file vecchi; upsert di sessioni, scambi e contenuti; distilled; liste filtrate; extractor con un solo attivo; extractions; conteggi",
+      "non_fa": "non valida i campi: lo fa Validate prima",
+      "serve_a": "HistRoutes"
+    },
+    {
+      "id": "Episodes",
+      "codice": [
+        "tools/alfred/src/hist/episodes.rs"
+      ],
+      "stato": "un Qdrant sulla collezione tl_episodes e un Embedder",
+      "fa": "cerca gli episodi per significato in un periodo; legge un episodio per id o prefisso; controlla ogni payload letto",
+      "non_fa": "non scrive episodi: li scrive td",
+      "serve_a": "HistRoutes"
+    },
+    {
+      "id": "HistRoutes",
+      "codice": [
+        "tools/alfred/src/hist/routes.rs",
+        "tools/alfred/src/serve.rs"
+      ],
+      "stato": "lo stato condiviso del server: Vault, Rules, HistDb, Episodes",
+      "fa": "le 14 rotte di tl piu' /health sotto /hist, con gli stessi parametri, codici e messaggi; GET /hist/search e GET /hist/episodes/{id}",
+      "non_fa": "nessuna logica di dominio oltre al giro: leggi, valida, scrivi",
+      "serve_a": "td e th in TypeScript con TL_API_URL=.../hist, e il futuro client alfred hist",
+      "cli": "alfred",
+      "comandi": [
+        "serve"
+      ],
+      "comanda": [
+        "Validate",
+        "HistDb",
+        "Episodes"
+      ]
+    }
+  ],
+  "flussi": [
+    {
+      "da": "HistRoutes",
+      "a": "Validate",
+      "passa": "le righe di una POST, una o una lista",
+      "torna": "il primo errore o niente"
+    },
+    {
+      "da": "HistRoutes",
+      "a": "HistDb",
+      "passa": "righe valide o filtri",
+      "torna": "righe, conteggi o HistError"
+    },
+    {
+      "da": "HistRoutes",
+      "a": "Episodes",
+      "passa": "testo, periodo, limite o id",
+      "torna": "episodi con punteggio o HistError"
+    }
+  ],
+  "invarianti": [
+    {
+      "testo": "il file SQLite resta quello di tl: stesso schema, nessuna migrazione oltre alle due colonne che tl gia' aggiunge",
+      "su": [
+        "HistDb"
+      ]
+    },
+    {
+      "testo": "una POST scrive solo se tutte le righe sono valide: con una riga sbagliata non scrive niente",
+      "su": [
+        "HistRoutes",
+        "HistDb"
+      ]
+    },
+    {
+      "testo": "l'upsert di uno scambio non tocca mai distilled",
+      "su": [
+        "HistDb"
+      ]
+    },
+    {
+      "testo": "c'e' al piu' un extractor attivo",
+      "su": [
+        "HistDb"
+      ]
+    },
+    {
+      "testo": "un id derivato e' sha256 di 'a:b' in forma UUID; un episodio letto ha l'id della sua sessione e del primo scambio",
+      "su": [
+        "Episodes"
+      ]
+    },
+    {
+      "testo": "ogni risposta ha lo stesso JSON di tl, cosi' td e th funzionano senza cambiare una riga",
+      "su": [
+        "Rows",
+        "HistRoutes"
+      ]
+    },
+    {
+      "testo": "un errore del mondo (file, Qdrant, input) torna come valore, mai come panic",
+      "su": [
+        "HistDb",
+        "Episodes",
+        "HistRoutes"
+      ]
+    }
+  ],
+  "fatti": [
+    "Lo schema SQL si copia carattere per carattere da tools/tl/src/db.ts (la costante SCHEMA), cosi' sqlite_master resta identico. Nessuna tabella, colonna o indice in piu'. Testo esatto:\n\nCREATE TABLE IF NOT EXISTS sessions (\n  id        TEXT PRIMARY KEY,\n  started   TEXT NOT NULL,\n  harness   TEXT,\n  host      TEXT,\n  path      TEXT\n);\nCREATE TABLE IF NOT EXISTS exchanges (\n  id        TEXT PRIMARY KEY,\n  session   TEXT REFERENCES sessions(id),\n  parent    TEXT REFERENCES exchanges(id),\n  timestamp TEXT NOT NULL,\n  kind      TEXT NOT NULL,\n  actor     TEXT NOT NULL,\n  model     TEXT,\n  tokens_in          INTEGER,\n  tokens_out         INTEGER,\n  tokens_cache_read  INTEGER,\n  tokens_cache_write INTEGER,\n  distilled TEXT,\n  meta      TEXT\n);\nCREATE TABLE IF NOT EXISTS contents (\n  exchange_id TEXT PRIMARY KEY REFERENCES exchanges(id),\n  input       TEXT NOT NULL,\n  output      TEXT NOT NULL,\n  tools       TEXT\n);\nCREATE TABLE IF NOT EXISTS extractor (\n  id      INTEGER PRIMARY KEY AUTOINCREMENT,\n  parent  INTEGER REFERENCES extractor(id),\n  why     TEXT NOT NULL,\n  active  INTEGER NOT NULL DEFAULT 0 CHECK (active IN (0, 1)),\n  config  TEXT NOT NULL CHECK (json_valid(config)),\n  created TEXT NOT NULL\n);\nCREATE UNIQUE INDEX IF NOT EXISTS extractor_one_active ON extractor(active) WHERE active = 1;\nCREATE TABLE IF NOT EXISTS extractions (\n  id            INTEGER PRIMARY KEY AUTOINCREMENT,\n  extractor_id  INTEGER NOT NULL REFERENCES extractor(id),\n  run           TEXT NOT NULL,\n  exchange_id   TEXT NOT NULL REFERENCES exchanges(id),\n  kind          TEXT NOT NULL CHECK (kind IN ('note', 'rule')),\n  body          TEXT NOT NULL CHECK (json_valid(body)),\n  quote         TEXT NOT NULL,\n  dropped_by    TEXT,\n  probabilities TEXT CHECK (probabilities IS NULL OR json_valid(probabilities)),\n  verdict       TEXT,\n  of            TEXT,\n  saved_id      TEXT,\n  created       TEXT NOT NULL\n);\nCREATE INDEX IF NOT EXISTS extractions_by_run ON extractions(extractor_id, run);\n",
+    "Schema SQLite, testo esatto da tools/tl/src/db.ts: tabelle sessions, exchanges, contents, extractor (con indice unico parziale extractor_one_active), extractions (con indice extractions_by_run). All'apertura: PRAGMA journal_mode = WAL, PRAGMA foreign_keys = ON, lo schema con CREATE ... IF NOT EXISTS, poi ALTER TABLE sessions ADD COLUMN harness TEXT e contents ADD COLUMN tools TEXT se mancano.",
+    "Variabili: HIST_DB (default $HOME/.tl/tl.db). QDRANT_URL e OLLAMA_URL come per rules.",
+    "Forme: id = ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$; timestamp = ^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$; giorno = ^\\d{4}-\\d{2}-\\d{2}$. kind di uno scambio: chat o subtask. harness: claude o pi. kind di un'estrazione: note o rule. Prefissi di dropped_by: 'check:' o 'critic:', seguiti da almeno un carattere.",
+    "validateSession, in ordine: 'session.id is required' (stringa vuota o assente); 'session.started is not ISO-8601 UTC: <v>'; se harness c'e' e non e' noto: 'session.harness is not claude or pi: <v>'.",
+    "validateExchange, in ordine: 'exchange.id is not an id: <v>'; 'exchange.session is required'; 'exchange.timestamp is not ISO-8601 UTC: <v>'; 'exchange.kind is not chat or subtask: <v>'; 'exchange.actor is required'; 'exchange.parent is not an id: <v>' se c'e'; 'exchange.distilled is not ISO-8601 UTC: <v>' se c'e'; per il primo tra tokens_in, tokens_out, tokens_cache_read, tokens_cache_write presente e non intero >= 0: 'exchange.<campo> is not a token count: <v>'.",
+    "validateContents, in ordine: 'contents.exchange_id is not an id: <v>'; 'contents.input is required' se non e' stringa; 'contents.output is required' se non e' stringa; 'contents.tools is not a non-empty string' se c'e' ed e' vuoto.",
+    "validateNewExtractor, in ordine: 'why is required'; 'config must be JSON'; 'created is not ISO-8601 UTC: <v>'; 'parent is not a row id: <v>' se parent non e' null e non e' intero > 0.",
+    "validateNewExtraction, in ordine: 'extractor_id is not a row id: <v>'; 'run is required'; 'exchange_id is not an id: <v>'; 'kind is not note or rule: <v>'; 'quote is required unless a check dropped the candidate'; 'body must be JSON'; 'probabilities must be JSON' se non null; 'created is not ISO-8601 UTC: <v>'; 'dropped_by is not a known reason: <v>' se non null; 'a dropped candidate has no verdict'; 'a saved candidate has a verdict' (saved_id senza verdict); 'a pointer comes with a verdict' (of senza verdict); 'a check drop has no probabilities'.",
+    "Il <v> nei messaggi e' il valore come lo stampa JavaScript: una stringa senza virgolette, undefined se manca, null se e' null.",
+    "POST /hist/sessions, /hist/exchanges, /hist/contents, /hist/extractions: corpo una riga o una lista; corpo non JSON -> 400 {error: 'body is not JSON'}; prima riga non valida -> 400 {error}; altrimenti scrive tutte le righe in una transazione e risponde {written: n}.",
+    "Upsert: sessions aggiorna started, harness, host, path; exchanges aggiorna tutto tranne distilled (all'inserimento distilled e' quello della riga); contents aggiorna input, output, tools. meta di uno scambio si salva come testo JSON e si rilegge come oggetto.",
+    "GET /hist/sessions?harness=&limit=: harness non noto -> 400 {error: 'harness must be claude or pi'}; ORDER BY started DESC, limit di default 100.",
+    "GET /hist/exchanges?session=&kind=&since=&until=&distilled=&limit=: kind non noto -> 400 {error: 'kind must be chat or subtask'}; since e until confrontano timestamp (>= e <=); distilled=true vuol dire non null, false vuol dire null; ORDER BY timestamp DESC, limit 100. Un limit che non e' un intero si ignora; un booleano diverso da true o false si ignora.",
+    "GET /hist/exchanges/{id}: 404 {error: 'exchange not found'}. PATCH /hist/exchanges/{id} {distilled}: senza la chiave -> 400 'distilled is required'; valore non null e non timestamp -> 400 'distilled is not ISO-8601 UTC'; id inesistente -> 404 'exchange not found'; altrimenti {id, distilled}.",
+    "GET /hist/contents/{id}?tools=true: tools solo con tools=true; 404 {error: 'contents not found'}.",
+    "POST /hist/extractors: corpo non JSON -> 400 'body is not JSON'; non valido -> 400 {error}; nasce non attivo; risponde {id}. GET /hist/extractors/{id}: id 'active' vuol dire quello attivo; 404 'extractor not found'. PATCH /hist/extractors/{id} {active: true}: altro corpo -> 400 'active: true is the only change allowed'; id inesistente -> 404; in una transazione spegne l'attivo e accende questo; risponde {id, active: true}. active nel JSON e' un booleano.",
+    "GET /hist/extractions?extractor_id=&run=&exchange_id=&kept=: kept=true vuol dire dropped_by null; ORDER BY id ASC, senza limite.",
+    "GET /hist/health: {ok: true, sessions, exchanges, contents} con i conteggi delle tre tabelle.",
+    "Episodi: collezione Qdrant tl_episodes (un alias). Payload {session, exchanges, from, to, summary, extractor, model, created}. Lettura controllata come episodeFromPayload: session id, exchanges lista non vuota di id, from e to timestamp con from <= to, summary non vuoto, extractor intero > 0, model non vuoto, created timestamp, id = sha256('<session>:<primo scambio>') in forma UUID. Un payload sbagliato e' un errore 502 con il motivo.",
+    "GET /hist/search?q=&limit=&min_score=&since=&until=: limit default 10, min_score default 0.30, since e until sono giorni. Filtro: to >= '<since>T00:00:00.000Z' e from <= '<until>T23:59:59.999Z'. Embedding con il prefisso di ricerca. Risposta: lista di {episode, score}, i piu' vicini prima. since dopo until o un giorno malformato -> 400.",
+    "GET /hist/episodes/{id}: id intero o prefisso; zero match -> 404; piu' di uno -> 409 con i primi 5 in paths; risponde l'episodio.",
+    "Le rotte di sola lettura si confrontano con tl serve: entrambi sulla stessa copia del file, la stessa richiesta, il JSON deve essere uguale. Le scritture si provano sulla copia.",
+    "int_param come parseInt di JavaScript in base 10: spazi iniziali ignorati, segno facoltativo, poi le cifre iniziali; '10abc' da' 10, '3.7' da' 3, 'abc' o vuoto da' niente. bool_param: solo 'true' o 'false'.",
+    "HistDb si prova con un file SQLite temporaneo creato dal test; Episodes si prova solo nelle funzioni pure (derived_id, episode_of, period_filter)."
+  ]
+}

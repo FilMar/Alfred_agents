@@ -1,7 +1,5 @@
 pub mod cli;
-pub mod embed;
 pub mod near;
-pub mod qdrant;
 pub mod reach;
 pub mod refine;
 pub mod routes;
@@ -10,7 +8,7 @@ pub mod store;
 use jiff::Timestamp;
 use serde::{Deserialize, Serialize};
 
-pub const VECTOR_SIZE: usize = 768;
+pub const COLLECTION: &str = "pi_identity";
 pub const SHOWN_CANDIDATES: usize = 5;
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
@@ -95,11 +93,8 @@ pub enum RulesError {
     },
     #[error("bad input: {0}")]
     BadInput(String),
-    #[error("{service} failed: {message}")]
-    Upstream {
-        service: &'static str,
-        message: String,
-    },
+    #[error(transparent)]
+    Upstream(#[from] crate::upstream::Upstream),
     #[error("search took more than {0} ms")]
     Timeout(u64),
     #[error("more than {0} items")]
@@ -165,4 +160,13 @@ pub(crate) fn iso(at: Timestamp) -> String {
     debug_assert!(result.ends_with('Z'), "iso: ends with Z");
     debug_assert!(result.len() == 24, "iso: millisecond precision");
     result
+}
+
+impl crate::qdrant::Stored<RuleBody> {
+    pub fn rule(self) -> Rule {
+        Rule {
+            id: self.id,
+            body: self.body,
+        }
+    }
 }

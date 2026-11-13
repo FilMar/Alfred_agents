@@ -1,15 +1,15 @@
 use jiff::Timestamp;
 
 use super::super::near::NearPair;
-use super::super::qdrant::Stored;
 use super::super::reach::{ReachReply, ReachRequest};
 use super::super::refine::{ApplyReply, RefineReport};
-use super::super::{Rule, RulesError};
+use super::super::{Rule, RuleBody, RulesError};
 use super::{REACH_LIMIT, REACH_MIN_SCORE, Rules, live_filter};
+use crate::qdrant::Stored;
 
 impl Rules {
     pub async fn refine(&self, now: Timestamp) -> Result<RefineReport, RulesError> {
-        let points = self.qdrant.scroll_all(None, false).await?;
+        let points = self.qdrant.scroll_all::<RuleBody>(None, false).await?;
         let rules: Vec<Rule> = points.into_iter().map(Stored::rule).collect();
         let result: Result<RefineReport, RulesError> =
             Ok(super::super::refine::refine_report(&rules, now));
@@ -17,7 +17,7 @@ impl Rules {
     }
 
     pub async fn refine_apply(&self, now: Timestamp) -> Result<ApplyReply, RulesError> {
-        let points = self.qdrant.scroll_all(None, false).await?;
+        let points = self.qdrant.scroll_all::<RuleBody>(None, false).await?;
         let rules: Vec<Rule> = points.into_iter().map(Stored::rule).collect();
         let report = super::super::refine::refine_report(&rules, now);
         let archive: Vec<String> = report
@@ -72,7 +72,7 @@ impl Rules {
             Err(RulesError::BadInput("limit must be at least 1".to_string()))
         } else {
             let filter = Some(live_filter());
-            let points = self.qdrant.scroll_all(filter, true).await?;
+            let points = self.qdrant.scroll_all::<RuleBody>(filter, true).await?;
             if points.len() > super::super::near::NEAR_ITEMS_LIMIT {
                 Err(RulesError::TooMany(
                     super::super::near::NEAR_ITEMS_LIMIT as u32,
@@ -108,7 +108,10 @@ impl Rules {
                 let limit = request.limit.unwrap_or(REACH_LIMIT);
                 let min_score = request.min_score.unwrap_or(REACH_MIN_SCORE);
                 let filter = Some(live_filter());
-                let points = self.qdrant.scroll_all(filter.clone(), false).await?;
+                let points = self
+                    .qdrant
+                    .scroll_all::<RuleBody>(filter.clone(), false)
+                    .await?;
                 let rules: Vec<(String, String)> = points
                     .into_iter()
                     .map(|point| (point.id, point.body.if_))
@@ -127,7 +130,7 @@ impl Rules {
                         searches.push(tokio::spawn(async move {
                             let vector = embedder.query(&prompt).await?;
                             let hits = qdrant
-                                .query(&vector, limit, filter, Some(min_score))
+                                .query::<RuleBody>(&vector, limit, filter, Some(min_score))
                                 .await?;
                             let ids: Vec<String> = hits.into_iter().map(|hit| hit.id).collect();
                             Ok::<Vec<String>, RulesError>(ids)
@@ -136,9 +139,11 @@ impl Rules {
                     for search in searches {
                         let ids = search
                             .await
-                            .map_err(|failure| RulesError::Upstream {
-                                service: "reach",
-                                message: failure.to_string(),
+                            .map_err(|failure| {
+                                RulesError::Upstream(crate::upstream::Upstream {
+                                    service: "reach",
+                                    message: failure.to_string(),
+                                })
                             })
                             .and_then(|searched| searched)?;
                         found.push(ids);
