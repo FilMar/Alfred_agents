@@ -8,12 +8,6 @@ A block is one run of ritchie (code) or efesto (skill). [A] is architecture: sma
 
 Only the next goals have blocks. When a goal is done, pick the next one from Ideas and cut it into blocks then.
 
-## alfred v2: hist
-
-`tl` moves into `alfred serve` as `alfred hist`. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
-
-- [A] Client `alfred hist`, and the session upload from the laptop.
-
 ## alfred v2: deploy and switch
 
 The server goes on the Deck, then every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
