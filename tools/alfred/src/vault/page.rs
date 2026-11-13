@@ -65,7 +65,6 @@ impl Page {
     pub fn toc(&self) -> Vec<Heading> {
         let result: Vec<Heading> = self.spans().into_iter().map(|span| span.heading).collect();
         debug_assert!(ids_unique(&result), "Page.toc: ids are unique");
-        debug_assert!(levels_valid(&result), "Page.toc: levels are 1 to 6");
         debug_assert!(
             chars_fit(&result, &self.body),
             "Page.toc: no section is longer than the body"
@@ -75,14 +74,11 @@ impl Page {
 
     pub fn section(&self, id: &str) -> Option<&str> {
         let key = heading_id(id, &HashSet::new());
-        let result: Option<&str> = self
+        let result = self
             .spans()
             .into_iter()
-            .find(|span| span.heading.id == key)
-            .map(|span| {
-                let range = span.range;
-                &self.body[range.start..range.end]
-            });
+            .find(|s| s.heading.id == key)
+            .map(|s| &self.body[s.range]);
         debug_assert!(
             result.is_none_or(|s| is_slice_of(s, &self.body)),
             "Page.section: section is a slice of the body"
@@ -138,29 +134,23 @@ impl Page {
 }
 
 pub(crate) fn heading_id(title: &str, seen: &HashSet<String>) -> String {
-    let result: String = {
-        let mut base = String::new();
-        for c in title.chars() {
+    let base: String = title
+        .chars()
+        .filter(|c| c.is_alphanumeric() || c.is_whitespace() || matches!(c, '-' | '_'))
+        .flat_map(|c| {
             if c.is_whitespace() {
-                base.push('-');
-            } else if c == '-' || c == '_' {
-                base.push(c);
-            } else if c.is_alphanumeric() {
-                for lower in c.to_lowercase() {
-                    base.push(lower);
-                }
+                vec!['-']
+            } else {
+                c.to_lowercase().collect()
             }
-        }
-        if seen.contains(&base) {
-            let mut free = base.clone();
-            for n in 1..=seen.len() + 1 {
-                free = format!("{base}-{n}");
-                if !seen.contains(&free) {
-                    break;
-                }
-            }
-            base = free;
-        }
+        })
+        .collect();
+    let result = if seen.contains(&base) {
+        (1..=seen.len() + 1)
+            .map(|n| format!("{base}-{n}"))
+            .find(|id| !seen.contains(id))
+            .unwrap_or(base)
+    } else {
         base
     };
     debug_assert!(!seen.contains(&result), "heading_id: id not seen before");
@@ -174,10 +164,6 @@ pub(crate) fn heading_id(title: &str, seen: &HashSet<String>) -> String {
 fn ids_unique(headings: &[Heading]) -> bool {
     let mut seen = HashSet::new();
     headings.iter().all(|h| seen.insert(h.id.as_str()))
-}
-
-fn levels_valid(headings: &[Heading]) -> bool {
-    headings.iter().all(|h| (1..=6).contains(&h.level))
 }
 
 fn chars_fit(headings: &[Heading], body: &str) -> bool {

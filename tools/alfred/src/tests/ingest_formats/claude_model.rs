@@ -1,5 +1,3 @@
-use crate::hist::ingest::formats::{CLAUDE, PI};
-
 #[allow(unused_imports)]
 use super::*;
 
@@ -96,27 +94,21 @@ fn pi_usage_prefers_message_usage_and_falls_back_to_the_line_usage() {
         "type": "message",
         "message": {"role": "assistant", "usage": {"input": 1}}
     });
-    assert_eq!((PI.usage)(&answer), Some(&serde_json::json!({"input": 1})));
+    assert_eq!((PI.usage)(&answer), Some([1, 0, 0, 0]));
     let compaction = serde_json::json!({"type": "compaction", "usage": {"output": 2}});
-    assert_eq!(
-        (PI.usage)(&compaction),
-        Some(&serde_json::json!({"output": 2}))
-    );
+    assert_eq!((PI.usage)(&compaction), Some([0, 2, 0, 0]));
     let both = serde_json::json!({
         "type": "message",
         "message": {"role": "assistant", "usage": {"input": 1}},
         "usage": {"input": 2}
     });
-    assert_eq!((PI.usage)(&both), Some(&serde_json::json!({"input": 1})));
+    assert_eq!((PI.usage)(&both), Some([1, 0, 0, 0]));
     let fallback = serde_json::json!({
         "type": "message",
         "message": {"role": "assistant"},
         "usage": {"cacheRead": 4}
     });
-    assert_eq!(
-        (PI.usage)(&fallback),
-        Some(&serde_json::json!({"cacheRead": 4}))
-    );
+    assert_eq!((PI.usage)(&fallback), Some([0, 0, 4, 0]));
     let no_usage = serde_json::json!({"type": "message", "message": {"role": "assistant"}});
     assert_eq!((PI.usage)(&no_usage), None);
     let bare = serde_json::json!({"type": "compaction"});

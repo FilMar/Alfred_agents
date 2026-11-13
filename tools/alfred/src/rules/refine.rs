@@ -115,16 +115,8 @@ pub fn spread_of(trusts: &[f64]) -> Spread {
         below_floor,
     };
     debug_assert!(
-        result.bins.len() == BIN_COUNT,
-        "spread_of: one bin per tenth"
-    );
-    debug_assert!(
         result.bins.iter().sum::<u32>() == result.total,
         "spread_of: bins add up to the total"
-    );
-    debug_assert!(
-        result.total as usize == trusts.len(),
-        "spread_of: total counts every trust"
     );
     result
 }

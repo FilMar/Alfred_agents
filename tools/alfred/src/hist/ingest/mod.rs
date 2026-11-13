@@ -1,4 +1,5 @@
-pub mod formats;
+pub mod harness;
+pub mod line;
 pub mod transcript;
 
 use std::path::{Path, PathBuf};
@@ -147,9 +148,9 @@ pub fn looks_like_pi(text: &str) -> bool {
 pub fn parse(text: &str, host: Option<&str>) -> Parsed {
     transcript::parse(
         if looks_like_pi(text) {
-            &formats::PI
+            harness::Harness::Pi
         } else {
-            &formats::CLAUDE
+            harness::Harness::Claude
         },
         &transcript::parse_lines(text),
         host,

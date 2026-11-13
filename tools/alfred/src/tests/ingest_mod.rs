@@ -278,10 +278,9 @@ fn hostname_no_empty_name_no_newline() {
 #[test]
 fn pi_exchange_id_matches_tl() {
     let opener = serde_json::json!({"type": "message", "id": "02bbcab0", "timestamp": "2026-06-21T17:21:18.789Z", "message": {"role": "user", "content": "x"}});
-    let id = (crate::hist::ingest::formats::PI.exchange_id)(
-        "019eeb1e-91c0-72e1-8280-9176550a7def",
-        &opener,
-    );
+    let opener: crate::hist::ingest::line::Line = serde_json::from_value(opener).unwrap();
+    let id = crate::hist::ingest::harness::Harness::Pi
+        .exchange_id("019eeb1e-91c0-72e1-8280-9176550a7def", &opener);
     assert_eq!(id.as_deref(), Some("1d3a3193-3890-d4e8-34de-a7d0ce92a67f"));
 }
 

@@ -1,30 +1,5 @@
-use crate::hist::ingest::formats::{CLAUDE, PI};
-
 #[allow(unused_imports)]
 use super::*;
-
-#[test]
-fn claude_table_names_harness_and_token_keys() {
-    assert_eq!(CLAUDE.harness, "claude");
-    assert_eq!(
-        CLAUDE.token_keys,
-        [
-            "input_tokens",
-            "output_tokens",
-            "cache_read_input_tokens",
-            "cache_creation_input_tokens"
-        ]
-    );
-}
-
-#[test]
-fn pi_table_names_harness_and_token_keys() {
-    assert_eq!(PI.harness, "pi");
-    assert_eq!(
-        PI.token_keys,
-        ["input", "output", "cacheRead", "cacheWrite"]
-    );
-}
 
 #[test]
 fn claude_opener_is_user_line_with_string_origin_kind() {
@@ -84,12 +59,9 @@ fn claude_usage_reads_usage_inside_message() {
         "type": "assistant",
         "message": {"model": "m", "usage": {"input_tokens": 3, "output_tokens": 7}}
     });
-    assert_eq!(
-        (CLAUDE.usage)(&answer),
-        Some(&serde_json::json!({"input_tokens": 3, "output_tokens": 7}))
-    );
+    assert_eq!((CLAUDE.usage)(&answer), Some([3, 7, 0, 0]));
     let empty_usage = serde_json::json!({"type": "assistant", "message": {"usage": {}}});
-    assert_eq!((CLAUDE.usage)(&empty_usage), Some(&serde_json::json!({})));
+    assert_eq!((CLAUDE.usage)(&empty_usage), Some([0, 0, 0, 0]));
     let no_usage = serde_json::json!({"type": "assistant", "message": {"model": "m"}});
     assert_eq!((CLAUDE.usage)(&no_usage), None);
     let no_message = serde_json::json!({"type": "assistant"});
@@ -328,4 +300,9 @@ fn claude_meta_is_trigger_when_origin_kind_is_not_empty() {
     assert_eq!((CLAUDE.meta)(&no_origin, &[]), None);
     let no_kind = serde_json::json!({"type": "user", "origin": {}});
     assert_eq!((CLAUDE.meta)(&no_kind, &[]), None);
+}
+
+#[test]
+fn the_harnesses_name_themselves() {
+    assert_eq!((CLAUDE.harness, PI.harness), ("claude", "pi"));
 }

@@ -1,5 +1,7 @@
 use serde_json::Value;
 
+use super::harness::Harness;
+use super::line::Line;
 use crate::hist::{Contents, Exchange, Session};
 
 pub const MAIN_ACTOR: &str = "alfredo";
@@ -18,30 +20,15 @@ pub struct SessionHead {
     pub cwd: Option<String>,
 }
 
-pub struct Format {
-    pub harness: &'static str,
-    pub is_opener: fn(&Value) -> bool,
-    pub is_answer: fn(&Value) -> bool,
-    pub spends: fn(&Value) -> bool,
-    pub usage: fn(&Value) -> Option<&Value>,
-    pub token_keys: [&'static str; 4],
-    pub part_text: fn(&Value, Option<&str>) -> Option<String>,
-    pub part_tool: fn(&Value, Option<&str>) -> Option<String>,
-    pub session: fn(&[Value]) -> Option<SessionHead>,
-    pub exchange_id: fn(&str, &Value) -> Option<String>,
-    pub meta: fn(&Value, &[&Value]) -> Option<Value>,
-    pub model: fn(&[&Value]) -> Option<String>,
-}
-
-pub fn parse(format: &Format, lines: &[Value], host: Option<&str>) -> Parsed {
-    let result: Parsed = match (format.session)(lines) {
+pub fn parse(harness: Harness, lines: &[Line], host: Option<&str>) -> Parsed {
+    let result: Parsed = match harness.session(lines) {
         None => Parsed::default(),
         Some(head) => {
-            let session = session_of(format, head, host);
-            let (found, orphans) = spans(lines, format.is_opener, format.is_answer);
+            let session = session_of(harness, head, host);
+            let (found, orphans) = spans(lines, harness);
             let exchanges = found
                 .iter()
-                .filter_map(|span| exchange_of(format, &session.id, span))
+                .filter_map(|span| exchange_of(harness, &session.id, span))
                 .collect();
             Parsed {
                 session: Some(session),
@@ -62,105 +49,42 @@ pub fn parse(format: &Format, lines: &[Value], host: Option<&str>) -> Parsed {
         result
             .session
             .as_ref()
-            .is_none_or(|s| s.harness.as_deref() == Some(format.harness)),
+            .is_none_or(|s| s.harness.as_deref() == Some(harness.name())),
         "transcript.parse: the session names its harness"
     );
     result
 }
 
-pub fn line_text(format: &Format, line: &Value) -> String {
-    let result: String = match line
-        .get("message")
-        .and_then(|message| message.get("content"))
-    {
-        Some(Value::String(text)) => text.clone(),
-        Some(Value::Array(parts)) => {
-            let role = line
-                .get("message")
-                .and_then(|message| message.get("role"))
-                .and_then(Value::as_str);
-            parts
-                .iter()
-                .filter_map(|part| (format.part_text)(part, role))
-                .filter(|text| !text.is_empty())
-                .collect::<Vec<String>>()
-                .join("\n")
-        }
-        _ => String::new(),
-    };
-    result
-}
-
-pub fn line_tools(format: &Format, line: &Value) -> String {
-    let result: String = match line
-        .get("message")
-        .and_then(|message| message.get("content"))
-    {
-        Some(Value::Array(parts)) => {
-            let role = line
-                .get("message")
-                .and_then(|message| message.get("role"))
-                .and_then(Value::as_str);
-            parts
-                .iter()
-                .filter_map(|part| (format.part_tool)(part, role))
-                .collect::<Vec<String>>()
-                .join("\n")
-        }
-        _ => String::new(),
-    };
-    result
-}
-
 pub struct Span<'a> {
-    pub opener: &'a Value,
-    pub body: Vec<&'a Value>,
+    pub opener: &'a Line,
+    pub body: Vec<&'a Line>,
 }
 
-pub fn parse_lines(text: &str) -> Vec<Value> {
+pub fn parse_lines(text: &str) -> Vec<Line> {
     text.lines()
-        .filter_map(|line| {
-            let trimmed = line.trim();
-            if trimmed.is_empty() {
-                None
-            } else {
-                serde_json::from_str(trimmed).ok()
-            }
-        })
+        .map(str::trim)
+        .filter(|l| !l.is_empty())
+        .filter_map(|l| serde_json::from_str(l).ok())
         .collect()
 }
 
-pub fn spans<'a>(
-    lines: &'a [Value],
-    is_opener: fn(&Value) -> bool,
-    is_answer: fn(&Value) -> bool,
-) -> (Vec<Span<'a>>, u32) {
-    let result: (Vec<Span<'a>>, u32) = {
-        let mut found: Vec<Span<'a>> = Vec::new();
-        let mut orphans: u32 = 0;
-        let mut open: Option<Span<'a>> = None;
-        for line in lines {
-            if is_opener(line) {
-                if let Some(span) = open.take() {
-                    found.push(span);
-                }
-                open = Some(Span {
-                    opener: line,
-                    body: Vec::new(),
-                });
-            } else if let Some(span) = open.as_mut() {
-                span.body.push(line);
-            } else if is_answer(line) {
-                orphans += 1;
-            }
+pub fn spans<'a>(lines: &'a [Line], harness: Harness) -> (Vec<Span<'a>>, u32) {
+    let (mut found, mut orphans) = (Vec::<Span<'a>>::new(), 0_u32);
+    for line in lines {
+        if harness.is_opener(line) {
+            found.push(Span {
+                opener: line,
+                body: Vec::new(),
+            });
+        } else if let Some(span) = found.last_mut() {
+            span.body.push(line);
+        } else if harness.is_answer(line) {
+            orphans += 1;
         }
-        if let Some(span) = open.take() {
-            found.push(span);
-        }
-        (found, orphans)
-    };
+    }
+    let result = (found, orphans);
     debug_assert!(
-        result.0.iter().all(|s| is_opener(s.opener)),
+        result.0.iter().all(|s| harness.is_opener(s.opener)),
         "spans: every span opens with an opener"
     );
     debug_assert!(
@@ -211,75 +135,51 @@ pub fn stringify(value: Option<&Value>) -> String {
     }
 }
 
-pub fn text_of(line: &Value, path: &[&str]) -> Option<String> {
-    {
-        let mut value: Option<&Value> = Some(line);
-        for key in path {
-            value = value.and_then(|current| current.get(*key));
-        }
-        value.and_then(Value::as_str).map(String::from)
-    }
-}
-
-fn session_of(format: &Format, head: SessionHead, host: Option<&str>) -> Session {
+fn session_of(harness: Harness, head: SessionHead, host: Option<&str>) -> Session {
     Session {
         id: head.id,
         started: head.started,
-        harness: Some(format.harness.to_string()),
+        harness: Some(harness.name().to_string()),
         host: host.filter(|h| !h.is_empty()).map(String::from),
         path: head.cwd.filter(|c| !c.is_empty()),
     }
 }
 
-fn exchange_of(format: &Format, session: &str, span: &Span) -> Option<(Exchange, Contents)> {
-    let id = (format.exchange_id)(session, span.opener)?;
-    let timestamp = text_of(span.opener, &["timestamp"])?;
+fn exchange_of(harness: Harness, session: &str, span: &Span) -> Option<(Exchange, Contents)> {
+    let id = harness.exchange_id(session, span.opener)?;
+    let timestamp = span.opener.timestamp.clone()?;
     let [tokens_in, tokens_out, tokens_cache_read, tokens_cache_write] =
-        tokens_of(format, &span.body);
+        harness.tokens_of(&span.body);
     let exchange = Exchange {
         id: id.clone(),
-        session: text_of(span.opener, &["sessionId"]).unwrap_or_else(|| session.to_string()),
+        session: span
+            .opener
+            .session_id
+            .clone()
+            .unwrap_or_else(|| session.to_string()),
         parent: None,
         timestamp,
         kind: "chat".to_string(),
         actor: MAIN_ACTOR.to_string(),
-        model: (format.model)(&span.body),
+        model: harness.model(&span.body),
         tokens_in: Some(tokens_in),
         tokens_out: Some(tokens_out),
         tokens_cache_read: Some(tokens_cache_read),
         tokens_cache_write: Some(tokens_cache_write),
         distilled: None,
-        meta: (format.meta)(span.opener, &span.body),
+        meta: harness.meta(span.opener, &span.body),
     };
-    let texts: Vec<String> = span
-        .body
-        .iter()
-        .map(|line| line_text(format, line))
-        .collect();
+    let texts: Vec<String> = span.body.iter().map(|line| harness.text_of(line)).collect();
     let tools: Vec<String> = span
         .body
         .iter()
-        .map(|line| line_tools(format, line))
+        .map(|line| harness.tools_of(line))
         .collect();
     let contents = Contents {
         exchange_id: id,
-        input: line_text(format, span.opener),
+        input: harness.text_of(span.opener),
         output: join_body(&texts),
         tools: join_tools(&tools),
     };
     Some((exchange, contents))
-}
-
-fn tokens_of(format: &Format, body: &[&Value]) -> [i64; 4] {
-    let mut tokens = [0i64; 4];
-    for usage in body
-        .iter()
-        .filter(|line| (format.spends)(line))
-        .filter_map(|line| (format.usage)(line))
-    {
-        for (slot, key) in tokens.iter_mut().zip(format.token_keys) {
-            *slot += usage.get(key).and_then(Value::as_i64).unwrap_or(0);
-        }
-    }
-    tokens
 }

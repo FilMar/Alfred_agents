@@ -2,44 +2,34 @@ use jiff::Timestamp;
 
 use super::super::near::NearPair;
 use super::super::reach::{ReachReply, ReachRequest};
-use super::super::refine::{ApplyReply, RefineReport};
+use super::super::refine::{ApplyReply, LowRule, RefineReport, refine_report};
 use super::super::{Rule, RuleBody, RulesError};
 use super::{REACH_LIMIT, REACH_MIN_SCORE, Rules, live_filter};
 use crate::qdrant::Stored;
 
 impl Rules {
     pub async fn refine(&self, now: Timestamp) -> Result<RefineReport, RulesError> {
-        let points = self.qdrant.scroll_all::<RuleBody>(None, false).await?;
-        let rules: Vec<Rule> = points.into_iter().map(Stored::rule).collect();
-        let result: Result<RefineReport, RulesError> =
-            Ok(super::super::refine::refine_report(&rules, now));
-        result
+        Ok(refine_report(&self.all_rules().await?, now))
+    }
+
+    async fn all_rules(&self) -> Result<Vec<Rule>, RulesError> {
+        Ok(self
+            .qdrant
+            .scroll_all::<RuleBody>(None, false)
+            .await?
+            .into_iter()
+            .map(Stored::rule)
+            .collect())
     }
 
     pub async fn refine_apply(&self, now: Timestamp) -> Result<ApplyReply, RulesError> {
-        let points = self.qdrant.scroll_all::<RuleBody>(None, false).await?;
-        let rules: Vec<Rule> = points.into_iter().map(Stored::rule).collect();
-        let report = super::super::refine::refine_report(&rules, now);
-        let archive: Vec<String> = report
-            .plan
-            .archive
-            .iter()
-            .map(|low| low.id.clone())
-            .collect();
+        let report = refine_report(&self.all_rules().await?, now);
+        let ids = |list: &[LowRule]| list.iter().map(|low| low.id.clone()).collect::<Vec<_>>();
+        let (archive, restore) = (ids(&report.plan.archive), ids(&report.plan.restore));
         if !archive.is_empty() {
-            self.qdrant
-                .set_payload(
-                    &archive,
-                    serde_json::json!({ "archived_at": super::super::iso(now) }),
-                )
-                .await?;
+            let stamp = serde_json::json!({ "archived_at": super::super::iso(now) });
+            self.qdrant.set_payload(&archive, stamp).await?;
         }
-        let restore: Vec<String> = report
-            .plan
-            .restore
-            .iter()
-            .map(|low| low.id.clone())
-            .collect();
         if !restore.is_empty() {
             self.qdrant.delete_keys(&restore, &["archived_at"]).await?;
         }

@@ -38,35 +38,26 @@ pub fn near_pairs(items: &[(String, Vec<f32>)], min: f32, limit: usize) -> Vec<P
         items.len() <= NEAR_ITEMS_LIMIT,
         "near_pairs: at most 3000 items"
     );
-    let result: Vec<Pair> = {
-        let mut pairs: Vec<Pair> = Vec::new();
-        let mut seen: std::collections::HashSet<(&str, &str)> = std::collections::HashSet::new();
-        for (i, (id_a, vector_a)) in items.iter().enumerate() {
-            for (id_b, vector_b) in &items[(i + 1)..] {
-                if id_a == id_b {
-                    continue;
-                }
-                let a = id_a.min(id_b);
-                let b = id_a.max(id_b);
-                let score = cosine(vector_a, vector_b);
-                if score >= min && seen.insert((a.as_str(), b.as_str())) {
-                    pairs.push(Pair {
-                        a: a.clone(),
-                        b: b.clone(),
-                        score,
-                    });
-                }
+    let mut result: Vec<Pair> = Vec::new();
+    for (i, (a, left)) in items.iter().enumerate() {
+        for (b, right) in items[i + 1..].iter().filter(|(b, _)| b != a) {
+            let score = cosine(left, right);
+            if score >= min {
+                result.push(Pair {
+                    a: a.clone(),
+                    b: b.clone(),
+                    score,
+                });
             }
         }
-        pairs.sort_by(|x, y| {
-            y.score
-                .total_cmp(&x.score)
-                .then_with(|| x.a.cmp(&y.a))
-                .then_with(|| x.b.cmp(&y.b))
-        });
-        pairs.truncate(limit);
-        pairs
-    };
+    }
+    result.sort_by(|x, y| {
+        y.score
+            .total_cmp(&x.score)
+            .then_with(|| x.a.cmp(&y.a))
+            .then_with(|| x.b.cmp(&y.b))
+    });
+    result.truncate(limit);
     debug_assert!(result.len() <= limit, "near_pairs: at most limit pairs");
     debug_assert!(
         result.iter().all(|p| p.a != p.b && p.score >= min),

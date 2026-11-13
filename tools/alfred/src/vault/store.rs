@@ -58,44 +58,7 @@ impl Vault {
     }
 
     fn find(&self, name: &str) -> Result<PathBuf, VaultError> {
-        let result: Result<PathBuf, VaultError>;
-        match check_name(name) {
-            Err(e) => result = Err(e),
-            Ok(()) => {
-                if name.contains('/') {
-                    let rel = PathBuf::from(format!("{name}.md"));
-                    let full = self.root.join(&rel);
-                    result = if is_published(&rel) && full.is_file() {
-                        Ok(full)
-                    } else {
-                        Err(VaultError::NoPage(name.to_string()))
-                    };
-                } else {
-                    result = match self.pages() {
-                        Err(e) => Err(e),
-                        Ok(pages) => {
-                            let hits: Vec<PathBuf> = pages
-                                .into_iter()
-                                .filter(|p| p.file_stem().and_then(|s| s.to_str()) == Some(name))
-                                .collect();
-                            if hits.len() > 1 {
-                                Err(VaultError::Ambiguous {
-                                    name: name.to_string(),
-                                    paths: hits
-                                        .iter()
-                                        .map(|p| p.with_extension("").display().to_string())
-                                        .collect(),
-                                })
-                            } else if let Some(p) = hits.first() {
-                                Ok(self.root.join(p))
-                            } else {
-                                Err(VaultError::NoPage(name.to_string()))
-                            }
-                        }
-                    };
-                }
-            }
-        }
+        let result = check_name(name).and_then(|()| self.locate(name));
         debug_assert!(
             result.as_ref().map_or(true, |p| p.starts_with(&self.root)),
             "Vault.find: path inside the root"
@@ -109,46 +72,40 @@ impl Vault {
         result
     }
 
-    fn pages(&self) -> Result<Vec<PathBuf>, VaultError> {
-        let mut found: Vec<PathBuf> = Vec::new();
-        let mut stack: Vec<PathBuf> = vec![PathBuf::new()];
-        let mut entries: u32 = 0;
-        let mut failed: Option<VaultError> = None;
-        while failed.is_none() {
-            let Some(dir) = stack.pop() else { break };
-            match std::fs::read_dir(self.root.join(&dir)) {
-                Err(e) => failed = Some(VaultError::Io(e)),
-                Ok(reader) => {
-                    for entry in reader {
-                        match entry {
-                            Err(e) => {
-                                failed = Some(VaultError::Io(e));
-                                break;
-                            }
-                            Ok(entry) => {
-                                entries += 1;
-                                if entries > MAX_ENTRIES {
-                                    failed = Some(VaultError::TooLarge(MAX_ENTRIES));
-                                    break;
-                                }
-                                let rel = dir.join(entry.file_name());
-                                if entry.file_type().is_ok_and(|t| t.is_dir()) {
-                                    stack.push(rel);
-                                } else if is_published(&rel) {
-                                    found.push(rel);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    fn locate(&self, name: &str) -> Result<PathBuf, VaultError> {
+        let missing = || VaultError::NoPage(name.to_string());
+        if name.contains('/') {
+            let rel = PathBuf::from(format!("{name}.md"));
+            let full = self.root.join(&rel);
+            return if is_published(&rel) && full.is_file() {
+                Ok(full)
+            } else {
+                Err(missing())
+            };
         }
-        let result: Result<Vec<PathBuf>, VaultError> = if let Some(e) = failed {
-            Err(e)
-        } else {
+        let hits: Vec<PathBuf> = self
+            .pages()?
+            .into_iter()
+            .filter(|p| p.file_stem().and_then(|s| s.to_str()) == Some(name))
+            .collect();
+        match hits.as_slice() {
+            [] => Err(missing()),
+            [one] => Ok(self.root.join(one)),
+            many => Err(VaultError::Ambiguous {
+                name: name.to_string(),
+                paths: many
+                    .iter()
+                    .map(|p| p.with_extension("").display().to_string())
+                    .collect(),
+            }),
+        }
+    }
+
+    fn pages(&self) -> Result<Vec<PathBuf>, VaultError> {
+        let result = self.walk().map(|mut found| {
             found.sort();
-            Ok(found)
-        };
+            found
+        });
         debug_assert!(
             result
                 .as_ref()
@@ -156,6 +113,26 @@ impl Vault {
             "Vault.pages: paths relative to the root"
         );
         result
+    }
+
+    fn walk(&self) -> Result<Vec<PathBuf>, VaultError> {
+        let (mut found, mut stack, mut entries) = (Vec::new(), vec![PathBuf::new()], 0_u32);
+        while let Some(dir) = stack.pop() {
+            for entry in std::fs::read_dir(self.root.join(&dir))? {
+                let entry = entry?;
+                entries += 1;
+                if entries > MAX_ENTRIES {
+                    return Err(VaultError::TooLarge(MAX_ENTRIES));
+                }
+                let rel = dir.join(entry.file_name());
+                if entry.file_type().is_ok_and(|t| t.is_dir()) {
+                    stack.push(rel);
+                } else if is_published(&rel) {
+                    found.push(rel);
+                }
+            }
+        }
+        Ok(found)
     }
 }
 

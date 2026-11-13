@@ -1,7 +1,5 @@
-use crate::hist::ingest::transcript::{MAIN_ACTOR, line_text, line_tools, parse, spans};
-use serde_json::{Value, json};
+use serde_json::json;
 
-#[allow(unused_imports)]
 use super::*;
 
 #[test]
@@ -28,7 +26,7 @@ fn parse_no_session_no_exchanges() {
             }
         }),
     ];
-    let _ = parse(&pi_format(), &lines, Some("box"));
+    let _ = parse(Harness::Pi, &ls(&lines), Some("box"));
 }
 
 #[test]
@@ -102,7 +100,7 @@ fn parse_contents_of_the_same_exchange() {
             }
         }),
     ];
-    let _ = parse(&claude_format(), &lines, Some("box"));
+    let _ = parse(Harness::Claude, &ls(&lines), Some("box"));
 }
 
 #[test]
@@ -116,216 +114,75 @@ fn parse_the_session_names_its_harness() {
         "uuid": "u1",
         "message": {"role": "user", "content": "hello"}
     })];
-    let _ = parse(&claude_format(), &lines, None);
+    let _ = parse(Harness::Claude, &ls(&lines), None);
 }
 
 #[test]
-fn line_text_returns_string_content_as_is() {
-    let format = probe_format();
+fn text_and_tools_of_a_line_per_harness() {
+    let claude = l(json!({"message": {"role": "user", "content": [
+        {"type": "text", "text": "a"}, {"type": "text", "text": ""}, {"type": "text", "text": "b"},
+        {"type": "tool_use", "name": "grep", "input": {"q": "x", "a": 1}}, {"type": "tool_result", "content": "out"}
+    ]}}));
+    assert_eq!(Harness::Claude.text_of(&claude), "a\nb");
     assert_eq!(
-        line_text(
-            &format,
-            &json!({"message": {"role": "user", "content": "plain"}})
-        ),
-        "plain"
+        Harness::Claude.tools_of(&claude),
+        "[tool grep] {\"q\":\"x\",\"a\":1}\n[result] out"
     );
-    assert_eq!(
-        line_text(
-            &format,
-            &json!({"message": {"role": "user", "content": ""}})
-        ),
-        ""
+    let pi_result =
+        l(json!({"message": {"role": "toolResult", "content": [{"type": "text", "text": "r"}]}}));
+    assert_eq!(Harness::Pi.text_of(&pi_result), "");
+    assert_eq!(Harness::Pi.tools_of(&pi_result), "[result] r");
+    let pi_call = l(
+        json!({"message": {"role": "assistant", "content": [{"type": "toolCall", "name": "ls", "arguments": null, "input": {"p": "."}}]}}),
     );
-    assert_eq!(
-        line_text(&format, &json!({"message": {"content": "no role"}})),
-        "no role"
-    );
+    assert_eq!(Harness::Pi.tools_of(&pi_call), "[tool ls] {\"p\":\".\"}");
+    let plain = l(json!({"message": {"role": "user", "content": "as is"}}));
+    assert_eq!(Harness::Claude.text_of(&plain), "as is");
+    assert_eq!(Harness::Claude.tools_of(&plain), "");
 }
 
 #[test]
-fn line_text_joins_text_parts_with_one_newline() {
-    let line = json!({"message": {"role": "user", "content": [
-        {"say": "a"},
-        {"other": 1},
-        {"say": "b"}
-    ]}});
-    assert_eq!(line_text(&probe_format(), &line), "a\nb");
-}
-
-#[test]
-fn line_text_drops_empty_part_texts() {
-    let line = json!({"message": {"role": "user", "content": [
-        {"blank": true},
-        {"say": "a"},
-        {"say": ""},
-        {"blank": true}
-    ]}});
-    assert_eq!(line_text(&probe_format(), &line), "a");
-    let spaced = json!({"message": {"role": "user", "content": [
-        {"say": "a"},
-        {"blank": true},
-        {"say": "b"}
-    ]}});
-    assert_eq!(line_text(&probe_format(), &spaced), "a\nb");
-}
-
-#[test]
-fn line_text_is_empty_without_text_parts() {
-    let format = probe_format();
-    assert_eq!(line_text(&format, &json!({"type": "user"})), "");
-    assert_eq!(
-        line_text(
-            &format,
-            &json!({"message": {"role": "user", "content": []}})
-        ),
-        ""
-    );
-    assert_eq!(
-        line_text(
-            &format,
-            &json!({"message": {"role": "user", "content": [{"other": 1}]}})
-        ),
-        ""
-    );
-    assert_eq!(
-        line_text(
-            &format,
-            &json!({"message": {"role": "user", "content": [{"blank": true}]}})
-        ),
-        ""
-    );
-    assert_eq!(
-        line_text(&format, &json!({"message": {"role": "user", "content": 5}})),
-        ""
-    );
-}
-
-#[test]
-fn line_text_passes_the_message_role_to_part_text() {
-    let format = probe_format();
-    let muted = json!({"message": {"role": "mute", "content": [{"say": "a"}]}});
-    assert_eq!(line_text(&format, &muted), "");
-    let speaking = json!({"message": {"role": "user", "content": [{"say": "a"}]}});
-    assert_eq!(line_text(&format, &speaking), "a");
-}
-
-#[test]
-fn line_tools_joins_tool_parts_with_one_newline() {
-    let line = json!({"message": {"role": "assistant", "content": [
-        {"tool": "grep"},
-        {"other": 1},
-        {"tool": "read"}
-    ]}});
-    assert_eq!(
-        line_tools(&probe_format(), &line),
-        "[tool grep]\n[tool read]"
-    );
-}
-
-#[test]
-fn line_tools_is_empty_without_tool_parts() {
-    let format = probe_format();
-    assert_eq!(
-        line_tools(
-            &format,
-            &json!({"message": {"role": "assistant", "content": "text"}})
-        ),
-        ""
-    );
-    assert_eq!(
-        line_tools(
-            &format,
-            &json!({"message": {"role": "assistant", "content": []}})
-        ),
-        ""
-    );
-    assert_eq!(
-        line_tools(
-            &format,
-            &json!({"message": {"role": "assistant", "content": [{"other": 1}]}})
-        ),
-        ""
-    );
-    assert_eq!(line_tools(&format, &json!({"type": "assistant"})), "");
-}
-
-#[test]
-fn line_tools_passes_the_message_role_to_part_tool() {
-    let format = probe_format();
-    let results = json!({"message": {"role": "toolResult", "content": [
-        {"tool": "grep"},
-        {"result": true}
-    ]}});
-    assert_eq!(line_tools(&format, &results), "[tool grep]\n[result]");
-    let plain = json!({"message": {"role": "user", "content": [{"result": true}]}});
-    assert_eq!(line_tools(&format, &plain), "");
-}
-
-#[test]
-fn spans_empty_input_yields_no_spans() {
-    let lines: Vec<Value> = Vec::new();
-    let (found, orphans) = spans(&lines, tag_opener, tag_answer);
-    assert!(found.is_empty());
-    assert_eq!(orphans, 0);
-}
-
-#[test]
-fn spans_counts_leading_answers_as_orphans() {
-    let lines = vec![json!({"kind": "answer"}), json!({"kind": "answer"})];
-    let (found, orphans) = spans(&lines, tag_opener, tag_answer);
-    assert!(found.is_empty());
-    assert_eq!(orphans, 2);
-}
-
-#[test]
-fn spans_drops_leading_others() {
-    let lines = vec![json!({"kind": "other"}), json!({"kind": "answer"})];
-    let (found, orphans) = spans(&lines, tag_opener, tag_answer);
-    assert!(found.is_empty());
-    assert_eq!(orphans, 1);
-}
-
-#[test]
-fn spans_opener_collects_answers_and_others_in_its_body() {
-    let lines = vec![
-        json!({"kind": "opener", "n": 1}),
-        json!({"kind": "answer", "n": 2}),
-        json!({"kind": "other", "n": 3}),
+fn spans_split_on_openers_and_count_leading_answers() {
+    let kind = |k: &str| match k {
+        "o" => json!({"type": "user", "origin": {"kind": "human"}}),
+        "a" => json!({"type": "assistant"}),
+        _ => json!({"type": "system"}),
+    };
+    let cases: &[(&str, &[usize], u32)] = &[
+        ("", &[], 0),
+        ("aa", &[], 2),
+        ("xa", &[], 1),
+        ("oax", &[2], 0),
+        ("oaox", &[1, 1], 0),
+        ("aoa", &[1], 1),
     ];
-    let (found, orphans) = spans(&lines, tag_opener, tag_answer);
-    assert_eq!(orphans, 0);
-    assert_eq!(found.len(), 1);
-    assert_eq!(found[0].opener, &lines[0]);
-    assert_eq!(found[0].body, vec![&lines[1], &lines[2]]);
+    for &(seq, bodies, orphans) in cases {
+        let lines = ls(&seq
+            .chars()
+            .map(|c| kind(&c.to_string()))
+            .collect::<Vec<_>>());
+        let (found, counted) = spans(&lines, Harness::Claude);
+        assert_eq!(
+            found.iter().map(|s| s.body.len()).collect::<Vec<_>>(),
+            bodies,
+            "spans of {seq:?}"
+        );
+        assert_eq!(counted, orphans, "orphans of {seq:?}");
+    }
 }
 
 #[test]
-fn spans_a_new_opener_closes_the_open_span() {
-    let lines = vec![
-        json!({"kind": "opener", "n": 1}),
-        json!({"kind": "answer", "n": 2}),
-        json!({"kind": "opener", "n": 3}),
-        json!({"kind": "other", "n": 4}),
+fn parse_lines_reads_one_object_per_line_and_skips_the_rest() {
+    let cases: &[(&str, usize)] = &[
+        ("", 0),
+        ("\n\n", 0),
+        ("not json", 0),
+        ("{\"a\":1}", 1),
+        ("{\"a\":1}\n", 1),
+        ("{\"a\":1}\n\nbad\n  \n{\"b\":2}", 2),
+        ("5", 0),
     ];
-    let (found, orphans) = spans(&lines, tag_opener, tag_answer);
-    assert_eq!(orphans, 0);
-    assert_eq!(found.len(), 2);
-    assert_eq!(found[0].opener, &lines[0]);
-    assert_eq!(found[0].body, vec![&lines[1]]);
-    assert_eq!(found[1].opener, &lines[2]);
-    assert_eq!(found[1].body, vec![&lines[3]]);
-}
-
-#[test]
-fn spans_only_answers_before_the_first_opener_are_orphans() {
-    let lines = vec![
-        json!({"kind": "answer", "n": 0}),
-        json!({"kind": "opener", "n": 1}),
-        json!({"kind": "answer", "n": 2}),
-    ];
-    let (found, orphans) = spans(&lines, tag_opener, tag_answer);
-    assert_eq!(orphans, 1);
-    assert_eq!(found.len(), 1);
-    assert_eq!(found[0].opener, &lines[1]);
-    assert_eq!(found[0].body, vec![&lines[2]]);
+    for &(text, count) in cases {
+        assert_eq!(parse_lines(text).len(), count, "parse_lines({text:?})");
+    }
 }
