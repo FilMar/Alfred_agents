@@ -4,9 +4,11 @@ Answers to `references/adapting-a-language.md`, with code shapes.
 
 ## 1. Immutability
 
-Private field + getter. `pub` fields only when no invariant protects the
-write (P3: a plain data struct keeps fields public — privacy that
-defends nothing is ceremony).
+Private field + getter. `pub` fields only when every mix of field
+values is a valid value (P3: a plain data struct keeps fields public —
+privacy that defends nothing is ceremony). Data read at a boundary
+(disk, network, a model) stays raw with `pub` fields. The checked type
+wraps it in a private field.
 
 ```rust
 pub struct Camera { zoom: f32, pan: Vec2 }
@@ -46,6 +48,10 @@ Common case (P4): derive `Default`, set required fields, spread the
 rest. A consuming `with_x(self) -> Self` builder only when there are
 enough optional fields to make the spread noisy, or an invariant to
 check per step.
+
+A type with an invariant is built or derived only inside its own
+`impl`: an `of` constructor or a `with_x` method. Outside it there is
+no struct literal and no `..value` spread of that type.
 
 ```rust
 #[derive(Default)]
