@@ -7,7 +7,12 @@
     clippy::match_wild_err_arm
 )]
 
+mod chat;
 mod cli;
+mod distill_ask;
+mod distill_config;
+mod distill_episodes;
+mod distill_session;
 mod hist_cli;
 mod hist_db;
 mod hist_episodes;

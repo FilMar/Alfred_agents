@@ -1,0 +1,77 @@
+{
+  "scostamenti": [
+    {
+      "testo": "bad_config diviso in bad_shape (controlli, nomi, misure) e bad_part (ruoli, soglie, testi): il corpo unico superava le 40 righe. Stesso ordine dei messaggi.",
+      "su": [
+        "Extractor"
+      ]
+    },
+    {
+      "testo": "Episodes.write: il payload e' l'episodio serializzato senza id, e gli id della sessione si leggono con un helper ids_of; il corpo della run superava le 40 righe.",
+      "su": [
+        "Episodes"
+      ]
+    },
+    {
+      "testo": "Le run th non vedevano i moduli vicini: ho corretto a mano le chiamate nei corpi (Call e Reply di Chat, ExchangeQuery di HistDb, scroll_all con due argomenti, config() di Extractor). Solo righe dei corpi.",
+      "su": [
+        "Ask",
+        "SessionMap",
+        "SessionRead",
+        "Episodes"
+      ]
+    },
+    {
+      "testo": "Test riscritti a mano: config come due tabelle (era 567 righe), chat col corpo esatto mandato a Ollama per ogni livello di think, ask contro un Ollama finto locale (risposta buona, una correzione, resa dopo 2, errore 400), episodi con listing, testo della mappa, turni per episodio e id derivati.",
+      "su": [
+        "Extractor",
+        "Chat",
+        "Ask",
+        "SessionMap"
+      ]
+    },
+    {
+      "testo": "Il retry su 429/5xx di Chat non ha un test: aspetta 5 secondi per tentativo e allungherebbe la suite. Episodes.write non ha test: tocca solo Qdrant.",
+      "su": [
+        "Chat",
+        "Episodes"
+      ]
+    }
+  ],
+  "derive": [],
+  "giri": [
+    "vai, mi piace"
+  ],
+  "metriche": "src/chat.rs:82  send                         logic=37  inv=1  computes\nsrc/distill/ask.rs:120  extract_json                 logic=28  inv=1  computes\nsrc/distill/config.rs:71  from_row                     logic=18  inv=3  computes\nsrc/distill/episodes.rs:196  stored                       logic=17  inv=2  computes\nsrc/distill/session.rs:129  of                           logic=17  inv=5  computes\nsrc/distill/session.rs:207  pending_sessions             logic=13  inv=1  computes\nsrc/hist/episodes.rs:27  write                        logic=24  inv=2  computes\nsrc/hist/episodes.rs:73  search                       logic=21  inv=2  computes\nsrc/hist/episodes.rs:111  get                          logic=8   inv=1  computes\nsrc/hist/episodes.rs:173  episode_of                   logic=4   inv=2  computes\n\n70 functions  median=3  mean=8.2  max=37  over40=0  flagged=10  files over350=0",
+  "test": {
+    "passati": 302,
+    "falliti": 0,
+    "nuovi": 63
+  },
+  "mutanti": [
+    {
+      "mutazione": "CriticCheck.drops: >= diventa >",
+      "ucciso": true
+    },
+    {
+      "mutazione": "pending_sessions: niente rev(), dalla piu' recente",
+      "ucciso": true
+    },
+    {
+      "mutazione": "Turn.noise: niente trim_start prima di API Error:",
+      "ucciso": true
+    },
+    {
+      "mutazione": "is_retried: 429 diventa 428",
+      "ucciso": true
+    },
+    {
+      "mutazione": "ask: un tentativo solo invece di due",
+      "ucciso": true
+    },
+    {
+      "mutazione": "SessionMap.text: due spazi dopo [from-to]",
+      "ucciso": true
+    }
+  ]
+}

@@ -24,6 +24,52 @@ impl Episodes {
         Episodes::new(Qdrant::from_env(COLLECTION), Embedder::from_env())
     }
 
+    pub async fn write(&self, session: &str, episodes: &[Episode]) -> Result<(), HistError> {
+        debug_assert!(!episodes.is_empty(), "Episodes.write: at least one episode");
+        debug_assert!(
+            episodes.iter().all(|e| e.session == session),
+            "Episodes.write: every episode is of the session"
+        );
+        let result: Result<(), HistError> = async {
+            self.qdrant.ensure().await?;
+            for episode in episodes {
+                let vector = self.embedder.document(&episode.summary).await?;
+                let mut payload = serde_json::to_value(episode).unwrap_or_default();
+                if let Some(fields) = payload.as_object_mut() {
+                    fields.remove("id");
+                }
+                self.qdrant.upsert(&episode.id, &vector, &payload).await?;
+            }
+            let mut written: Vec<String> = episodes.iter().map(|e| e.id.clone()).collect();
+            written.sort();
+            written.dedup();
+            for id in self.ids_of(session).await? {
+                if !written.contains(&id) {
+                    self.qdrant.delete(&id).await?;
+                }
+            }
+            let mut held = self.ids_of(session).await?;
+            held.sort();
+            if held == written {
+                Ok(())
+            } else {
+                Err(HistError::BadEpisode {
+                    id: session.to_string(),
+                    reason: "the session does not hold exactly the episodes written".to_string(),
+                })
+            }
+        }
+        .await;
+        result
+    }
+
+    async fn ids_of(&self, session: &str) -> Result<Vec<String>, HistError> {
+        let filter =
+            serde_json::json!({ "must": [{ "key": "session", "match": { "value": session } }] });
+        let points = self.qdrant.scroll_all::<Value>(Some(filter), false).await?;
+        Ok(points.into_iter().map(|point| point.id).collect())
+    }
+
     pub async fn search(&self, query: &EpisodeQuery) -> Result<Vec<EpisodeHit>, HistError> {
         let result: Result<Vec<EpisodeHit>, HistError> = async {
             let filter = period_filter(query.since.as_deref(), query.until.as_deref())?;
