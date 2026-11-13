@@ -1,20 +1,22 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-11-12
+updated: 2026-11-13
 ---
 
 A block is one run of ritchie (code) or efesto (skill). [A] is architecture: small, read it closely in review. [M] is mechanical: big, the first piece shows the rest.
 
 Only the next goals have blocks. When a goal is done, pick the next one from Ideas and cut it into blocks then.
 
-## alfred v2: deploy and switch
+## alfred v2: distill, command, deploy and switch
 
-The server goes on the Deck, then every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
+The distiller and `th` move into alfred. Then the server goes on the Deck, and every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
+- [A] The distiller inside `alfred serve`, on a schedule: it reads the archive and writes rules and episodes, with no `tb` notes. Model calls by `reqwest` to Ollama. [detail](memory_extractor_calls_go_to_ollama_by_reqwest)
+- [A] `alfred command` (`th` today): local, no API, the bwrap sandbox, pi as a child process.
 - [A] Install `alfred serve` on the Deck as a user unit.
 - [M] Rewrite skills, hooks, `CLAUDE.md` and extensions to call `alfred`.
-- [M] `tools/ti` and `tools/tl` stay only as the library of `td`.
+- [M] Retire `tools/tb`, `tools/ti`, `tools/tl`, `tools/td` and `tools/th`, with the wiki pages that describe them.
 
 ## Ideas
 
@@ -27,8 +29,6 @@ One line each. An idea becomes blocks only when it is the next goal.
 - `browse` and `random` print text, as `search` does. [detail](memory_search_prints_text_blocks_by_default)
 - A limit on the extractions API and on `tl extractions`.
 - One home for `requireServices`, or leave it. [detail](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags)
-- The distiller runs inside `alfred serve` on a schedule. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
-- `th` becomes `alfred command`, local, with no API.
 - A generic runner of scheduled jobs inside `alfred serve`, agentic or not: sort the mail, check the state of the Deck. It may meet the `tp` design below.
 - Fix the generic `ti` rules that score 0.5-0.6 on every prompt. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
 - Drop empty `tl` episodes from the search. [detail](memory_tb_dropped_vault_holds_shared_knowledge)

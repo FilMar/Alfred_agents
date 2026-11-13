@@ -35,4 +35,4 @@ Where it will likely break: `tl` is no longer a pure archive, it also holds the 
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the tables tl has today
 - [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) — use, not reading, judges a note
 - [memory_distiller_is_its_own_tool_td_and_tl_stays_the_register](memory_td_is_its_own_tool) — td checks the config; tl stores it
-- [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) — what a call in the config must state
+- [memory_extractor_calls_go_to_ollama_by_reqwest](memory_extractor_calls_go_to_ollama_by_reqwest) — what a call in the config must state
