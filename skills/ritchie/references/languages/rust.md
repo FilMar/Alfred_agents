@@ -112,6 +112,25 @@ disguise: replace it with an assert (P5).
 None. Composition: the outer struct holds the inner one and calls its
 methods (P1).
 
+## 9. Local state
+
+No `let mut` and no `&mut` in a body. An accumulator is an iterator
+chain: `filter_map`, `partition`, `fold`, `collect`. A value that
+changes over a run is a consuming method that returns a new value
+(see 3).
+
+```rust
+let (turns, noise): (Vec<Turn>, Vec<Turn>) =
+    sorted(pending).into_iter().partition(|t| t.noise().is_none());
+```
+
+Two exceptions keep `mut` inside one function:
+
+- a loop that awaits or exits early, such as a retry. An iterator
+  cannot await, and recursion is out.
+- a sort. It goes through a helper, `fn sorted(v: Vec<T>) -> Vec<T>`,
+  so the caller has no `mut`.
+
 ## Layout and newtypes
 
 One struct, many files: each file holds one `impl` block for one
