@@ -1,7 +1,11 @@
+pub mod cli;
+pub mod command;
 pub mod db;
 pub mod episodes;
+pub mod ingest;
 mod js;
 pub mod routes;
+pub mod stats;
 pub mod validate;
 
 use serde::{Deserialize, Serialize};

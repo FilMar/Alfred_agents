@@ -8,11 +8,16 @@
 )]
 
 mod cli;
+mod hist_cli;
 mod hist_db;
 mod hist_episodes;
 mod hist_mod;
 mod hist_routes;
+mod hist_stats;
 mod hist_validate;
+mod ingest_formats;
+mod ingest_mod;
+mod ingest_transcript;
 mod page;
 mod rules_cli;
 mod rules_mod;

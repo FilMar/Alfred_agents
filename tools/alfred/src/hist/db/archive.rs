@@ -167,4 +167,33 @@ impl HistDb {
         );
         result
     }
+
+    pub fn chat_inputs(
+        &self,
+        since: Option<&str>,
+        until: Option<&str>,
+        limit: i64,
+    ) -> Result<Vec<(Exchange, String)>, HistError> {
+        let sql = format!(
+            "SELECT {EXCHANGE_COLUMNS}, input FROM exchanges
+             JOIN contents ON contents.exchange_id = exchanges.id
+             WHERE kind = 'chat' AND (?1 IS NULL OR timestamp >= ?1) AND (?2 IS NULL OR timestamp <= ?2)
+             ORDER BY timestamp, id LIMIT ?3"
+        );
+        let conn = self.lock();
+        let rows = conn
+            .prepare(&sql)?
+            .query_map(params![since, until, limit], |row| {
+                Ok((exchange_of(row)?, row.get(13)?))
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>();
+        let result: Result<Vec<(Exchange, String)>, HistError> = rows.map_err(HistError::from);
+        debug_assert!(
+            result
+                .as_ref()
+                .map_or(true, |r| r.iter().all(|(e, _)| e.kind == "chat")),
+            "HistDb.chat_inputs: only chat exchanges"
+        );
+        result
+    }
 }

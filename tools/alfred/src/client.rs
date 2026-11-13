@@ -66,6 +66,15 @@ impl Client {
         self.send(self.http.post(&url).json(body), url).await
     }
 
+    pub async fn patch<B: Serialize, T: DeserializeOwned>(
+        &self,
+        path: &str,
+        body: &B,
+    ) -> Result<T, ClientError> {
+        let url = self.url(path);
+        self.send(self.http.patch(&url).json(body), url).await
+    }
+
     pub async fn delete<T: DeserializeOwned>(&self, path: &str) -> Result<T, ClientError> {
         let url = self.url(path);
         self.send(self.http.delete(&url), url).await

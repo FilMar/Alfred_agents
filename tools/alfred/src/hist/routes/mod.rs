@@ -1,3 +1,5 @@
+mod reads;
+
 use axum::extract::{Path, Query, State};
 use axum::http::StatusCode;
 use axum::routing::get;
@@ -5,11 +7,13 @@ use axum::{Json, Router};
 use serde_json::Value;
 
 use super::{
-    Contents, Episode, EpisodeHit, EpisodeQuery, Exchange, ExchangeQuery, Extraction,
-    ExtractionQuery, Extractor, Health, HistError, Session, SessionQuery,
+    Contents, Exchange, ExchangeQuery, Extraction, ExtractionQuery, Extractor, Health, HistError,
+    Session, SessionQuery,
 };
 use crate::api::ErrorReply;
 use crate::serve::{ApiError, Shared};
+
+pub const MAX_BODY_BYTES: usize = 512 * 1024 * 1024;
 
 pub fn router() -> Router<Shared> {
     Router::new()
@@ -31,8 +35,11 @@ pub fn router() -> Router<Shared> {
             "/hist/extractions",
             get(list_extractions).post(post_extractions),
         )
-        .route("/hist/search", get(search))
-        .route("/hist/episodes/{id}", get(get_episode))
+        .route("/hist/search", get(reads::search))
+        .route("/hist/prompts", get(reads::prompts))
+        .route("/hist/cost", get(reads::cost))
+        .route("/hist/episodes/{id}", get(reads::get_episode))
+        .layer(axum::extract::DefaultBodyLimit::max(MAX_BODY_BYTES))
 }
 
 async fn health(State(app): State<Shared>) -> Result<Json<Health>, ApiError> {
@@ -241,20 +248,6 @@ async fn list_extractions(
     Query(q): Query<ExtractionQuery>,
 ) -> Result<Json<Vec<Extraction>>, ApiError> {
     Ok(Json(app.hist.list_extractions(&q)?))
-}
-
-async fn search(
-    State(app): State<Shared>,
-    Query(q): Query<EpisodeQuery>,
-) -> Result<Json<Vec<EpisodeHit>>, ApiError> {
-    Ok(Json(app.episodes.search(&q).await?))
-}
-
-async fn get_episode(
-    State(app): State<Shared>,
-    Path(id): Path<String>,
-) -> Result<Json<Episode>, ApiError> {
-    Ok(Json(app.episodes.get(&id).await?))
 }
 
 pub(crate) fn rows_of(

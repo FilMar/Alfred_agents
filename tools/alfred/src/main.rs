@@ -4,6 +4,7 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 
 use alfred::client::Client;
+use alfred::hist::cli::HistCommand;
 use alfred::hist::db::HistDb;
 use alfred::hist::episodes::Episodes;
 use alfred::rules::cli::RulesCommand;
@@ -38,6 +39,10 @@ enum Command {
         #[command(subcommand)]
         command: RulesCommand,
     },
+    Hist {
+        #[command(subcommand)]
+        command: HistCommand,
+    },
 }
 
 #[derive(Subcommand)]
@@ -69,6 +74,9 @@ async fn main() -> ExitCode {
             };
             reply.map_err(|e| e.to_string())
         }
+        Command::Hist { command } => alfred::hist::cli::run(command)
+            .await
+            .map_err(|e| e.to_string()),
         Command::Rules { command } => alfred::rules::cli::run(command)
             .await
             .map_err(|e| e.to_string()),
