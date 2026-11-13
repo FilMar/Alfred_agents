@@ -114,9 +114,11 @@ tree (the size gate counts new files), on the shape of
 `references/cuts-template.md`. The values are in Italian. Then draw the
 page with `scripts/cuts_page.sh --cuts <file>` (it runs
 `scripts/cut_holes.py` and `scripts/render_cuts.py`). One cut is one
-decision: the same change in many files is one cut. A merge shows
-Prima and Dopo. A cut that only deletes shows the code that goes, so
-the user reads it and judges. A dead symbol carries its proof. The
+decision: the same change in many files is one cut. A cut that
+rewrites code shows Prima and Dopo: a stamp for two or more copies, a
+`codice` view with `dopo` for one piece. A cut that only deletes uses
+`codice` without `dopo`, so the user reads the code that goes and
+judges. A dead symbol carries its proof. The
 user ticks the cuts and copies the choice. Chat carries only the total
 and the path of the page.
 

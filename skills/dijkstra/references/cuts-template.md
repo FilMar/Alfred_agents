@@ -71,6 +71,8 @@ A cut has at most one view:
   without it, the whole piece goes. A weak test is the whole test. An
   assert that cannot fail is its whole function, with the assert lines
   in `via`. Dead code and a redundant check use it too.
+  `dopo` is the proposed code when the cut rewrites the pieces; the
+  page then shows Prima and Dopo. Without `dopo`, the pieces only go.
   `simbolo` asks for the proof that a symbol is dead. The script runs
   `rg -w` on the repo and `graphify explain <file>::<simbolo>`. It
   shows every hit outside the cut and every caller in the graph. "Non
