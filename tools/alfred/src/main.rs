@@ -83,7 +83,8 @@ async fn main() -> ExitCode {
     };
     match output {
         Ok(text) => {
-            print!("{text}");
+            // a closed pipe (| head) is not an error
+            let _ = std::io::Write::write_all(&mut std::io::stdout(), text.as_bytes());
             ExitCode::SUCCESS
         }
         Err(error) => {
