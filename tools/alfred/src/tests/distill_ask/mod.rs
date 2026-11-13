@@ -1,7 +1,7 @@
 use crate::chat::Tokens;
 use crate::distill::ask::{Answer, MAX_TRIES, correction, extract_json};
 
-mod fake;
+pub(super) mod fake;
 
 #[test]
 #[should_panic(expected = "Answer.accepted: tries is from 1 to MAX_TRIES")]

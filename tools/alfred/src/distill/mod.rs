@@ -1,4 +1,9 @@
 pub mod ask;
 pub mod config;
+pub mod critic;
 pub mod episodes;
+pub mod extract;
+pub mod record;
+pub mod rule;
 pub mod session;
+pub mod text;

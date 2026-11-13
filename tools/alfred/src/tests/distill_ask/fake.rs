@@ -10,7 +10,7 @@ use crate::chat::{Chat, Think};
 use crate::distill::ask::ask;
 use crate::distill::config::Role;
 
-type Script = Arc<Mutex<(VecDeque<(u16, Value)>, Vec<Value>)>>;
+pub(crate) type Script = Arc<Mutex<(VecDeque<(u16, Value)>, Vec<Value>)>>;
 
 async fn reply(
     State(script): State<Script>,
@@ -22,7 +22,7 @@ async fn reply(
     (StatusCode::from_u16(status).unwrap(), Json(body))
 }
 
-async fn fake(replies: Vec<(u16, Value)>) -> (Chat, Script) {
+pub(crate) async fn fake(replies: Vec<(u16, Value)>) -> (Chat, Script) {
     let script: Script = Arc::new(Mutex::new((replies.into(), Vec::new())));
     let router = axum::Router::new()
         .route("/api/chat", axum::routing::post(reply))
@@ -33,7 +33,7 @@ async fn fake(replies: Vec<(u16, Value)>) -> (Chat, Script) {
     (Chat::new(base, reqwest::Client::new()), script)
 }
 
-fn said(text: &str, input: u64, output: u64) -> (u16, Value) {
+pub(crate) fn said(text: &str, input: u64, output: u64) -> (u16, Value) {
     (
         200,
         json!({"message": {"role": "assistant", "content": text}, "prompt_eval_count": input, "eval_count": output}),
