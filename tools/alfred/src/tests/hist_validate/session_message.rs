@@ -1,13 +1,7 @@
-use crate::hist::validate::{exchange, session};
+use crate::hist::validate::session;
 
 #[allow(unused_imports)]
 use super::*;
-
-#[test]
-fn session_message_names_the_field() {
-    let row = serde_json::json!({});
-    let _ = session(&row);
-}
 
 #[test]
 fn session_returns_the_first_tl_error() {
@@ -59,10 +53,4 @@ fn session_returns_the_first_tl_error() {
     for (row, expected) in cases {
         assert_eq!(session(&row).as_deref(), expected, "row: {row}");
     }
-}
-
-#[test]
-fn exchange_message_names_the_field() {
-    let row = serde_json::json!({});
-    let _ = exchange(&row);
 }

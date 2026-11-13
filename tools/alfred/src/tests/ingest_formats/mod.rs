@@ -1,4 +1,5 @@
-use serde_json::Value;
+#[allow(unused_imports)]
+pub(super) use serde_json::{Value, json};
 
 use crate::hist::ingest::harness::Harness;
 use crate::hist::ingest::line::{Line, Part};

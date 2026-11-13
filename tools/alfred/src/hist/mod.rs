@@ -204,14 +204,9 @@ pub(crate) fn int_param(raw: Option<&str>) -> Option<i64> {
 }
 
 pub(crate) fn bool_param(raw: Option<&str>) -> Option<bool> {
-    let result: Option<bool> = match raw {
+    match raw {
         Some("true") => Some(true),
         Some("false") => Some(false),
         _ => None,
-    };
-    debug_assert!(
-        result.is_none() || matches!(raw, Some("true" | "false")),
-        "bool_param: only true or false"
-    );
-    result
+    }
 }

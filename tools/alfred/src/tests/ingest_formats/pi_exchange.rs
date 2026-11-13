@@ -6,20 +6,17 @@ fn pi_exchange_id_is_none_without_a_string_opener_id() {
     assert_eq!(
         (PI.exchange_id)(
             "session-1",
-            &serde_json::json!({"type": "message", "message": {"role": "user"}})
+            &json!({"type": "message", "message": {"role": "user"}})
         ),
         None
     );
-    assert_eq!(
-        (PI.exchange_id)("session-1", &serde_json::json!({"id": 7})),
-        None
-    );
+    assert_eq!((PI.exchange_id)("session-1", &json!({"id": 7})), None);
 }
 
 #[test]
 fn pi_meta_is_source_id_provider_and_cost_in_order() {
-    let opener = serde_json::json!({"type": "message", "id": "op-1", "message": {"role": "user"}});
-    let answer = serde_json::json!({
+    let opener = json!({"type": "message", "id": "op-1", "message": {"role": "user"}});
+    let answer = json!({
         "type": "message",
         "message": {
             "role": "assistant",
@@ -28,11 +25,11 @@ fn pi_meta_is_source_id_provider_and_cost_in_order() {
             "usage": {"cost": {"total": 0.25}}
         }
     });
-    let compaction = serde_json::json!({"type": "compaction", "usage": {"cost": {"total": 0.25}}});
+    let compaction = json!({"type": "compaction", "usage": {"cost": {"total": 0.25}}});
     let meta = (PI.meta)(&opener, &[&answer, &compaction]).unwrap();
     assert_eq!(
         meta,
-        serde_json::json!({"source_id": "op-1", "provider": "anthropic", "cost_usd": 0.5})
+        json!({"source_id": "op-1", "provider": "anthropic", "cost_usd": 0.5})
     );
     let keys: Vec<&str> = meta
         .as_object()
@@ -45,19 +42,19 @@ fn pi_meta_is_source_id_provider_and_cost_in_order() {
 
 #[test]
 fn pi_meta_omits_provider_when_no_answer_has_one() {
-    let opener = serde_json::json!({"type": "message", "id": "op-1", "message": {"role": "user"}});
-    let answer = serde_json::json!({"type": "message", "message": {"role": "assistant"}});
+    let opener = json!({"type": "message", "id": "op-1", "message": {"role": "user"}});
+    let answer = json!({"type": "message", "message": {"role": "assistant"}});
     assert_eq!(
         (PI.meta)(&opener, &[&answer]).unwrap(),
-        serde_json::json!({"source_id": "op-1"})
+        json!({"source_id": "op-1"})
     );
-    let compaction = serde_json::json!({"type": "compaction"});
+    let compaction = json!({"type": "compaction"});
     assert_eq!(
         (PI.meta)(&opener, &[&compaction]).unwrap(),
-        serde_json::json!({"source_id": "op-1"})
+        json!({"source_id": "op-1"})
     );
     assert_eq!(
         (PI.meta)(&opener, &[]).unwrap(),
-        serde_json::json!({"source_id": "op-1"})
+        json!({"source_id": "op-1"})
     );
 }

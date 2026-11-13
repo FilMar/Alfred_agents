@@ -1,4 +1,4 @@
-use crate::hist::validate::{contents, new_extraction, new_extractor};
+use crate::hist::validate::{contents, new_extractor};
 
 #[allow(unused_imports)]
 use super::*;
@@ -61,12 +61,6 @@ fn contents_returns_the_first_tl_error() {
 }
 
 #[test]
-fn new_extractor_message_is_not_empty() {
-    let row = serde_json::json!({});
-    let _ = new_extractor(&row);
-}
-
-#[test]
 fn new_extractor_returns_the_first_tl_error() {
     let cases: Vec<(serde_json::Value, Option<&str>)> = vec![
         (serde_json::json!({}), Some("why is required")),
@@ -119,10 +113,4 @@ fn new_extractor_returns_the_first_tl_error() {
     for (row, expected) in cases {
         assert_eq!(new_extractor(&row).as_deref(), expected, "row: {row}");
     }
-}
-
-#[test]
-fn new_extraction_message_is_not_empty() {
-    let row = serde_json::json!({});
-    let _ = new_extraction(&row);
 }

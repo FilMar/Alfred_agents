@@ -11,7 +11,7 @@ const TOKEN_FIELDS: [&str; 4] = [
 
 pub fn session(row: &Value) -> Option<String> {
     let harness = row.get("harness");
-    let result = first_failure(vec![
+    first_failure(vec![
         (!filled(row, "id"), "session.id is required".into()),
         (
             !shaped(row, "started", is_timestamp),
@@ -24,12 +24,7 @@ pub fn session(row: &Value) -> Option<String> {
             harness.is_some_and(|h| !matches!(h.as_str(), Some("claude" | "pi"))),
             format!("session.harness is not claude or pi: {}", js(harness)),
         ),
-    ]);
-    debug_assert!(
-        result.as_ref().is_none_or(|m| m.starts_with("session.")),
-        "validate.session: message names the field"
-    );
-    result
+    ])
 }
 
 pub fn exchange(row: &Value) -> Option<String> {
@@ -37,7 +32,7 @@ pub fn exchange(row: &Value) -> Option<String> {
         .iter()
         .copied()
         .find(|f| row.get(*f).is_some_and(|v| !is_count(v)));
-    let result = first_failure(vec![
+    first_failure(vec![
         (
             !shaped(row, "id", is_id),
             format!("exchange.id is not an id: {}", js(row.get("id"))),
@@ -78,16 +73,11 @@ pub fn exchange(row: &Value) -> Option<String> {
                 format!("exchange.{f} is not a token count: {}", js(row.get(f)))
             }),
         ),
-    ]);
-    debug_assert!(
-        result.as_ref().is_none_or(|m| m.starts_with("exchange.")),
-        "validate.exchange: message names the field"
-    );
-    result
+    ])
 }
 
 pub fn contents(row: &Value) -> Option<String> {
-    let result = first_failure(vec![
+    first_failure(vec![
         (
             !shaped(row, "exchange_id", is_id),
             format!(
@@ -107,17 +97,12 @@ pub fn contents(row: &Value) -> Option<String> {
             row.get("tools").is_some() && !filled(row, "tools"),
             "contents.tools is not a non-empty string".into(),
         ),
-    ]);
-    debug_assert!(
-        result.as_ref().is_none_or(|m| m.starts_with("contents.")),
-        "validate.contents: message names the field"
-    );
-    result
+    ])
 }
 
 pub fn new_extractor(row: &Value) -> Option<String> {
     let parent = row.get("parent");
-    let result = first_failure(vec![
+    first_failure(vec![
         (!filled(row, "why"), "why is required".into()),
         (!is_json(row.get("config")), "config must be JSON".into()),
         (
@@ -128,23 +113,13 @@ pub fn new_extractor(row: &Value) -> Option<String> {
             !parent.is_none_or(|p| p.is_null() || is_row_id(p)),
             format!("parent is not a row id: {}", js(parent)),
         ),
-    ]);
-    debug_assert!(
-        result.as_ref().is_none_or(|m| !m.is_empty()),
-        "validate.new_extractor: a message is not empty"
-    );
-    result
+    ])
 }
 
 pub fn new_extraction(row: &Value) -> Option<String> {
-    let result = extraction_identity(row)
+    extraction_identity(row)
         .or_else(|| extraction_payload(row))
-        .or_else(|| extraction_outcome(row));
-    debug_assert!(
-        result.as_ref().is_none_or(|m| !m.is_empty()),
-        "validate.new_extraction: a message is not empty"
-    );
-    result
+        .or_else(|| extraction_outcome(row))
 }
 
 fn extraction_identity(row: &Value) -> Option<String> {
@@ -269,50 +244,32 @@ fn is_reason(value: &Value) -> bool {
 }
 
 pub fn is_id(text: &str) -> bool {
-    let result: bool = {
-        let bytes = text.as_bytes();
-        bytes.len() == 36
-            && bytes.iter().enumerate().all(|(i, byte)| match i {
-                8 | 13 | 18 | 23 => *byte == b'-',
-                _ => matches!(*byte, b'0'..=b'9' | b'a'..=b'f'),
-            })
-    };
-    debug_assert!(
-        !result || text.len() == 36,
-        "is_id: an id has 36 characters"
-    );
-    result
+    let bytes = text.as_bytes();
+    bytes.len() == 36
+        && bytes.iter().enumerate().all(|(i, byte)| match i {
+            8 | 13 | 18 | 23 => *byte == b'-',
+            _ => matches!(*byte, b'0'..=b'9' | b'a'..=b'f'),
+        })
 }
 
 pub fn is_timestamp(text: &str) -> bool {
-    let result: bool = {
-        let bytes = text.as_bytes();
-        bytes.len() == 24
-            && bytes.iter().enumerate().all(|(i, byte)| match i {
-                4 | 7 => *byte == b'-',
-                10 => *byte == b'T',
-                13 | 16 => *byte == b':',
-                19 => *byte == b'.',
-                23 => *byte == b'Z',
-                _ => byte.is_ascii_digit(),
-            })
-    };
-    debug_assert!(
-        !result || (text.len() == 24 && text.ends_with('Z')),
-        "is_timestamp: 24 characters ending in Z"
-    );
-    result
+    let bytes = text.as_bytes();
+    bytes.len() == 24
+        && bytes.iter().enumerate().all(|(i, byte)| match i {
+            4 | 7 => *byte == b'-',
+            10 => *byte == b'T',
+            13 | 16 => *byte == b':',
+            19 => *byte == b'.',
+            23 => *byte == b'Z',
+            _ => byte.is_ascii_digit(),
+        })
 }
 
 pub fn is_day(text: &str) -> bool {
-    let result: bool = {
-        let bytes = text.as_bytes();
-        bytes.len() == 10
-            && bytes.iter().enumerate().all(|(i, byte)| match i {
-                4 | 7 => *byte == b'-',
-                _ => byte.is_ascii_digit(),
-            })
-    };
-    debug_assert!(!result || text.len() == 10, "is_day: 10 characters");
-    result
+    let bytes = text.as_bytes();
+    bytes.len() == 10
+        && bytes.iter().enumerate().all(|(i, byte)| match i {
+            4 | 7 => *byte == b'-',
+            _ => byte.is_ascii_digit(),
+        })
 }

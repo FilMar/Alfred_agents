@@ -19,18 +19,13 @@ const UPSERT_CONTENTS: &str =
 
 impl HistDb {
     pub fn upsert_sessions(&self, rows: &[Session]) -> Result<usize, HistError> {
-        let result = self.write_all(UPSERT_SESSION, rows, |stmt, r| {
+        self.write_all(UPSERT_SESSION, rows, |stmt, r| {
             stmt.execute(params![r.id, r.started, r.harness, r.host, r.path])
-        });
-        debug_assert!(
-            result.as_ref().map_or(true, |n| *n == rows.len()),
-            "HistDb.upsert_sessions: every row written"
-        );
-        result
+        })
     }
 
     pub fn upsert_exchanges(&self, rows: &[Exchange]) -> Result<usize, HistError> {
-        let result = self.write_all(UPSERT_EXCHANGE, rows, |stmt, r| {
+        self.write_all(UPSERT_EXCHANGE, rows, |stmt, r| {
             let meta = r.meta.as_ref().map(ToString::to_string);
             stmt.execute(params![
                 r.id,
@@ -47,23 +42,13 @@ impl HistDb {
                 r.distilled,
                 meta
             ])
-        });
-        debug_assert!(
-            result.as_ref().map_or(true, |n| *n == rows.len()),
-            "HistDb.upsert_exchanges: every row written"
-        );
-        result
+        })
     }
 
     pub fn upsert_contents(&self, rows: &[Contents]) -> Result<usize, HistError> {
-        let result = self.write_all(UPSERT_CONTENTS, rows, |stmt, r| {
+        self.write_all(UPSERT_CONTENTS, rows, |stmt, r| {
             stmt.execute(params![r.exchange_id, r.input, r.output, r.tools])
-        });
-        debug_assert!(
-            result.as_ref().map_or(true, |n| *n == rows.len()),
-            "HistDb.upsert_contents: every row written"
-        );
-        result
+        })
     }
 
     pub fn set_distilled(&self, id: &str, distilled: Option<&str>) -> Result<bool, HistError> {

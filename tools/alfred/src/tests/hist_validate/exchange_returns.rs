@@ -1,272 +1,106 @@
-use crate::hist::validate::{contents, exchange};
+use crate::hist::validate::exchange;
 
 #[allow(unused_imports)]
 use super::*;
 
 #[test]
 fn exchange_returns_the_first_tl_error() {
-    let cases: Vec<(serde_json::Value, Option<&str>)> = vec![
+    let cases = [
+        (json!({}), Some("exchange.id is not an id: undefined")),
         (
-            serde_json::json!({}),
-            Some("exchange.id is not an id: undefined"),
-        ),
-        (
-            serde_json::json!({
-                "id": "x",
-                "session": "",
-                "timestamp": "x",
-                "kind": "x",
-                "actor": "",
-                "tokens_in": -1
-            }),
+            json!({"id": "x", "session": "", "timestamp": "x", "kind": "x", "actor": "", "tokens_in": -1}),
             Some("exchange.id is not an id: x"),
         ),
+        (json!({"id": "x"}), Some("exchange.id is not an id: x")),
+        (json!({"id": ID}), Some("exchange.session is required")),
         (
-            serde_json::json!({"id": "x"}),
-            Some("exchange.id is not an id: x"),
-        ),
-        (
-            serde_json::json!({"id": ID}),
+            json!({"id": ID, "session": ""}),
             Some("exchange.session is required"),
         ),
         (
-            serde_json::json!({"id": ID, "session": ""}),
-            Some("exchange.session is required"),
-        ),
-        (
-            serde_json::json!({"id": ID, "session": OTHER_ID}),
+            json!({"id": ID, "session": OTHER_ID}),
             Some("exchange.timestamp is not ISO-8601 UTC: undefined"),
         ),
         (
-            serde_json::json!({"id": ID, "session": OTHER_ID, "timestamp": "x"}),
+            json!({"id": ID, "session": OTHER_ID, "timestamp": "x"}),
             Some("exchange.timestamp is not ISO-8601 UTC: x"),
         ),
         (
-            serde_json::json!({"id": ID, "session": OTHER_ID, "timestamp": TS}),
+            json!({"id": ID, "session": OTHER_ID, "timestamp": TS}),
             Some("exchange.kind is not chat or subtask: undefined"),
         ),
         (
-            serde_json::json!({"id": ID, "session": OTHER_ID, "timestamp": TS, "kind": "x"}),
+            json!({"id": ID, "session": OTHER_ID, "timestamp": TS, "kind": "x"}),
             Some("exchange.kind is not chat or subtask: x"),
         ),
         (
-            serde_json::json!({"id": ID, "session": OTHER_ID, "timestamp": TS, "kind": "chat"}),
+            json!({"id": ID, "session": OTHER_ID, "timestamp": TS, "kind": "chat"}),
             Some("exchange.actor is required"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": ""
-            }),
+            json!({"id": ID, "session": OTHER_ID, "timestamp": TS, "kind": "chat", "actor": ""}),
             Some("exchange.actor is required"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "parent": "x",
-                "distilled": "x"
-            }),
+            exchange_row(json!({"parent": "x", "distilled": "x"})),
             Some("exchange.parent is not an id: x"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "distilled": "x",
-                "tokens_in": -1
-            }),
+            exchange_row(json!({"distilled": "x", "tokens_in": -1})),
             Some("exchange.distilled is not ISO-8601 UTC: x"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "tokens_in": -1
-            }),
+            exchange_row(json!({"tokens_in": -1})),
             Some("exchange.tokens_in is not a token count: -1"),
         ),
+        (exchange_row(json!({"tokens_in": 0})), None),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "tokens_in": 0
-            }),
-            None,
-        ),
-        (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "tokens_in": 1.5
-            }),
+            exchange_row(json!({"tokens_in": 1.5})),
             Some("exchange.tokens_in is not a token count: 1.5"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "tokens_in": "3"
-            }),
+            exchange_row(json!({"tokens_in": "3"})),
             Some("exchange.tokens_in is not a token count: 3"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "tokens_in": true
-            }),
+            exchange_row(json!({"tokens_in": true})),
             Some("exchange.tokens_in is not a token count: true"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "tokens_out": -1
-            }),
+            exchange_row(json!({"tokens_out": -1})),
             Some("exchange.tokens_out is not a token count: -1"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "tokens_cache_read": -1
-            }),
+            exchange_row(json!({"tokens_cache_read": -1})),
             Some("exchange.tokens_cache_read is not a token count: -1"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "tokens_cache_write": -1
-            }),
+            exchange_row(json!({"tokens_cache_write": -1})),
             Some("exchange.tokens_cache_write is not a token count: -1"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "tokens_in": -1,
-                "tokens_out": -1
-            }),
+            exchange_row(json!({"tokens_in": -1, "tokens_out": -1})),
             Some("exchange.tokens_in is not a token count: -1"),
         ),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "tokens_out": -1,
-                "tokens_cache_write": -1
-            }),
+            exchange_row(json!({"tokens_out": -1, "tokens_cache_write": -1})),
             Some("exchange.tokens_out is not a token count: -1"),
         ),
+        (exchange_row(json!({})), None),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user"
-            }),
+            json!({"id": ID, "session": OTHER_ID, "timestamp": TS, "kind": "subtask", "actor": "model"}),
             None,
         ),
+        (exchange_row(json!({"parent": OTHER_ID})), None),
+        (exchange_row(json!({"distilled": TS})), None),
         (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "subtask",
-                "actor": "model"
-            }),
-            None,
-        ),
-        (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "parent": OTHER_ID
-            }),
-            None,
-        ),
-        (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "distilled": TS
-            }),
-            None,
-        ),
-        (
-            serde_json::json!({
-                "id": ID,
-                "session": OTHER_ID,
-                "timestamp": TS,
-                "kind": "chat",
-                "actor": "user",
-                "parent": OTHER_ID,
-                "distilled": TS,
-                "model": "m",
-                "meta": {"turn": 1},
-                "tokens_in": 0,
-                "tokens_out": 1,
-                "tokens_cache_read": 2,
-                "tokens_cache_write": 3
-            }),
+            exchange_row(
+                json!({"parent": OTHER_ID, "distilled": TS, "model": "m", "meta": {"turn": 1}, "tokens_in": 0, "tokens_out": 1, "tokens_cache_read": 2, "tokens_cache_write": 3}),
+            ),
             None,
         ),
     ];
     for (row, expected) in cases {
         assert_eq!(exchange(&row).as_deref(), expected, "row: {row}");
     }
-}
-
-#[test]
-fn contents_message_names_the_field() {
-    let row = serde_json::json!({});
-    let _ = contents(&row);
 }

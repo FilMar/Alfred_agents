@@ -24,11 +24,6 @@ fn join_body_keeps_whitespace_parts() {
 }
 
 #[test]
-fn join_body_no_empty_part_joined() {
-    let _ = join_body(&strings(&["", "a", ""]));
-}
-
-#[test]
 fn join_tools_is_none_when_the_joined_text_would_be_empty() {
     assert_eq!(join_tools(&strings(&[])), None);
     assert_eq!(join_tools(&strings(&[""])), None);
@@ -47,11 +42,6 @@ fn join_tools_joins_the_rest_with_two_newlines() {
         join_tools(&strings(&["a", "", "b"])),
         Some("a\n\nb".to_string())
     );
-}
-
-#[test]
-fn join_tools_never_an_empty_text() {
-    let _ = join_tools(&strings(&["", ""]));
 }
 
 #[test]

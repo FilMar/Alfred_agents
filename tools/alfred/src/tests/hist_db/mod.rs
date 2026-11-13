@@ -159,3 +159,29 @@ pub(super) fn write_exchange(db: &HistDb, id: &str, session: &str, timestamp: &s
 mod list_exchanges;
 mod list_extractions;
 mod open_creates;
+
+pub(super) fn chats(name: &str) -> HistDb {
+    let db = db(name);
+    write_session(&db, SID1, T1);
+    for (id, at) in [(XID1, T1), (XID2, T2), (XID3, T3)] {
+        write_exchange(&db, id, SID1, at, "chat");
+    }
+    db
+}
+
+pub(super) fn sessions(name: &str) -> HistDb {
+    let db = db(name);
+    for (id, at) in [(SID1, T1), (SID2, T2), (SID3, T3)] {
+        write_session(&db, id, at);
+    }
+    db
+}
+
+pub(super) fn listed(
+    db: &HistDb,
+    query: &crate::hist::ExchangeQuery,
+    distilled: Option<bool>,
+) -> Vec<String> {
+    let rows = db.list_exchanges(query, distilled, 100).unwrap();
+    rows.into_iter().map(|row| row.id).collect()
+}

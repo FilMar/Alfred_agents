@@ -4,11 +4,6 @@ use crate::hist::validate::{is_day, is_id, is_timestamp, js};
 use super::*;
 
 #[test]
-fn is_id_true_means_36_characters() {
-    let _ = is_id(ID);
-}
-
-#[test]
 fn is_id_matches_the_id_form() {
     let cases: Vec<(&str, bool)> = vec![
         (ID, true),
@@ -24,11 +19,6 @@ fn is_id_matches_the_id_form() {
     for (text, expected) in cases {
         assert_eq!(is_id(text), expected, "text: {text}");
     }
-}
-
-#[test]
-fn is_timestamp_true_means_24_characters_ending_in_z() {
-    let _ = is_timestamp(TS);
 }
 
 #[test]
@@ -50,11 +40,6 @@ fn is_timestamp_matches_the_timestamp_form() {
     for (text, expected) in cases {
         assert_eq!(is_timestamp(text), expected, "text: {text}");
     }
-}
-
-#[test]
-fn is_day_true_means_10_characters() {
-    let _ = is_day(DAY);
 }
 
 #[test]
@@ -98,15 +83,9 @@ fn js_prints_values_like_javascript() {
 
 #[test]
 fn json_fields_must_be_strings_as_in_tl() {
-    let created = "2026-01-02T03:04:05.006Z";
-    let extractor = serde_json::json!({"why": "x", "config": {}, "created": created});
-    assert_eq!(
-        crate::hist::validate::new_extractor(&extractor).as_deref(),
-        Some("config must be JSON")
-    );
-    let extraction = serde_json::json!({"extractor_id": 1, "run": "r", "exchange_id": "01234567-89ab-cdef-0123-456789abcdef", "kind": "note", "quote": "q", "body": {}, "created": created});
-    assert_eq!(
-        crate::hist::validate::new_extraction(&extraction).as_deref(),
-        Some("body must be JSON")
-    );
+    let extractor = json!({"why": "x", "config": {}, "created": TS});
+    let message = crate::hist::validate::new_extractor(&extractor);
+    assert_eq!(message.as_deref(), Some("config must be JSON"));
+    let message = crate::hist::validate::new_extraction(&extraction_row(json!({"body": {}})));
+    assert_eq!(message.as_deref(), Some("body must be JSON"));
 }

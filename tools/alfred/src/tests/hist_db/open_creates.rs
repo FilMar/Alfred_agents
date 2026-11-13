@@ -30,7 +30,7 @@ fn open_keeps_tl_schema() {
         .unwrap();
     assert_eq!(mode, "wal");
     let mut stmt = conn
-        .prepare("SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY name")
+        .prepare("SELECT type, name, sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name")
         .unwrap();
     let actual = stmt
         .query_map([], |row| {
@@ -45,6 +45,16 @@ fn open_keeps_tl_schema() {
         .collect::<Vec<(String, String, String)>>();
     let expected: Vec<(String, String, String)> = [
         (
+            "index",
+            "extractions_by_run",
+            "CREATE INDEX extractions_by_run ON extractions(extractor_id, run)",
+        ),
+        (
+            "index",
+            "extractor_one_active",
+            "CREATE UNIQUE INDEX extractor_one_active ON extractor(active) WHERE active = 1",
+        ),
+        (
             "table",
             "contents",
             "CREATE TABLE contents (\n  exchange_id TEXT PRIMARY KEY REFERENCES exchanges(id),\n  input       TEXT NOT NULL,\n  output      TEXT NOT NULL,\n  tools       TEXT\n)",
@@ -56,23 +66,13 @@ fn open_keeps_tl_schema() {
         ),
         (
             "table",
-            "extractor",
-            "CREATE TABLE extractor (\n  id      INTEGER PRIMARY KEY AUTOINCREMENT,\n  parent  INTEGER REFERENCES extractor(id),\n  why     TEXT NOT NULL,\n  active  INTEGER NOT NULL DEFAULT 0 CHECK (active IN (0, 1)),\n  config  TEXT NOT NULL CHECK (json_valid(config)),\n  created TEXT NOT NULL\n)",
-        ),
-        (
-            "index",
-            "extractor_one_active",
-            "CREATE UNIQUE INDEX extractor_one_active ON extractor(active) WHERE active = 1",
-        ),
-        (
-            "table",
             "extractions",
             "CREATE TABLE extractions (\n  id            INTEGER PRIMARY KEY AUTOINCREMENT,\n  extractor_id  INTEGER NOT NULL REFERENCES extractor(id),\n  run           TEXT NOT NULL,\n  exchange_id   TEXT NOT NULL REFERENCES exchanges(id),\n  kind          TEXT NOT NULL CHECK (kind IN ('note', 'rule')),\n  body          TEXT NOT NULL CHECK (json_valid(body)),\n  quote         TEXT NOT NULL,\n  dropped_by    TEXT,\n  probabilities TEXT CHECK (probabilities IS NULL OR json_valid(probabilities)),\n  verdict       TEXT,\n  of            TEXT,\n  saved_id      TEXT,\n  created       TEXT NOT NULL\n)",
         ),
         (
-            "index",
-            "extractions_by_run",
-            "CREATE INDEX extractions_by_run ON extractions(extractor_id, run)",
+            "table",
+            "extractor",
+            "CREATE TABLE extractor (\n  id      INTEGER PRIMARY KEY AUTOINCREMENT,\n  parent  INTEGER REFERENCES extractor(id),\n  why     TEXT NOT NULL,\n  active  INTEGER NOT NULL DEFAULT 0 CHECK (active IN (0, 1)),\n  config  TEXT NOT NULL CHECK (json_valid(config)),\n  created TEXT NOT NULL\n)",
         ),
         (
             "table",
@@ -83,10 +83,6 @@ fn open_keeps_tl_schema() {
     .into_iter()
     .map(|entry| (entry.0.to_string(), entry.1.to_string(), entry.2.to_string()))
     .collect();
-    let mut actual = actual;
-    let mut expected = expected;
-    actual.sort();
-    expected.sort();
     assert_eq!(actual, expected);
 }
 
@@ -116,8 +112,12 @@ CREATE TABLE contents (
     write_exchange(&db, XID1, SID1, T1, "chat");
     db.upsert_contents(&[contents_row(XID1, "in", "out", Some("a tool"))])
         .unwrap();
-    let rows = db.list_sessions(Some("claude"), 100).unwrap();
-    let ids: Vec<&str> = rows.iter().map(|row| row.id.as_str()).collect();
+    let ids: Vec<String> = db
+        .list_sessions(Some("claude"), 100)
+        .unwrap()
+        .into_iter()
+        .map(|row| row.id)
+        .collect();
     assert_eq!(ids, [SID1]);
     let row = db.get_contents(XID1, true).unwrap().expect("the contents");
     assert_eq!(row.tools.as_deref(), Some("a tool"));
@@ -149,16 +149,6 @@ fn count_counts_every_table() {
 }
 
 #[test]
-fn upsert_sessions_writes_every_row() {
-    let db = db("upsert_sessions_writes_every_row");
-    db.upsert_sessions(&[
-        session_row(SID1, T1, Some("claude")),
-        session_row(SID2, T2, Some("pi")),
-    ])
-    .unwrap();
-}
-
-#[test]
 fn upsert_sessions_updates_the_row() {
     let db = db("upsert_sessions_updates_the_row");
     write_session(&db, SID1, T1);
@@ -182,12 +172,13 @@ fn upsert_sessions_updates_the_row() {
 
 #[test]
 fn list_sessions_orders_by_started_desc() {
-    let db = db("list_sessions_orders_by_started_desc");
-    write_session(&db, SID1, T1);
-    write_session(&db, SID2, T2);
-    write_session(&db, SID3, T3);
-    let rows = db.list_sessions(None, 100).unwrap();
-    let ids: Vec<&str> = rows.iter().map(|row| row.id.as_str()).collect();
+    let db = sessions("list_sessions_orders_by_started_desc");
+    let ids: Vec<String> = db
+        .list_sessions(None, 100)
+        .unwrap()
+        .into_iter()
+        .map(|row| row.id)
+        .collect();
     assert_eq!(ids, [SID3, SID2, SID1]);
 }
 
@@ -200,47 +191,25 @@ fn list_sessions_filters_by_harness() {
         session_row(SID3, T3, Some("claude")),
     ])
     .unwrap();
-    let rows = db.list_sessions(Some("claude"), 100).unwrap();
-    let ids: Vec<&str> = rows.iter().map(|row| row.id.as_str()).collect();
+    let ids: Vec<String> = db
+        .list_sessions(Some("claude"), 100)
+        .unwrap()
+        .into_iter()
+        .map(|row| row.id)
+        .collect();
     assert_eq!(ids, [SID3, SID1]);
 }
 
 #[test]
 fn list_sessions_returns_at_most_limit_rows() {
-    let db = db("list_sessions_returns_at_most_limit_rows");
-    write_session(&db, SID1, T1);
-    write_session(&db, SID2, T2);
-    write_session(&db, SID3, T3);
+    let db = sessions("list_sessions_returns_at_most_limit_rows");
     db.list_sessions(None, 2).unwrap();
 }
 
 #[test]
-fn list_sessions_limit_zero_returns_nothing() {
-    let db = db("list_sessions_limit_zero_returns_nothing");
-    write_session(&db, SID1, T1);
-    write_session(&db, SID2, T2);
-    write_session(&db, SID3, T3);
-    db.list_sessions(None, 0).unwrap();
-}
-
-#[test]
 fn list_sessions_accepts_a_negative_limit() {
-    let db = db("list_sessions_accepts_a_negative_limit");
-    write_session(&db, SID1, T1);
-    write_session(&db, SID2, T2);
-    write_session(&db, SID3, T3);
+    let db = sessions("list_sessions_accepts_a_negative_limit");
     db.list_sessions(None, -1).unwrap();
-}
-
-#[test]
-fn upsert_exchanges_writes_every_row() {
-    let db = db("upsert_exchanges_writes_every_row");
-    write_session(&db, SID1, T1);
-    db.upsert_exchanges(&[
-        exchange_row(XID1, SID1, T1, "chat"),
-        exchange_row(XID2, SID1, T2, "subtask"),
-    ])
-    .unwrap();
 }
 
 #[test]
@@ -286,15 +255,6 @@ fn set_distilled_marks_and_clears_the_exchange() {
     let row = db.get_exchange(XID1).unwrap().expect("the exchange");
     assert_eq!(row.distilled, None);
     assert!(!db.set_distilled(MISSING, Some(T2)).unwrap());
-}
-
-#[test]
-fn get_exchange_returns_the_row_asked() {
-    let db = db("get_exchange_returns_the_row_asked");
-    write_session(&db, SID1, T1);
-    write_exchange(&db, XID1, SID1, T1, "chat");
-    write_exchange(&db, XID2, SID1, T2, "subtask");
-    db.get_exchange(XID1).unwrap();
 }
 
 #[test]

@@ -46,96 +46,53 @@ impl Summary {
 
 impl Roots {
     pub fn from_env() -> Roots {
-        {
-            let home = std::env::var_os("HOME")
-                .map(PathBuf::from)
-                .unwrap_or_default();
-            let claude = match std::env::var_os("TL_TRANSCRIPTS") {
-                Some(root) => PathBuf::from(root),
-                None => home.join(".claude").join("projects"),
-            };
-            let pi = match std::env::var_os("TL_PI_SESSIONS") {
-                Some(root) => PathBuf::from(root),
-                None => home.join(".pi").join("agent").join("sessions"),
-            };
-            Roots { claude, pi }
-        }
+        let home = std::env::var_os("HOME")
+            .map(PathBuf::from)
+            .unwrap_or_default();
+        let claude = match std::env::var_os("TL_TRANSCRIPTS") {
+            Some(root) => PathBuf::from(root),
+            None => home.join(".claude").join("projects"),
+        };
+        let pi = match std::env::var_os("TL_PI_SESSIONS") {
+            Some(root) => PathBuf::from(root),
+            None => home.join(".pi").join("agent").join("sessions"),
+        };
+        Roots { claude, pi }
     }
 
     pub fn all(&self) -> Vec<PathBuf> {
-        let result: Vec<PathBuf> = 'walk: {
-            let mut files: Vec<PathBuf> = Vec::new();
-            for root in [&self.claude, &self.pi] {
-                let Ok(projects) = std::fs::read_dir(root) else {
-                    continue;
-                };
-                for project in projects.flatten() {
-                    let project = project.path();
-                    if !project.is_dir() {
-                        continue;
-                    }
-                    let Ok(entries) = std::fs::read_dir(&project) else {
-                        continue;
-                    };
-                    for entry in entries.flatten() {
-                        let file = entry.path();
-                        if file.extension().is_some_and(|ext| ext == "jsonl") && file.is_file() {
-                            files.push(file);
-                            if files.len() >= MAX_FILES {
-                                break 'walk files;
-                            }
-                        }
-                    }
-                }
-            }
-            files
-        };
-        debug_assert!(result.len() <= MAX_FILES, "Roots.all: at most MAX_FILES");
-        debug_assert!(
-            result
-                .iter()
-                .all(|p| p.extension().is_some_and(|e| e == "jsonl")),
-            "Roots.all: only jsonl files"
-        );
-        result
+        self.files()
+            .filter(|file| file.extension().is_some_and(|ext| ext == "jsonl"))
+            .take(MAX_FILES)
+            .collect()
     }
 
     pub fn find(&self, session: &str) -> Option<PathBuf> {
-        'search: {
-            let exact = format!("{session}.jsonl");
-            let suffix = format!("_{session}.jsonl");
-            let mut loose: Option<PathBuf> = None;
-            for root in [&self.claude, &self.pi] {
-                let Ok(projects) = std::fs::read_dir(root) else {
-                    continue;
-                };
-                for project in projects.flatten() {
-                    let project = project.path();
-                    if !project.is_dir() {
-                        continue;
-                    }
-                    let Ok(entries) = std::fs::read_dir(&project) else {
-                        continue;
-                    };
-                    for entry in entries.flatten() {
-                        let file = entry.path();
-                        if !file.is_file() {
-                            continue;
-                        }
-                        let Some(name) = file.file_name().and_then(|raw| raw.to_str()) else {
-                            continue;
-                        };
-                        if name == exact {
-                            break 'search Some(file);
-                        }
-                        if loose.is_none() && name.ends_with(suffix.as_str()) {
-                            loose = Some(file);
-                        }
-                    }
+        let (exact, suffix) = (format!("{session}.jsonl"), format!("_{session}.jsonl"));
+        let mut loose: Option<PathBuf> = None;
+        self.files()
+            .find(|file| {
+                let name = file
+                    .file_name()
+                    .and_then(|raw| raw.to_str())
+                    .unwrap_or_default();
+                if loose.is_none() && name.ends_with(suffix.as_str()) {
+                    loose = Some(file.clone());
                 }
-            }
-            loose
-        }
+                name == exact
+            })
+            .or(loose)
+    }
+
+    fn files(&self) -> impl Iterator<Item = PathBuf> + '_ {
+        [&self.claude, &self.pi]
+            .into_iter()
+            .filter_map(|root| std::fs::read_dir(root).ok())
+            .flat_map(|projects| projects.flatten().map(|project| project.path()))
+            .filter(|project| project.is_dir())
+            .filter_map(|project| std::fs::read_dir(project).ok())
+            .flat_map(|entries| entries.flatten().map(|entry| entry.path()))
+            .filter(|file| file.is_file())
     }
 }
 
@@ -163,48 +120,36 @@ pub async fn transcript(
     refresh: bool,
     host: Option<&str>,
 ) -> Result<Summary, ClientError> {
-    let result: Result<Summary, ClientError> = async {
-        let text = std::fs::read_to_string(path).map_err(|error| {
-            ClientError::Input(format!("cannot read {}: {error}", path.display()))
-        })?;
-        let parsed = parse(&text, host);
-        let Some(session) = parsed.session else {
-            return Ok(Summary {
-                transcripts: 1,
-                sessions: 0,
-                exchanges: 0,
-                known: 0,
-                orphans: 0,
-            });
-        };
-        let known = if refresh {
-            Vec::new()
-        } else {
-            known_ids(client, &session.id).await?
-        };
-        let (fresh, known) = split_known(parsed.exchanges, &known);
-        let (exchanges, contents): (Vec<crate::hist::Exchange>, Vec<crate::hist::Contents>) =
-            fresh.into_iter().unzip();
-        let summary = Summary {
+    let text = std::fs::read_to_string(path)
+        .map_err(|error| ClientError::Input(format!("cannot read {}: {error}", path.display())))?;
+    let parsed = parse(&text, host);
+    let Some(session) = parsed.session else {
+        return Ok(Summary {
             transcripts: 1,
-            sessions: 1,
-            exchanges: exchanges.len() as u32,
-            known,
-            orphans: parsed.orphans,
-        };
-        let _: serde_json::Value = client.post("/hist/sessions", &[session]).await?;
-        if !exchanges.is_empty() {
-            let _: serde_json::Value = client.post("/hist/exchanges", &exchanges).await?;
-            let _: serde_json::Value = client.post("/hist/contents", &contents).await?;
-        }
-        Ok(summary)
+            ..Summary::default()
+        });
+    };
+    let known = if refresh {
+        Vec::new()
+    } else {
+        known_ids(client, &session.id).await?
+    };
+    let (fresh, known) = split_known(parsed.exchanges, &known);
+    let (exchanges, contents): (Vec<crate::hist::Exchange>, Vec<crate::hist::Contents>) =
+        fresh.into_iter().unzip();
+    let summary = Summary {
+        transcripts: 1,
+        sessions: 1,
+        exchanges: exchanges.len() as u32,
+        known,
+        orphans: parsed.orphans,
+    };
+    let _: serde_json::Value = client.post("/hist/sessions", &[session]).await?;
+    if !exchanges.is_empty() {
+        let _: serde_json::Value = client.post("/hist/exchanges", &exchanges).await?;
+        let _: serde_json::Value = client.post("/hist/contents", &contents).await?;
     }
-    .await;
-    debug_assert!(
-        result.as_ref().map_or(true, |s| s.transcripts == 1),
-        "ingest.transcript: one transcript"
-    );
-    result
+    Ok(summary)
 }
 
 pub fn modified_at(path: &Path) -> Option<String> {
@@ -222,17 +167,10 @@ pub fn modified_at(path: &Path) -> Option<String> {
 }
 
 pub fn hostname() -> Option<String> {
-    let result: Option<String> = std::fs::read_to_string("/proc/sys/kernel/hostname")
+    std::fs::read_to_string("/proc/sys/kernel/hostname")
         .ok()
         .map(|text| text.trim().to_owned())
-        .filter(|name| !name.is_empty());
-    debug_assert!(
-        result
-            .as_ref()
-            .is_none_or(|h| !h.is_empty() && !h.ends_with('\n')),
-        "hostname: no empty name, no newline"
-    );
-    result
+        .filter(|name| !name.is_empty())
 }
 
 async fn known_ids(client: &Client, session: &str) -> Result<Vec<String>, ClientError> {
@@ -256,10 +194,5 @@ pub(crate) fn split_known(
         .filter(|(e, _)| !known.contains(&e.id))
         .collect();
     let count = (total - fresh.len()) as u32;
-    let result = (fresh, count);
-    debug_assert!(
-        result.0.len() + result.1 as usize == total,
-        "split_known: every exchange is fresh or known"
-    );
-    result
+    (fresh, count)
 }

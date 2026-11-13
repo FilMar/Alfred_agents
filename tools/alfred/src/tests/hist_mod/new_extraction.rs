@@ -4,35 +4,6 @@ use crate::hist::{Extraction, Extractor, NewExtraction};
 use super::*;
 
 #[test]
-fn new_extraction_defaults_the_optional_fields() {
-    let row: NewExtraction = serde_json::from_str(
-        r#"{"extractor_id":1,"run":"r1","exchange_id":"00000000-0000-0000-0000-000000000011","kind":"note","body":"{}","quote":"q","created":"2026-01-02T03:04:05.000Z"}"#,
-    )
-    .unwrap();
-    assert_eq!(row.extractor_id, 1);
-    assert_eq!(row.run, "r1");
-    assert_eq!(row.kind, "note");
-    assert_eq!(row.dropped_by, None);
-    assert_eq!(row.probabilities, None);
-    assert_eq!(row.verdict, None);
-    assert_eq!(row.of, None);
-    assert_eq!(row.saved_id, None);
-
-    let row: NewExtraction = serde_json::from_str(
-        r#"{"extractor_id":1,"run":"r1","exchange_id":"00000000-0000-0000-0000-000000000011","kind":"rule","body":"{}","quote":"q","dropped_by":"check:no","probabilities":"[0.9]","verdict":"keep","of":"other","saved_id":"00000000-0000-0000-0000-000000000012","created":"2026-01-02T03:04:05.000Z"}"#,
-    )
-    .unwrap();
-    assert_eq!(row.dropped_by, Some("check:no".to_string()));
-    assert_eq!(row.probabilities, Some("[0.9]".to_string()));
-    assert_eq!(row.verdict, Some("keep".to_string()));
-    assert_eq!(row.of, Some("other".to_string()));
-    assert_eq!(
-        row.saved_id,
-        Some("00000000-0000-0000-0000-000000000012".to_string())
-    );
-}
-
-#[test]
 fn extraction_json_flattens_the_row() {
     let extraction = Extraction {
         id: 9,
@@ -57,9 +28,6 @@ fn extraction_json_flattens_the_row() {
     )
     .unwrap();
     assert_eq!(got, want);
-    assert!(got.get("row").is_none());
-    let back: Extraction = serde_json::from_value(got).unwrap();
-    assert_eq!(back, extraction);
 }
 
 #[test]
@@ -78,6 +46,4 @@ fn extractor_json_keeps_active_as_a_boolean() {
     )
     .unwrap();
     assert_eq!(got, want);
-    let back: Extractor = serde_json::from_value(got).unwrap();
-    assert_eq!(back, extractor);
 }

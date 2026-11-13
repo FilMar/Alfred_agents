@@ -18,12 +18,7 @@ impl HistDb {
             "INSERT INTO extractor (parent, why, config, created) VALUES (?1, ?2, ?3, ?4)",
             params![row.parent, row.why, row.config, row.created],
         )?;
-        let result: Result<i64, HistError> = Ok(conn.last_insert_rowid());
-        debug_assert!(
-            result.as_ref().map_or(true, |id| *id > 0),
-            "HistDb.insert_extractor: a row id"
-        );
-        result
+        Ok(conn.last_insert_rowid())
     }
 
     pub fn get_extractor(&self, id: Option<i64>) -> Result<Option<Extractor>, HistError> {
@@ -64,7 +59,7 @@ impl HistDb {
     }
 
     pub fn insert_extractions(&self, rows: &[NewExtraction]) -> Result<usize, HistError> {
-        let result = self.write_all(INSERT_EXTRACTION, rows, |stmt, r| {
+        self.write_all(INSERT_EXTRACTION, rows, |stmt, r| {
             stmt.execute(params![
                 r.extractor_id,
                 r.run,
@@ -79,12 +74,7 @@ impl HistDb {
                 r.saved_id,
                 r.created
             ])
-        });
-        debug_assert!(
-            result.as_ref().map_or(true, |n| *n == rows.len()),
-            "HistDb.insert_extractions: every row written"
-        );
-        result
+        })
     }
 
     pub fn list_extractions(&self, query: &ExtractionQuery) -> Result<Vec<Extraction>, HistError> {

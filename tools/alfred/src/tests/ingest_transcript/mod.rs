@@ -3,7 +3,7 @@ use serde_json::Value;
 pub(super) use crate::hist::ingest::harness::Harness;
 pub(super) use crate::hist::ingest::line::Line;
 pub(super) use crate::hist::ingest::transcript::{
-    MAIN_ACTOR, join_body, join_tools, parse, parse_lines, spans, stringify,
+    join_body, join_tools, parse_lines, spans, stringify,
 };
 #[allow(unused_imports)]
 pub(super) use serde_json::json;

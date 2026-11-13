@@ -96,9 +96,7 @@ impl HistDb {
             "HistDb.count: a known table"
         );
         let sql = format!("SELECT count(*) FROM {table}");
-        let result: Result<i64, HistError> =
-            Ok(self.lock().query_row(&sql, [], |row| row.get(0))?);
-        result
+        Ok(self.lock().query_row(&sql, [], |row| row.get(0))?)
     }
 
     fn lock(&self) -> MutexGuard<'_, Connection> {

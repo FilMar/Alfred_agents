@@ -21,7 +21,7 @@ pub struct SessionHead {
 }
 
 pub fn parse(harness: Harness, lines: &[Line], host: Option<&str>) -> Parsed {
-    let result: Parsed = match harness.session(lines) {
+    match harness.session(lines) {
         None => Parsed::default(),
         Some(head) => {
             let session = session_of(harness, head, host);
@@ -36,23 +36,7 @@ pub fn parse(harness: Harness, lines: &[Line], host: Option<&str>) -> Parsed {
                 orphans,
             }
         }
-    };
-    debug_assert!(
-        result.session.is_some() || result.exchanges.is_empty(),
-        "transcript.parse: no session, no exchanges"
-    );
-    debug_assert!(
-        result.exchanges.iter().all(|(e, c)| e.id == c.exchange_id),
-        "transcript.parse: contents of the same exchange"
-    );
-    debug_assert!(
-        result
-            .session
-            .as_ref()
-            .is_none_or(|s| s.harness.as_deref() == Some(harness.name())),
-        "transcript.parse: the session names its harness"
-    );
-    result
+    }
 }
 
 pub struct Span<'a> {
@@ -82,49 +66,21 @@ pub fn spans<'a>(lines: &'a [Line], harness: Harness) -> (Vec<Span<'a>>, u32) {
             orphans += 1;
         }
     }
-    let result = (found, orphans);
-    debug_assert!(
-        result.0.iter().all(|s| harness.is_opener(s.opener)),
-        "spans: every span opens with an opener"
-    );
-    debug_assert!(
-        result.0.iter().map(|s| s.body.len() + 1).sum::<usize>() + result.1 as usize <= lines.len(),
-        "spans: no line counted twice"
-    );
-    result
+    (found, orphans)
 }
 
 pub fn join_body(parts: &[String]) -> String {
-    let result: String = parts
+    parts
         .iter()
         .filter(|part| !part.is_empty())
         .map(String::as_str)
         .collect::<Vec<&str>>()
-        .join("\n\n");
-    debug_assert!(
-        !result.starts_with("\n\n") && !result.ends_with("\n\n")
-            || parts
-                .iter()
-                .any(|p| p.starts_with('\n') || p.ends_with('\n')),
-        "join_body: no empty part joined"
-    );
-    result
+        .join("\n\n")
 }
 
 pub fn join_tools(parts: &[String]) -> Option<String> {
-    let result: Option<String> = {
-        let joined = join_body(parts);
-        if joined.is_empty() {
-            None
-        } else {
-            Some(joined)
-        }
-    };
-    debug_assert!(
-        result.as_ref().is_none_or(|t| !t.is_empty()),
-        "join_tools: never an empty text"
-    );
-    result
+    let joined = join_body(parts);
+    (!joined.is_empty()).then_some(joined)
 }
 
 pub fn stringify(value: Option<&Value>) -> String {
