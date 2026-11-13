@@ -12,7 +12,7 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 The distiller and `th` move into alfred. Then the server goes on the Deck, and every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
-- [A] The distiller inside `alfred serve`, on a schedule: it reads the archive and writes rules and episodes, with no `tb` notes. Model calls by `reqwest` to Ollama. [detail](memory_extractor_calls_go_to_ollama_by_reqwest)
+- [A] The distiller inside `alfred serve`, in three specs. A (config, chat, ask, session read, episodes) is done. B: extraction, rule checks, critic, record. C: twins, novelty, save, the run, the trigger on ingest, the CLI. [detail](memory_distill_starts_on_ingest_by_threshold)
 - [A] `alfred command` (`th` today): local, no API, the bwrap sandbox, pi as a child process.
 - [A] Install `alfred serve` on the Deck as a user unit.
 - [M] Rewrite skills, hooks, `CLAUDE.md` and extensions to call `alfred`.

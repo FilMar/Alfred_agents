@@ -1,12 +1,12 @@
 ---
 tags: [memory, distiller, llm, ollama, reqwest, transport, alfred]
-sources: [conversation, tools/alfred/src/embed.rs]
+sources: [conversation, tools/alfred/src/chat.rs, tools/alfred/src/embed.rs]
 replaces: [memory_extractor_calls_go_through_pi_ai_with_reasoning_low@86b2f64]
 ---
 
 ## Decision
 
-In alfred v2 every model call of the distiller is one `POST /api/chat` to Ollama, sent with `reqwest`. It sits next to `Embedder` in `embed.rs`. It reuses the same base URL (`OLLAMA_URL`), the same `reqwest::Client` and the same `Upstream` error.
+In alfred v2 every model call of the distiller is one `POST /api/chat` to Ollama, sent with `reqwest`. It lives in `chat.rs`, a file of its own, because it is a different job from `Embedder`. It reuses the same base URL (`OLLAMA_URL`), the same `reqwest::Client` and the same `Upstream` error.
 
 The provider is Ollama only: a model in the config is a model name and a thinking level.
 

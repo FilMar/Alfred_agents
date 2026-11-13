@@ -131,6 +131,8 @@ updated: 2026-10-16
 | [memory_rules_search_deadline_is_kept_by_the_server](memory_rules_search_deadline_is_kept_by_the_server) | search --timeout is applied by the server before hits are counted; the client adds a network margin |
 | [memory_hist_serves_the_tl_archive_unchanged](memory_hist_serves_the_tl_archive_unchanged) | alfred serve keeps the tl routes, JSON and SQLite file under /hist, so td and th switch with one URL |
 | [memory_hist_ingest_reads_every_harness_through_one_format](memory_hist_ingest_reads_every_harness_through_one_format) | ingest reads Claude and pi through one Format table; rows identical to tl; prompts and cost on the server |
+| [memory_distill_starts_on_ingest_by_threshold](memory_distill_starts_on_ingest_by_threshold) | No timer: a distill run starts after an ingest when 50 exchanges are pending or the oldest is 24 hours old |
+| [memory_extractor_row_4_has_rules_only_roles](memory_extractor_row_4_has_rules_only_roles) | Row 4: roles are model, think, temperature, system; prompts for rules only; ALFRED_DISTILL_MODEL overrides the model |
 
 ## skill
 
