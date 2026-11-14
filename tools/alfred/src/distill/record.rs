@@ -122,6 +122,10 @@ impl Outcome {
         self.dropped_by.is_none()
     }
 
+    pub fn is_judged(&self) -> bool {
+        self.probabilities.is_some()
+    }
+
     pub fn verdict(&self) -> Option<Verdict> {
         self.verdict
     }
