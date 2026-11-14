@@ -136,6 +136,10 @@ updated: 2026-10-16
 | [memory_distill_tag_vocabulary_comes_from_ti_rules](memory_distill_tag_vocabulary_comes_from_ti_rules) | The Rust distiller takes its tag vocabulary from the ti rules, by count, ties by name |
 | [memory_distill_tag_key_strips_accents_by_nfd](memory_distill_tag_key_strips_accents_by_nfd) | tag_key strips accents with NFD, as td does, via unicode-normalization |
 | [memory_distill_extraction_body_keeps_five_keys](memory_distill_extraction_body_keeps_five_keys) | An extractions body holds only if, do, tags, proposedTags, quote |
+| [memory_distill_novelty_settles_rules_by_cand](memory_distill_novelty_settles_rules_by_cand) | The Rust novelty judge sees only rules: new, duplicate, append; verdicts matched by cand |
+| [memory_distill_keeps_shadow_mode](memory_distill_keeps_shadow_mode) | The Rust distiller keeps shadow mode: the whole pipeline, no write to ti, no budget spent |
+| [memory_distill_has_no_session_cap](memory_distill_has_no_session_cap) | No cap for one session in the Rust distiller: only the budget of the run |
+| [memory_distill_neighbours_include_archived_rules](memory_distill_neighbours_include_archived_rules) | Archived rules count as neighbours: a copy of one is a duplicate |
 
 ## skill
 

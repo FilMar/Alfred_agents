@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-11-13
+updated: 2026-11-14
 ---
 
 A block is one run of ritchie (code) or efesto (skill). [A] is architecture: small, read it closely in review. [M] is mechanical: big, the first piece shows the rest.
@@ -12,8 +12,7 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 The distiller and `th` move into alfred. Then the server goes on the Deck, and every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
-- [A] Distiller C1, the decision on one exchange: twins of the session, neighbours from a `ti` search with no hits, the novelty prompt, check and settle, and the save with its budget and read back. Parts A (config, chat, ask, session read, episodes) and B (extraction, rule checks, critic, record) are done.
-- [A] Distiller C2, the run: the session loop, the episodes write, the close by `distilled`, failed sessions stay pending, the trigger on ingest with its thresholds, `alfred distill` and `POST /distill`, `extractor add/show/activate`, row 4 with rules-only prompts. [detail](memory_distill_starts_on_ingest_by_threshold)
+- [A] Distiller C2, the run: the session loop, the episodes write, the close by `distilled`, failed sessions stay pending, the trigger on ingest with its thresholds, `alfred distill` and `POST /distill`, `extractor add/show/activate`, row 4 with rules-only prompts, and a check of the twin cutoff where `Tools` is built from the config: `decide()` no longer checks it. Parts A, B and C1 (twins, neighbours, novelty, save) are done. [detail](memory_distill_starts_on_ingest_by_threshold)
 - [A] `alfred command` (`th` today): local, no API, the bwrap sandbox, pi as a child process.
 - [A] Install `alfred serve` on the Deck as a user unit.
 - [M] Rewrite skills, hooks, `CLAUDE.md` and extensions to call `alfred`.
