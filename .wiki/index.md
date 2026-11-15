@@ -181,6 +181,7 @@ updated: 2026-10-16
 | [skill_dijkstra_report_is_a_before_after_page](skill_dijkstra_report_is_a_before_after_page) | The report is a page: tree-sitter stamps, a table of free holes, Prima and Dopo, no animations |
 | [skill_ritchie_setup_agrees_on_commented_skeleton](skill_ritchie_setup_agrees_on_commented_skeleton) | At setup the user comments on the real skeleton, line by line, until ok; it is frozen in concordato.json |
 | [skill_ritchie_review_marks_code_against_agreement](skill_ritchie_review_marks_code_against_agreement) | The review marks each line of the final code against concordato.json: not agreed, gone, body, agreed |
+| [skill_ritchie_contracts_only_where_an_invariant_is](skill_ritchie_contracts_only_where_an_invariant_is) | A contract exists where an invariant exists; no invariant, no contract and no test |
 
 ## orchestrator
 

@@ -107,8 +107,8 @@ deviates: `references/rules.md`.
 
 **Contracts**
 
-- Every function carries the contract it needs: preconditions first,
-  postconditions before every return. Pure computation included.
+- A contract exists where an invariant exists: preconditions first,
+  postconditions before every return. No invariant: no contract, no test.
 - An assert must be able to fail: skip one already guaranteed by the
   line above, the type, the language or the callee (`references/rules.md`).
 - At most five invariants per function. Above that, extract functions.
