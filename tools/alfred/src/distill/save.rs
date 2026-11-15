@@ -141,8 +141,8 @@ pub async fn save_rule(
     debug_assert!(
         result
             .as_ref()
-            .map_or(true, |id| id.is_some() || is_session_append(ruling)),
-        "save_rule: a write gives an id, or skips a session item"
+            .map_or(true, |id| id.is_none() == is_session_append(ruling)),
+        "save_rule: no id exactly when it skips a session item"
     );
     debug_assert!(
         result.as_ref().err().is_none_or(|f| !f.trim().is_empty()),
