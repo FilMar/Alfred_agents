@@ -3,7 +3,12 @@ use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
 
+use alfred::chat::Chat;
 use alfred::client::Client;
+use alfred::distill::cli::{DistillArgs, ExtractorCommand};
+use alfred::distill::runner::Runner;
+use alfred::distill::trigger::Trigger;
+use alfred::embed::Embedder;
 use alfred::hist::cli::HistCommand;
 use alfred::hist::db::HistDb;
 use alfred::hist::episodes::Episodes;
@@ -43,6 +48,11 @@ enum Command {
         #[command(subcommand)]
         command: HistCommand,
     },
+    Distill(DistillArgs),
+    Extractor {
+        #[command(subcommand)]
+        command: ExtractorCommand,
+    },
 }
 
 #[derive(Subcommand)]
@@ -80,6 +90,20 @@ async fn main() -> ExitCode {
         Command::Rules { command } => alfred::rules::cli::run(command)
             .await
             .map_err(|e| e.to_string()),
+        Command::Distill(args) => match Client::from_env() {
+            Err(e) => Err(e.to_string()),
+            Ok(client) => alfred::distill::cli::distill(&client, &args)
+                .await
+                .map_err(|e| e.to_string()),
+        },
+        Command::Extractor { command } => match Client::from_env() {
+            Err(e) => Err(e.to_string()),
+            Ok(client) => {
+                alfred::distill::cli::extractor(&client, &command, jiff::Timestamp::now())
+                    .await
+                    .map_err(|e| e.to_string())
+            }
+        },
     };
     match output {
         Ok(text) => {
@@ -107,11 +131,15 @@ async fn start(
         .or_else(|| home.as_ref().map(|h| h.join(".tl/tl.db")))
         .ok_or("set HIST_DB or HOME")?;
     let hist = HistDb::open(&hist_db).map_err(|e| e.to_string())?;
+    let trigger = Trigger::from_env()?;
     let app = App {
         vault: Vault::new(vault),
         rules: Rules::from_env(),
         hist,
         episodes: Episodes::from_env(),
+        chat: Chat::from_env(),
+        embedder: Embedder::from_env(),
+        runner: Runner::new(trigger),
     };
     serve::run(app, port)
         .await

@@ -129,10 +129,12 @@ async fn patch_exchange(
 }
 
 async fn post_contents(State(app): State<Shared>, body: String) -> Result<Json<Value>, ApiError> {
-    Ok(written(
+    let reply = written(
         app.hist
             .upsert_contents(&rows_of(&body, validate::contents)?)?,
-    ))
+    );
+    crate::distill::runner::Runner::spawn_on_ingest(app);
+    Ok(reply)
 }
 
 async fn get_contents(

@@ -1,0 +1,371 @@
+{
+  "feature": "Distiller C2: la run. Ciclo sulle sessioni pending, episodi, chiusura per distilled, trigger sull'ingest, alfred distill e POST /distill, alfred extractor add/show/activate, riga 4 solo regole",
+  "entita": [
+    {
+      "id": "Trigger",
+      "codice": [
+        "tools/alfred/src/distill/trigger.rs"
+      ],
+      "stato": "min_pending (50) e max_age_hours (24), letti da ALFRED_DISTILL_MIN_PENDING e ALFRED_DISTILL_MAX_AGE_HOURS",
+      "fa": "dice se una run e' dovuta: almeno min_pending scambi pending, o il piu' vecchio oltre max_age; le sessioni fallite nell'ultima run non contano",
+      "non_fa": "non lancia la run, non legge il DB",
+      "serve_a": "Runner, dopo ogni ingest",
+      "comanda": []
+    },
+    {
+      "id": "Runner",
+      "codice": [
+        "tools/alfred/src/distill/runner.rs"
+      ],
+      "stato": "il lock della run (una alla volta), lo Status in memoria: la run in corso (Progress) e il report dell'ultima finita (last); il Trigger, assente se ALFRED_DISTILL_TRIGGER non e' on",
+      "fa": "start(): prende il lock o torna Busy, avvia la Run (errori di opzioni o riga tornano subito), poi la fa girare in un task tokio che aggiorna il Progress dopo ogni sessione e alla fine mette il report in last. status(): copia dello Status. on_ingest(): se il trigger c'e' e il lock e' libero, legge i pending e, se dovuta, chiama start con le Options del trigger",
+      "non_fa": "non scrive lo stato su file o DB: le tracce durevoli sono extractions, distilled ed episodi; non accoda una run se il lock e' preso",
+      "serve_a": "Rotte (POST /distill) e Ingest (dopo POST /hist/contents)",
+      "comanda": [
+        "Trigger",
+        "Run",
+        "Archivio"
+      ]
+    },
+    {
+      "id": "Run",
+      "codice": [
+        "tools/alfred/src/distill/run.rs"
+      ],
+      "stato": "Extractor della riga scelta, vocabolario dei tag, Recorder, modo, max_saved, cutoff dei gemelli",
+      "fa": "start(): legge la riga (id o active), la controlla, applica ALFRED_DISTILL_MODEL, carica il vocabolario, controlla il cutoff. all(): sessione per sessione finche' il budget non e' speso; una sessione di solo rumore si chiude in active; dopo ogni sessione chiama on_session col report; progress() da' il Progress iniziale, Progress.after() lo avanza",
+      "non_fa": "non sceglie da sola le sessioni: le riceve da sessions_of",
+      "serve_a": "Runner",
+      "comanda": [
+        "SessioneRun",
+        "Archivio",
+        "Regole"
+      ]
+    },
+    {
+      "id": "SessioneRun",
+      "codice": [
+        "tools/alfred/src/distill/session_run.rs"
+      ],
+      "stato": "nessuno: il report della sessione e il budget tornano al chiamante",
+      "fa": "divide la sessione in episodi, scrive gli episodi (active), passa ogni scambio pending allo Scambio in ordine, poi chiude: distilled = run su ogni scambio letto, rumore incluso, solo in active e senza fallimenti",
+      "non_fa": "non chiude una sessione con un fallimento: resta pending",
+      "serve_a": "Run",
+      "comanda": [
+        "Scambio",
+        "Episodi",
+        "Archivio"
+      ]
+    },
+    {
+      "id": "Scambio",
+      "codice": [
+        "tools/alfred/src/distill/target.rs"
+      ],
+      "stato": "Context: Tools di C1, archivio, episodi, Recorder, vocabolario",
+      "fa": "estrae le regole, le giudica col critico, decide (C1), scrive le righe extractions, torna il report dello scambio e il Carry",
+      "non_fa": "non chiude lo scambio",
+      "serve_a": "SessioneRun",
+      "comanda": [
+        "Decide",
+        "Archivio"
+      ]
+    },
+    {
+      "id": "Decide",
+      "codice": [
+        "tools/alfred/src/distill/decide.rs"
+      ],
+      "stato": "C1, gia' fatto",
+      "fa": "gemelli, vicini, novita', salvataggio col budget",
+      "non_fa": "non controlla il cutoff: lo fa Run.start",
+      "serve_a": "Scambio",
+      "comanda": [
+        "Regole"
+      ]
+    },
+    {
+      "id": "Rotte",
+      "codice": [
+        "tools/alfred/src/distill/routes.rs"
+      ],
+      "stato": "nessuno",
+      "fa": "POST /distill: legge le Options, chiama Runner.start, torna 202 col Progress. GET /distill/status: torna {running, last}. 400 opzioni sbagliate, 404 riga assente, 409 run in corso, 502 a monte giu'",
+      "non_fa": "non aspetta la fine della run",
+      "serve_a": "DistillCli",
+      "comanda": [
+        "Runner"
+      ]
+    },
+    {
+      "id": "Ingest",
+      "codice": [
+        "tools/alfred/src/hist/routes/mod.rs"
+      ],
+      "stato": "nessuno",
+      "fa": "dopo POST /hist/contents, l'ultima scrittura dell'ingest, chiama Runner.spawn_on_ingest",
+      "non_fa": "non aspetta la run",
+      "serve_a": "alfred hist ingest",
+      "comanda": [
+        "Runner"
+      ]
+    },
+    {
+      "id": "DistillCli",
+      "codice": [
+        "tools/alfred/src/distill/cli.rs"
+      ],
+      "cli": "alfred",
+      "comandi": [
+        "distill"
+      ],
+      "stato": "nessuno",
+      "fa": "alfred distill [session] --extractor id|active --active --max-saved n --same-session-cutoff x: POST /distill, poi GET /distill/status ogni 5 s finche' last e' la run avviata, e stampa il report. --status: stampa lo stato e basta",
+      "non_fa": "non controlla il cutoff: lo fa il server",
+      "serve_a": "l'utente, per provare la riga 4 in shadow prima dello switch",
+      "comanda": [
+        "Rotte"
+      ]
+    },
+    {
+      "id": "ExtractorCli",
+      "codice": [
+        "tools/alfred/src/distill/cli.rs"
+      ],
+      "cli": "alfred",
+      "comandi": [
+        "extractor"
+      ],
+      "stato": "nessuno",
+      "fa": "add <file> --why --parent: legge il JSON, lo controlla come Config, lo scrive inattivo e lo rilegge; show [id|active]; activate <id>",
+      "non_fa": "non modifica una riga: una modifica e' una riga nuova",
+      "serve_a": "l'utente, per aggiungere la riga 4 e attivarla allo switch",
+      "comanda": [
+        "Archivio"
+      ]
+    },
+    {
+      "id": "Archivio",
+      "codice": [
+        "tools/alfred/src/hist/db"
+      ],
+      "stato": "tl.db: exchanges.distilled, extractor, extractions",
+      "fa": "pending, letture di sessione, righe extractions, set_distilled",
+      "non_fa": "",
+      "serve_a": "Run, SessioneRun, Scambio, Runner",
+      "comanda": []
+    },
+    {
+      "id": "Episodi",
+      "codice": [
+        "tools/alfred/src/hist/episodes.rs"
+      ],
+      "stato": "collezione episodi in Qdrant",
+      "fa": "write(session, episodi)",
+      "non_fa": "",
+      "serve_a": "SessioneRun",
+      "comanda": []
+    },
+    {
+      "id": "Regole",
+      "codice": [
+        "tools/alfred/src/rules/store"
+      ],
+      "stato": "ti in Qdrant",
+      "fa": "list per il vocabolario, search e add per C1",
+      "non_fa": "",
+      "serve_a": "Run, Decide",
+      "comanda": []
+    },
+    {
+      "id": "Riga4",
+      "codice": null,
+      "stato": "JSON della riga 3 senza note: ruoli model/think/temperature/system, prompt extract e novelty solo regole, check del critico solo regole (is_user_rejection, is_generic_rule)",
+      "fa": "entra in tl con alfred extractor add --parent 3, inattiva",
+      "non_fa": "non vive nel repo: il file temporaneo sparisce dopo l'add",
+      "serve_a": "Run, con --extractor 4 fino allo switch",
+      "comanda": []
+    }
+  ],
+  "flussi": [
+    {
+      "da": "Ingest",
+      "a": "Runner",
+      "passa": "l'app, dopo la scrittura dei contents",
+      "torna": null
+    },
+    {
+      "da": "Runner",
+      "a": "Trigger",
+      "passa": "scambi pending, sessioni fallite, ora",
+      "torna": "dovuta o no"
+    },
+    {
+      "da": "Rotte",
+      "a": "Runner",
+      "passa": "Options, o la richiesta dello stato",
+      "torna": "Progress (202) o RunError; Status"
+    },
+    {
+      "da": "Runner",
+      "a": "Run",
+      "passa": "Options, ora",
+      "torna": "RunReport con le sessioni fallite"
+    },
+    {
+      "da": "Run",
+      "a": "SessioneRun",
+      "passa": "SessionRead, budget",
+      "torna": "SessionReport, budget"
+    },
+    {
+      "da": "SessioneRun",
+      "a": "Episodi",
+      "passa": "episodi della mappa (active)",
+      "torna": "errore o niente"
+    },
+    {
+      "da": "SessioneRun",
+      "a": "Scambio",
+      "passa": "Target, Carry",
+      "torna": "ExchangeReport, Carry"
+    },
+    {
+      "da": "Scambio",
+      "a": "Decide",
+      "passa": "Checked, Outcome giudicati, Carry",
+      "torna": "Decision"
+    },
+    {
+      "da": "SessioneRun",
+      "a": "Archivio",
+      "passa": "distilled = run sugli id letti",
+      "torna": "errore o niente"
+    },
+    {
+      "da": "DistillCli",
+      "a": "Rotte",
+      "passa": "Options in JSON, poi letture dello stato",
+      "torna": "Progress, poi Status con last"
+    },
+    {
+      "da": "ExtractorCli",
+      "a": "Archivio",
+      "passa": "riga nuova, o active su un id",
+      "torna": "la riga riletta"
+    },
+    {
+      "da": "Run",
+      "a": "Runner",
+      "passa": "il report di ogni sessione finita (on_session)",
+      "torna": null
+    }
+  ],
+  "invarianti": [
+    {
+      "testo": "una run alla volta: una seconda richiesta torna Busy (409), il trigger salta",
+      "su": [
+        "Runner"
+      ]
+    },
+    {
+      "testo": "senza ALFRED_DISTILL_TRIGGER=on il trigger non lancia niente",
+      "su": [
+        "Runner",
+        "Trigger"
+      ]
+    },
+    {
+      "testo": "il trigger non e' mai dovuto senza pending, ed e' dovuto a min_pending scambi o col piu' vecchio oltre max_age, sessioni fallite escluse",
+      "su": [
+        "Trigger"
+      ]
+    },
+    {
+      "testo": "shadow non scrive niente: ne' regole, ne' episodi, ne' distilled; scrive solo le righe extractions",
+      "su": [
+        "Run",
+        "SessioneRun"
+      ]
+    },
+    {
+      "testo": "una sessione con un fallimento non si chiude e finisce tra le fallite dell'ultima run",
+      "su": [
+        "SessioneRun",
+        "Run",
+        "Runner"
+      ]
+    },
+    {
+      "testo": "una sessione chiusa chiude ogni scambio letto, rumore incluso",
+      "su": [
+        "SessioneRun"
+      ]
+    },
+    {
+      "testo": "con lo split ok ogni scambio pending ha un report, in ordine; con lo split fallito nessuno",
+      "su": [
+        "SessioneRun"
+      ]
+    },
+    {
+      "testo": "un'estrazione fallita non giudica niente ed e' un fallimento",
+      "su": [
+        "Scambio"
+      ]
+    },
+    {
+      "testo": "il budget non passa mai max_saved; la run si ferma tra le sessioni quando e' speso",
+      "su": [
+        "Run"
+      ]
+    },
+    {
+      "testo": "il cutoff dei gemelli e' assente o in (0, 1], controllato in Run.start",
+      "su": [
+        "Run"
+      ]
+    },
+    {
+      "testo": "una riga aggiunta e' inattiva e, riletta, ha config, parent e why dati",
+      "su": [
+        "ExtractorCli"
+      ]
+    },
+    {
+      "testo": "una run avviata e' quella in running; finita, il suo report e' in last e running torna vuoto",
+      "su": [
+        "Runner"
+      ]
+    },
+    {
+      "testo": "il Progress avanza di una sessione alla volta e saved non scende",
+      "su": [
+        "Run"
+      ]
+    }
+  ],
+  "fatti": [
+    "Run.start: riga assente -> RunError::NotFound; config non della forma nuova (righe 1-3) -> BadInput; Rules.list giu' -> Upstream; vocabolario vuoto -> BadInput 'no tag vocabulary'.",
+    "Il modello: ALFRED_DISTILL_MODEL, se c'e', passa a Extractor::from_row come override.",
+    "Le Options del trigger: session nessuna, extractor active, active true, max_saved nessuno, cutoff SAME_SESSION_CUTOFF.",
+    "Il run e il created delle righe extractions e il distilled degli scambi sono lo stesso timestamp: Recorder.run(), ISO-8601 UTC con millisecondi e Z.",
+    "Gli episodi si scrivono con SessionMap.stored(extractor_id, modello del ruolo episodes, run). Una scrittura fallita e' il fallimento 'episodes: ...'.",
+    "Fallimenti di sessione, in ordine: 'read: ...' (SessionRead.read fallisce, nessun report, sessione fallita), 'split failed', 'episodes: ...', poi quelli degli scambi, poi 'close: ...'.",
+    "Fallimenti di scambio: 'extraction failed: <id>', quelli di decide, 'record: ...' se insert_extractions fallisce.",
+    "Lo Scambio: per ogni Checked di extraction.rules() un Outcome::of; se e' tenuto, Judgement::of e, con le probabilita', outcome.judged(p, drop); senza probabilita' resta aperto e decide segnala 'critic failed'.",
+    "Il report di scambio conta: rules = regole estratte, kept = tenute dai check, passed = aperte dopo il critico, criticFailed = aperte senza probabilita', twins = rulings con TWIN_REASON, saved = id salvati, verdicts = nomi dei verdetti.",
+    "Il Carry riparte vuoto a ogni sessione (SessionList::empty), il budget passa da una sessione all'altra.",
+    "La chiusura usa HistDb.set_distilled(id, Some(run)) su read.closing_ids(); al primo errore si ferma col fallimento 'close: ...' e closed conta quelli gia' chiusi solo se tutti sono andati.",
+    "Run.all salta una sessione senza turni pending; se ha solo rumore e il modo e' active, chiude il rumore.",
+    "status_of: BadInput 400, NotFound 404, Busy 409, Upstream 502.",
+    "La CLI: --extractor 'active' -> None, un intero -> Some(id), altro -> ClientError::Input. --max-saved 0 -> ClientError::Input.",
+    "extractor add: il file e' un Config (deny_unknown_fields, bad_config); POST /hist/extractors {parent, why, config: JSON compatto, created: now}; poi GET /hist/extractors/<id>. show: GET /hist/extractors/<id|active>. activate: PATCH /hist/extractors/<id> {active: true}. Tutti stampano la riga con pretty().",
+    "Il trigger legge i pending con list_exchanges(default, Some(false), PENDING_SESSIONS_CAP); ogni Exchange ha session e timestamp ISO.",
+    "parse_env: on diverso da 'on' -> Ok(None); numeri non interi o 0 -> Err con il nome della variabile; assenti -> 50 e 24.",
+    "Alla fine del task il server scrive su stderr 'alfred distill: run <run>: <n> sessions, <saved> saved, <f> failed'.",
+    "Le sessioni fallite per il trigger sono status.last.failed; senza last nessuna.",
+    "La CLI aspetta al massimo MAX_POLLS letture a intervalli POLL (24 h); oltre e' ClientError::Input 'distill: the run is still going, see --status'.",
+    "finished(status, run): Some(last) quando running non e' quella run e last.run == run; None altrimenti."
+  ]
+}

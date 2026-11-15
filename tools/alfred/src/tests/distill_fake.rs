@@ -21,6 +21,8 @@ pub(crate) struct World {
     pub queries: u32,
     pub points: BTreeMap<String, (Vec<f32>, Value)>,
     pub down: HashSet<&'static str>,
+    pub episodes: BTreeMap<String, Value>,
+    pub base: String,
 }
 
 pub(crate) type Shared = Arc<Mutex<World>>;
@@ -70,6 +72,10 @@ async fn chat(
     State(world): State<Shared>,
     Json(request): Json<Value>,
 ) -> (StatusCode, Json<Value>) {
+    let slow = world.lock().unwrap().down.contains("slow");
+    if slow {
+        tokio::time::sleep(std::time::Duration::from_millis(300)).await;
+    }
     let mut world = world.lock().unwrap();
     if let Some(down) = fail(&world, "chat") {
         return down;
@@ -136,9 +142,20 @@ async fn query(
 
 async fn upsert(
     State(world): State<Shared>,
+    Path(name): Path<String>,
     Json(request): Json<Value>,
 ) -> (StatusCode, Json<Value>) {
     let mut world = world.lock().unwrap();
+    if name == crate::hist::episodes::COLLECTION {
+        if let Some(down) = fail(&world, "episodes") {
+            return down;
+        }
+        for p in request["points"].as_array().unwrap() {
+            let id = p["id"].as_str().unwrap().to_string();
+            world.episodes.insert(id, p["payload"].clone());
+        }
+        return ok(json!({ "status": "completed" }));
+    }
     if let Some(down) = fail(&world, "upsert") {
         return down;
     }
@@ -190,13 +207,27 @@ async fn payload(
     ok(json!({ "status": "completed" }))
 }
 
-async fn scroll(State(world): State<Shared>) -> (StatusCode, Json<Value>) {
+async fn scroll(
+    State(world): State<Shared>,
+    Path(name): Path<String>,
+    Json(request): Json<Value>,
+) -> (StatusCode, Json<Value>) {
     let world = world.lock().unwrap();
-    let points: Vec<Value> = world
-        .points
-        .iter()
-        .map(|(id, p)| point(id, &p.0, &p.1, None))
-        .collect();
+    let session = request["filter"]["must"][0]["match"]["value"].clone();
+    let points: Vec<Value> = if name == crate::hist::episodes::COLLECTION {
+        world
+            .episodes
+            .iter()
+            .filter(|(_, p)| p["session"] == session)
+            .map(|(id, p)| point(id, &[], p, None))
+            .collect()
+    } else {
+        world
+            .points
+            .iter()
+            .map(|(id, p)| point(id, &p.0, &p.1, None))
+            .collect()
+    };
     ok(json!({ "points": points, "next_page_offset": null }))
 }
 
@@ -235,6 +266,7 @@ pub(crate) async fn fake(replies: Vec<&str>) -> Fake {
         .with_state(world.clone());
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let base = format!("http://{}", listener.local_addr().unwrap());
+    world.lock().unwrap().base = base.clone();
     tokio::spawn(async move { axum::serve(listener, router).await });
     let http = reqwest::Client::new();
     let embedder = Embedder::new(base.clone(), http.clone());
