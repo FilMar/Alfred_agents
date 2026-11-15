@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-11-14
+updated: 2026-11-15
 ---
 
 A block is one run of ritchie (code) or efesto (skill). [A] is architecture: small, read it closely in review. [M] is mechanical: big, the first piece shows the rest.
@@ -12,9 +12,8 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 The distiller and `th` move into alfred. Then the server goes on the Deck, and every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
-- [A] Distiller C2, the run: the session loop, the episodes write, the close by `distilled`, failed sessions stay pending, the trigger on ingest with its thresholds, `alfred distill` and `POST /distill`, `extractor add/show/activate`, row 4 with rules-only prompts, and a check of the twin cutoff where `Tools` is built from the config: `decide()` no longer checks it. Parts A, B and C1 (twins, neighbours, novelty, save) are done. [detail](memory_distill_starts_on_ingest_by_threshold)
 - [A] `alfred command` (`th` today): local, no API, the bwrap sandbox, pi as a child process.
-- [A] Install `alfred serve` on the Deck as a user unit.
+- [A] Install `alfred serve` on the Deck as a user unit. Add row 4 with `alfred extractor add`, from row 3 with the notes taken out; at the switch, activate it and set `ALFRED_DISTILL_TRIGGER=on`. [detail](memory_distill_trigger_is_off_until_the_switch)
 - [M] Rewrite skills, hooks, `CLAUDE.md` and extensions to call `alfred`.
 - [M] Retire `tools/tb`, `tools/ti`, `tools/tl`, `tools/td` and `tools/th`, with the wiki pages that describe them.
 
@@ -22,6 +21,7 @@ The distiller and `th` move into alfred. Then the server goes on the Deck, and e
 
 One line each. An idea becomes blocks only when it is the next goal.
 
+- The session failure `split failed` carries the reason of the answer: an Ollama quota error looks like a bad model answer today.
 - Scale the session cap with its exchanges, and record the skipped ones. [detail](memory_td_session_cap_limits_one_session)
 - A guard for tag synonyms in `td`, after reading the proposed tags. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - `td` phase 3: bridges between saved notes. [detail](memory_bridges_by_shape_are_judged_by_reading)
