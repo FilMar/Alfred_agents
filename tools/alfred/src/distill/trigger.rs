@@ -28,12 +28,11 @@ impl Trigger {
 
     pub fn from_env() -> Result<Option<Trigger>, String> {
         let var = |name: &str| std::env::var(name).ok();
-        let result: Result<Option<Trigger>, String> = parse_env(
+        parse_env(
             var(TRIGGER_ENV).as_deref(),
             var(MIN_PENDING_ENV).as_deref(),
             var(MAX_AGE_ENV).as_deref(),
-        );
-        result
+        )
     }
 
     pub fn due(&self, pending: &[Exchange], failed: &HashSet<String>, now: Timestamp) -> bool {
@@ -56,10 +55,6 @@ impl Trigger {
             "Trigger.due: due at min_pending exchanges"
         );
         result
-    }
-
-    pub fn min_pending(&self) -> u32 {
-        self.min_pending
     }
 
     pub fn max_age(&self) -> SignedDuration {

@@ -19,18 +19,7 @@ pub(super) fn seed(db: &crate::hist::db::HistDb, exchanges: &[crate::hist::Excha
 }
 
 pub(super) fn temp_db() -> crate::hist::db::HistDb {
-    static SEQ: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
-    let n = SEQ.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap();
-    let path = std::env::temp_dir().join(format!(
-        "distill-session-{}-{}-{}.sqlite",
-        std::process::id(),
-        now.as_nanos(),
-        n
-    ));
-    crate::hist::db::HistDb::open(&path).unwrap()
+    crate::hist::db::HistDb::open(&crate::tests::distill_bench::temp_path("session")).unwrap()
 }
 
 pub(super) fn uuid(tag: u64) -> String {

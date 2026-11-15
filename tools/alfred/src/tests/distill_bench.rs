@@ -6,10 +6,11 @@ use crate::distill::runner::Runner;
 use crate::distill::trigger::Trigger;
 use crate::hist::db::HistDb;
 use crate::hist::episodes::Episodes;
-use crate::hist::{Contents, Exchange, NewExtractor, Session};
+use crate::hist::{Contents, Exchange, NewExtractor};
 use crate::qdrant::Qdrant;
 use crate::serve::{App, Shared};
-use crate::tests::distill_fake::{self, Fake, rule_payload, vector_of};
+use crate::tests::distill_fake::{self, Fake, seed};
+use crate::tests::distill_session::{contents, exchange, ts, uuid};
 use crate::vault::store::Vault;
 
 pub(crate) struct Bench {
@@ -52,7 +53,7 @@ pub(crate) async fn bench(replies: Vec<&str>, trigger: Option<Trigger>) -> Bench
         embedder,
         world,
     } = distill_fake::fake(replies).await;
-    let base = chat_base(&world);
+    let base = world.lock().unwrap().base.clone();
     let hist = HistDb::open(&temp_path("bench")).unwrap();
     let extractor = hist
         .insert_extractor(&NewExtractor {
@@ -87,72 +88,28 @@ pub(crate) async fn bench(replies: Vec<&str>, trigger: Option<Trigger>) -> Bench
     }
 }
 
-fn chat_base(world: &distill_fake::Shared) -> String {
-    world.lock().unwrap().base.clone()
-}
-
 pub(crate) fn tag_rule(world: &distill_fake::Shared, id: &str) {
-    let mut payload = rule_payload("quando si chiude una sessione", &["salva il lavoro"]);
-    payload["tags"] = json!(["sessione"]);
-    world.lock().unwrap().points.insert(
-        id.to_string(),
-        (vector_of("quando si chiude una sessione"), payload),
+    seed(
+        world,
+        id,
+        "quando si chiude una sessione",
+        &["salva il lavoro"],
     );
-}
-
-pub(crate) fn uuid(tag: u64) -> String {
-    format!("{tag:08x}-0000-4000-8000-{tag:012x}")
-}
-
-pub(crate) fn ts(second: i64) -> String {
-    format!(
-        "2026-11-14T{:02}:{:02}:{:02}.000Z",
-        second / 3600,
-        (second / 60) % 60,
-        second % 60
-    )
+    world.lock().unwrap().points.get_mut(id).unwrap().1["tags"] = json!(["sessione"]);
 }
 
 pub(crate) fn seed_session(app: &App, session: u64, turns: &[(u64, i64, &str, bool)]) {
     let id = uuid(session);
-    app.hist
-        .upsert_sessions(&[Session {
-            id: id.clone(),
-            started: ts(0),
-            harness: Some("claude".to_string()),
-            host: None,
-            path: None,
-        }])
-        .unwrap();
     let exchanges: Vec<Exchange> = turns
         .iter()
-        .map(|&(tag, second, _, distilled)| Exchange {
-            id: uuid(tag),
-            session: id.clone(),
-            parent: None,
-            timestamp: ts(second),
-            kind: "chat".to_string(),
-            actor: "alfredo".to_string(),
-            model: None,
-            tokens_in: None,
-            tokens_out: None,
-            tokens_cache_read: None,
-            tokens_cache_write: None,
-            distilled: distilled.then(|| ts(1)),
-            meta: None,
-        })
+        .map(|&(tag, second, _, done)| exchange(&uuid(tag), &id, &ts(second), "chat", None, done))
         .collect();
-    app.hist.upsert_exchanges(&exchanges).unwrap();
-    let contents: Vec<Contents> = turns
+    let rows: Vec<Contents> = turns
         .iter()
-        .map(|&(tag, _, input, _)| Contents {
-            exchange_id: uuid(tag),
-            input: input.to_string(),
-            output: "va bene".to_string(),
-            tools: None,
-        })
+        .map(|&(tag, _, input, _)| contents(&uuid(tag), input, "va bene"))
         .collect();
-    app.hist.upsert_contents(&contents).unwrap();
+    crate::tests::distill_session::seed(&app.hist, &exchanges);
+    app.hist.upsert_contents(&rows).unwrap();
 }
 
 pub(crate) fn split(last: u32) -> String {

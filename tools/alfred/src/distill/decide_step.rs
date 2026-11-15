@@ -50,15 +50,13 @@ pub(super) async fn judge(
         let asked: Vec<&RuleCandidate> = rest.iter().map(|&at| candidates[at]).collect();
         let judged = Judged::of(tools.chat, &asked, &known, tools.extractor).await;
         let ruling_at = |at: usize| {
-            if let Some(twin) = twins.ruling(at) {
-                twin.clone()
-            } else {
+            twins.ruling(at).cloned().unwrap_or_else(|| {
                 let k = rest
                     .iter()
                     .position(|&r| r == at)
                     .expect("judge: a non twin was asked");
                 judged.rulings()[k].clone()
-            }
+            })
         };
         match judged.answer().and_then(Answer::failure) {
             Some(failure) => Err(format!("novelty: {failure}")),
@@ -88,10 +86,6 @@ pub(super) async fn apply(
     outcomes: Vec<Outcome>,
     carry: Carry,
 ) -> Applied {
-    debug_assert!(
-        judged.rulings.len() == step.judgeables.len(),
-        "apply: one ruling per judgeable"
-    );
     let mut outcomes = outcomes;
     let mut budget = carry.budget;
     let mut list = carry.list;

@@ -1,11 +1,11 @@
 use crate::distill::config::Extractor;
-use crate::distill::decide::{Carry, Decision, Tools, decide};
+use crate::distill::decide::{Carry, Decision, decide};
 use crate::distill::record::{Outcome, Verdict};
 use crate::distill::rule::Checked;
 use crate::distill::save::{Budget, CAP_FAILURE, Mode};
 use crate::distill::twin::SessionList;
 use crate::tests::distill_fake::{
-    EXCHANGE, Fake, checked, extractor, fake, judged, seed, vector_of,
+    EXCHANGE, Fake, carry, checked, extractor, fake, judged, seed, tools, vector_of,
 };
 
 const OLD: &str = "11111111-1111-4111-8111-111111111111";
@@ -21,14 +21,7 @@ async fn run(
     carry: Carry,
 ) -> Decision {
     let ex: Extractor = extractor(3);
-    let tools = Tools {
-        chat: &f.chat,
-        rules: &f.rules,
-        embedder: &f.embedder,
-        extractor: &ex,
-        mode,
-        cutoff,
-    };
+    let tools = tools(f, &ex, mode, cutoff);
     let outcomes: Vec<Outcome> = rules.iter().map(|c| judged(c, 0.1)).collect();
     decide(
         &tools,
@@ -39,13 +32,6 @@ async fn run(
         jiff::Timestamp::now(),
     )
     .await
-}
-
-fn fresh(max: Option<u32>) -> Carry {
-    Carry {
-        list: SessionList::empty(),
-        budget: Budget::of(max),
-    }
 }
 
 fn verdicts(d: &Decision) -> Vec<Option<Verdict>> {
@@ -60,7 +46,7 @@ async fn a_new_rule_is_saved_read_back_and_listed() {
         Mode::Active,
         Some(0.75),
         &[checked(RAIN.0, RAIN.1)],
-        fresh(None),
+        carry(None),
     )
     .await;
     assert_eq!(d.failures(), &[] as &[String]);
@@ -79,7 +65,7 @@ async fn shadow_judges_but_writes_nothing() {
         Mode::Shadow,
         None,
         &[checked(RAIN.0, RAIN.1)],
-        fresh(Some(1)),
+        carry(Some(1)),
     )
     .await;
     assert_eq!(verdicts(&d), [Some(Verdict::New)]);
@@ -95,7 +81,7 @@ async fn shadow_judges_but_writes_nothing() {
 async fn a_twin_of_the_session_skips_the_judge() {
     let f = fake(vec![]).await;
     let text = format!("SE {} ALLORA {}", RAIN.0, RAIN.1);
-    let list = SessionList::empty().with(text.clone(), None, Some(vector_of(&text)));
+    let list = SessionList::default().with(text.clone(), None, Some(vector_of(&text)));
     let d = run(
         &f,
         Mode::Active,
@@ -123,7 +109,7 @@ async fn an_append_adds_a_do_to_the_neighbour_without_counting_a_hit() {
         Mode::Active,
         None,
         &[checked(RAIN.0, RAIN.1)],
-        fresh(None),
+        carry(None),
     )
     .await;
     assert_eq!(d.outcomes()[0].saved_id(), Some(OLD));
@@ -143,7 +129,7 @@ async fn a_spent_budget_says_cap_once() {
         checked(TRAIN.0, TRAIN.1),
         checked(SNOW.0, SNOW.1),
     ];
-    let d = run(&f, Mode::Active, None, &rules, fresh(Some(1))).await;
+    let d = run(&f, Mode::Active, None, &rules, carry(Some(1))).await;
     assert_eq!(d.failures(), [CAP_FAILURE.to_string()]);
     assert_eq!(f.world.lock().unwrap().points.len(), 1);
 }
@@ -157,7 +143,7 @@ async fn a_failed_search_stops_before_the_judge() {
         Mode::Active,
         None,
         &[checked(RAIN.0, RAIN.1)],
-        fresh(None),
+        carry(None),
     )
     .await;
     assert!(d.failures()[0].starts_with("neighbours: "));
@@ -172,7 +158,7 @@ async fn a_failed_answer_is_a_novelty_failure() {
         Mode::Active,
         None,
         &[checked(RAIN.0, RAIN.1)],
-        fresh(None),
+        carry(None),
     )
     .await;
     assert!(d.failures()[0].starts_with("novelty: "));
@@ -183,21 +169,14 @@ async fn a_failed_answer_is_a_novelty_failure() {
 async fn an_open_outcome_without_probabilities_is_a_critic_failure() {
     let f = fake(vec![]).await;
     let ex = extractor(3);
-    let tools = Tools {
-        chat: &f.chat,
-        rules: &f.rules,
-        embedder: &f.embedder,
-        extractor: &ex,
-        mode: Mode::Active,
-        cutoff: None,
-    };
+    let tools = tools(&f, &ex, Mode::Active, None);
     let rules = [checked(RAIN.0, RAIN.1)];
     let d = decide(
         &tools,
         EXCHANGE,
         &rules,
         vec![Outcome::of(&rules[0])],
-        fresh(None),
+        carry(None),
         jiff::Timestamp::now(),
     )
     .await;
@@ -216,7 +195,7 @@ async fn a_duplicate_of_a_neighbour_stays_out_of_the_list() {
         Mode::Active,
         None,
         &[checked(RAIN.0, RAIN.1)],
-        fresh(None),
+        carry(None),
     )
     .await;
     assert_eq!(verdicts(&d), [Some(Verdict::Duplicate)]);
@@ -232,7 +211,7 @@ async fn a_rule_read_back_with_another_do_is_a_save_failure() {
         Mode::Active,
         None,
         &[checked(RAIN.0, RAIN.1)],
-        fresh(None),
+        carry(None),
     )
     .await;
     assert!(d.failures()[0].starts_with("save: save_rule: the rule is not in the store"));

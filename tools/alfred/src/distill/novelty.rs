@@ -117,7 +117,7 @@ pub fn novelty_prompt(candidates: &[&RuleCandidate], known: &[Known]) -> String 
         !candidates.is_empty(),
         "novelty_prompt: at least one candidate"
     );
-    let result: String = [
+    [
         vec![
             super::extract::quality_bar(),
             String::new(),
@@ -145,13 +145,12 @@ pub fn novelty_prompt(candidates: &[&RuleCandidate], known: &[Known]) -> String 
     ]
     .concat()
     .join("\n")
-        + "\n\nUse the integer after C as `cand` and the integer after N as `of`.";
-    result
+        + "\n\nUse the integer after C as `cand` and the integer after N as `of`."
 }
 
 pub fn verdicts_check(json: &Value, candidates: usize, known: usize) -> Option<String> {
     debug_assert!(candidates > 0, "verdicts_check: at least one candidate");
-    let result: Option<String> = match json["verdicts"].as_array() {
+    match json["verdicts"].as_array() {
         None => Some("need list `verdicts`".to_string()),
         Some(list) if !covers_every_cand(list, candidates) => Some(format!(
             "need exactly one verdict per cand 0..{}",
@@ -161,8 +160,7 @@ pub fn verdicts_check(json: &Value, candidates: usize, known: usize) -> Option<S
             .iter()
             .enumerate()
             .find_map(|(k, v)| verdict_fault(k, v, known)),
-    };
-    result
+    }
 }
 
 pub fn settle(json: &Value, candidates: usize, known: &[Known]) -> Vec<Ruling> {

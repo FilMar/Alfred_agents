@@ -45,24 +45,20 @@ pub enum ExtractorCommand {
 }
 
 pub async fn distill(client: &Client, args: &DistillArgs) -> Result<String, ClientError> {
-    let result: Result<String, ClientError> = if args.status {
+    if args.status {
         client
             .get::<Value>("/distill/status", &[])
             .await
             .map(|status| pretty(&status))
     } else {
-        match options_of(args) {
-            Err(e) => Err(e),
-            Ok(options) => match client.post::<Options, Value>("/distill", &options).await {
-                Err(e) => Err(e),
-                Ok(progress) => {
-                    let run = progress["run"].as_str().unwrap_or_default().to_string();
-                    wait(client, &run).await.map(|report| pretty(&report))
-                }
-            },
+        async {
+            let options = options_of(args)?;
+            let progress = client.post::<Options, Value>("/distill", &options).await?;
+            let run = progress["run"].as_str().unwrap_or_default().to_string();
+            wait(client, &run).await.map(|report| pretty(&report))
         }
-    };
-    result
+        .await
+    }
 }
 
 pub const POLL: Duration = Duration::from_secs(5);
@@ -142,33 +138,34 @@ pub async fn extractor(
     command: &ExtractorCommand,
     now: Timestamp,
 ) -> Result<String, ClientError> {
-    let result: Result<String, ClientError> = match command {
+    match command {
         ExtractorCommand::Add { file, why, parent } => {
-            let text = std::fs::read_to_string(file)
-                .map_err(|e| ClientError::Input(format!("cannot read {}: {e}", file.display())));
-            match text.and_then(|t| config_of(&t).map_err(ClientError::Input)) {
-                Err(e) => Err(e),
-                Ok(config) => add(client, &config, why, *parent, now)
+            async {
+                let text = std::fs::read_to_string(file).map_err(|e| {
+                    ClientError::Input(format!("cannot read {}: {e}", file.display()))
+                })?;
+                let config = config_of(&text).map_err(ClientError::Input)?;
+                add(client, &config, why, *parent, now)
                     .await
-                    .map(|row| pretty(&row)),
+                    .map(|row| pretty(&row))
             }
+            .await
         }
         ExtractorCommand::Show { id } => client
             .get::<Row>(&format!("/hist/extractors/{id}"), &[])
             .await
             .map(|row| pretty(&row)),
         ExtractorCommand::Activate { id } => {
-            let path = format!("/hist/extractors/{id}");
-            match client
-                .patch::<Value, Value>(&path, &serde_json::json!({ "active": true }))
-                .await
-            {
-                Err(e) => Err(e),
-                Ok(_) => client.get::<Row>(&path, &[]).await.map(|row| pretty(&row)),
+            async {
+                let path = format!("/hist/extractors/{id}");
+                client
+                    .patch::<Value, Value>(&path, &serde_json::json!({ "active": true }))
+                    .await?;
+                client.get::<Row>(&path, &[]).await.map(|row| pretty(&row))
             }
+            .await
         }
-    };
-    result
+    }
 }
 
 pub async fn add(
@@ -185,16 +182,14 @@ pub async fn add(
         config: serde_json::to_string(config).expect("add: the config serializes"),
         created: crate::rules::iso(now),
     };
-    let result: Result<Row, ClientError> =
-        match client.post::<_, Value>("/hist/extractors", &row).await {
-            Err(e) => Err(e),
-            Ok(added) => {
-                let id = added["id"].as_i64().unwrap_or_default();
-                client
-                    .get::<Row>(&format!("/hist/extractors/{id}"), &[])
-                    .await
-            }
-        };
+    let result: Result<Row, ClientError> = async {
+        let added = client.post::<_, Value>("/hist/extractors", &row).await?;
+        let id = added["id"].as_i64().unwrap_or_default();
+        client
+            .get::<Row>(&format!("/hist/extractors/{id}"), &[])
+            .await
+    }
+    .await;
     debug_assert!(
         result.as_ref().map_or(true, |r| !r.active),
         "add: a new row is inactive"

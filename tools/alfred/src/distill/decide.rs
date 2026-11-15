@@ -186,11 +186,10 @@ pub fn neighbour_of(rule: &Rule) -> Known {
         "neighbour_of: the rule has an if"
     );
     debug_assert!(!rule.body.do_.is_empty(), "neighbour_of: the rule has a do");
-    let result: Known = Known::neighbour(
+    Known::neighbour(
         rule.id.clone(),
         format!("SE {} ALLORA {}", rule.body.if_, rule.body.do_.join("; ")),
-    );
-    result
+    )
 }
 
 pub fn known_for(neighbours: Vec<Known>, list: &SessionList) -> Vec<Known> {

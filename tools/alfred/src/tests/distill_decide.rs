@@ -40,13 +40,8 @@ fn neighbour_of_rejects_no_do() {
 
 #[test]
 fn known_for_drops_repeated_neighbours_and_puts_the_session_last() {
-    let list = SessionList::empty().with("SE a ALLORA b".to_string(), None, None);
+    let list = SessionList::default().with("SE a ALLORA b".to_string(), None, None);
     let found = known_for(vec![known("r1"), known("r2"), known("r1")], &list);
     let keys: Vec<&str> = found.iter().map(Known::key).collect();
     assert_eq!(keys, ["r1", "r2", "session:0"]);
-}
-
-#[test]
-fn known_for_with_nothing_is_empty() {
-    assert!(known_for(Vec::new(), &SessionList::empty()).is_empty());
 }

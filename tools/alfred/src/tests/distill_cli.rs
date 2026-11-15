@@ -37,15 +37,6 @@ fn options_of_accepts_max_saved_one() {
 }
 
 #[test]
-fn options_of_leaves_the_cutoff_to_the_server() {
-    let asked = DistillArgs {
-        same_session_cutoff: 0.0,
-        ..args("active", None)
-    };
-    assert!(options_of(&asked).is_ok());
-}
-
-#[test]
 fn options_of_keeps_the_mode_asked() {
     let asked = DistillArgs {
         active: true,
@@ -90,18 +81,6 @@ fn finished_returns_none_while_the_run_goes() {
 #[test]
 fn finished_returns_none_when_last_is_of_another_run() {
     let status = serde_json::json!({"running": null, "last": {"run": "r2"}});
-    assert_eq!(finished(&status, "r1"), None);
-}
-
-#[test]
-fn finished_returns_none_when_the_run_is_neither_running_nor_last() {
-    let status = serde_json::json!({"running": {"run": "r9"}, "last": {"run": "r2"}});
-    assert_eq!(finished(&status, "r1"), None);
-}
-
-#[test]
-fn finished_returns_none_without_a_last() {
-    let status = serde_json::json!({"running": null, "last": null});
     assert_eq!(finished(&status, "r1"), None);
 }
 

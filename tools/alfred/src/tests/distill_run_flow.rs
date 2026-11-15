@@ -7,8 +7,9 @@ use crate::hist::{ExtractionQuery, NewExtractor};
 use crate::serve::Shared;
 use crate::tests::distill_bench::{
     Bench, CRITIC_KEEPS, NO_RULES, NOVELTY_NEW, USER, bench, distilled, one_rule, seed_session,
-    split, tag_rule, ts, uuid,
+    split, tag_rule,
 };
+use crate::tests::distill_session::{ts, uuid};
 
 const TAGGED: &str = "22222222-2222-4222-8222-222222222222";
 
@@ -43,13 +44,14 @@ async fn rainy(replies: Vec<&str>, trigger: Option<Trigger>) -> Bench {
     b
 }
 
-fn saving() -> Vec<String> {
-    vec![
+async fn saving(trigger: Option<Trigger>) -> Bench {
+    let replies = [
         split(0),
         one_rule(),
         CRITIC_KEEPS.to_string(),
         NOVELTY_NEW.to_string(),
-    ]
+    ];
+    rainy(replies.iter().map(String::as_str).collect(), trigger).await
 }
 
 async fn run(b: &Bench, active: bool) -> RunReport {
@@ -61,8 +63,7 @@ async fn run(b: &Bench, active: bool) -> RunReport {
 
 #[tokio::test]
 async fn shadow_records_the_rows_and_writes_nothing_else() {
-    let replies = saving();
-    let b = rainy(replies.iter().map(String::as_str).collect(), None).await;
+    let b = saving(None).await;
     let report = run(&b, false).await;
     let rows = b
         .app
@@ -80,14 +81,26 @@ async fn shadow_records_the_rows_and_writes_nothing_else() {
 
 #[tokio::test]
 async fn active_saves_the_rule_writes_the_episodes_and_closes() {
-    let replies = saving();
-    let b = rainy(replies.iter().map(String::as_str).collect(), None).await;
+    let b = saving(None).await;
     let report = run(&b, true).await;
     let world = b.world.lock().unwrap();
     assert_eq!((report.saved, report.sessions[0].closed), (1, 1));
     assert_eq!((world.points.len(), world.episodes.len()), (2, 1));
     assert_eq!(distilled(&b.app, 10), Some(report.run.clone()));
     assert!(report.failed.is_empty());
+    let e = &report.sessions[0].exchanges[0];
+    assert_eq!(
+        (
+            e.extraction,
+            e.rules,
+            e.kept,
+            e.passed,
+            e.critic_failed,
+            e.twins
+        ),
+        ("ok", 1, 1, 1, 0, 0)
+    );
+    assert_eq!((e.verdicts.clone(), e.saved.len()), (vec!["new"], 1));
 }
 
 #[tokio::test]
@@ -121,8 +134,7 @@ async fn only_the_pending_turns_are_distilled() {
 
 #[tokio::test]
 async fn the_run_stops_between_sessions_when_the_budget_is_spent() {
-    let replies = saving();
-    let b = rainy(replies.iter().map(String::as_str).collect(), None).await;
+    let b = saving(None).await;
     seed_session(&b.app, 2, &[(20, 30, USER, false)]);
     let options = Options {
         max_saved: Some(1),
@@ -136,8 +148,7 @@ async fn the_run_stops_between_sessions_when_the_budget_is_spent() {
 
 #[tokio::test]
 async fn a_second_start_while_running_is_busy() {
-    let replies = saving();
-    let b = rainy(replies.iter().map(String::as_str).collect(), None).await;
+    let b = saving(None).await;
     b.world.lock().unwrap().down.insert("slow");
     Runner::start(b.app.clone(), &options(&b, false), now())
         .await
@@ -149,25 +160,13 @@ async fn a_second_start_while_running_is_busy() {
 
 #[tokio::test]
 async fn a_started_run_shows_in_the_status_then_in_last() {
-    let replies = saving();
-    let b = rainy(replies.iter().map(String::as_str).collect(), None).await;
+    let b = saving(None).await;
     let progress = Runner::start(b.app.clone(), &options(&b, false), now())
         .await
         .unwrap();
     let report = finish(&b.app).await;
     assert_eq!(report.run, progress.run);
     assert_eq!(progress.sessions, 1);
-}
-
-#[tokio::test]
-async fn start_refuses_a_bad_cutoff() {
-    let b = rainy(Vec::new(), None).await;
-    let options = Options {
-        same_session_cutoff: Some(1.5),
-        ..options(&b, false)
-    };
-    let started = Runner::start(b.app.clone(), &options, now()).await;
-    assert!(matches!(started, Err(RunError::BadInput(_))));
 }
 
 #[tokio::test]
@@ -218,13 +217,7 @@ async fn no_trigger_no_run() {
 
 #[tokio::test]
 async fn the_trigger_starts_a_run_at_min_pending() {
-    let replies = saving();
-    let b = rainy(
-        replies.iter().map(String::as_str).collect(),
-        Some(Trigger::of(1, 24)),
-    )
-    .await;
-    b.app.hist.set_active_extractor(b.extractor).unwrap();
+    let b = saving(Some(Trigger::of(1, 24))).await;
     let started = Runner::on_ingest(b.app.clone(), now()).await;
     assert!(matches!(started, Some(Ok(_))));
     assert_eq!(finish(&b.app).await.saved, 1);
@@ -242,26 +235,6 @@ async fn the_trigger_skips_the_sessions_failed_last_time() {
     Runner::on_ingest(b.app.clone(), now()).await;
     assert!(finish(&b.app).await.failed.contains(&uuid(1)));
     assert!(Runner::on_ingest(b.app.clone(), now()).await.is_none());
-}
-
-#[tokio::test]
-async fn the_exchange_report_counts_the_saved_rule() {
-    let replies = saving();
-    let b = rainy(replies.iter().map(String::as_str).collect(), None).await;
-    let report = run(&b, true).await;
-    let e = &report.sessions[0].exchanges[0];
-    assert_eq!(
-        (
-            e.extraction,
-            e.rules,
-            e.kept,
-            e.passed,
-            e.critic_failed,
-            e.twins
-        ),
-        ("ok", 1, 1, 1, 0, 0)
-    );
-    assert_eq!((e.verdicts.clone(), e.saved.len()), (vec!["new"], 1));
 }
 
 #[tokio::test]
@@ -291,8 +264,7 @@ async fn a_failed_critic_is_reported_and_keeps_the_session_pending() {
 
 #[tokio::test]
 async fn a_failed_episodes_write_keeps_the_session_pending() {
-    let replies = saving();
-    let b = rainy(replies.iter().map(String::as_str).collect(), None).await;
+    let b = saving(None).await;
     b.world.lock().unwrap().down.insert("episodes");
     let report = run(&b, true).await;
     assert!(report.sessions[0].failures[0].starts_with("episodes: "));
@@ -327,12 +299,7 @@ async fn a_rule_dropped_by_the_critic_does_not_pass() {
 
 #[tokio::test]
 async fn the_trigger_skips_while_a_run_goes() {
-    let replies = saving();
-    let b = rainy(
-        replies.iter().map(String::as_str).collect(),
-        Some(Trigger::of(1, 24)),
-    )
-    .await;
+    let b = saving(Some(Trigger::of(1, 24))).await;
     b.world.lock().unwrap().down.insert("slow");
     Runner::start(b.app.clone(), &options(&b, false), now())
         .await

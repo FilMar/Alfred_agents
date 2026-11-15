@@ -58,17 +58,9 @@ impl Known {
     pub fn vector(&self) -> Option<&[f32]> {
         self.vector.as_deref()
     }
-
-    pub fn is_session(&self) -> bool {
-        self.key.starts_with(SESSION_KEY)
-    }
 }
 
 impl SessionList {
-    pub fn empty() -> SessionList {
-        SessionList::default()
-    }
-
     pub fn items(&self) -> &[Known] {
         &self.items
     }
@@ -129,7 +121,7 @@ impl Twins {
                     let mut found: Vec<(Option<Vec<f32>>, Option<Ruling>)> =
                         Vec::with_capacity(candidates.len());
                     for candidate in candidates {
-                        let vector = embedder.document(&twin_text(candidate)).await?;
+                        let vector = embedder.document(&saved_text(candidate)).await?;
                         let ruling = twin_of(&vector, list.items(), cutoff)
                             .map(|twin| Ruling::twin(twin.key));
                         found.push((Some(vector), ruling));
@@ -203,10 +195,6 @@ pub fn twin_of(vector: &[f32], items: &[Known], cutoff: f32) -> Option<Twin> {
         "twin_of: the twin is the first nearest item, and without one no item reaches the cutoff"
     );
     result
-}
-
-pub fn twin_text(candidate: &RuleCandidate) -> String {
-    saved_text(candidate)
 }
 
 pub fn is_cutoff(value: f32) -> bool {

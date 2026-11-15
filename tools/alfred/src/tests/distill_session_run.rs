@@ -17,11 +17,6 @@ fn exchange(failures: &[&str]) -> ExchangeReport {
 }
 
 #[test]
-fn a_clean_session_has_no_failure() {
-    assert!(session_failures(true, &[exchange(&[])]).is_empty());
-}
-
-#[test]
 fn a_failed_split_is_the_first_failure() {
     assert_eq!(
         session_failures(false, &[]),

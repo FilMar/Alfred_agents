@@ -9,8 +9,7 @@ use super::record::Recorder;
 use super::rule::vocabulary_of;
 use super::save::{Budget, Mode};
 use super::session::SessionRead;
-use super::session_run::SessionReport;
-use super::session_run::{close, distill_session};
+use super::session_run::{SessionReport, close, distill_session};
 use super::target::Context;
 use super::twin::SAME_SESSION_CUTOFF;
 use crate::serve::App;
@@ -179,7 +178,7 @@ impl Run {
             recorder: &self.recorder,
             vocabulary: &self.vocabulary,
         };
-        let mut budget = self.budget();
+        let mut budget = Budget::of(self.max_saved);
         let mut reports: Vec<SessionReport> = Vec::with_capacity(sessions.len());
         let mut failed: BTreeSet<String> = BTreeSet::new();
         for session in sessions {
@@ -220,10 +219,6 @@ impl Run {
             "Run.all: a failed session is one with a failure"
         );
         result
-    }
-
-    pub fn budget(&self) -> Budget {
-        Budget::of(self.max_saved)
     }
 
     pub fn progress(&self, sessions: u32) -> Progress {

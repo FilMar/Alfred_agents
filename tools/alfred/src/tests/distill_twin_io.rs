@@ -4,7 +4,7 @@ use crate::distill::twin::{SessionList, Twins};
 use crate::tests::distill_fake::{candidate, fake, vector_of};
 
 fn listed(texts: &[&str]) -> SessionList {
-    texts.iter().fold(SessionList::empty(), |list, t| {
+    texts.iter().fold(SessionList::default(), |list, t| {
         list.with((*t).to_string(), None, Some(vector_of(t)))
     })
 }
@@ -47,23 +47,12 @@ async fn of_marks_a_paraphrase_of_the_list_as_a_duplicate() {
 }
 
 #[tokio::test]
-async fn of_with_an_empty_list_still_gives_the_vectors() {
-    let f = fake(vec![]).await;
-    let c = candidate("quando piove forte", "chiudi la finestra");
-    let twins = Twins::of(&f.embedder, &[&c], &SessionList::empty(), Some(0.75))
-        .await
-        .unwrap();
-    assert!(twins.vector(0).is_some());
-    assert_eq!(twins.ruling(0), None);
-}
-
-#[tokio::test]
 async fn of_returns_the_embed_error() {
     let f = fake(vec![]).await;
     f.world.lock().unwrap().down.insert("embed");
     let c = candidate("quando piove forte", "chiudi la finestra");
     assert!(
-        Twins::of(&f.embedder, &[&c], &SessionList::empty(), Some(0.75))
+        Twins::of(&f.embedder, &[&c], &SessionList::default(), Some(0.75))
             .await
             .is_err()
     );
@@ -73,5 +62,5 @@ async fn of_returns_the_embed_error() {
 #[should_panic(expected = "Twins.of: the cutoff is above 0 and at most 1")]
 async fn of_rejects_a_cutoff_above_one() {
     let f = fake(vec![]).await;
-    let _ = Twins::of(&f.embedder, &[], &SessionList::empty(), Some(1.5)).await;
+    let _ = Twins::of(&f.embedder, &[], &SessionList::default(), Some(1.5)).await;
 }

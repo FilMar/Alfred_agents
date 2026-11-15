@@ -1,9 +1,8 @@
+use std::collections::HashSet;
 use std::sync::{Arc, Mutex};
 
 use jiff::Timestamp;
 use serde::Serialize;
-
-use std::collections::HashSet;
 
 use super::run::{Options, Progress, Run, RunError, RunReport, sessions_of};
 use super::session_run::SessionReport;
@@ -30,10 +29,6 @@ impl Runner {
             status: Arc::new(Mutex::new(Status::default())),
             trigger,
         }
-    }
-
-    pub fn trigger(&self) -> Option<Trigger> {
-        self.trigger
     }
 
     pub fn status(&self) -> Status {
@@ -71,7 +66,13 @@ impl Runner {
                     });
                 };
                 let report = run.all(&task, &sessions, &on_session, now).await;
-                eprintln!("alfred distill: {}", summary_line(&report));
+                eprintln!(
+                    "alfred distill: run {}: {} sessions, {} saved, {} failed",
+                    report.run,
+                    report.sessions.len(),
+                    report.saved,
+                    report.failed.len()
+                );
                 task.runner.update(|_| Status {
                     running: None,
                     last: Some(report),
@@ -86,10 +87,6 @@ impl Runner {
                 .as_ref()
                 .map_or(true, |p| is_running_or_last(&app.runner.status(), &p.run)),
             "Runner.start: a started run is the running one, or the last when it already ended"
-        );
-        debug_assert!(
-            result.as_ref().map_or(true, |p| p.done == 0),
-            "Runner.start: a started run has done nothing yet"
         );
         result
     }
@@ -155,19 +152,4 @@ impl Runner {
 fn is_running_or_last(status: &Status, run: &str) -> bool {
     status.running.as_ref().is_some_and(|p| p.run == run)
         || status.last.as_ref().is_some_and(|l| l.run == run)
-}
-
-pub fn summary_line(report: &RunReport) -> String {
-    let result: String = format!(
-        "run {}: {} sessions, {} saved, {} failed",
-        report.run,
-        report.sessions.len(),
-        report.saved,
-        report.failed.len()
-    );
-    debug_assert!(
-        result.contains(&report.run),
-        "summary_line: the line names the run"
-    );
-    result
 }

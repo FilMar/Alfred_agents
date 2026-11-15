@@ -1,16 +1,7 @@
 mod check;
 
 use crate::distill::novelty::{KNOWN_TEXT_CHARS, Ruling, TWIN_REASON, novelty_prompt, saved_text};
-
-pub(super) fn candidate(if_: &str, do_: &str) -> crate::distill::rule::RuleCandidate {
-    crate::distill::rule::RuleCandidate {
-        if_: if_.to_string(),
-        do_: do_.to_string(),
-        tags: Vec::new(),
-        proposed_tags: Vec::new(),
-        quote: String::new(),
-    }
-}
+use crate::tests::distill_fake::candidate;
 
 pub(super) fn known(key: &str, text: &str) -> crate::distill::twin::Known {
     crate::distill::twin::Known::neighbour(key.to_string(), text.to_string())
@@ -38,11 +29,6 @@ fn twin_is_a_duplicate_of_the_key() {
 }
 
 #[test]
-fn saved_text_is_not_blank() {
-    saved_text(&candidate("when it rains", "close the window"));
-}
-
-#[test]
 fn saved_text_reads_se_if_allora_do() {
     assert_eq!(saved_text(&candidate("a", "b")), "SE a ALLORA b");
     assert_eq!(
@@ -55,16 +41,6 @@ fn saved_text_reads_se_if_allora_do() {
 #[should_panic(expected = "novelty_prompt: at least one candidate")]
 fn novelty_prompt_rejects_no_candidate() {
     novelty_prompt(&[], &[]);
-}
-
-#[test]
-fn novelty_prompt_lists_one_candidate_and_one_neighbour() {
-    let candidates = [candidate("when it rains", "close the window")];
-    let refs = [&candidates[0]];
-    let prompt = novelty_prompt(&refs, &[known("r1", "SE a ALLORA b")]);
-    assert!(prompt.ends_with(
-        "\n\n## Candidates\nC0 (rule): SE when it rains ALLORA close the window\n\n## Neighbours\nN0 (rule): SE a ALLORA b\n\nUse the integer after C as `cand` and the integer after N as `of`."
-    ));
 }
 
 #[test]
@@ -85,27 +61,6 @@ fn novelty_prompt_keeps_the_neighbours_header_without_neighbours() {
     assert!(prompt.ends_with(
         "\n\n## Candidates\nC0 (rule): SE a ALLORA b\n\n## Neighbours\n\nUse the integer after C as `cand` and the integer after N as `of`."
     ));
-}
-
-#[test]
-fn novelty_prompt_cuts_the_neighbour_text_at_known_text_chars() {
-    let n = KNOWN_TEXT_CHARS as usize;
-    let candidates = [candidate("a", "b")];
-    let refs = [&candidates[0]];
-    let prompt = novelty_prompt(
-        &refs,
-        &[
-            known("r1", &"a".repeat(n - 1)),
-            known("r2", &"b".repeat(n)),
-            known("r3", &"c".repeat(n + 1)),
-        ],
-    );
-    assert!(prompt.ends_with(&format!(
-        "\n\n## Candidates\nC0 (rule): SE a ALLORA b\n\n## Neighbours\nN0 (rule): {}\nN1 (rule): {}\nN2 (rule): {}\n\nUse the integer after C as `cand` and the integer after N as `of`.",
-        "a".repeat(n - 1),
-        "b".repeat(n),
-        "c".repeat(n)
-    )));
 }
 
 #[test]

@@ -6,6 +6,7 @@ use std::sync::{Arc, Mutex};
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
+use axum::routing::{post, put};
 use serde_json::{Value, json};
 
 use crate::chat::Chat;
@@ -18,7 +19,6 @@ pub(crate) struct World {
     pub replies: VecDeque<String>,
     pub prompts: Vec<String>,
     pub embedded: Vec<String>,
-    pub queries: u32,
     pub points: BTreeMap<String, (Vec<f32>, Value)>,
     pub down: HashSet<&'static str>,
     pub episodes: BTreeMap<String, Value>,
@@ -119,11 +119,10 @@ async fn query(
     State(world): State<Shared>,
     Json(request): Json<Value>,
 ) -> (StatusCode, Json<Value>) {
-    let mut world = world.lock().unwrap();
+    let world = world.lock().unwrap();
     if let Some(down) = fail(&world, "query") {
         return down;
     }
-    world.queries += 1;
     let vector: Vec<f32> = serde_json::from_value(request["query"].clone()).unwrap();
     let limit = request["limit"].as_u64().unwrap_or(10) as usize;
     let scored: Vec<(f32, &String, &(Vec<f32>, Value))> = world
@@ -241,28 +240,16 @@ pub(crate) async fn fake(replies: Vec<&str>) -> Fake {
         ..World::default()
     }));
     let router = axum::Router::new()
-        .route("/api/chat", axum::routing::post(chat))
-        .route("/api/embed", axum::routing::post(embed))
+        .route("/api/chat", post(chat))
+        .route("/api/embed", post(embed))
         .route(
             "/collections/{name}",
             axum::routing::get(collection).put(collection),
         )
-        .route(
-            "/collections/{name}/points/query",
-            axum::routing::post(query),
-        )
-        .route(
-            "/collections/{name}/points/scroll",
-            axum::routing::post(scroll),
-        )
-        .route(
-            "/collections/{name}/points/payload",
-            axum::routing::post(payload),
-        )
-        .route(
-            "/collections/{name}/points",
-            axum::routing::put(upsert).post(get),
-        )
+        .route("/collections/{name}/points/query", post(query))
+        .route("/collections/{name}/points/scroll", post(scroll))
+        .route("/collections/{name}/points/payload", post(payload))
+        .route("/collections/{name}/points", put(upsert).post(get))
         .with_state(world.clone());
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let base = format!("http://{}", listener.local_addr().unwrap());
@@ -296,15 +283,7 @@ pub(crate) fn seed(world: &Shared, id: &str, if_: &str, dos: &[&str]) {
 pub(crate) const EXCHANGE: &str = "0b7c4a2e-1f3d-4c5b-9a8e-7d6c5b4a3f21";
 
 pub(crate) fn extractor(top_k: u32) -> crate::distill::config::Extractor {
-    let role = |name: &str| json!({"model": "fake", "think": "off", "temperature": 0.2, "system": format!("you are the {name} role")});
-    let config = json!({
-        "episodes": role("episodes"), "extract": role("extract"),
-        "critic": role("critic"), "novelty": role("novelty"),
-        "checks": [{"name": "a", "text": "the rule is confused", "dropWhen": "atLeast", "threshold": 0.5}],
-        "episodeChars": 4000, "targetInputChars": 400, "targetOutputChars": 400,
-        "listingChars": 300, "vocabularySize": 20, "topK": top_k
-    })
-    .to_string();
+    let config = crate::tests::distill_bench::config(top_k);
     let row = crate::hist::Extractor {
         id: 7,
         parent: None,
@@ -343,4 +322,27 @@ pub(crate) fn judged(
     let probabilities = json!({"a": p}).as_object().cloned().unwrap_or_default();
     let drop = (p >= 0.5).then_some("a");
     crate::distill::record::Outcome::of(checked).judged(probabilities, drop)
+}
+
+pub(crate) fn tools<'a>(
+    f: &'a Fake,
+    extractor: &'a crate::distill::config::Extractor,
+    mode: crate::distill::save::Mode,
+    cutoff: Option<f32>,
+) -> crate::distill::decide::Tools<'a> {
+    crate::distill::decide::Tools {
+        chat: &f.chat,
+        rules: &f.rules,
+        embedder: &f.embedder,
+        extractor,
+        mode,
+        cutoff,
+    }
+}
+
+pub(crate) fn carry(max: Option<u32>) -> crate::distill::decide::Carry {
+    crate::distill::decide::Carry {
+        list: crate::distill::twin::SessionList::default(),
+        budget: crate::distill::save::Budget::of(max),
+    }
 }

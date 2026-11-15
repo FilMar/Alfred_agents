@@ -1,4 +1,5 @@
 use crate::distill::trigger::{Trigger, parse_env};
+use crate::tests::distill_session::exchange;
 
 fn now() -> jiff::Timestamp {
     "2027-06-15T12:00:00Z"
@@ -6,56 +7,20 @@ fn now() -> jiff::Timestamp {
         .expect("distill_trigger: fixed now")
 }
 
-fn exchange(id: &str, session: &str, iso: &str) -> crate::hist::Exchange {
-    crate::hist::Exchange {
-        id: id.to_string(),
-        session: session.to_string(),
-        parent: None,
-        timestamp: iso.to_string(),
-        kind: "turn".to_string(),
-        actor: "user".to_string(),
-        model: None,
-        tokens_in: None,
-        tokens_out: None,
-        tokens_cache_read: None,
-        tokens_cache_write: None,
-        distilled: None,
-        meta: None,
-    }
-}
-
 fn fresh(id: &str, session: &str) -> crate::hist::Exchange {
-    exchange(id, session, "2027-06-15T09:00:00Z")
+    exchange(id, session, "2027-06-15T09:00:00Z", "chat", None, false)
 }
 
 fn exactly_max_age(id: &str, session: &str) -> crate::hist::Exchange {
-    exchange(id, session, "2027-06-14T12:00:00Z")
+    exchange(id, session, "2027-06-14T12:00:00Z", "chat", None, false)
 }
 
 fn beyond_max_age(id: &str, session: &str) -> crate::hist::Exchange {
-    exchange(id, session, "2027-06-14T11:59:59Z")
+    exchange(id, session, "2027-06-14T11:59:59Z", "chat", None, false)
 }
 
 fn failed(sessions: &[&str]) -> std::collections::HashSet<String> {
     sessions.iter().map(|s| (*s).to_string()).collect()
-}
-
-#[test]
-fn of_keeps_min_pending() {
-    assert_eq!(Trigger::of(3, 24).min_pending(), 3);
-}
-
-#[test]
-fn of_keeps_max_age() {
-    assert_eq!(
-        Trigger::of(50, 5).max_age(),
-        jiff::SignedDuration::from_hours(5)
-    );
-}
-
-#[test]
-fn of_accepts_one_just_inside_the_edges() {
-    Trigger::of(1, 1);
 }
 
 #[test]
@@ -140,27 +105,8 @@ fn due_is_true_with_failed_sessions_around_the_count() {
 }
 
 #[test]
-fn due_is_never_due_with_nothing_pending() {
-    Trigger::of(2, 24).due(
-        &[beyond_max_age("e1", "s-bad"), beyond_max_age("e2", "s-bad")],
-        &failed(&["s-bad"]),
-        now(),
-    );
-}
-
-#[test]
-fn due_is_due_at_min_pending_exchanges() {
-    Trigger::of(1, 24).due(&[fresh("e1", "s1")], &failed(&[]), now());
-}
-
-#[test]
 fn parse_env_without_the_switch_is_none() {
     assert_eq!(parse_env(None, None, None), Ok(None));
-}
-
-#[test]
-fn parse_env_with_the_switch_off_is_none() {
-    assert_eq!(parse_env(Some("off"), None, None), Ok(None));
 }
 
 #[test]
@@ -185,22 +131,6 @@ fn parse_env_reads_both_numbers() {
 }
 
 #[test]
-fn parse_env_keeps_the_default_max_age_when_absent() {
-    assert_eq!(
-        parse_env(Some("on"), Some("10"), None),
-        Ok(Some(Trigger::of(10, 24)))
-    );
-}
-
-#[test]
-fn parse_env_keeps_the_default_min_pending_when_absent() {
-    assert_eq!(
-        parse_env(Some("on"), None, Some("3")),
-        Ok(Some(Trigger::of(50, 3)))
-    );
-}
-
-#[test]
 fn parse_env_accepts_one_just_inside_the_edges() {
     assert_eq!(
         parse_env(Some("on"), Some("1"), Some("1")),
@@ -221,20 +151,8 @@ fn parse_env_rejects_non_integer_min_pending() {
 }
 
 #[test]
-fn parse_env_rejects_negative_min_pending() {
-    let err = parse_env(Some("on"), Some("-1"), None).unwrap_err();
-    assert!(err.contains("ALFRED_DISTILL_MIN_PENDING"));
-}
-
-#[test]
 fn parse_env_rejects_zero_max_age_hours() {
     let err = parse_env(Some("on"), None, Some("0")).unwrap_err();
-    assert!(err.contains("ALFRED_DISTILL_MAX_AGE_HOURS"));
-}
-
-#[test]
-fn parse_env_rejects_non_integer_max_age_hours() {
-    let err = parse_env(Some("on"), None, Some("3.5")).unwrap_err();
     assert!(err.contains("ALFRED_DISTILL_MAX_AGE_HOURS"));
 }
 

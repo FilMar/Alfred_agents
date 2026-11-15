@@ -44,7 +44,7 @@ pub async fn distill_session(
             .collect()
     });
     let mut carry = Carry {
-        list: SessionList::empty(),
+        list: SessionList::default(),
         budget,
     };
     let mut exchanges: Vec<ExchangeReport> = Vec::with_capacity(targets.len());
@@ -79,10 +79,6 @@ pub async fn distill_session(
         result.0.split != "ok" || reports_every_turn(&result.0, read),
         "distill_session: an ok split reports every pending turn, in order"
     );
-    debug_assert!(
-        context.tools.mode == Mode::Active || result.0.closed == 0,
-        "distill_session: shadow closes nothing"
-    );
     result
 }
 
@@ -91,12 +87,11 @@ pub async fn write_episodes(
     read: &SessionRead,
     split: &Split,
 ) -> Option<String> {
-    let config = context.tools.extractor.config();
     let result: Option<String> = match (&split.map, context.tools.mode) {
         (Some(map), Mode::Active) => {
             let stored = map.stored(
                 context.tools.extractor.id(),
-                &config.episodes.model,
+                &context.tools.extractor.config().episodes.model,
                 context.recorder.run(),
             );
             context

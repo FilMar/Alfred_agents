@@ -30,13 +30,12 @@ async fn status(State(app): State<Shared>) -> Json<Status> {
 }
 
 pub fn status_of(error: &RunError) -> StatusCode {
-    let result: StatusCode = match error {
+    match error {
         RunError::BadInput(_) => StatusCode::BAD_REQUEST,
         RunError::NotFound(_) => StatusCode::NOT_FOUND,
         RunError::Busy => StatusCode::CONFLICT,
         RunError::Upstream(_) => StatusCode::BAD_GATEWAY,
-    };
-    result
+    }
 }
 
 impl From<RunError> for ApiError {
