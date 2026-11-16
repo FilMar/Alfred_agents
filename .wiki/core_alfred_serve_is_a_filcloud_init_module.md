@@ -5,7 +5,7 @@ sources: [conversation, setup.sh, tools/alfred/deploy/alfred.service, filcloud_i
 
 ## Decision
 
-`alfred serve` runs on the Deck as a user unit from a filcloud_init module, the way `tl` does. The unit is a file in this repo, `tools/alfred/deploy/alfred.service`. `services/alfred/install.sh` in filcloud_init links it with `link_unit`, enables it, and restarts it so a new binary is loaded. The unit sets no variables: the code defaults fit the Deck. Those are vault `~/notes`, hist `~/.tl/tl.db`, Qdrant and Ollama on localhost, port 8791, and the distill trigger off. `tl` stays on 8790 until the switch.
+`alfred serve` runs on the Deck as a user unit from a filcloud_init module. The unit is a file in this repo, `tools/alfred/deploy/alfred.service`. `services/alfred/install.sh` in filcloud_init links it with `link_unit`, enables it, and restarts it so a new binary is loaded. The unit sets only `ALFRED_DISTILL_TRIGGER=on`: the other code defaults fit the Deck. Those are vault `~/notes`, hist `~/.tl/tl.db`, Qdrant and Ollama on localhost, and port 8791. Since 2026-11-17 `tl` is off and its module is gone: alfred holds the archive, and the backup of `tl.db` and its restore, which now stops alfred, stay as they were.
 
 `setup.sh` installs only the client side, and it takes no role. It clones the repo if it is missing and links identity, skills and extensions. Then it runs `cargo install --git` of `alfred` with the `release-checked` profile into `~/.local/bin`. When it runs from a checkout, it uses that checkout. When it is piped through `curl`, it clones into `~/.local/share/alfred/repo`. The Deck is a client too: `scripts/30_repos.sh` runs `setup.sh` with no argument, as before.
 
