@@ -1,76 +1,99 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+# desc: install alfred; client also clones the repo and links identity, skills and extensions; server also starts the user unit
+# usage: setup.sh client|server [--dry-run]
+set -euo pipefail
 
-REPO="$(cd "$(dirname "$0")" && pwd)"
-CLAUDE="$HOME/.claude"
-PI="$HOME/.pi/agent"
+readonly repo_url=https://github.com/FilMar/Alfred_agents
+readonly branch=${ALFRED_BRANCH:-main}
+readonly home_dir=${ALFRED_HOME:-$HOME/.local/share/alfred/repo}
+readonly port=${ALFRED_PORT:-8791}
+readonly unit_dir=$HOME/.config/systemd/user
+readonly unit=$unit_dir/alfred.service
 
-# --- prereq check ---
-if ! command -v bun &>/dev/null; then
-    echo "[error] bun non trovato in PATH — installa da https://bun.sh"
-    exit 1
-fi
+die() { printf 'setup: %s\n' "$1" >&2; exit "${2:-1}"; }
+usage() { sed -n 's/^# usage: //p' "$0" >&2; exit 2; }
+say() { printf '  %s\n' "$1" >&2; }
+run() { if $dry_run; then say "would run: $*"; else "$@"; fi; }
 
 link() {
-    local src="$1" dst="$2" label="$3"
-    if [[ -e "$dst" ]]; then
-        echo "  [skip] $label already exists"
-    else
-        ln -s "$src" "$dst"
-        echo "  [ok]   $label -> $src"
-    fi
+    local src=$1 dst=$2
+    if [[ -e $dst || -L $dst ]]; then say "[skip] $dst exists"; return; fi
+    run mkdir --parents "$(dirname "$dst")"
+    run ln --symbolic "$src" "$dst"
+    say "[ok]   $dst -> $src"
 }
 
-# --- directories ---
-mkdir -p "$HOME/.local/bin"
-mkdir -p "$PI"
-mkdir -p "$HOME/.pi"
-mkdir -p "$CLAUDE"
+install_alfred() {
+    run cargo install --git "$repo_url" --branch "$branch" \
+        --profile release-checked --locked --root "$HOME/.local" alfred
+}
 
-# --- identity ---
-echo "identity (alfred.md)"
-link "$REPO/alfred.md" "$CLAUDE/CLAUDE.md"  "~/.claude/CLAUDE.md"
-link "$REPO/alfred.md" "$PI/SYSTEM.md"      "~/.pi/agent/SYSTEM.md"
+client() {
+    command -v git >/dev/null || die "git not found"
+    if [[ -d $home_dir/.git ]]; then say "[skip] $home_dir is a checkout"
+    else run git clone --branch "$branch" "$repo_url" "$home_dir"; fi
+    local claude=$HOME/.claude pi=$HOME/.pi/agent ext=$home_dir/extensions
+    link "$home_dir/alfred.md" "$claude/CLAUDE.md"
+    link "$home_dir/alfred.md" "$pi/SYSTEM.md"
+    link "$home_dir/skills" "$claude/skills"
+    link "$home_dir/skills" "$pi/skills"
+    if command -v claude >/dev/null; then
+        link "$ext/tb_ti/claude.sh" "$claude/hooks/inject-ti-tb-context.sh"
+        link "$ext/tl/claude.sh" "$claude/hooks/ingest-tl.sh"
+        link "$ext/tb_refine/claude.sh" "$claude/hooks/refine-tb.sh"
+    fi
+    if command -v pi >/dev/null; then
+        link "$ext/tb_ti/pi.ts" "$pi/extensions/tb_ti.ts"
+        link "$ext/tl/pi.ts" "$pi/extensions/tl.ts"
+        link "$ext/tb_refine/pi.ts" "$pi/extensions/tb_refine.ts"
+    fi
+    install_alfred
+}
 
-# --- skills ---
-echo "skills"
-link "$REPO/skills" "$CLAUDE/skills" "~/.claude/skills"
-link "$REPO/skills" "$PI/skills"     "~/.pi/agent/skills"
+# systemd expands ${ALFRED_PORT}, not the shell.
+# shellcheck disable=SC2016
+unit_text() {
+    printf '%s\n' '[Unit]' 'Description=alfred serve' 'After=network-online.target' '' \
+        '[Service]' "Environment=ALFRED_PORT=$port" 'EnvironmentFile=-%h/.config/alfred/env' \
+        'ExecStart=%h/.local/bin/alfred serve --port ${ALFRED_PORT}' 'Restart=on-failure' '' \
+        '[Install]' 'WantedBy=default.target'
+}
 
-# --- tools (tb, td, th, ti, tl) ---
-echo "tools (tb, td, th, ti, tl)"
-cd "$REPO" && bun install --silent
-echo "  [ok]   bun install done"
-for tool in tb td th ti tl; do
-    chmod +x "$REPO/tools/$tool/src/cli.ts"
-    link "$REPO/tools/$tool/src/cli.ts" "$HOME/.local/bin/$tool" "~/.local/bin/$tool"
+server() {
+    command -v systemctl >/dev/null || die "systemctl not found"
+    command -v loginctl >/dev/null || die "loginctl not found"
+    install_alfred
+    local want have linger
+    want=$(unit_text)
+    have=$(cat "$unit" 2>/dev/null || true)
+    if [[ $want == "$have" ]]; then say "[skip] $unit is current"
+    elif $dry_run; then say "would write $unit"
+    else
+        mkdir --parents "$unit_dir"
+        tmp=$(mktemp "$unit.XXXXXX")
+        printf '%s\n' "$want" >"$tmp"
+        chmod 644 "$tmp"
+        mv "$tmp" "$unit"
+        say "[ok]   $unit"
+    fi
+    linger=$(loginctl show-user "$USER" --property=Linger --value)
+    [[ $linger == yes ]] || run loginctl enable-linger "$USER"
+    run systemctl --user daemon-reload
+    run systemctl --user enable alfred.service
+    run systemctl --user restart alfred.service
+}
+
+role="" dry_run=false
+while (($#)); do
+    case $1 in
+        client | server) role=$1; shift ;;
+        --dry-run) dry_run=true; shift ;;
+        --help) usage ;;
+        *) die "unknown argument: $1" 2 ;;
+    esac
 done
-
-# --- tb_ti extension (claude hook + pi extension) ---
-if command -v claude &>/dev/null || command -v pi &>/dev/null; then
-    echo "tb_ti extension"
-    if command -v claude &>/dev/null; then
-        mkdir -p "$CLAUDE/hooks"
-        link "$REPO/extensions/tb_ti/claude.sh" "$CLAUDE/hooks/inject-ti-tb-context.sh" "~/.claude/hooks/inject-ti-tb-context.sh"
-    fi
-    if command -v pi &>/dev/null; then
-        mkdir -p "$PI/extensions"
-        link "$REPO/extensions/tb_ti/pi.ts" "$PI/extensions/tb_ti.ts" "~/.pi/agent/extensions/tb_ti.ts"
-    fi
-fi
-
-# --- tl and tb_refine extensions (claude hook + pi extension) ---
-# The hooks are linked here. The entries in ~/.claude/settings.json are added by hand.
-if command -v claude &>/dev/null || command -v pi &>/dev/null; then
-    echo "tl and tb_refine extensions"
-    if command -v claude &>/dev/null; then
-        mkdir -p "$CLAUDE/hooks"
-        link "$REPO/extensions/tl/claude.sh" "$CLAUDE/hooks/ingest-tl.sh" "~/.claude/hooks/ingest-tl.sh"
-        link "$REPO/extensions/tb_refine/claude.sh" "$CLAUDE/hooks/refine-tb.sh" "~/.claude/hooks/refine-tb.sh"
-    fi
-    if command -v pi &>/dev/null; then
-        mkdir -p "$PI/extensions"
-        link "$REPO/extensions/tl/pi.ts" "$PI/extensions/tl.ts" "~/.pi/agent/extensions/tl.ts"
-        link "$REPO/extensions/tb_refine/pi.ts" "$PI/extensions/tb_refine.ts" "~/.pi/agent/extensions/tb_refine.ts"
-    fi
-fi
+[[ -n $role ]] || usage
+command -v cargo >/dev/null || die "cargo not found: install rustup (https://rustup.rs)"
+tmp=""
+trap 'rm -f "$tmp"' EXIT
+"$role"
