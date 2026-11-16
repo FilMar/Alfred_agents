@@ -24,6 +24,7 @@ updated: 2026-10-16
 | [core_alfred_command_keeps_only_what_callers_use](core_alfred_command_keeps_only_what_callers_use) | Only run, wait and hats survive the port; hats compiled in; ASCII label; split in part A (foreground) and B (archive, detach, wait) |
 | [core_alfred_command_files_each_run_in_hist_with_a_spool](core_alfred_command_files_each_run_in_hist_with_a_spool) | A run becomes session, subtask and contents rows; one 2s deadline; failed sends go to a spool that survives reboot; timestamps in ms |
 | [core_alfred_command_detach_relaunches_alfred_and_wait_reads_files](core_alfred_command_detach_relaunches_alfred_and_wait_reads_files) | --detach starts alfred again with --job; wait reads the files; dead only with a still .out and no pid; no .pid means alive |
+| [core_alfred_serve_is_a_filcloud_init_module](core_alfred_serve_is_a_filcloud_init_module) | alfred serve is a filcloud_init module with the unit in this repo; setup.sh is client only, cargo install --git; main gets the branch at the switch |
 
 ## th
 

@@ -13,7 +13,7 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 The distiller and `th` move into alfred. Then the server goes on the Deck, and every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
 - [M] `alfred command` tests that close two gaps: pi dies after the timeout, read through the `.pid` file [detail](core_alfred_command_runs_pi_as_a_child_in_bwrap); a sent spool file leaves, with a `Client::at(url)` for tests [detail](core_alfred_command_files_each_run_in_hist_with_a_spool). Parts A and B are done.
-- [A] Install `alfred serve` on the Deck as a user unit. Add row 4 with `alfred extractor add`, from row 3 with the notes taken out; at the switch, activate it and set `ALFRED_DISTILL_TRIGGER=on`. [detail](memory_distill_trigger_is_off_until_the_switch)
+- [A] Run `alfred serve` on the Deck from the branch: check out `refactoring/alfred_v2` in `~/Alfred_agents`, run `setup.sh` and `services/alfred/install.sh`, check 8791 next to `tl` on 8790 [detail](core_alfred_serve_is_a_filcloud_init_module). Add row 4 with `alfred extractor add`, from row 3 with the notes taken out; at the switch, activate it and set `ALFRED_DISTILL_TRIGGER=on`. [detail](memory_distill_trigger_is_off_until_the_switch)
 - [M] Rewrite skills, hooks, `CLAUDE.md` and extensions to call `alfred`.
 - [M] Retire `tools/tb`, `tools/ti`, `tools/tl`, `tools/td` and `tools/th`, with the wiki pages that describe them.
 
@@ -21,6 +21,7 @@ The distiller and `th` move into alfred. Then the server goes on the Deck, and e
 
 One line each. An idea becomes blocks only when it is the next goal.
 
+- Start and follow chats and `alfred command` runs from the phone, through the `alfred serve` API: the Deck is a client too.
 - The session failure `split failed` carries the reason of the answer: an Ollama quota error looks like a bad model answer today.
 - Scale the session cap with its exchanges, and record the skipped ones. [detail](memory_td_session_cap_limits_one_session)
 - A guard for tag synonyms in `td`, after reading the proposed tags. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
