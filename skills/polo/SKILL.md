@@ -15,14 +15,14 @@ Pick the row that fits the question. A question with two parts takes two rows.
 | The question asks for | Source | How |
 |---|---|---|
 | knowledge: what it is, how it works, its history | Wikipedia | `scripts/wikipedia.py search "<query>"`, then `scripts/wikipedia.py read "<title>"` |
-| studies: what the evidence says | OpenAlex | `scripts/openalex.py "<query>" --reviews` first, then without `--reviews` for single studies |
+| studies: what the evidence says | OpenAlex | `scripts/openalex.py "<query>"`; add `--reviews` when the question has many studies; `scripts/openalex.py --doi <doi>` reads a known work |
 | data: how much, a trend, a comparison | Our World in Data | `scripts/owid.py search "<query>"`, then `scripts/owid.py data <slug> --countries ITA~FRA --since 2000` |
 | news: what happened recently | Google News | `scripts/news.py "<query>" --lang it --days 7` |
 | anything else | the general web | search the web; read the best pages as web articles |
 
 For Wikipedia, use `--lang en` by default: it is the most complete. Use `--lang it` for an Italian topic. A claim that matters gets checked in its cited link: read that link as a web article.
 
-For studies, one study is not "the evidence": lead with the reviews. A citation count measures attention, not quality, and a recent study always has few. `openalex.py` needs `OPENALEX_API_KEY`; each search costs about $0.001 of a free $1 a day. Read a study through its `free` link as a web article.
+For studies, one study is not "the evidence": lead with the reviews. A citation count measures attention, not quality, and a recent study always has few. `openalex.py` needs `OPENALEX_API_KEY`. A search costs about $0.001 of a free $1 a day; a read by `--doi` is free, so use it for a DOI you already have. Read a study through its `free` link as a web article.
 
 For news, each article carries the WP:RSP verdict of its outlet: generally reliable, no consensus, generally unreliable, deprecated, or not rated. WP:RSP rates mostly English-language outlets. The link is a Google News redirect: to read the article, find its title on the outlet's own site. Google News answers 429 to calls in quick succession: wait a minute, then retry once.
 
