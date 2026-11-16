@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-11-15
+updated: 2026-11-16
 ---
 
 A block is one run of ritchie (code) or efesto (skill). [A] is architecture: small, read it closely in review. [M] is mechanical: big, the first piece shows the rest.
@@ -12,7 +12,7 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 
 The distiller and `th` move into alfred. Then the server goes on the Deck, and every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
-- [A] `alfred command` (`th` today): local, no API, the bwrap sandbox, pi as a child process.
+- [A] `alfred command` part B: archive the run to hist as a subtask, the spool when the Deck is down and its drain, `--detach`, `wait`, `--no-archive`. Add a test that pi dies after the timeout, through the `.pid` file. Part A is done: [detail](core_alfred_command_keeps_only_what_callers_use)
 - [A] Install `alfred serve` on the Deck as a user unit. Add row 4 with `alfred extractor add`, from row 3 with the notes taken out; at the switch, activate it and set `ALFRED_DISTILL_TRIGGER=on`. [detail](memory_distill_trigger_is_off_until_the_switch)
 - [M] Rewrite skills, hooks, `CLAUDE.md` and extensions to call `alfred`.
 - [M] Retire `tools/tb`, `tools/ti`, `tools/tl`, `tools/td` and `tools/th`, with the wiki pages that describe them.

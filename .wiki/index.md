@@ -20,6 +20,8 @@ updated: 2026-10-16
 | [core_alfred_v2_written_in_rust](core_alfred_v2_written_in_rust) | alfred v2 is in Rust for trust and ownership, not speed |
 | [core_alfred_api_speaks_json_cli_prints_text](core_alfred_api_speaks_json_cli_prints_text) | Every API reply is JSON with shared serde types; the CLI prints text |
 | [core_alfred_serve_runs_on_axum_and_tokio](core_alfred_serve_runs_on_axum_and_tokio) | axum, tokio and reqwest; pulldown-cmark for vault headings |
+| [core_alfred_command_runs_pi_as_a_child_in_bwrap](core_alfred_command_runs_pi_as_a_child_in_bwrap) | alfred command runs pi -p --mode json as a child; only pi in bwrap; always a terminal status, timeout is its own |
+| [core_alfred_command_keeps_only_what_callers_use](core_alfred_command_keeps_only_what_callers_use) | Only run, wait and hats survive the port; hats compiled in; ASCII label; split in part A (foreground) and B (archive, detach, wait) |
 
 ## th
 
