@@ -4,11 +4,12 @@
 set -euo pipefail
 
 readonly repo_url=https://github.com/FilMar/Alfred_agents
-readonly branch=${ALFRED_BRANCH:-main}
-# Run from a checkout, use it; piped through curl, clone one.
+# Run from a checkout, use it and its branch; piped through curl, clone main.
 self=$(cd "$(dirname "${BASH_SOURCE[0]:-/nowhere/x}")" 2>/dev/null && pwd || true)
 [[ -f $self/tools/alfred/Cargo.toml ]] || self=$HOME/.local/share/alfred/repo
 readonly home_dir=${ALFRED_HOME:-$self}
+here=$(git -C "$home_dir" branch --show-current 2>/dev/null || true)
+readonly branch=${ALFRED_BRANCH:-${here:-main}}
 
 die() { printf 'setup: %s\n' "$1" >&2; exit "${2:-1}"; }
 usage() { sed -n 's/^# usage: //p' "$0" >&2; exit 2; }
