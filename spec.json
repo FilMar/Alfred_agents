@@ -1,0 +1,112 @@
+{
+  "feature": "alfred command parte B: la run finita va in hist come subtask, con lo spool quando il Deck non risponde; --detach, wait, --no-archive. La parte A (run in primo piano, hats, bwrap) c'e' gia'",
+  "entita": [
+    {
+      "id": "CommandCli",
+      "codice": ["tools/alfred/src/command/cli.rs"],
+      "cli": "alfred",
+      "comandi": ["command run", "command wait", "command hats"],
+      "stato": "nessuno: gli argomenti di clap",
+      "fa": "run in primo piano o --detach; con --job <base> e' il figlio di --detach; dopo la run costruisce FinishedRun e lo passa ad Archive, se non c'e' --no-archive; wait sui file .status; prima di run e wait svuota lo Spool",
+      "non_fa": "non tiene history, get, models, archive-pending, sandbox-exec: nessuno li chiama",
+      "serve_a": "gli script delle skill: annibale debate.sh usa run --detach e wait; efesto e ritchie usano run",
+      "comanda": ["Runner", "Archive", "Spool", "Detach", "Waiter", "JobPaths"]
+    },
+    {
+      "id": "Runner",
+      "codice": ["tools/alfred/src/command/runner.rs"],
+      "stato": "come nella parte A",
+      "fa": "come nella parte A; execute ora torna Ended, lo Status e i messaggi di agent_end",
+      "non_fa": "non sa niente di hist ne' dello spool",
+      "serve_a": "CommandCli",
+      "comanda": ["JobPaths"]
+    },
+    {
+      "id": "Archive",
+      "codice": ["tools/alfred/src/command/archive.rs"],
+      "stato": "FinishedRun: id, label, task, skill, thinking, timeout, status, inizio e fine; RunRows: le righe session, exchange, contents di hist",
+      "fa": "rows e' puro: dai messaggi di pi fa le tre righe; send le manda a /hist/sessions, /hist/exchanges, /hist/contents con timeout 2 secondi; archive prova send e, se fallisce, passa le righe allo Spool",
+      "non_fa": "non fa mai fallire la run: gli errori vanno su stderr",
+      "serve_a": "CommandCli, Spool",
+      "comanda": ["Spool"]
+    },
+    {
+      "id": "Spool",
+      "codice": ["tools/alfred/src/command/spool.rs"],
+      "stato": "la cartella $XDG_STATE_HOME/alfred/spool, con un file <job>.unarchived per ogni RunRows non mandato",
+      "fa": "write mette da parte un RunRows; drain manda ogni file e cancella solo quelli mandati, entro 2 secondi in tutto",
+      "non_fa": "non vive in /tmp: deve sopravvivere al riavvio",
+      "serve_a": "Archive, CommandCli",
+      "comanda": ["Archive"]
+    },
+    {
+      "id": "Detach",
+      "codice": ["tools/alfred/src/command/detach.rs"],
+      "stato": "nessuno",
+      "fa": "scrive running nel .status, rilancia alfred stesso in un nuovo gruppo di processi con --job <base> al posto di --detach, scrive il .pid, torna pid, out, log, status",
+      "non_fa": "non aspetta la run",
+      "serve_a": "CommandCli",
+      "comanda": ["JobPaths", "Status"]
+    },
+    {
+      "id": "Waiter",
+      "codice": ["tools/alfred/src/command/wait.rs"],
+      "stato": "per ogni job: l'ultimo mtime del .out e quando e' cambiato",
+      "fa": "ogni 2 secondi legge gli Status finche' sono tutti terminali o scade il timeout; un job col .out fermo da 60 secondi e il pid morto diventa error: process died unexpectedly; un Outcome per path, nello stesso ordine",
+      "non_fa": "non legge l'archivio, non scrive i .status",
+      "serve_a": "CommandCli",
+      "comanda": ["JobPaths", "Status"]
+    },
+    {
+      "id": "JobPaths",
+      "codice": ["tools/alfred/src/command/job.rs"],
+      "stato": "come nella parte A",
+      "fa": "come nella parte A; of_status ricava i path di un job da wait",
+      "non_fa": "niente di nuovo",
+      "serve_a": "CommandCli, Detach, Waiter",
+      "comanda": []
+    },
+    {
+      "id": "Status",
+      "codice": ["tools/alfred/src/command/job.rs"],
+      "stato": "running, done, error: <motivo>, timeout",
+      "fa": "come nella parte A",
+      "non_fa": "niente di nuovo",
+      "serve_a": "Detach, Waiter",
+      "comanda": []
+    }
+  ],
+  "flussi": [
+    {"da": "CommandCli", "a": "Spool", "passa": "drain prima di run e di wait", "torna": "quanti mandati e quanti no"},
+    {"da": "CommandCli", "a": "Detach", "passa": "gli argomenti di run e i path", "torna": "pid, out, log, status"},
+    {"da": "CommandCli", "a": "Runner", "passa": "RunSpec e i path", "torna": "Ended: Status e messaggi"},
+    {"da": "CommandCli", "a": "Archive", "passa": "FinishedRun e i messaggi di pi", "torna": null},
+    {"da": "Archive", "a": "Spool", "passa": "RunRows non mandato", "torna": null},
+    {"da": "Spool", "a": "Archive", "passa": "RunRows letto dal disco", "torna": "mandato o no"},
+    {"da": "CommandCli", "a": "Waiter", "passa": "i path .status e il timeout", "torna": "un Outcome per job"},
+    {"da": "Waiter", "a": "JobPaths", "passa": "un path .status", "torna": "i path .out e .pid"}
+  ],
+  "invarianti": [
+    {"testo": "il figlio di --detach riceve gli stessi argomenti di run, senza --detach e con --job che nomina la base", "su": ["Detach"]},
+    {"testo": "la riga exchange ha kind subtask, actor la label, la session ha harness pi, l'id e' derived_id(id della run, \"run\")", "su": ["Archive"]},
+    {"testo": "il RunRows passa dal disco: quello che si rilegge dallo spool e' uguale a quello scritto", "su": ["Spool", "Archive"]},
+    {"testo": "archiviare non fa mai fallire la run e non dura piu' di 2 secondi", "su": ["Archive", "Spool"]},
+    {"testo": "un file di spool sparisce esattamente quando e' stato mandato", "su": ["Spool"]},
+    {"testo": "wait torna un Outcome per path, nello stesso ordine; ok solo se lo Status e' done", "su": ["Waiter"]},
+    {"testo": "un job vivo non e' mai dichiarato morto: serve il .out fermo da 60 secondi e il pid morto", "su": ["Waiter"]}
+  ],
+  "fatti": [
+    "--detach: il figlio e' alfred stesso (std::env::current_exe) con gli argomenti di run senza --detach e con --job <base> nascosto; stdin, stdout, stderr su /dev/null; process_group(0). Il padre stampa JSON pretty {pid, out, log, status}, come th. Il .pid non scritto e' solo un warn su stderr",
+    "con --job <base> la run usa JobPaths::of_base(base) invece di path nuovi, e non stampa log: e output: sul terminale perche' stderr e' /dev/null",
+    "l'id della run e' un uuid v4. started_at e finished_at sono ISO 8601 UTC (jiff Timestamp). meta: status (done, error, timeout come testo del .status), finished_at, duration_s arrotondato, timeout_s, thinking, skill se ci sono, cost_usd se sopra 0",
+    "RunRows da messages: ogni messaggio diventa una Line {type: message, message}, come in un file di sessione pi; si tolgono le Line opener (Harness::Pi.is_opener); model, token e cost come Harness::Pi; output = join_body dei text_of; tools = join_tools dei tools_of. session = {id della run, started, harness pi, host, path cwd}; contents.input = task, exchange_id = id dell'exchange",
+    "send usa Client::from_env().with_timeout(2 secondi): POST /hist/sessions con [session], poi /hist/exchanges con [exchange], poi /hist/contents con [contents]: le route di hist vogliono array, come in hist/ingest. Senza ALFRED_URL e' un fallimento come gli altri: le righe vanno nello spool. Rimandare le stesse righe e' sicuro: hist fa upsert",
+    "su stderr: 'warn: archive unreachable, run spooled: <errore>'; se anche lo spool fallisce: 'warn: run not spooled either, history lost: <errore>'; per un file che drain non riesce a mandare: 'warn: <path> still not archived: <errore>'",
+    "spool: $XDG_STATE_HOME/alfred/spool, se no ~/.local/state/alfred/spool, creata se manca. File <nome del job>.unarchived con il RunRows in JSON; files legge solo i nomi che iniziano con alfred- e finiscono con .unarchived. drain non fa nessuna richiesta se la cartella e' vuota; si ferma a 2 secondi; non fallisce mai",
+    "--no-archive: la run non va ne' in hist ne' nello spool",
+    "wait <status...> --timeout <s>: timeout di default 600 secondi; stampa JSON pretty [{statusPath, status, ok}]; esce con 1 se un ok e' false. Uno .status che non si legge ha status missing. Scaduto il timeout, i job ancora running restano running con ok false. Pid vivo: esiste /proc/<pid>",
+    "main: command wait deve stampare gli Outcome anche quando esce con 1: Reply con text e ok=false, non un Err",
+    "i test di Archive non chiamano la rete: rows e' puro; send e archive si provano con ALFRED_URL che punta a una porta chiusa (127.0.0.1:9), e lo spool in una cartella temporanea. I test di Spool usano Spool::at con una cartella sotto std::env::temp_dir() unica per test",
+    "i test di Waiter usano file .status scritti a mano in una cartella temporanea; Watch e' puro e si prova con Instant e SystemTime costruiti nel test"
+  ]
+}

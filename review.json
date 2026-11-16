@@ -1,0 +1,31 @@
+{
+  "scostamenti": [
+    {"testo": "Archive.rows: il run aveva riscritto a mano il parsing di pi, e prendeva solo l'ultimo messaggio dell'assistente. Ora usa Harness::Pi come chiede la spec: is_opener, tokens_of, model, text_of, tools_of, join_body, join_tools. I messaggi diventano Line in un helper, answer_lines, e meta e' un helper suo, cosi' rows sta sotto le 40 righe", "su": ["Archive"]},
+    {"testo": "Archive.rows: bug trovato solo dalla prova vera. hist accetta solo timestamp con i millisecondi (YYYY-MM-DDTHH:MM:SS.mmmZ), mentre jiff stampava i nanosecondi e hist rifiutava le righe. Ora c'e' iso() con lo stesso formato di hist/ingest. Ho tolto la postcondizione 'contents legati all'exchange', garantita dalla riga sopra (stessa variabile id), e al suo posto ho messo is_timestamp sullo start, che puo' fallire davvero. Il mutante con i nanosecondi ora muore", "su": ["Archive"]},
+    {"testo": "Archive.archive: le tre POST hanno una scadenza unica di 2 secondi in tutto, con tokio::time::timeout. Il run non l'aveva messa. send manda array di una riga, come hist/ingest", "su": ["Archive"]},
+    {"testo": "mod.rs: aggiunto CommandError::io(context), che costruisce l'errore Io da un io::Error. I run usavano ? senza conversione, e serviva in spool, detach e cli: DRY alla seconda copia", "su": ["Spool", "Detach", "CommandCli"]},
+    {"testo": "Spool.from_env: un HOME mancante non fa panico, perche' e' un errore del mondo (P5). Spool.at e Spool.write sono catene di map_err, non closure chiamate subito. Spool.read e drain avvisano su stderr quando un file non si legge", "su": ["Spool"]},
+    {"testo": "Spool.drain: la scadenza di 2 secondi ora ferma anche una richiesta gia' partita (timeout_at su ogni send_one). Prima controllava la scadenza solo tra un file e l'altro", "su": ["Spool"]},
+    {"testo": "Waiter: senza file .pid il job conta come vivo, come vuole l'invariante 'un job vivo non e' mai dichiarato morto'. Il run lo dava per morto. Uno status missing chiude subito il job, invece di aspettare tutto il timeout. Job e mtime sono usciti dal corpo di wait e stanno a livello di modulo; via i return anticipati", "su": ["Waiter"]},
+    {"testo": "Detach.spawn: scrive running con Status::Running.write, non con una stringa a mano, e costruisce il Command in una catena senza mut", "su": ["Detach", "Status"]},
+    {"testo": "Runner.execute ora torna Ended invece di Status, come concordato. Il corpo e' cambiato solo per restituire l'Ended", "su": ["Runner"]},
+    {"testo": "CommandCli: corpi scritti a mano. build_spec, new_paths, detach_run, finished, client, file_run, drain e wait_all. Il drain parte prima di run e di wait. Se lo spool non si apre (cartella non creabile), la run avvisa e non archivia", "su": ["CommandCli"]},
+    {"testo": "Prova vera con un alfred serve temporaneo e un hist vuoto. Una run senza ALFRED_URL e' andata nello spool. Una run --detach con il server su, seguita da wait: wait ha svuotato lo spool e il figlio ha archiviato da solo. Una run --no-archive non e' finita da nessuna parte. In hist ci sono 2 subtask (white-core, omero), con session harness pi, host, model, token, meta con status, durata, timeout e skill", "su": ["CommandCli", "Archive", "Spool", "Detach", "Waiter"]},
+    {"testo": "Test aggiunti a mano a quelli dei run: rows riempie le tre righe (input, output, model, token, meta), child_args tiene gli altri argomenti in ordine, spawn scrive running e il pid, pid_alive e' vero senza file .pid, wait aspetta davvero il timeout. Tolto un test tautologico sulle costanti PREFIX e SUFFIX", "su": ["Archive", "Detach", "Waiter", "Spool"]}
+  ],
+  "derive": [],
+  "giri": ["vai, mi piace"],
+  "metriche": "src/command/spec.rs:38  of     logic=7  inv=3  computes\nsrc/command/spool.rs:42  at   logic=4  inv=1  computes\nsrc/command/spool.rs:84  files logic=9  inv=1  computes\n\n101 functions  median=4  mean=6.8  max=39  over40=0  flagged=3  files over350=0",
+  "test": {"passati": 628, "falliti": 0, "nuovi": 42},
+  "mutanti": [
+    {"mutazione": "rows: timestamp con i nanosecondi", "ucciso": true},
+    {"mutazione": "rows: l'opener resta nel corpo", "ucciso": true},
+    {"mutazione": "archive: senza client la run non va nello spool", "ucciso": true},
+    {"mutazione": "child_args: --detach resta negli argomenti", "ucciso": true},
+    {"mutazione": "outcome: un job morto resta running", "ucciso": true},
+    {"mutazione": "pid_alive: senza .pid il job e' morto", "ucciso": true},
+    {"mutazione": "wait: running conta come chiuso", "ucciso": true},
+    {"mutazione": "Watch.seen: non si azzera mai", "ucciso": true},
+    {"mutazione": "send_one: il file mandato non viene tolto. Serve un invio riuscito, e Client si costruisce solo da ALFRED_URL, che altri test cambiano in parallelo. Si chiude con un Client::at(url) per i test", "ucciso": false}
+  ]
+}

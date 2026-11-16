@@ -9,12 +9,16 @@
 
 mod chat;
 mod cli;
+mod command_archive;
+mod command_detach;
 mod command_hats;
 mod command_job;
 mod command_runner;
 mod command_sandbox;
 mod command_skill;
 mod command_spec;
+mod command_spool;
+mod command_wait;
 mod distill_ask;
 mod distill_bench;
 mod distill_cli;

@@ -125,18 +125,18 @@ pub async fn stream(launch: &Launch, paths: &JobPaths, spec: &RunSpec) -> Ended 
     result
 }
 
-pub async fn execute(spec: &RunSpec, paths: &JobPaths, cwd: &Path, home: &Path) -> Status {
+pub async fn execute(spec: &RunSpec, paths: &JobPaths, cwd: &Path, home: &Path) -> Ended {
     let system = paths.system();
-    let result: Status = match std::fs::write(&system, spec.system()) {
+    let result: Ended = match std::fs::write(&system, spec.system()) {
         Ok(()) => {
             let bwrap = find_bwrap(std::env::var_os("PATH").as_deref());
             let launch = wrap(spec.pi_args(&system), cwd, home, bwrap);
-            stream(&launch, paths, spec).await.status
+            stream(&launch, paths, spec).await
         }
         Err(err) => {
-            let status = Status::Error(format!("cannot write the system prompt: {err}"));
-            let _ = status.write(&paths.status());
-            status
+            let ended = failed(format!("cannot write the system prompt: {err}"));
+            let _ = ended.status.write(&paths.status());
+            ended
         }
     };
     debug_assert!(
