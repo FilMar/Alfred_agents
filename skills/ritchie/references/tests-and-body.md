@@ -1,7 +1,7 @@
 # Tests and body
 
 After the contracts are approved, the file holds structs, signatures,
-contracts and `todo` bodies. Two th runs write the rest: one the tests,
+contracts and `todo` bodies. Two `alfred command` runs write the rest: one the tests,
 one the bodies. Ritchie writes the spec, calls the script, and checks
 each result.
 

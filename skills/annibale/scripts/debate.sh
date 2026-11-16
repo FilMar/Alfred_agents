@@ -14,7 +14,7 @@
 #   --synth <hat>                           default blue-core
 #   --model "<hat>=<provider/id>"           model for every run under that hat,
 #                                           synthesis included. Repeat per hat.
-#                                           Without it, th picks the model.
+#                                           Without it, the run picks the model.
 #   --run-id ID                             reuse to resume a crashed run
 #   --timeout SEC                           per run, default 600
 #   --dry-run                               validate without spending any call
@@ -82,12 +82,12 @@ fi
 (( ${#HATS[@]} <= MAX_EXPERTS ))  || die "${#HATS[@]} experts > max $MAX_EXPERTS (override with DEBATE_MAX_EXPERTS)"
 
 command -v jq >/dev/null || die "jq is required"
-command -v th >/dev/null || die "th not found in PATH"
+command -v alfred >/dev/null || die "alfred not found in PATH"
 
 # Fail fast: every hat must exist before anything starts.
 for h in "${HATS[@]}" "$SYNTH"; do
   [[ -n "$h" ]] || die "an --expert has an empty hat"
-  th hats get "$h" >/dev/null 2>&1 || die "hat not found: '$h'. Run th hats list to see the six."
+  alfred command hats get "$h" >/dev/null 2>&1 || die "hat not found: '$h'. Run alfred command hats list to see the six."
 done
 for s in "${STANCES[@]}"; do
   [[ -n "${s// }" ]] || die "an --expert has an empty stance"
@@ -155,7 +155,7 @@ Why: up to five lines. Be specific.
 What would change my mind: one line."
 
   mapfile -t model_flags < <(model_args "${HATS[$i]}")
-  (cd "$RUN_DIR" && th run --hat "${HATS[$i]}" "${model_flags[@]}" --system "$system" --task "$prompt" \
+  (cd "$RUN_DIR" && alfred command run --hat "${HATS[$i]}" "${model_flags[@]}" --system "$system" --task "$prompt" \
       --detach --timeout "$TIMEOUT") > "$job"
   pending_status+=("$(jq -r .status "$job")")
   pending_ids+=("$id")
@@ -164,7 +164,7 @@ done
 
 # Phase 2 — WAIT: native poll; never synthesise early
 if (( ${#pending_status[@]} > 0 )); then
-  th wait --timeout "$TIMEOUT" "${pending_status[@]}" > "$RUN_DIR/r1-wait.json" || true
+  alfred command wait --timeout "$TIMEOUT" "${pending_status[@]}" > "$RUN_DIR/r1-wait.json" || true
 fi
 
 # Phase 3 — VALIDATE + COLLECT: every voice must have produced output
@@ -208,7 +208,7 @@ Tensions: where they truly disagree, and why. Do not flatten them.
 Recommendation: one concrete decision.
 Tripwires: what would make the recommendation wrong, as seen in the voices."
   mapfile -t model_flags < <(model_args "$SYNTH")
-  (cd "$RUN_DIR" && th run --hat "$SYNTH" "${model_flags[@]}" --task "$synth_prompt" --timeout "$TIMEOUT") > "$synth_md"
+  (cd "$RUN_DIR" && alfred command run --hat "$SYNTH" "${model_flags[@]}" --task "$synth_prompt" --timeout "$TIMEOUT") > "$synth_md"
   step_done "$synth_md" || die "synthesis produced no output — resume with: --run-id $RUN_ID"
 fi
 

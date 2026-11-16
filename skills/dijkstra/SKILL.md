@@ -32,7 +32,7 @@ red baseline hides what broke.
 Read the rules of the skill that owns each file. A file with a
 `desc:` and a `usage:` header is a pike script:
 `~/.pi/agent/skills/pike/SKILL.md`. Any other file is ritchie's:
-`~/.pi/agent/skills/ritchie/SKILL.md`. Run `ti search "<what the code does>"` and
+`~/.pi/agent/skills/ritchie/SKILL.md`. Run `alfred rules search "<what the code does>"` and
 read the project's `.wiki/` too. A project rule wins.
 
 Read the sheet for each language in scope, in

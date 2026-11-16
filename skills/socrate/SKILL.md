@@ -29,10 +29,10 @@ Done when you have the list of premises and steps, and every weak point the logi
 The memory is the user's own past. Search it for what pushes against the thesis and its hidden premises. Use the thesis, its opposite and the key words of each premise as queries.
 
 ```bash
-ti search "<query>" --limit 5          # what the user corrected before: their rules
-tl search "<query>" --limit 5          # past episodes: what was decided, and how it ended
-tl episode <id>                        # the whole episode of a hit
-alfred vault read <page name>          # shared knowledge, read by page name
+alfred rules search "<query>" --limit 5    # what the user corrected before: their rules
+alfred hist search "<query>" --limit 5     # past episodes: what was decided, and how it ended
+alfred hist episode <id>                   # the whole episode of a hit
+alfred vault read <page name>              # shared knowledge, read by page name
 ```
 
 The strongest friction here is the user against themselves: a rule they wrote that the thesis breaks, or an earlier decision that ended badly for the same reason.
@@ -55,7 +55,7 @@ One question, short, with no answer hidden inside. It starts from the tension an
 
 ```
 **[Tension]**
-> <the rule, episode, page, fact or logical step it comes from> — <source: ti id, tl episode and date, vault page, URL, or "the argument itself">
+> <the rule, episode, page, fact or logical step it comes from> — <source: rule id, episode id and date, vault page, URL, or "the argument itself">
 
 **Question:**
 <one question>

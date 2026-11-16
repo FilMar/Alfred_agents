@@ -98,10 +98,10 @@ def main() -> int:
         return 2
     run = Path(sys.argv[1])
     data = {name: load(run / f"{name}.json") for name in ["before_ti", "near_ti"]}
-    data["after_ti"] = cli(["ti", "refine"], run / "after_ti.json")
-    data["near_ti_after"] = cli(["ti", "near", "--min", "0.85", "--limit", "50"], run / "near_ti_after.json")
+    data["after_ti"] = cli(["alfred", "rules", "refine"], run / "after_ti.json")
+    data["near_ti_after"] = cli(["alfred", "rules", "near", "--min", "0.85", "--limit", "50"], run / "near_ti_after.json")
     with (run / "prompts.json").open() as prompts:
-        text = subprocess.run(["ti", "reach"], stdin=prompts, check=True, capture_output=True, text=True).stdout
+        text = subprocess.run(["alfred", "rules", "reach"], stdin=prompts, check=True, capture_output=True, text=True).stdout
     (run / "reach_after.json").write_text(text)
     data["reach_after"] = json.loads(text)
     data["actions"] = [json.loads(line) for line in (run / "actions.jsonl").read_text().splitlines() if line.strip()]

@@ -28,7 +28,7 @@ as a page, next to the skeleton, and the user looks at the page.
   "invarianti": [
     {"testo": "<regola che vale sempre>", "su": ["<Nome>"]}
   ],
-  "fatti": ["<un fatto che i contratti non portano, per le run th>"]
+  "fatti": ["<un fatto che i contratti non portano, per le run di alfred command>"]
 }
 ```
 

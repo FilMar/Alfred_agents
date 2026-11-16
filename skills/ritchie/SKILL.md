@@ -23,7 +23,7 @@ becomes a feature is rewritten from scratch; its code is evidence only.
 ### 0. Read the project
 
 ```
-ti search "<what you are about to write>"
+alfred rules search "<what you are about to write>"
 ```
 
 Then the project's `.wiki/` (via omero) and its CLAUDE.md. A project

@@ -12,5 +12,5 @@ skill_path="$1"
 task="$2"
 
 # No file to create and nothing to clean up: the role is an argument.
-th run --hat white-core --system "You test the skill under evaluation." --tools read,bash \
-  --task "Use the skill at $skill_path to do this: $task. Note: you run inside a bwrap sandbox — only $(pwd), ~/.pi, ~/.bun and /tmp are writable; everything else is read-only by design, not a bug in the skill."
+alfred command run --hat white-core --system "You test the skill under evaluation." --tools read,bash \
+  --task "Use the skill at $skill_path to do this: $task. Note: you run inside a bwrap sandbox — only $(pwd), ~/.pi and /tmp are writable; everything else is read-only by design, not a bug in the skill."

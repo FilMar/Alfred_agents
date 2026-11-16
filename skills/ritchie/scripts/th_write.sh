@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# desc: Run one th member that writes the tests or the bodies of a todo file. Hat, model, thinking and system are fixed per role.
+# desc: Run one alfred command run that writes the tests or the bodies of a todo file. Hat, model, thinking and system are fixed per role.
 # usage: th_write.sh tests|body <todo-file> <spec-file> <test-file>
 #
 # tests: the run reads the todo file and the spec, and writes <test-file>.
@@ -105,7 +105,7 @@ else
   task="Read test/$tests_name and spec.json. Replace every todo line of src/$target with its body."
 fi
 
-(cd "$work" && th run --hat "$hat" --model "$MODEL" --thinking "$THINKING" --tools "$TOOLS" \
+(cd "$work" && alfred command run --hat "$hat" --model "$MODEL" --thinking "$THINKING" --tools "$TOOLS" \
   --system "$system" --timeout "$TIMEOUT_S" --task "$task")
 
 if [ "$mode" = tests ]; then
