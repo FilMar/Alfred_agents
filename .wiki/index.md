@@ -147,7 +147,7 @@ updated: 2026-10-16
 | [memory_distill_neighbours_include_archived_rules](memory_distill_neighbours_include_archived_rules) | Archived rules count as neighbours: a copy of one is a duplicate |
 | [memory_distill_run_starts_async_with_status](memory_distill_run_starts_async_with_status) | POST /distill answers 202 and runs in a task; GET /distill/status gives running and last; state in memory |
 | [memory_distill_cli_is_a_client_of_the_server](memory_distill_cli_is_a_client_of_the_server) | alfred distill is a client of POST /distill and polls the status; extractor add checks the Config |
-| [memory_distill_trigger_is_off_until_the_switch](memory_distill_trigger_is_off_until_the_switch) | The ingest trigger is off unless ALFRED_DISTILL_TRIGGER=on; it runs active with the active row |
+| [memory_distill_trigger_is_off_until_the_switch](memory_distill_runs_on_the_server_with_row_4) | The ingest trigger is off unless ALFRED_DISTILL_TRIGGER=on; it runs active with the active row |
 
 ## skill
 

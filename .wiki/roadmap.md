@@ -13,9 +13,8 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 The distiller and `th` move into alfred. Then the server goes on the Deck, and every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
 - [M] `alfred command` tests that close two gaps: pi dies after the timeout, read through the `.pid` file [detail](core_alfred_command_runs_pi_as_a_child_in_bwrap); a sent spool file leaves, with a `Client::at(url)` for tests [detail](core_alfred_command_files_each_run_in_hist_with_a_spool). Parts A and B are done.
-- [A] Run `alfred serve` on the Deck from the branch: check out `refactoring/alfred_v2` in `~/Alfred_agents`, run `setup.sh` and `services/alfred/install.sh`, check 8791 next to `tl` on 8790 [detail](core_alfred_serve_is_a_filcloud_init_module). Row 4 is in hist, inactive [detail](memory_extractor_row_4_has_rules_only_roles); at the switch, run `alfred extractor activate 4` and set `ALFRED_DISTILL_TRIGGER=on`. [detail](memory_distill_trigger_is_off_until_the_switch)
-- [M] Rewrite skills, hooks, `CLAUDE.md` and extensions to call `alfred`.
-- [M] Retire `tools/tb`, `tools/ti`, `tools/tl`, `tools/td` and `tools/th`, with the wiki pages that describe them.
+- [A] Stop `tl` on the Deck: drop `services/tl` and port 8790 from filcloud_init; `backup_tl.sh` keeps the same `tl.db`. Then merge `refactoring/alfred_v2` into `main`. alfred runs on the Deck, callers call `alfred`, and the server distils with row 4 [detail](memory_distill_runs_on_the_server_with_row_4).
+- [M] Retire `tools/tb`, `tools/ti`, `tools/tl`, `tools/td` and `tools/th`, their tests, `package.json` and bun, with the wiki pages that describe them. Drop `TL_API_URL` and `QDRANT_URL` from `env.sh`. Rename the extension folders `tb_ti` and `tb_refine`, with `setup.sh` and the links.
 
 ## Ideas
 
