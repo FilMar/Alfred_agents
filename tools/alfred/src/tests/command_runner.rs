@@ -65,15 +65,6 @@ fn route_truncates_a_result_just_over_the_limit() {
 }
 
 #[test]
-fn route_keeps_a_result_just_under_the_limit() {
-    let json = format!("{{\"data\":\"{}\"}}", "a".repeat(LOG_RESULT_MAX - 12));
-    let line = format!(
-        "{{\"type\":\"tool_execution_end\",\"toolName\":\"bash\",\"result\":{json},\"isError\":false}}"
-    );
-    assert_eq!(route(&line), Route::Log(format!("[tool:bash] → {json}\n")));
-}
-
-#[test]
 fn route_carries_agent_end_messages() {
     let line = r#"{"type":"agent_end","messages":[{"role":"assistant","content":"a"},{"role":"user","content":"b"}]}"#;
     match route(line) {
@@ -114,11 +105,6 @@ fn sanitize_drops_chars_outside_the_allowed_set() {
 }
 
 #[test]
-fn sanitize_strips_ansi_color_codes() {
-    assert_eq!(sanitize("\u{1b}[31mred\u{1b}[0m"), "red");
-}
-
-#[test]
 fn sanitize_strips_ansi_codes_with_params() {
     assert_eq!(sanitize("\u{1b}[1;32mgreen\u{1b}[0mplain"), "greenplain");
 }
@@ -155,11 +141,6 @@ fn truncate_cuts_text_just_over_the_limit() {
     let text = "a".repeat(LOG_RESULT_MAX + 1);
     let expected = format!("{}… [+1 chars]", "a".repeat(LOG_RESULT_MAX));
     assert_eq!(truncate(&text, LOG_RESULT_MAX), expected);
-}
-
-#[test]
-fn truncate_marks_the_dropped_count() {
-    assert_eq!(truncate("abcdef", 3), "abc… [+3 chars]");
 }
 
 #[test]

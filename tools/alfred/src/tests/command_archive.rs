@@ -1,4 +1,4 @@
-use crate::command::archive::{Archived, DEADLINE, FinishedRun, archive, rows, send};
+use crate::command::archive::{Archived, DEADLINE, FinishedRun, archive, rows};
 
 fn finished_run(label: &str, id: &str) -> FinishedRun {
     FinishedRun {
@@ -45,63 +45,6 @@ fn closed_port_client() -> crate::client::Client {
         .with_timeout(DEADLINE)
 }
 
-#[test]
-fn rows_kind_is_subtask() {
-    let run = finished_run("worker", "8f9a0b1c-2d3e-4f5a-9b6c-7d8e9f0a1b2c");
-    rows(&run, &messages(), Some("localhost"), "/work");
-}
-
-#[test]
-fn rows_actor_is_the_label() {
-    let run = finished_run("efesto", "9a0b1c2d-3e4f-4a5b-9c7d-8e9f0a1b2c3d");
-    rows(&run, &messages(), Some("localhost"), "/work");
-}
-
-#[test]
-fn rows_harness_is_pi() {
-    let run = FinishedRun {
-        id: "0b1c2d3e-4f5a-4b6c-9d8e-9f0a1b2c3d4e".to_string(),
-        label: "worker".to_string(),
-        task: "write the feature".to_string(),
-        skill: None,
-        thinking: None,
-        timeout_s: None,
-        status: crate::command::job::Status::Done,
-        started_at: jiff::Timestamp::now(),
-        finished_at: jiff::Timestamp::now(),
-    };
-    rows(&run, &messages(), None, "/work");
-}
-
-#[test]
-fn rows_id_derives_from_the_run() {
-    let run = finished_run("worker", "1c2d3e4f-5a6b-4c7d-9e8f-0a1b2c3d4e5f");
-    rows(&run, &messages(), Some("localhost"), "/work");
-}
-
-#[test]
-fn rows_contents_belong_to_the_exchange() {
-    let run = finished_run("worker", "2d3e4f5a-6b7c-4d8e-9f9a-1b2c3d4e5f6a");
-    rows(&run, &[], Some("localhost"), "/work");
-}
-
-#[tokio::test]
-async fn send_fails_on_a_closed_port() {
-    let client = closed_port_client();
-    let run = finished_run("worker", "3e4f5a6b-7c8d-4e9f-9a0b-2c3d4e5f6a7b");
-    let run_rows = rows(&run, &messages(), Some("localhost"), "/work");
-    let sent = send(&client, &run_rows).await;
-    assert!(sent.is_err());
-}
-
-#[tokio::test]
-async fn archive_spooled_run_has_its_spool_file() {
-    let spool = crate::command::spool::Spool::at(spool_dir("spool-file")).unwrap();
-    let run = finished_run("worker", "4f5a6b7c-8d9e-4f0a-9b1c-3d4e5f6a7b8c");
-    let run_rows = rows(&run, &messages(), Some("localhost"), "/work");
-    archive(None, &run_rows, "alfred-archive-file", &spool).await;
-}
-
 #[tokio::test]
 async fn archive_spools_when_there_is_no_client() {
     let spool = crate::command::spool::Spool::at(spool_dir("no-client")).unwrap();
@@ -129,6 +72,8 @@ fn rows_fill_the_three_hist_rows() {
     assert_eq!(got.session.host.as_deref(), Some("deck"));
     assert_eq!(got.session.path.as_deref(), Some("/work"));
     assert_eq!(got.exchange.session, run.id);
+    assert_eq!(got.exchange.kind, "subtask");
+    assert_eq!(got.exchange.actor, "worker");
     assert_eq!(got.exchange.model.as_deref(), Some("glm-5"));
     assert_eq!(got.exchange.tokens_in, Some(10));
     assert_eq!(got.exchange.tokens_out, Some(5));

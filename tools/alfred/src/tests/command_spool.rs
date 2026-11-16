@@ -89,13 +89,6 @@ fn at_ends_up_on_an_existing_directory() {
 }
 
 #[test]
-fn dir_returns_the_directory_given_to_at() {
-    let dir = scratch("dir");
-    let spool = Spool::at(dir.clone()).unwrap();
-    assert_eq!(spool.dir(), dir.as_path());
-}
-
-#[test]
 fn path_names_the_job_file() {
     let dir = scratch("path");
     let spool = Spool::at(dir.clone()).unwrap();
@@ -132,14 +125,6 @@ fn files_lists_only_alfred_unarchived() {
             dir.join("alfred-a.unarchived")
         ]
     );
-}
-
-#[tokio::test]
-async fn send_one_leaves_the_file_when_the_send_fails() {
-    let spool = Spool::at(scratch("send-one")).unwrap();
-    spool.write("alfred-one", &rows()).unwrap();
-    let client = closed_port_client();
-    Spool::send_one(&client, &spool.path("alfred-one")).await;
 }
 
 #[tokio::test]

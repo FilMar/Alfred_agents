@@ -30,10 +30,6 @@ impl Skill {
             .ok_or_else(|| CommandError::BadInput(format!("Skill \"{name}\" not found")))
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
     pub fn file(&self) -> &Path {
         &self.file
     }

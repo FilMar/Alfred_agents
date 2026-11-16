@@ -32,21 +32,15 @@ pub struct Ended {
 pub fn route(line: &str) -> Route {
     match serde_json::from_str::<Value>(line) {
         Ok(event) => match event["type"].as_str() {
-            Some("message_update") => match event["assistantMessageEvent"]["type"].as_str() {
-                Some("text_delta") => Route::Out(
-                    event["assistantMessageEvent"]["delta"]
-                        .as_str()
-                        .unwrap_or("")
-                        .to_string(),
-                ),
-                Some("thinking_delta") => Route::Log(
-                    event["assistantMessageEvent"]["delta"]
-                        .as_str()
-                        .unwrap_or("")
-                        .to_string(),
-                ),
-                _ => Route::Skip,
-            },
+            Some("message_update") => {
+                let update = &event["assistantMessageEvent"];
+                let delta = update["delta"].as_str().unwrap_or("").to_string();
+                match update["type"].as_str() {
+                    Some("text_delta") => Route::Out(delta),
+                    Some("thinking_delta") => Route::Log(delta),
+                    _ => Route::Skip,
+                }
+            }
             Some("tool_execution_start") => Route::Log(format!(
                 "\n[tool:{}] {}\n",
                 event["toolName"].as_str().unwrap_or(""),

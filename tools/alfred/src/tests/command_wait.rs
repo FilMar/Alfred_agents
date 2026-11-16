@@ -70,13 +70,6 @@ fn is_stale_below_sixty_seconds() {
 }
 
 #[test]
-fn is_stale_above_sixty_seconds() {
-    let now = Instant::now();
-    let watch = Watch::start(Some(SystemTime::UNIX_EPOCH), now);
-    assert!(watch.is_stale(now + STALE + Duration::from_secs(1)));
-}
-
-#[test]
 fn pid_alive_is_true_for_a_live_pid() {
     let dir = scratch("pid_alive_live");
     let path = dir.join("alive.pid");

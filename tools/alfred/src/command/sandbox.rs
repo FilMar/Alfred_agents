@@ -36,27 +36,20 @@ pub fn wrap(pi_args: Vec<String>, cwd: &Path, home: &Path, bwrap: Option<PathBuf
 
     if let Some(program) = bwrap {
         let pi_dir = home.join(".pi");
-        let args: Vec<OsString> = vec![
-            OsString::from("--ro-bind"),
-            OsString::from("/"),
-            OsString::from("/"),
-            OsString::from("--proc"),
-            OsString::from("/proc"),
-            OsString::from("--dev"),
-            OsString::from("/dev"),
-        ]
-        .into_iter()
-        .chain(bind(cwd))
-        .chain(bind(&pi_dir))
-        .chain(bind(Path::new("/tmp")))
-        .chain([
-            OsString::from("--setenv"),
-            OsString::from("HOME"),
-            home.as_os_str().to_owned(),
-        ])
-        .chain([OsString::from("--"), OsString::from("pi")])
-        .chain(pi_args.into_iter().map(OsString::from))
-        .collect();
+        let args: Vec<OsString> = ["--ro-bind", "/", "/", "--proc", "/proc", "--dev", "/dev"]
+            .map(OsString::from)
+            .into_iter()
+            .chain(bind(cwd))
+            .chain(bind(&pi_dir))
+            .chain(bind(Path::new("/tmp")))
+            .chain([
+                OsString::from("--setenv"),
+                OsString::from("HOME"),
+                home.as_os_str().to_owned(),
+            ])
+            .chain([OsString::from("--"), OsString::from("pi")])
+            .chain(pi_args.into_iter().map(OsString::from))
+            .collect();
         Launch { program, args }
     } else {
         eprintln!("{NO_BWRAP}");

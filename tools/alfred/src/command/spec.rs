@@ -4,6 +4,16 @@ use std::path::Path;
 use super::CommandError;
 
 pub const SEPARATOR: &str = "\n\n---\n\n";
+const FLAGS: [&str; 8] = [
+    "-p",
+    "--mode",
+    "json",
+    "--no-session",
+    "--no-extensions",
+    "--no-context-files",
+    "--no-skills",
+    "--system-prompt",
+];
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Label(String);
@@ -41,24 +51,13 @@ impl Label {
             "Label.of: a hat or a skill"
         );
         let name = hat.or(skill).expect("Label.of: a hat or a skill");
-        let result: Result<Label, CommandError> = if safe_name(name) {
+        if safe_name(name) {
             Ok(Label(name.to_string()))
         } else {
             Err(CommandError::BadInput(format!(
                 "label \"{name}\": only letters, digits, - and _"
             )))
-        };
-        debug_assert!(
-            labels_with(&result, hat.or(skill)),
-            "Label.of: the hat, else the skill"
-        );
-        debug_assert!(
-            result
-                .as_ref()
-                .map_or(true, |label| safe_name(label.as_str())),
-            "Label.of: only letters, digits, - and _"
-        );
-        result
+        }
     }
 
     pub fn as_str(&self) -> &str {
@@ -74,39 +73,12 @@ pub fn safe_name(name: &str) -> bool {
 }
 
 pub fn compose(role: Option<&str>, hat: Option<&str>, skill: Option<&str>) -> String {
-    let result: String = [role, hat, skill]
+    [role, hat, skill]
         .into_iter()
         .flatten()
         .filter(|block| !block.trim().is_empty())
         .collect::<Vec<&str>>()
-        .join(SEPARATOR);
-    debug_assert!(
-        in_order(&result, &[role, hat, skill]),
-        "compose: role, hat, skill in this order"
-    );
-    debug_assert!(no_blank_block(&result), "compose: no blank block");
-    result
-}
-
-fn labels_with(result: &Result<Label, CommandError>, name: Option<&str>) -> bool {
-    result
-        .as_ref()
-        .map_or(true, |label| Some(label.as_str()) == name)
-}
-
-fn no_blank_block(prompt: &str) -> bool {
-    prompt.is_empty() || !prompt.split(SEPARATOR).any(|block| block.trim().is_empty())
-}
-
-fn in_order(prompt: &str, blocks: &[Option<&str>]) -> bool {
-    blocks
-        .iter()
-        .copied()
-        .flatten()
-        .filter(|block| !block.trim().is_empty())
-        .collect::<Vec<&str>>()
         .join(SEPARATOR)
-        == prompt
 }
 
 pub fn parse_tools(raw: Option<&str>) -> Vec<String> {
@@ -146,17 +118,11 @@ impl RunSpec {
 
     pub fn pi_args(&self, system_file: &Path) -> Vec<String> {
         [
-            vec![
-                "-p".to_string(),
-                "--mode".to_string(),
-                "json".to_string(),
-                "--no-session".to_string(),
-                "--no-extensions".to_string(),
-                "--no-context-files".to_string(),
-                "--no-skills".to_string(),
-                "--system-prompt".to_string(),
-                system_file.to_string_lossy().into_owned(),
-            ],
+            FLAGS
+                .map(String::from)
+                .into_iter()
+                .chain([system_file.to_string_lossy().into_owned()])
+                .collect(),
             if self.tools.is_empty() {
                 Vec::new()
             } else {

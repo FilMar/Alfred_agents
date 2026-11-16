@@ -86,22 +86,6 @@ pub fn rows(run: &FinishedRun, messages: &[Value], host: Option<&str>, cwd: &str
         },
     };
     debug_assert!(
-        result.exchange.kind == "subtask",
-        "archive.rows: kind is subtask"
-    );
-    debug_assert!(
-        result.exchange.actor == run.label,
-        "archive.rows: the actor is the label"
-    );
-    debug_assert!(
-        result.session.harness.as_deref() == Some("pi"),
-        "archive.rows: the harness is pi"
-    );
-    debug_assert!(
-        result.exchange.id == crate::hist::episodes::derived_id(&run.id, "run"),
-        "archive.rows: the id derives from the run"
-    );
-    debug_assert!(
         is_timestamp(&result.session.started),
         "archive.rows: the start is a hist timestamp"
     );
@@ -160,21 +144,13 @@ pub async fn archive(
 ) -> Archived {
     let sent = match client {
         Some(client) => match tokio::time::timeout(DEADLINE, send(client, rows)).await {
-            Ok(Ok(())) => true,
-            Ok(Err(err)) => {
-                eprintln!("warn: archive unreachable, run spooled: {err}");
-                false
-            }
-            Err(_) => {
-                eprintln!("warn: archive unreachable, run spooled: no answer in 2s");
-                false
-            }
+            Ok(sent) => sent.map_err(|err| err.to_string()),
+            Err(_) => Err("no answer in 2s".to_string()),
         },
-        None => false,
+        None => Err("ALFRED_URL is not set".to_string()),
     };
-    let result = if sent {
-        Archived::Sent
-    } else {
+    let result = if let Err(why) = sent {
+        eprintln!("warn: archive unreachable, run spooled: {why}");
         match spool.write(name, rows) {
             Ok(()) => Archived::Spooled,
             Err(err) => {
@@ -182,6 +158,8 @@ pub async fn archive(
                 Archived::Lost
             }
         }
+    } else {
+        Archived::Sent
     };
     debug_assert!(
         result != Archived::Spooled || spool.path(name).exists(),

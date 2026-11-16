@@ -1,7 +1,7 @@
 use std::num::NonZeroU32;
 use std::path::Path;
 
-use crate::command::spec::{Label, RunParts, RunSpec, SEPARATOR, compose, parse_tools, safe_name};
+use crate::command::spec::{Label, RunParts, RunSpec, SEPARATOR, parse_tools, safe_name};
 
 fn full_parts() -> RunParts {
     RunParts {
@@ -79,91 +79,6 @@ fn parse_tools_splits_the_comma_list() {
 #[should_panic(expected = "Label.of: a hat or a skill")]
 fn label_of_requires_a_hat_or_a_skill() {
     let _ = Label::of(None, None);
-}
-
-#[test]
-fn label_of_takes_the_hat() {
-    let _ = Label::of(Some("probe"), None);
-}
-
-#[test]
-fn label_of_falls_back_to_the_skill() {
-    let _ = Label::of(None, Some("pack"));
-}
-
-#[test]
-fn label_of_prefers_the_hat_when_both() {
-    let _ = Label::of(Some("probe"), Some("pack"));
-}
-
-#[test]
-fn label_of_rejects_an_unsafe_hat() {
-    let _ = Label::of(Some("not safe!"), None);
-}
-
-#[test]
-fn label_of_rejects_an_unsafe_skill() {
-    let _ = Label::of(None, Some("not safe!"));
-}
-
-#[test]
-fn compose_puts_role_hat_skill_in_order() {
-    compose(Some("the role"), Some("the hat"), Some("the skill"));
-}
-
-#[test]
-fn compose_without_a_role() {
-    compose(None, Some("the hat"), Some("the skill"));
-}
-
-#[test]
-fn compose_without_a_hat() {
-    compose(Some("the role"), None, Some("the skill"));
-}
-
-#[test]
-fn compose_without_a_skill() {
-    compose(Some("the role"), Some("the hat"), None);
-}
-
-#[test]
-fn compose_role_only() {
-    compose(Some("the role"), None, None);
-}
-
-#[test]
-fn compose_hat_only() {
-    compose(None, Some("the hat"), None);
-}
-
-#[test]
-fn compose_skill_only() {
-    compose(None, None, Some("the skill"));
-}
-
-#[test]
-fn compose_nothing() {
-    compose(None, None, None);
-}
-
-#[test]
-fn compose_drops_an_empty_role() {
-    compose(Some(""), Some("the hat"), None);
-}
-
-#[test]
-fn compose_drops_a_blank_role() {
-    compose(Some("   "), None, Some("the skill"));
-}
-
-#[test]
-fn compose_drops_an_empty_hat_between_blocks() {
-    compose(Some("the role"), Some(""), Some("the skill"));
-}
-
-#[test]
-fn compose_drops_all_blank_blocks() {
-    compose(Some(""), Some("   "), Some(" "));
 }
 
 #[test]

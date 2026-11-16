@@ -104,10 +104,7 @@ pub async fn run(command: CommandCommand) -> Result<Reply, CommandError> {
 }
 
 async fn run_one(args: RunArgs) -> Result<Reply, CommandError> {
-    let cwd = std::env::current_dir().map_err(|source| CommandError::Io {
-        context: "current dir".to_string(),
-        source,
-    })?;
+    let cwd = std::env::current_dir().map_err(CommandError::io("current dir"))?;
     let home = PathBuf::from(std::env::var_os("HOME").unwrap_or_default());
     let spec = build_spec(args.clone(), &cwd, &home)?;
     let paths = args
@@ -140,10 +137,7 @@ async fn run_one(args: RunArgs) -> Result<Reply, CommandError> {
 
 fn detach_run(paths: &JobPaths) -> Result<Reply, CommandError> {
     let argv: Vec<OsString> = std::env::args_os().skip(1).collect();
-    let exe = std::env::current_exe().map_err(|source| CommandError::Io {
-        context: "current exe".to_string(),
-        source,
-    })?;
+    let exe = std::env::current_exe().map_err(CommandError::io("current exe"))?;
     let detached = detach::spawn(&exe, &detach::child_args(&argv, paths.base()), paths)?;
     Ok(Reply {
         text: pretty(&detached),
@@ -182,10 +176,7 @@ fn skill_block(name: &str, cwd: &Path, home: &Path) -> Result<String, CommandErr
     let skill = Skill::find(name, &Skill::roots(cwd, home))?;
     std::fs::read_to_string(skill.file())
         .map(|body| skill.block(&body))
-        .map_err(|source| CommandError::Io {
-            context: format!("read {}", skill.file().display()),
-            source,
-        })
+        .map_err(CommandError::io(format!("read {}", skill.file().display())))
 }
 
 fn finished(spec: &RunSpec, id: String, started_at: Timestamp, status: Status) -> FinishedRun {

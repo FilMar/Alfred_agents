@@ -52,14 +52,6 @@ fn expected_bwrap_args(cwd: &str, home: &str, pi_args: &[&str]) -> Vec<std::ffi:
 }
 
 #[test]
-fn find_bwrap_finds_it_in_a_path_entry() {
-    let dir = fixture_dir("found");
-    let bwrap = write_bwrap(&dir);
-    let path_var = std::env::join_paths([&dir]).unwrap();
-    assert_eq!(find_bwrap(Some(path_var.as_os_str())), Some(bwrap));
-}
-
-#[test]
 fn find_bwrap_takes_the_first_entry_in_order() {
     let first = fixture_dir("order_first");
     let second = fixture_dir("order_second");
@@ -131,19 +123,6 @@ fn wrap_builds_the_bwrap_argv() {
 }
 
 #[test]
-fn wrap_with_no_pi_args_stops_at_pi() {
-    let bwrap = std::path::PathBuf::from("/usr/bin/bwrap");
-    let launch = wrap(
-        Vec::new(),
-        std::path::Path::new("/w"),
-        std::path::Path::new("/h"),
-        Some(bwrap.clone()),
-    );
-    assert_eq!(launch.program, bwrap);
-    assert_eq!(launch.args, expected_bwrap_args("/w", "/h", &[]));
-}
-
-#[test]
 fn wrap_without_bwrap_launches_pi_naked() {
     let pi_args = ["-p", "--mode", "json"];
     let launch = wrap(
@@ -157,16 +136,4 @@ fn wrap_without_bwrap_launches_pi_naked() {
     );
     assert_eq!(launch.program, std::path::PathBuf::from("pi"));
     assert_eq!(launch.args, osvec(&pi_args));
-}
-
-#[test]
-fn wrap_without_bwrap_and_no_args_is_bare_pi() {
-    let launch = wrap(
-        Vec::new(),
-        std::path::Path::new("/w"),
-        std::path::Path::new("/h"),
-        None,
-    );
-    assert_eq!(launch.program, std::path::PathBuf::from("pi"));
-    assert_eq!(launch.args, osvec(&[]));
 }

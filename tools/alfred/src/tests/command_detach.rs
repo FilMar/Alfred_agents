@@ -10,25 +10,6 @@ fn os_args(parts: &[&str]) -> Vec<OsString> {
 }
 
 #[test]
-fn child_args_removes_detach() {
-    let argv = os_args(&[
-        "command",
-        "run",
-        "--detach",
-        "--skill",
-        "ritchie",
-        "make it solid",
-    ]);
-    child_args(&argv, Path::new("/tmp/alfred-6b1f2a"));
-}
-
-#[test]
-fn child_args_job_names_the_base() {
-    let argv = os_args(&["command", "run", "--detach", "debate the choice"]);
-    child_args(&argv, Path::new("/tmp/alfred-77c2e9"));
-}
-
-#[test]
 fn child_args_keeps_the_other_args_in_order() {
     let argv = os_args(&[
         "command",

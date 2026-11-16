@@ -1,11 +1,6 @@
 use crate::command::hats::{get, names};
 
 #[test]
-fn names_are_in_order() {
-    let _ = names();
-}
-
-#[test]
 fn names_return_the_six_hats_in_order() {
     assert_eq!(
         names(),

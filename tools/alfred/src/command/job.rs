@@ -27,17 +27,6 @@ impl JobPaths {
         JobPaths { base }
     }
 
-    pub fn of_status(path: &Path) -> Result<JobPaths, CommandError> {
-        if path.extension().and_then(|ext| ext.to_str()) == Some("status") {
-            Ok(JobPaths::of_base(path.with_extension("")))
-        } else {
-            Err(CommandError::BadInput(format!(
-                "not a status file: {}",
-                path.display()
-            )))
-        }
-    }
-
     pub fn base(&self) -> &Path {
         &self.base
     }
@@ -79,16 +68,14 @@ fn four_hex(hex: &str) -> bool {
 
 impl Status {
     pub fn parse(text: &str) -> Status {
-        if text == "running" {
-            Status::Running
-        } else if text == "done" {
-            Status::Done
-        } else if text == "timeout" {
-            Status::Timeout
-        } else if let Some(why) = text.strip_prefix("error: ") {
-            Status::Error(why.into())
-        } else {
-            Status::Other(text.into())
+        match text {
+            "running" => Status::Running,
+            "done" => Status::Done,
+            "timeout" => Status::Timeout,
+            _ => text.strip_prefix("error: ").map_or_else(
+                || Status::Other(text.into()),
+                |why| Status::Error(why.into()),
+            ),
         }
     }
 
@@ -116,9 +103,7 @@ impl Status {
     }
 
     pub fn write(&self, path: &Path) -> Result<(), CommandError> {
-        std::fs::write(path, self.text()).map_err(|source| CommandError::Io {
-            context: format!("write {}", path.display()),
-            source,
-        })
+        std::fs::write(path, self.text())
+            .map_err(CommandError::io(format!("write {}", path.display())))
     }
 }

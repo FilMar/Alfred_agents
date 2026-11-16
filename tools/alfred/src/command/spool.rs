@@ -22,14 +22,9 @@ pub struct Drained {
 }
 
 pub fn state_dir(xdg: Option<OsString>, home: &Path) -> PathBuf {
-    match xdg {
-        Some(state) => PathBuf::from(state).join("alfred").join("spool"),
-        None => home
-            .join(".local")
-            .join("state")
-            .join("alfred")
-            .join("spool"),
-    }
+    xdg.map_or_else(|| home.join(".local").join("state"), PathBuf::from)
+        .join("alfred")
+        .join("spool")
 }
 
 impl Spool {
@@ -48,10 +43,6 @@ impl Spool {
             "Spool.at: the directory exists"
         );
         result
-    }
-
-    pub fn dir(&self) -> &Path {
-        &self.dir
     }
 
     pub fn path(&self, name: &str) -> PathBuf {
@@ -100,22 +91,17 @@ impl Spool {
     }
 
     pub async fn send_one(client: &Client, path: &Path) -> bool {
-        let result: bool = match Spool::read(path) {
-            Ok(rows) => match super::archive::send(client, &rows).await {
-                Ok(()) => {
-                    let _ = std::fs::remove_file(path);
-                    !path.exists()
-                }
-                Err(err) => {
-                    eprintln!("warn: {} still not archived: {}", path.display(), err);
-                    false
-                }
-            },
-            Err(err) => {
-                eprintln!("warn: {} still not archived: {err}", path.display());
-                !path.exists()
-            }
+        let sent = match Spool::read(path) {
+            Ok(rows) => super::archive::send(client, &rows)
+                .await
+                .map_err(|err| err.to_string()),
+            Err(err) => Err(err.to_string()),
         };
+        match sent {
+            Ok(()) => drop(std::fs::remove_file(path)),
+            Err(why) => eprintln!("warn: {} still not archived: {why}", path.display()),
+        }
+        let result = !path.exists();
         debug_assert!(
             result != path.exists(),
             "Spool.send_one: a file is gone exactly when it was sent"

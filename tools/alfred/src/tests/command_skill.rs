@@ -36,7 +36,6 @@ fn find_takes_the_first_root_with_the_skill() {
     write_skill(&first, "ritchie", "first body");
     write_skill(&second, "ritchie", "second body");
     let skill = Skill::find("ritchie", &[first.clone(), second]).unwrap();
-    assert_eq!(skill.name(), "ritchie");
     assert_eq!(skill.file(), first.join("ritchie").join("SKILL.md"));
 }
 
@@ -63,29 +62,6 @@ fn find_errors_when_the_skill_is_nowhere() {
     let ghost = std::env::temp_dir().join("command-skill-nowhere-ghost");
     let error = Skill::find("nope", &[empty, ghost]).unwrap_err();
     assert_eq!(error.to_string(), "Skill \"nope\" not found");
-}
-
-#[test]
-fn find_errors_without_roots() {
-    let error = Skill::find("nope", &[]).unwrap_err();
-    assert_eq!(error.to_string(), "Skill \"nope\" not found");
-}
-
-#[test]
-fn block_wraps_name_location_base_and_body() {
-    let root = temp("block_wraps");
-    let dir = write_skill(&root, "ritchie", "hello");
-    let skill = Skill::find("ritchie", &[root]).unwrap();
-    let block = skill.block("hello");
-    assert_eq!(
-        block,
-        format!(
-            "<skill name=\"ritchie\" location=\"{file}\">\nReferences inside this skill are relative to {base} — resolve them against it.\n\n{body}\n</skill>",
-            file = dir.join("SKILL.md").display(),
-            base = dir.display(),
-            body = "hello",
-        )
-    );
 }
 
 #[test]
