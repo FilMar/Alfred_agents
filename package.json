@@ -3,30 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
-  "bin": {
-    "tb": "./tools/tb/src/cli.ts",
-    "td": "./tools/td/src/cli.ts",
-    "th": "./tools/th/src/cli.ts",
-    "ti": "./tools/ti/src/cli.ts",
-    "tl": "./tools/tl/src/cli.ts"
-  },
-  "scripts": {
-    "test": "bun test tests/",
-    "typecheck": "tsc --project tools/tb/tsconfig.json --noEmit && tsc --project tools/ti/tsconfig.json --noEmit && tsc --project tools/tl/tsconfig.json --noEmit && tsc --project tools/th/tsconfig.json --noEmit && tsc --project tools/td/tsconfig.json --noEmit && tsc --project tests/tsconfig.json"
-  },
   "pi": {
     "skills": [
       "./skills"
     ]
-  },
-  "dependencies": {
-    "@earendil-works/pi-coding-agent": "^0.75.5",
-    "commander": "^14.0.3",
-    "hono": "^4.12.31"
-  },
-  "devDependencies": {
-    "@types/bun": "^1.3.14",
-    "@types/node": "^22.19.19",
-    "typescript": "^5.9.3"
   }
 }

@@ -43,12 +43,10 @@ link "$home_dir/alfred.md" "$claude/CLAUDE.md"
 link "$home_dir/alfred.md" "$pi/SYSTEM.md"
 for dir in "$claude" "$pi"; do link "$home_dir/skills" "$dir/skills"; done
 if command -v claude >/dev/null; then
-    link "$ext/tb_ti/claude.sh" "$claude/hooks/inject-ti-tb-context.sh"
-    link "$ext/tl/claude.sh" "$claude/hooks/ingest-tl.sh"
-    link "$ext/tb_refine/claude.sh" "$claude/hooks/refine-tb.sh"
+    for name in rules hist refine; do link "$ext/$name/claude.sh" "$claude/hooks/$name.sh"; done
 fi
 if command -v pi >/dev/null; then
-    for name in tb_ti tl tb_refine; do link "$ext/$name/pi.ts" "$pi/extensions/$name.ts"; done
+    for name in rules hist refine; do link "$ext/$name/pi.ts" "$pi/extensions/$name.ts"; done
 fi
 
 run cargo install --git "$repo_url" --branch "$branch" \
