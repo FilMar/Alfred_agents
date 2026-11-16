@@ -7,8 +7,8 @@ sources: [conversation, spec.json@4246539, tools/alfred/src/command/cli.rs, tool
 
 `alfred command` keeps only what the real callers of `th` use. Those callers are `debate.sh` (annibale), `test_skill.sh` (efesto) and `th_write.sh` (ritchie). The kept parts:
 
-- `run`, with `--hat`, `--skill`, `--system`, `--tools`, `--thinking`, `--model`, `--timeout`. Part B adds `--detach`;
-- `wait`, in part B;
+- `run`, with `--hat`, `--skill`, `--system`, `--tools`, `--thinking`, `--model`, `--timeout`, `--detach` and `--no-archive`;
+- `wait`;
 - `hats list` and `hats get`.
 
 `history`, `get`, `models`, `archive-pending` and `sandbox-exec` are dropped.
@@ -30,3 +30,5 @@ The port is split in two. Part A is the foreground run. Part B is the archive to
 ## Cross-references
 
 - [core_alfred_command_runs_pi_as_a_child_in_bwrap](core_alfred_command_runs_pi_as_a_child_in_bwrap) — how a run executes
+- [core_alfred_command_files_each_run_in_hist_with_a_spool](core_alfred_command_files_each_run_in_hist_with_a_spool) — part B: the archive
+- [core_alfred_command_detach_relaunches_alfred_and_wait_reads_files](core_alfred_command_detach_relaunches_alfred_and_wait_reads_files) — part B: `--detach` and `wait`

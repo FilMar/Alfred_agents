@@ -23,7 +23,7 @@ The run always ends with a terminal `Status`: `done`, `error: <reason>` or `time
 
 **`timeout` is its own status.** The status was `error: Timeout...` in `th`. A caller can now tell a slow run from a broken one.
 
-**Known gap.** No test checks that pi dies after the timeout: the mutant without `kill_on_drop` survives. The `.pid` file of part B makes that test possible.
+**Known gap.** No test checks that pi dies after the timeout: the mutant without `kill_on_drop` survives. Part B wrote the `.pid` file, so the test is now possible, but it is not written yet.
 
 ## Cross-references
 

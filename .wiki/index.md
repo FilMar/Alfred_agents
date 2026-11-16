@@ -22,6 +22,8 @@ updated: 2026-10-16
 | [core_alfred_serve_runs_on_axum_and_tokio](core_alfred_serve_runs_on_axum_and_tokio) | axum, tokio and reqwest; pulldown-cmark for vault headings |
 | [core_alfred_command_runs_pi_as_a_child_in_bwrap](core_alfred_command_runs_pi_as_a_child_in_bwrap) | alfred command runs pi -p --mode json as a child; only pi in bwrap; always a terminal status, timeout is its own |
 | [core_alfred_command_keeps_only_what_callers_use](core_alfred_command_keeps_only_what_callers_use) | Only run, wait and hats survive the port; hats compiled in; ASCII label; split in part A (foreground) and B (archive, detach, wait) |
+| [core_alfred_command_files_each_run_in_hist_with_a_spool](core_alfred_command_files_each_run_in_hist_with_a_spool) | A run becomes session, subtask and contents rows; one 2s deadline; failed sends go to a spool that survives reboot; timestamps in ms |
+| [core_alfred_command_detach_relaunches_alfred_and_wait_reads_files](core_alfred_command_detach_relaunches_alfred_and_wait_reads_files) | --detach starts alfred again with --job; wait reads the files; dead only with a still .out and no pid; no .pid means alive |
 
 ## th
 
