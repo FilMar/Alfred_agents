@@ -16,7 +16,15 @@ updated: 2026-10-16
 |------|---------|
 | [core_orthogonal_layers_no_overlap](core_orthogonal_layers_no_overlap) | The five layers and the no-overlap boundary |
 | [core_mcp_not_adopted_cli_json_schemas_first](core_mcp_not_adopted_cli_json_schemas_first) | No MCP migration; contract layer with JSON Schemas first, MCP shim behind a trigger |
-| [core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp](core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp) | tb and ti keep no local state; every client points to the Qdrant and Ollama on the Rasp |
+| [core_alfred_v2_one_binary_serve_on_the_deck](core_alfred_v2_one_binary_serve_on_the_deck) | One alfred binary: serve on the Deck holds logic and data, the rest are thin API clients |
+| [core_alfred_v2_written_in_rust](core_alfred_v2_written_in_rust) | alfred v2 is in Rust for trust and ownership, not speed |
+| [core_alfred_api_speaks_json_cli_prints_text](core_alfred_api_speaks_json_cli_prints_text) | Every API reply is JSON with shared serde types; the CLI prints text |
+| [core_alfred_serve_runs_on_axum_and_tokio](core_alfred_serve_runs_on_axum_and_tokio) | axum, tokio and reqwest; pulldown-cmark for vault headings |
+| [core_alfred_command_runs_pi_as_a_child_in_bwrap](core_alfred_command_runs_pi_as_a_child_in_bwrap) | alfred command runs pi -p --mode json as a child; only pi in bwrap; always a terminal status, timeout is its own |
+| [core_alfred_command_keeps_only_what_callers_use](core_alfred_command_keeps_only_what_callers_use) | Only run, wait and hats survive the port; hats compiled in; ASCII label; split in part A (foreground) and B (archive, detach, wait) |
+| [core_alfred_command_files_each_run_in_hist_with_a_spool](core_alfred_command_files_each_run_in_hist_with_a_spool) | A run becomes session, subtask and contents rows; one 2s deadline; failed sends go to a spool that survives reboot; timestamps in ms |
+| [core_alfred_command_detach_relaunches_alfred_and_wait_reads_files](core_alfred_command_detach_relaunches_alfred_and_wait_reads_files) | --detach starts alfred again with --job; wait reads the files; dead only with a still .out and no pid; no .pid means alive |
+| [core_alfred_serve_is_a_filcloud_init_module](core_alfred_serve_is_a_filcloud_init_module) | alfred serve is a filcloud_init module with the unit in this repo; setup.sh is client only, cargo install --git; main gets the branch at the switch |
 
 ## th
 
@@ -79,7 +87,7 @@ updated: 2026-10-16
 | [memory_td_ref_only_saves_nothing_because_a_ref_needs_two_notes](memory_td_ref_only_saves_nothing_because_a_ref_needs_two_notes) | ref_only writes nothing: a ref links two notes and the candidate makes none |
 | [memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending](memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending) | --max-saved caps the writes of a run; a capped session stays pending and is redone |
 | [memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores) | td tests use in-memory stubs; an end-to-end test checks the stores, since bare calls cannot tell a save from a failure |
-| [memory_extractor_calls_go_through_pi_ai_with_reasoning_low](memory_extractor_calls_go_through_pi_ai_with_reasoning_low) | Calls go through pi-ai: reasoning low and the system role for Ollama, or the prompt is lost or glm thinks 15x |
+| [memory_extractor_calls_go_to_ollama_by_reqwest](memory_extractor_calls_go_to_ollama_by_reqwest) | Calls are one reqwest POST to Ollama /api/chat, with the system role and the thinking level always set |
 | [memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading) | Phase 3 bridges by shape; 0/20 ref recovery, so judge by reading the yes answers |
 | [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing) | tb refine: trust 0..1 derived from the hit counters, start 0.5, floor at 2026-09-21; the first pass computes it and stores nothing |
 | [memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first) | Delete when archived and no signal for 365 days, after an append-only log line; not before 2027-09-21 |
@@ -120,6 +128,26 @@ updated: 2026-10-16
 | [memory_aristotele_is_a_manual_curator_of_tb_and_ti](memory_aristotele_is_a_manual_curator_of_tb_and_ti) | Aristotele curates tb and ti when the user starts it: merges, refs, hubs, ghost rules, no approval, a web report after |
 | [memory_near_and_reach_find_what_aristotele_judges](memory_near_and_reach_find_what_aristotele_judges) | tb near and ti near list close pairs; tl prompts piped into ti reach counts which rules real prompts reach; code finds, Aristotele judges |
 | [memory_td_extractor_row_3_drops_generic_rules_and_bad_appends](memory_td_extractor_row_3_drops_generic_rules_and_bad_appends) | Row 3: a critic check drops generic rules; an append must fit the if of its rule and be an order |
+| [memory_tb_dropped_vault_holds_shared_knowledge](memory_tb_dropped_vault_holds_shared_knowledge) | v2 memory is rules, episodes and the vault; tb is not migrated |
+| [memory_vault_read_from_the_deck_checkout](memory_vault_read_from_the_deck_checkout) | serve reads the vault markdown in ~/notes on the Deck and skips what Quartz skips |
+| [memory_vault_read_by_name_from_the_indexes](memory_vault_read_by_name_from_the_indexes) | alfred vault toc and read by link name; the agent starts from the index pages |
+| [memory_hook_two_stage_tl_then_ti_rejected](memory_hook_two_stage_tl_then_ti_rejected) | No second ti search enriched with the best tl episode |
+| [memory_rules_served_on_the_same_qdrant_data](memory_rules_served_on_the_same_qdrant_data) | alfred serve serves ti rules on the same pi_identity data, embeddings from the Deck Ollama kept loaded |
+| [memory_rules_search_deadline_is_kept_by_the_server](memory_rules_search_deadline_is_kept_by_the_server) | search --timeout is applied by the server before hits are counted; the client adds a network margin |
+| [memory_hist_serves_the_tl_archive_unchanged](memory_hist_serves_the_tl_archive_unchanged) | alfred serve keeps the tl routes, JSON and SQLite file under /hist, so td and th switch with one URL |
+| [memory_hist_ingest_reads_every_harness_through_one_format](memory_hist_ingest_reads_every_harness_through_one_format) | ingest reads Claude and pi through one Format table; rows identical to tl; prompts and cost on the server |
+| [memory_distill_starts_on_ingest_by_threshold](memory_distill_starts_on_ingest_by_threshold) | No timer: a distill run starts after an ingest when 50 exchanges are pending or the oldest is 24 hours old |
+| [memory_extractor_row_4_has_rules_only_roles](memory_extractor_row_4_has_rules_only_roles) | Row 4: roles are model, think, temperature, system; prompts for rules only; ALFRED_DISTILL_MODEL overrides the model |
+| [memory_distill_tag_vocabulary_comes_from_ti_rules](memory_distill_tag_vocabulary_comes_from_ti_rules) | The Rust distiller takes its tag vocabulary from the ti rules, by count, ties by name |
+| [memory_distill_tag_key_strips_accents_by_nfd](memory_distill_tag_key_strips_accents_by_nfd) | tag_key strips accents with NFD, as td does, via unicode-normalization |
+| [memory_distill_extraction_body_keeps_five_keys](memory_distill_extraction_body_keeps_five_keys) | An extractions body holds only if, do, tags, proposedTags, quote |
+| [memory_distill_novelty_settles_rules_by_cand](memory_distill_novelty_settles_rules_by_cand) | The Rust novelty judge sees only rules: new, duplicate, append; verdicts matched by cand |
+| [memory_distill_keeps_shadow_mode](memory_distill_keeps_shadow_mode) | The Rust distiller keeps shadow mode: the whole pipeline, no write to ti, no budget spent |
+| [memory_distill_has_no_session_cap](memory_distill_has_no_session_cap) | No cap for one session in the Rust distiller: only the budget of the run |
+| [memory_distill_neighbours_include_archived_rules](memory_distill_neighbours_include_archived_rules) | Archived rules count as neighbours: a copy of one is a duplicate |
+| [memory_distill_run_starts_async_with_status](memory_distill_run_starts_async_with_status) | POST /distill answers 202 and runs in a task; GET /distill/status gives running and last; state in memory |
+| [memory_distill_cli_is_a_client_of_the_server](memory_distill_cli_is_a_client_of_the_server) | alfred distill is a client of POST /distill and polls the status; extractor add checks the Config |
+| [memory_distill_trigger_is_off_until_the_switch](memory_distill_runs_on_the_server_with_row_4) | The ingest trigger is off unless ALFRED_DISTILL_TRIGGER=on; it runs active with the active row |
 
 ## skill
 
@@ -158,6 +186,7 @@ updated: 2026-10-16
 | [skill_dijkstra_report_is_a_before_after_page](skill_dijkstra_report_is_a_before_after_page) | The report is a page: tree-sitter stamps, a table of free holes, Prima and Dopo, no animations |
 | [skill_ritchie_setup_agrees_on_commented_skeleton](skill_ritchie_setup_agrees_on_commented_skeleton) | At setup the user comments on the real skeleton, line by line, until ok; it is frozen in concordato.json |
 | [skill_ritchie_review_marks_code_against_agreement](skill_ritchie_review_marks_code_against_agreement) | The review marks each line of the final code against concordato.json: not agreed, gone, body, agreed |
+| [skill_ritchie_contracts_only_where_an_invariant_is](skill_ritchie_contracts_only_where_an_invariant_is) | A contract exists where an invariant exists; no invariant, no contract and no test |
 
 ## orchestrator
 

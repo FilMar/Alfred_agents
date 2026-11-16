@@ -23,7 +23,7 @@ becomes a feature is rewritten from scratch; its code is evidence only.
 ### 0. Read the project
 
 ```
-ti search "<what you are about to write>"
+alfred rules search "<what you are about to write>"
 ```
 
 Then the project's `.wiki/` (via omero) and its CLAUDE.md. A project
@@ -107,8 +107,8 @@ deviates: `references/rules.md`.
 
 **Contracts**
 
-- Every function carries the contract it needs: preconditions first,
-  postconditions before every return. Pure computation included.
+- A contract exists where an invariant exists: preconditions first,
+  postconditions before every return. No invariant: no contract, no test.
 - An assert must be able to fail: skip one already guaranteed by the
   line above, the type, the language or the callee (`references/rules.md`).
 - At most five invariants per function. Above that, extract functions.
@@ -194,7 +194,7 @@ deviates: `references/rules.md`.
 - An abstraction must make sense of the domain, not of the code.
 - A helper lives where its knowledge lives, not where it looks most
   reusable.
-- A trait or interface pays only with one consumer and many
-  implementors. Never over a backend that has one implementation.
+- A trait pays only with one consumer and many implementors.
+- A union pays only when each variant leads to different work.
 - DRY at the second copy, not the third.
 - A dependency arrives with the commit that uses it.

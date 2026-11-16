@@ -101,7 +101,8 @@ function proof(p) {
 }
 function codeView(d) {
   const lines = p => p.lines.map(l => `<span class="ln${l.gone ? " gone" : ""}"><i>${l.n}</i>${segs(l.segs)}</span>`).join("");
-  return d.pezzi.map(p => `<div class="code"><b>${esc(p.nome || "")} · ${esc(p.file)}</b><pre>${lines(p)}</pre>${proof(p)}</div>`).join("");
+  const gone = d.pezzi.map(p => `<div class="code"><b>${esc(p.nome || "")} · ${esc(p.file)}</b><pre>${lines(p)}</pre>${proof(p)}</div>`).join("");
+  return d.after ? `<div class="prima">${gone}</div><div class="dopo"><div class="code"><b>dopo</b><pre>${segs(d.after)}</pre></div></div>` : gone;
 }
 const on = Object.fromEntries(D.tagli.map(c => [c.id, true]));
 function total() {
@@ -115,7 +116,7 @@ function show(box, state) {
 }
 const boxes = D.tagli.map(c => {
   const view = c.stampo ? stampView(c.stampo, c.delta) : c.matrice ? matrixView(c.matrice) : c.codice ? codeView(c.codice) : "";
-  const buttons = view && !c.codice ? `<button data-s="prima">Prima</button><button data-s="dopo">Dopo</button>` : "";
+  const buttons = view && (!c.codice || c.codice.after) ? `<button data-s="prima">Prima</button><button data-s="dopo">Dopo</button>` : "";
   const box = $(`<section class="cut"><div class="head"><input type="checkbox" checked><span class="id">${esc(c.id)}</span><span class="kind">${esc(c.tipo)}</span>
     <span>${esc(c.cosa)}</span><span class="mute">${esc(c.dove)}</span>${buttons}<span class="delta">${c.delta}</span></div><div class="stage">${view}</div></section>`);
   const cb = box.querySelector("input");

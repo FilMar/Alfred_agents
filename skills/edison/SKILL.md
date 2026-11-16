@@ -78,8 +78,8 @@ Write the answer into the header block: one paragraph, plus the verdict.
 Then route it:
 
 - a decision about this project → **omero**, into `.wiki/`
-- an idea that outlives this project → nothing to do: `td` distils the
-  session into `tb`
+- an idea that outlives this project → propose it to the user for the
+  vault, which the user writes with you
 
 Commit the spike once, `spike(<slug>): <question>`, and never touch it
 again. A spike that stops compiling gets deleted, not repaired.

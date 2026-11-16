@@ -1,0 +1,19 @@
+# alfred serve, as a user unit. filcloud_init (services/alfred) links and starts it.
+# The defaults fit the server: vault ~/notes, hist ~/.tl/tl.db (the tl archive),
+# Qdrant and Ollama on localhost, port 8791.
+# The distill trigger is on: after an ingest, a run starts past the pending threshold.
+# Override a value in a drop-in.
+
+[Unit]
+Description=alfred serve
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/alfred serve
+Restart=always
+RestartSec=5
+Environment=ALFRED_DISTILL_TRIGGER=on
+
+[Install]
+WantedBy=default.target

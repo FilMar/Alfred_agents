@@ -7,7 +7,7 @@ export default function (pi: ExtensionAPI): void {
     if (!transcript) return;
 
     // Detached and silent: a turn never waits for the archive, and never fails because of it.
-    spawn("tl", ["ingest", "--transcript", transcript], { detached: true, stdio: "ignore" })
+    spawn("alfred", ["hist", "ingest", "--transcript", transcript], { detached: true, stdio: "ignore" })
       .on("error", () => {})
       .unref();
   });

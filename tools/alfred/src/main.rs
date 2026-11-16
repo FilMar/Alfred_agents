@@ -1,0 +1,171 @@
+use std::path::PathBuf;
+use std::process::ExitCode;
+
+use clap::{Parser, Subcommand};
+
+use alfred::chat::Chat;
+use alfred::client::Client;
+use alfred::command::cli::CommandCommand;
+use alfred::distill::cli::{DistillArgs, ExtractorCommand};
+use alfred::distill::runner::Runner;
+use alfred::distill::trigger::Trigger;
+use alfred::embed::Embedder;
+use alfred::hist::cli::HistCommand;
+use alfred::hist::db::HistDb;
+use alfred::hist::episodes::Episodes;
+use alfred::rules::cli::RulesCommand;
+use alfred::rules::store::Rules;
+use alfred::serve;
+use alfred::serve::App;
+use alfred::vault::cli;
+use alfred::vault::store::Vault;
+
+#[derive(Parser)]
+#[command(name = "alfred")]
+struct Cli {
+    #[command(subcommand)]
+    command: Command,
+}
+
+#[derive(Subcommand)]
+enum Command {
+    Serve {
+        #[arg(long, default_value_t = serve::PORT)]
+        port: u16,
+        #[arg(long, env = "ALFRED_VAULT")]
+        vault: Option<PathBuf>,
+        #[arg(long, env = "HIST_DB")]
+        hist_db: Option<PathBuf>,
+    },
+    Vault {
+        #[command(subcommand)]
+        command: VaultCommand,
+    },
+    Rules {
+        #[command(subcommand)]
+        command: RulesCommand,
+    },
+    Hist {
+        #[command(subcommand)]
+        command: HistCommand,
+    },
+    Distill(DistillArgs),
+    Extractor {
+        #[command(subcommand)]
+        command: ExtractorCommand,
+    },
+    #[command(name = "command")]
+    Delegate {
+        #[command(subcommand)]
+        command: CommandCommand,
+    },
+}
+
+#[derive(Subcommand)]
+enum VaultCommand {
+    Read {
+        name: String,
+        heading: Option<String>,
+        #[arg(long)]
+        all: bool,
+    },
+}
+
+#[tokio::main]
+async fn main() -> ExitCode {
+    let output: Result<String, String> = match Cli::parse().command {
+        Command::Delegate { command } => {
+            return match alfred::command::cli::run(command).await {
+                Ok(reply) => {
+                    let _ =
+                        std::io::Write::write_all(&mut std::io::stdout(), reply.text.as_bytes());
+                    if reply.ok {
+                        ExitCode::SUCCESS
+                    } else {
+                        ExitCode::FAILURE
+                    }
+                }
+                Err(error) => {
+                    eprintln!("alfred: {error}");
+                    ExitCode::FAILURE
+                }
+            };
+        }
+        Command::Serve {
+            port,
+            vault,
+            hist_db,
+        } => start(port, vault, hist_db).await,
+        Command::Vault { command } => {
+            let reply = match Client::from_env() {
+                Err(e) => Err(e),
+                Ok(client) => match command {
+                    VaultCommand::Read { name, heading, all } => {
+                        cli::read(&client, &name, heading.as_deref(), all).await
+                    }
+                },
+            };
+            reply.map_err(|e| e.to_string())
+        }
+        Command::Hist { command } => alfred::hist::cli::run(command)
+            .await
+            .map_err(|e| e.to_string()),
+        Command::Rules { command } => alfred::rules::cli::run(command)
+            .await
+            .map_err(|e| e.to_string()),
+        Command::Distill(args) => match Client::from_env() {
+            Err(e) => Err(e.to_string()),
+            Ok(client) => alfred::distill::cli::distill(&client, &args)
+                .await
+                .map_err(|e| e.to_string()),
+        },
+        Command::Extractor { command } => match Client::from_env() {
+            Err(e) => Err(e.to_string()),
+            Ok(client) => {
+                alfred::distill::cli::extractor(&client, &command, jiff::Timestamp::now())
+                    .await
+                    .map_err(|e| e.to_string())
+            }
+        },
+    };
+    match output {
+        Ok(text) => {
+            // a closed pipe (| head) is not an error
+            let _ = std::io::Write::write_all(&mut std::io::stdout(), text.as_bytes());
+            ExitCode::SUCCESS
+        }
+        Err(error) => {
+            eprintln!("alfred: {error}");
+            ExitCode::FAILURE
+        }
+    }
+}
+
+async fn start(
+    port: u16,
+    vault: Option<PathBuf>,
+    hist_db: Option<PathBuf>,
+) -> Result<String, String> {
+    let home = std::env::var_os("HOME").map(PathBuf::from);
+    let vault = vault
+        .or_else(|| home.as_ref().map(|h| h.join("notes")))
+        .ok_or("set ALFRED_VAULT or HOME")?;
+    let hist_db = hist_db
+        .or_else(|| home.as_ref().map(|h| h.join(".tl/tl.db")))
+        .ok_or("set HIST_DB or HOME")?;
+    let hist = HistDb::open(&hist_db).map_err(|e| e.to_string())?;
+    let trigger = Trigger::from_env()?;
+    let app = App {
+        vault: Vault::new(vault),
+        rules: Rules::from_env(),
+        hist,
+        episodes: Episodes::from_env(),
+        chat: Chat::from_env(),
+        embedder: Embedder::from_env(),
+        runner: Runner::new(trigger),
+    };
+    serve::run(app, port)
+        .await
+        .map(|()| String::new())
+        .map_err(|e| e.to_string())
+}

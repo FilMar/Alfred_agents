@@ -28,7 +28,7 @@ as a page, next to the skeleton, and the user looks at the page.
   "invarianti": [
     {"testo": "<regola che vale sempre>", "su": ["<Nome>"]}
   ],
-  "fatti": ["<un fatto che i contratti non portano, per le run th>"]
+  "fatti": ["<un fatto che i contratti non portano, per le run di alfred command>"]
 }
 ```
 
@@ -36,7 +36,7 @@ as a page, next to the skeleton, and the user looks at the page.
   the entity lives outside the repo. Two entities may share one file:
   then the graph tells them apart by the symbol that matches `id`.
 - `cli` and `comandi` (optional): the command an entity runs as, and
-  its subcommands, such as `"cli": "tb"`, `"comandi": ["search"]`.
+  its subcommands, such as `"cli": "ti"`, `"comandi": ["search"]`.
   They let `overlay.py` find calls that graphify cannot see.
 - `su`: the entities an invariant binds. The page puts a badge on each.
 - `fatti`: optional. See `tests-and-body.md`, step 1.

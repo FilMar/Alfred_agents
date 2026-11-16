@@ -22,7 +22,7 @@ contract. The real run is the only test.
 ### 0. Read the context
 
 ```
-ti search "<what the script does>"
+alfred rules search "<what the script does>"
 ```
 
 Then the project's CLAUDE.md and `.wiki/` (via omero), if they exist.

@@ -62,7 +62,7 @@ the whole audit; nothing else in this skill matters more.
    ```
    scripts/test_skill.sh <skill_path> "<realistic task>"
    ```
-   This runs the skill in a throwaway `th` member, inside a bwrap
+   This runs the skill in a throwaway `alfred command` run, inside a bwrap
    sandbox: only the current directory, `~/.pi`, `~/.bun`, and `/tmp`
    are writable. A write failure elsewhere is the sandbox at work, not a
    bug in the skill.
@@ -144,13 +144,13 @@ is written in English, easy-English style:
   script").
 - No idioms — they don't translate and they don't parse reliably.
 
-This applies to anything public or shareable. The Third Brain and
-personal notes stay in Italian — the split is by audience, not by file
+This applies to anything public or shareable. Personal notes stay in
+Italian — the split is by audience, not by file
 type, and skills are always on the public side of it.
 
 ### Rule 3 — Direct CLI + scripts
 
-`SKILL.md` calls the tools it needs directly — `tb`, `ti`, `th`, `gh`,
+`SKILL.md` calls the tools it needs directly — `alfred`, `gh`,
 whatever the skill is about. The prose and the CLI meet with no layer in
 between: one source of truth, nothing to keep in sync. The CLI's
 `--help` is the authority on syntax; the skill, on procedure. When a

@@ -1,6 +1,6 @@
 ---
 name: feynman
-description: "Feynman teaches a topic as one visual HTML page: a model, an animation, a diagram the user can play with, and as few words as it takes. It teaches only from sources: the files, code and links the user gives, the Third Brain, and the web for the gaps. Every claim cites a source line, and a script checks each cite. Use it whenever the user wants to understand something, even if they do not say 'explain'. Strong triggers: 'spiegami', 'come funziona', 'fammi capire', 'insegnami', 'cosa so davvero di X', 'spiegami questo codice', 'ho aggiunto dei video su X, insegnami', 'fammi vedere come funziona'. Not for finding debt or patterns in a codebase (indiana), not for a plain list of what the Third Brain holds (christopher)."
+description: "Feynman teaches a topic as one visual HTML page: a model, an animation, a diagram the user can play with, and as few words as it takes. It teaches only from sources: the files, code and links the user gives, and the web for the gaps. Every claim cites a source line, and a script checks each cite. Use it whenever the user wants to understand something, even if they do not say 'explain'. Strong triggers: 'spiegami', 'come funziona', 'fammi capire', 'insegnami', 'cosa so davvero di X', 'spiegami questo codice', 'ho aggiunto dei video su X, insegnami', 'fammi vedere come funziona'. Not for finding debt or patterns in a codebase (indiana)."
 allowed-tools: Bash, Read, Write, WebSearch
 ---
 
@@ -34,9 +34,7 @@ is `<id>:<line>`. Take the sources in this order:
    output: `python3 ../polo/scripts/article.py "<url>" > <id>.txt`.
    For code, a real run is a source too: save its output to a file and
    cite it like any other line.
-2. **The Third Brain.** Run 2 to 4 queries from different angles and
-   save them: `tb search "<query>" --min-score 0.35 --limit 10 --depth 1 >> tb.txt`.
-3. **The web, for the gaps only.** Search, then save the best pages with
+2. **The web, for the gaps only.** Search, then save the best pages with
    polo, as in point 1.
 
 List them in `sources.json` in the same folder:

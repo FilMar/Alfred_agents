@@ -226,6 +226,9 @@ def code(spec: Json) -> Json:
             piece |= {"grafo": graph, "quante": len(hits)}
             piece["occorrenze"] = hits[:HITS_MAX]
             piece["vivo"] = bool(hits or (graph and graph["in"]))
+    if after := spec.get("dopo"):
+        tree = parser.parse(after.encode()).root_node
+        spec["after"] = paint(after.encode(), tree, [], range(len(after.encode())))
     return spec
 
 

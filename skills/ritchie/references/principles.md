@@ -21,8 +21,9 @@ value.
 
 ## P2. The contract is the boundary
 
-Every function declares at its boundary what it demands (preconditions)
-and what it guarantees (postconditions). The contract is the only oracle
+A function with an invariant declares it at its boundary: what it
+demands (preconditions) and what it guarantees (postconditions). A
+function with no invariant declares nothing. The contract is the only oracle
 of a test: a test carries no assert of its own, except a classifier's
 outcome table. Contracts stay live in the checked production profile.
 

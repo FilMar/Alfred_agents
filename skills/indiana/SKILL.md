@@ -45,11 +45,6 @@ find <path> -maxdepth 1 -type f -name '*.md' | sort   # markdown docs
 grep -rn "TODO\|FIXME\|HACK\|XXX\|workaround\|kludge\|hotfix" <path> --include="*.py" --include="*.ts" --include="*.go" --include="*.js" 2>/dev/null | grep -v node_modules | head -30
 ```
 
-Then search the Third Brain for what you already know about these stacks:
-```bash
-tb search "<main language or framework>" --limit 5
-```
-
 ### 2. Layer Dig (Layer Analysis)
 
 Read the project in layers, from general to particular:

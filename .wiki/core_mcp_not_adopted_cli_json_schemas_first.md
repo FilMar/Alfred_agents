@@ -31,7 +31,7 @@ Rejected: native MCP servers, for no measured benefit. Also rejected: an MCP fac
 ## Cross-references
 
 - [style_dual_entrypoint](style_dual_entrypoint) — the CLI + HTTP API pattern these tools already follow
-- [core_tb_stateless_single_source](core_tb_and_ti_are_stateless_clients_of_one_store_on_the_rasp) — CLIs hold no state
+- [core_tb_stateless_single_source](core_alfred_v2_one_binary_serve_on_the_deck) — CLIs hold no state
 - [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) — the hand-built MCP-like hook that already exists
 - [skill_convention_direct_cli](skill_convention_direct_cli) — skills call CLIs directly
 - [memory_ti_context_action_rules](memory_ti_context_action_rules) — where the P2 trigger rule lives

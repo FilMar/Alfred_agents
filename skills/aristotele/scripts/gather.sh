@@ -12,12 +12,10 @@ fi
 run="/tmp/aristotele/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$run"
 
-tb refine >"$run/before_tb.json"
-ti refine >"$run/before_ti.json"
-tb near --min 0.9 --limit 50 >"$run/near_tb.json"
-ti near --min 0.85 --limit 50 >"$run/near_ti.json"
-tl prompts --since "$(date -d "-$days days" +%Y-%m-%d)" >"$run/prompts.json"
-ti reach <"$run/prompts.json" >"$run/reach.json"
+alfred rules refine >"$run/before_ti.json"
+alfred rules near --min 0.85 --limit 50 >"$run/near_ti.json"
+alfred hist prompts --since "$(date -d "-$days days" +%Y-%m-%d)" >"$run/prompts.json"
+alfred rules reach <"$run/prompts.json" >"$run/reach.json"
 : >"$run/actions.jsonl"
 
 echo "$run"

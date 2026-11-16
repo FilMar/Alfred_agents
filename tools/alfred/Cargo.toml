@@ -1,0 +1,33 @@
+[package]
+name = "alfred"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.9"
+clap = { version = "4.6.7", features = ["derive", "env"] }
+jiff = "0.2.43"
+pulldown-cmark = "0.13.6"
+reqwest = { version = "0.13.5", default-features = false, features = ["json", "query"] }
+rusqlite = { version = "0.42.0", features = ["bundled"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.154", features = ["preserve_order"] }
+sha2 = "0.11.1"
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["macros", "rt-multi-thread", "process", "io-util", "time"] }
+unicode-normalization = "0.1"
+uuid = { version = "1.29.2", features = ["v4"] }
+
+[profile.release-checked]
+inherits = "release"
+debug-assertions = true
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+missing_errors_doc = "allow"
+must_use_candidate = "allow"
+missing_panics_doc = "allow"
+return_self_not_must_use = "allow"
+cast_possible_truncation = "allow"
+cast_precision_loss = "allow"
+cast_sign_loss = "allow"

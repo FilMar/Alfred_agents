@@ -1,5 +1,5 @@
 #!/bin/bash
-# Claude hook: query Third Identity (ti) and Third Brain (tb) before each prompt
+# Claude hook: search the rules (alfred rules) before each prompt
 # Output format matches Claude's hookSpecificOutput schema
 #
 # The cutoff belongs to the embedding model, not to taste: measured on
@@ -8,39 +8,18 @@
 # and it fired on none of eight real prompts — the injection was silent.
 # 2026-10-21 spike (spikes/2026-10-21-hook-preview + threshold-fix): 0.5 sat on the
 # edge of the used-note band (used 0.506-0.600, misses 0.33-0.50). Lowered to 0.3:
-# trims the noise tail, empties ti on conversational prompts, keeps the miss band.
+# trims the noise tail, empties the rules on conversational prompts, keeps the miss band.
 # Below ~0.25 the threshold is a no-op on this corpus (measured cosine floor).
-# Related notes removed: they bypass --min-score via ref-traversal (depth 0).
+# The search gives up after 1 second: a server that does not answer injects nothing.
 
 input=$(cat)
 prompt=$(jq -r '.prompt // empty' <<<"$input")
 
 [ -z "$prompt" ] && exit 0
 
-ti_file=$(mktemp)
-tb_file=$(mktemp)
+rules=$(alfred rules search "$prompt" --limit 5 --min-score 0.3 --no-archived --timeout 1000 2>/dev/null)
 
-ti search "$prompt" --limit 5 --min-score 0.3 --no-archived 2>/dev/null >"$ti_file" &
-pid_ti=$!
-
-tb search "$prompt" --depth 0 --limit 5 --min-score 0.3 --no-archived 2>/dev/null >"$tb_file" &
-pid_tb=$!
-
-wait "$pid_ti" "$pid_tb"
-
-ti_out=$(cat "$ti_file")
-tb_out=$(cat "$tb_file")
-
-rm -f "$ti_file" "$tb_file"
-
-context=""
-if [ -n "$ti_out" ]; then
-  context+=$'## Third Identity (ti) matches\n'"$ti_out"$'\n\n'
-fi
-if [ -n "$tb_out" ]; then
-  context+=$'## Third Brain (tb) matches\n'"$tb_out"
-fi
-
-if [ -n "$context" ]; then
+if [ -n "$rules" ]; then
+  context=$'## Rule matches\n'"$rules"
   jq -n --arg ctx "$context" '{hookSpecificOutput: {hookEventName: "UserPromptSubmit", additionalContext: $ctx}}'
 fi

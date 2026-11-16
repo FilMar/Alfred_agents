@@ -32,7 +32,7 @@ red baseline hides what broke.
 Read the rules of the skill that owns each file. A file with a
 `desc:` and a `usage:` header is a pike script:
 `~/.pi/agent/skills/pike/SKILL.md`. Any other file is ritchie's:
-`~/.pi/agent/skills/ritchie/SKILL.md`. Run `ti search "<what the code does>"` and
+`~/.pi/agent/skills/ritchie/SKILL.md`. Run `alfred rules search "<what the code does>"` and
 read the project's `.wiki/` too. A project rule wins.
 
 Read the sheet for each language in scope, in
@@ -78,7 +78,10 @@ Look for these, in this order. The first ones save the most lines.
    fails, it was ceremony. An assert that cannot fail is ceremony too:
    see "An assert must be able to fail" in
    `~/.pi/agent/skills/ritchie/references/rules.md`. An assert that
-   states a decision of the body in another form stays.
+   states a decision of the body in another form stays. A union whose
+   users all check the variant and then do the same work is ceremony
+   too: merge it into one type with a field. A union whose branches do
+   different work stays. See "When a union pays" in the same file.
 4. **A shorter way.** Walk the language sheet tool by tool, and look
    for the code each one replaces: a macro, a derive, a generic, a
    table, a decorator, a comprehension. Each tool states when it pays
@@ -111,9 +114,11 @@ tree (the size gate counts new files), on the shape of
 `references/cuts-template.md`. The values are in Italian. Then draw the
 page with `scripts/cuts_page.sh --cuts <file>` (it runs
 `scripts/cut_holes.py` and `scripts/render_cuts.py`). One cut is one
-decision: the same change in many files is one cut. A merge shows
-Prima and Dopo. A cut that only deletes shows the code that goes, so
-the user reads it and judges. A dead symbol carries its proof. The
+decision: the same change in many files is one cut. A cut that
+rewrites code shows Prima and Dopo: a stamp for two or more copies, a
+`codice` view with `dopo` for one piece. A cut that only deletes uses
+`codice` without `dopo`, so the user reads the code that goes and
+judges. A dead symbol carries its proof. The
 user ticks the cuts and copies the choice. Chat carries only the total
 and the path of the page.
 

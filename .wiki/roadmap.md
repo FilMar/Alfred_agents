@@ -1,17 +1,27 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-11-03
+updated: 2026-11-16
 ---
 
 A block is one run of ritchie (code) or efesto (skill). [A] is architecture: small, read it closely in review. [M] is mechanical: big, the first piece shows the rest.
 
 Only the next goals have blocks. When a goal is done, pick the next one from Ideas and cut it into blocks then.
 
+## alfred v2: distill, command, deploy and switch
+
+The distiller and `th` move into alfred. Then the server goes on the Deck, and every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
+
+- [M] `alfred command` tests that close two gaps: pi dies after the timeout, read through the `.pid` file [detail](core_alfred_command_runs_pi_as_a_child_in_bwrap); a sent spool file leaves, with a `Client::at(url)` for tests [detail](core_alfred_command_files_each_run_in_hist_with_a_spool). Parts A and B are done.
+- [A] Merge `refactoring/alfred_v2` into `main`; `tl` is already off on the Deck. alfred runs on the Deck, callers call `alfred`, and the server distils with row 4 [detail](memory_distill_runs_on_the_server_with_row_4).
+- [M] Retire `tools/tb`, `tools/ti`, `tools/tl`, `tools/td` and `tools/th`, their tests, `package.json` and bun, with the wiki pages that describe them. Drop `TL_API_URL` and `QDRANT_URL` from `env.sh`. Rename the extension folders `tb_ti` and `tb_refine`, with `setup.sh` and the links.
+
 ## Ideas
 
 One line each. An idea becomes blocks only when it is the next goal.
 
+- Start and follow chats and `alfred command` runs from the phone, through the `alfred serve` API: the Deck is a client too.
+- The session failure `split failed` carries the reason of the answer: an Ollama quota error looks like a bad model answer today.
 - Scale the session cap with its exchanges, and record the skipped ones. [detail](memory_td_session_cap_limits_one_session)
 - A guard for tag synonyms in `td`, after reading the proposed tags. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - `td` phase 3: bridges between saved notes. [detail](memory_bridges_by_shape_are_judged_by_reading)
@@ -19,7 +29,9 @@ One line each. An idea becomes blocks only when it is the next goal.
 - `browse` and `random` print text, as `search` does. [detail](memory_search_prints_text_blocks_by_default)
 - A limit on the extractions API and on `tl extractions`.
 - One home for `requireServices`, or leave it. [detail](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags)
-- The distiller runs on the Rasp. It needs Ollama there. [detail](memory_td_distills_by_itself_at_session_start)
+- A generic runner of scheduled jobs inside `alfred serve`, agentic or not: sort the mail, check the state of the Deck. It may meet the `tp` design below.
+- Fix the generic `ti` rules that score 0.5-0.6 on every prompt. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
+- Drop empty `tl` episodes from the search. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
 - A test for the hook script of the distiller. [detail](memory_td_distills_by_itself_at_session_start)
 - `th` cleans up zombie processes.
 - Ritchie: the mutant run as a script; a fixture helper; contract messages carry values; an integration net. [detail](skill_ritchie_contract_messages_carry_values)
@@ -27,7 +39,6 @@ One line each. An idea becomes blocks only when it is the next goal.
 - Router pass: multi-direction skills become dispatch tables. [detail](skill_router_pass_planned)
 - Socrate becomes a `ti` principle. [detail](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood)
 - The piano rule in `ti` covers new features too. [detail](skill_piano_writes_design_main_md)
-- Ritchie: settle "every function has a contract" against "one invariant is checked once per call chain". Dijkstra decides it case by case today. [detail](skill_dijkstra_proves_owner_rules_against_baseline)
 - Spec view: a layout that stays readable with 15 entities and 20 flows. [detail](skill_ritchie_spec_is_shown_not_written)
 - Spec view: find CLI calls without a regex per tool, so a call like `bun <path> distill` is not missed. [detail](skill_ritchie_review_shows_plan_against_built)
 - Census of the skills not yet judged: feynman, indiana, polo and the rest.
@@ -43,7 +54,7 @@ One line each. An idea becomes blocks only when it is the next goal.
 To discuss with Piano before any block.
 
 - analisi: `.design/analisi.md`. `polo` reads sources. Missing: official and independent sources, the chart (`atlante` is in git), the stop when there are none. The expense CSV (`.bank.csv` in `essays`, read with `xan`) is a case too. On request only, or a monthly summary.
-- memory: discuss `.design/memory.md`.
+- memory: discuss `.design/memory.md`. It says "Io non la curo", "Non è ciò che so io" and "Non è un wiki che leggo io". The v2 memory contradicts these lines: the vault is written with the user. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
 - Procedural memory: `tp`, a runner of procedures (decided 2026-10-20, shape still moving, so no decision page yet). A procedure is a script in a folder; the folder is the registry, there is no register command. The script does the deterministic steps and asks `th` one structured question where judgment is needed: one branch per verdict, no loop. Every run writes a row in `tl` with its outcome, so skill telemetry comes from the runner. Two sources of procedures: a flow over `tl` that finds the operations done often and proposes the script; the agent itself, when it sees that a script it just wrote is generic, saves it in `tp`. The trigger is a `ti` rule whose `do` says `tp run <name>`. Use is the judge: a procedure never run again is archived like a note. Runs under the `th` bwrap profile. Replaces the "tb note of kind protocollo" step in [detail](memory_procedural_memory_grows_on_data); that page is rewritten when the design ends. To Piano first.
 - From the MCP audit: a JSON Schema layer for CLI output, a command whitelist with audit log, the binary trigger rule and an MCP shim for `ti`. [detail](core_mcp_not_adopted_cli_json_schemas_first)
 

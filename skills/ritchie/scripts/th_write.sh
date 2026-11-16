@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# desc: Run one th member that writes the tests or the bodies of a todo file. Hat, model, thinking and system are fixed per role.
+# desc: Run one alfred command run that writes the tests or the bodies of a todo file. Hat, model, thinking and system are fixed per role.
 # usage: th_write.sh tests|body <todo-file> <spec-file> <test-file>
 #
 # tests: the run reads the todo file and the spec, and writes <test-file>.
@@ -64,6 +64,11 @@ mkdir -p "$src_dir" "$test_dir"
 cp "$todo_file" "$src_dir/$target"
 cp "$todo_file" "$src_dir/$target.todo"
 cp "$spec_file" "$work/spec.json"
+case "$target" in
+  *.rs) lang=rust ;; *.ts) lang=typescript ;; *.py) lang=python ;; *.sh) lang=bash ;; *) lang="" ;;
+esac
+sheet="$here/../references/languages/$lang.md"
+[ -n "$lang" ] && [ -f "$sheet" ] && cp "$sheet" "$work/sheet.md"
 
 RULES_TESTS='You write tests from contracts. You never see a body: every body is a todo line.
 An assert above the todo line is a precondition. An assert below it is a postcondition.
@@ -74,7 +79,8 @@ An assert above the todo line is a precondition. An assert below it is a postcon
 - Import only what the file exports. Never import or reach a private member.
 - Use the test framework and style of the project language.
 - The test file holds code only. Write no comment of any kind.
-Read only src/, spec.json and the modules the todo file imports. Never read other test files.
+Read only src/, spec.json, sheet.md and the modules the todo file imports. Never read other test files.
+sheet.md holds the rules of the language. Follow them.
 Write the test file once and stop. You cannot run it.'
 
 RULES_BODY='You write function bodies. Each body replaces one todo line, in that place only.
@@ -82,7 +88,8 @@ RULES_BODY='You write function bodies. Each body replaces one todo line, in that
 - A function with postconditions has no return in its body: assign result and let the postconditions after the todo line run.
 - No recursion. Every loop has a bound.
 - The tests and the spec say what the body must do. The contracts must hold for every test.
-Read only src/, test/ and spec.json. Never read another version of this file.
+Read only src/, test/, spec.json and sheet.md. Never read another version of this file.
+sheet.md holds the rules of the language. Follow them.
 Edit the file once and stop. You cannot run it.'
 
 if [ "$mode" = tests ]; then
@@ -98,7 +105,7 @@ else
   task="Read test/$tests_name and spec.json. Replace every todo line of src/$target with its body."
 fi
 
-(cd "$work" && th run --hat "$hat" --model "$MODEL" --thinking "$THINKING" --tools "$TOOLS" \
+(cd "$work" && alfred command run --hat "$hat" --model "$MODEL" --thinking "$THINKING" --tools "$TOOLS" \
   --system "$system" --timeout "$TIMEOUT_S" --task "$task")
 
 if [ "$mode" = tests ]; then
