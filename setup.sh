@@ -7,8 +7,7 @@ readonly repo_url=https://github.com/FilMar/Alfred_agents
 readonly branch=${ALFRED_BRANCH:-main}
 readonly home_dir=${ALFRED_HOME:-$HOME/.local/share/alfred/repo}
 readonly port=${ALFRED_PORT:-8791}
-readonly unit_dir=$HOME/.config/systemd/user
-readonly unit=$unit_dir/alfred.service
+readonly unit=$HOME/.config/systemd/user/alfred.service
 
 die() { printf 'setup: %s\n' "$1" >&2; exit "${2:-1}"; }
 usage() { sed -n 's/^# usage: //p' "$0" >&2; exit 2; }
@@ -35,17 +34,14 @@ client() {
     local claude=$HOME/.claude pi=$HOME/.pi/agent ext=$home_dir/extensions
     link "$home_dir/alfred.md" "$claude/CLAUDE.md"
     link "$home_dir/alfred.md" "$pi/SYSTEM.md"
-    link "$home_dir/skills" "$claude/skills"
-    link "$home_dir/skills" "$pi/skills"
+    for dir in "$claude" "$pi"; do link "$home_dir/skills" "$dir/skills"; done
     if command -v claude >/dev/null; then
         link "$ext/tb_ti/claude.sh" "$claude/hooks/inject-ti-tb-context.sh"
         link "$ext/tl/claude.sh" "$claude/hooks/ingest-tl.sh"
         link "$ext/tb_refine/claude.sh" "$claude/hooks/refine-tb.sh"
     fi
     if command -v pi >/dev/null; then
-        link "$ext/tb_ti/pi.ts" "$pi/extensions/tb_ti.ts"
-        link "$ext/tl/pi.ts" "$pi/extensions/tl.ts"
-        link "$ext/tb_refine/pi.ts" "$pi/extensions/tb_refine.ts"
+        for name in tb_ti tl tb_refine; do link "$ext/$name/pi.ts" "$pi/extensions/$name.ts"; done
     fi
     install_alfred
 }
@@ -69,10 +65,9 @@ server() {
     if [[ $want == "$have" ]]; then say "[skip] $unit is current"
     elif $dry_run; then say "would write $unit"
     else
-        mkdir --parents "$unit_dir"
+        mkdir --parents "${unit%/*}"
         tmp=$(mktemp "$unit.XXXXXX")
         printf '%s\n' "$want" >"$tmp"
-        chmod 644 "$tmp"
         mv "$tmp" "$unit"
         say "[ok]   $unit"
     fi
