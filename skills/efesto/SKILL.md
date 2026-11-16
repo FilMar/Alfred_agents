@@ -144,13 +144,13 @@ is written in English, easy-English style:
   script").
 - No idioms — they don't translate and they don't parse reliably.
 
-This applies to anything public or shareable. The Third Brain and
-personal notes stay in Italian — the split is by audience, not by file
+This applies to anything public or shareable. Personal notes stay in
+Italian — the split is by audience, not by file
 type, and skills are always on the public side of it.
 
 ### Rule 3 — Direct CLI + scripts
 
-`SKILL.md` calls the tools it needs directly — `tb`, `ti`, `th`, `gh`,
+`SKILL.md` calls the tools it needs directly — `ti`, `th`, `gh`,
 whatever the skill is about. The prose and the CLI meet with no layer in
 between: one source of truth, nothing to keep in sync. The CLI's
 `--help` is the authority on syntax; the skill, on procedure. When a

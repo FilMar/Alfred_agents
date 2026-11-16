@@ -21,7 +21,6 @@ Personal cognitive augmentation system. Five orthogonal layers that cooperate wi
 | `feynman` | Teaches the TB corpus with the Feynman technique |
 | `socrate` | Generates cognitive friction: finds contradictions and gaps, never closes |
 | `aristotele` | Curates TB syntheses: hubs, missing connections, clusters |
-| `christopher` | Retrieves knowledge from the TB without interpreting |
 | `polo` | Extracts text from URLs (web articles and YouTube) |
 | `indiana` | Code archaeology: diagnoses patterns and technical debt |
 | `efesto` | Creates and improves skills |

@@ -4,7 +4,7 @@ The domain model for the wiki Omero maintains. Every term below is a part of the
 
 ## English style
 
-Wiki page text is written in **easy English**. The wiki lives in a git repo and can be shared, so it sits on the public side of the language split (skills and wiki pages in English; the Third Brain and personal notes in Italian).
+Wiki page text is written in **easy English**. The wiki lives in a git repo and can be shared, so it sits on the public side of the language split (skills and wiki pages in English; personal notes in Italian).
 
 Write pages in easy English:
 

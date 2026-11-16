@@ -59,15 +59,15 @@ def actions_table(actions: list[dict]) -> str:
     if not actions:
         return "<p>No action.</p>"
     rows = "".join(
-        f"<tr><td>{a['op']}</td><td>{a['store']}</td><td>{html.escape(a['why'])}</td>"
+        f"<tr><td>{a['op']}</td><td>{html.escape(a['why'])}</td>"
         f"<td class='ids'>{' '.join(i[:8] for i in a['ids'])}</td></tr>"
         for a in actions
     )
-    return f"<table><tr><th>op</th><th>store</th><th>why</th><th>ids</th></tr>{rows}</table>"
+    return f"<table><tr><th>op</th><th>why</th><th>ids</th></tr>{rows}</table>"
 
 
 def page(run: Path, data: dict) -> str:
-    counts = Counter(f"{a['store']} {a['op']}" for a in data["actions"])
+    counts = Counter(a["op"] for a in data["actions"])
     tiles = "".join(f"<div class='tile'><b>{n}</b><span>{html.escape(k)}</span></div>" for k, n in sorted(counts.items()))
     unreached = "".join(f"<li>{html.escape(r['if'])}</li>" for r in data["reach_after"]["unreached"])
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -84,9 +84,8 @@ table {{ border-collapse:collapse; width:100%; font-size:14px; }} td,th {{ borde
 </style></head><body>
 <h1>Aristotele run {html.escape(run.name)}</h1>
 <div class="tiles">{tiles or "<p>No action.</p>"}</div>
-<h2>Close pairs</h2><p>tb: {len(data["near_tb"])} before, {len(data["near_tb_after"])} after. ti: {len(data["near_ti"])} before, {len(data["near_ti_after"])} after.</p>
-<h2>Trust of the notes (tb)</h2>{spread_chart(data["before_tb"], data["after_tb"])}
-<h2>Trust of the rules (ti)</h2>{spread_chart(data["before_ti"], data["after_ti"])}
+<h2>Close pairs</h2><p>{len(data["near_ti"])} before, {len(data["near_ti_after"])} after.</p>
+<h2>Trust of the rules</h2>{spread_chart(data["before_ti"], data["after_ti"])}
 <h2>How often each rule comes up, after the run</h2><p>{data["reach_after"]["prompts"]} real prompts.</p>{reach_chart(data["reach_after"])}
 <h2>Actions</h2>{actions_table(data["actions"])}
 <h2>Rules that still never come up</h2><ul>{unreached}</ul>
@@ -98,10 +97,8 @@ def main() -> int:
         print("usage: report.py <run_dir>  (a folder made by gather.sh)", file=sys.stderr)
         return 2
     run = Path(sys.argv[1])
-    data = {name: load(run / f"{name}.json") for name in ["before_tb", "before_ti", "near_tb", "near_ti"]}
-    data["after_tb"] = cli(["tb", "refine"], run / "after_tb.json")
+    data = {name: load(run / f"{name}.json") for name in ["before_ti", "near_ti"]}
     data["after_ti"] = cli(["ti", "refine"], run / "after_ti.json")
-    data["near_tb_after"] = cli(["tb", "near", "--min", "0.9", "--limit", "50"], run / "near_tb_after.json")
     data["near_ti_after"] = cli(["ti", "near", "--min", "0.85", "--limit", "50"], run / "near_ti_after.json")
     with (run / "prompts.json").open() as prompts:
         text = subprocess.run(["ti", "reach"], stdin=prompts, check=True, capture_output=True, text=True).stdout

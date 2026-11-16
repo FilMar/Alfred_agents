@@ -33,7 +33,7 @@ Hats run on different models, and that is the strongest source of difference. Pr
 
 ## The flow
 
-1. **Write the brief.** The text of the problem, whole: what to decide, the options in play, the constraints, who is affected. The voices know nothing else. If the project has `.design/main.md`, take from it only what the problem needs. If the problem touches what the Third Brain may know, run `th run --skill christopher` first and put only the useful part in the brief. A skill is never a value for `--hat`.
+1. **Write the brief.** The text of the problem, whole: what to decide, the options in play, the constraints, who is affected. The voices know nothing else. If the project has `.design/main.md`, take from it only what the problem needs. A skill is never a value for `--hat`.
 2. **Make the viewpoints.** Two to four voices. Each is a hat and a stance made for this problem. A stance gives a direction and a blind spot, not a credential: "a developer back after eight months who remembers nothing", not "a documentation expert". For a project, take the voices from its real readers, users and maintainers. If two stances would give the same answer, drop one.
 3. **Show the plan and wait for a yes.**
 
