@@ -1,33 +1,40 @@
 # Pi
 
-Personal cognitive augmentation system. Five orthogonal layers that cooperate without overlapping.
+Personal agent tooling. One binary, `alfred`, holds the memory and runs delegated work. The skills in `skills/` tell an agent how to use it.
 
-## The Layers
+## The layers
 
 | Access | Name | Purpose |
 |--------|------|---------|
-| `tb` (CLI + HTTP) | Third Brain | Semantic memory: ideas, concepts, connections. Additive associative graph with hybrid search and hubs. Notes are never deleted; refs and tags can be updated. |
-| `th` (CLI) | Third Hand | Agent orchestration with de Bono hats. Project members, sequential and parallel flows, bwrap sandbox. |
-| `.wiki/` (Omero skill) | Third Wiki | Local project wiki: pages, style guides, code conventions. Plain markdown, maintained by Omero. Lives and dies with the project. |
-| `ti` (CLI + HTTP) | Third Identity | Context→behavior rules: what to do in a given situation. Dedicated Qdrant collection, same shape as `tb`. |
-| `tl` (REST, planned) | Third Log | Unified structured event log shared by `th`/`tb`/`ti`. Founded, not yet implemented. |
+| `alfred rules` | Third Identity | Context→action rules: what to do in a given situation. The server distils them from past sessions. |
+| `alfred hist` | Third Log | The archive of past sessions, with an episode per run of work: a summary and a date. |
+| `alfred vault` | Vault | Shared knowledge across projects, written with the user. |
+| `alfred command` | Third Hand | Delegated runs: a hat plus instructions, pi as a child process inside a bwrap sandbox. |
+| `.wiki/` (Omero skill) | Third Wiki | Local project wiki: decisions, style guides, code conventions. Lives and dies with the project. |
 
-## Agents
+`alfred serve` runs on the home server and holds the state. Every other `alfred` command is a client of it, through `ALFRED_URL`. `alfred command` runs on the local machine.
 
-| Agent | Role |
+## Skills
+
+| Skill | Role |
 |-------|------|
 | `annibale` | Agentic debate: viewpoints made on the fly, one synthesis |
 | `piano` | Debates what a project or feature is for: writes `.design/main.md` |
-| `feynman` | Teaches the TB corpus with the Feynman technique |
-| `socrate` | Generates cognitive friction: finds contradictions and gaps, never closes |
-| `aristotele` | Curates TB syntheses: hubs, missing connections, clusters |
-| `polo` | Extracts text from URLs (web articles and YouTube) |
+| `polo` | Research by kind of question (Wikipedia, studies, data, news, web) and reading any URL |
+| `feynman` | Teaches a topic as one visual page, from sources |
+| `socrate` | Puts your reasoning under pressure with logic, memory and the web |
+| `aristotele` | Curates the rules: duplicates, wrong rules, ghost rules |
 | `indiana` | Code archaeology: diagnoses patterns and technical debt |
+| `ritchie` | Production code: spec, contracts, tests, bodies, review |
+| `pike` | Short, solid scripts |
+| `dijkstra` | Makes code shorter after ritchie or pike |
+| `edison` | Throwaway spikes |
 | `efesto` | Creates and improves skills |
 | `omero` | Maintains the local project wiki in `.wiki/` |
 | `linus` | Manages GitHub via gh: issues, project board, recaps |
+| `kara` | Bookmarks on Karakeep |
 
-Full, always-current roster (derived from the filesystem at print time):
+The always-current roster comes from the filesystem:
 
 ```bash
 python3 skills/efesto/scripts/roster.py
@@ -35,48 +42,20 @@ python3 skills/efesto/scripts/roster.py
 
 ## Setup
 
+On a client:
+
 ```bash
 ./setup.sh
 ```
 
-Requires `bun`. Installs the `tb`, `th`, `ti` symlinks in `~/.local/bin/`, links the identity (`alfred.md`) and the `skills/` directory into both `~/.claude/` and `~/.pi/agent/`, links the `tb_ti` extension (automatic `tb`/`ti` context injection) and the systemd user services for the `tb`/`ti` HTTP APIs.
+It needs `git` and `cargo`. It links the identity (`alfred.md`), the `skills/` directory and the extensions into `~/.claude/` and `~/.pi/agent/`, then installs `alfred` into `~/.local/bin` with `cargo install --git`. Set `ALFRED_URL` to the server, like `http://<server>:8791`.
 
----
+On the server, the `filcloud_init` repo runs `setup.sh` and then starts `alfred serve` as a user unit, from `tools/alfred/deploy/alfred.service`.
 
-## The Ritual
+## The rules and the wiki
 
-The system works only if used consistently.
+**Rules** (`alfred rules`): what to do in a situation that recurs across projects. A hook searches them on every prompt.
 
-### During work — Alfred + th
+**Local wiki** (`.wiki/`, via Omero): project-specific decisions, flows, architecture and conventions.
 
-Before answering on a topic that might be in the TB:
-
-```bash
-tb search "<topic>" --depth 1
-```
-
-For a judgment with trade-offs that benefits from several viewpoints: Annibale runs a debate. Read its SKILL.md and follow it.
-To extract content from URLs or videos: Polo.
-
-### On a project — Omero
-
-Omero maintains the local wiki in `.wiki/` — plain markdown pages, style guides and code conventions. Delegate to Omero to ingest material, ask about the project, or document how the code is written. The skill operates on the files directly.
-
-### End of session
-
-`td` distils the session into `tb` and `ti` at the start of a later session. Nothing to do by hand.
-If the work was on a project with a wiki: Omero updates `.wiki/`.
-
-### Periodically — Aristotele
-
-When the TB starts to feel dense (every 2-4 weeks): Aristotele creates hubs and connects isolated notes.
-
----
-
-### The fundamental distinction
-
-**Third Brain** (`tb`): ideas that have value beyond the project — principles, patterns, cognitive tensions. No code blocks, no detailed technical documentation.
-
-**Local wiki** (`.wiki/`, via Omero): project-specific documentation — commands, flows, architecture, conventions, lore. Lives and dies with the project.
-
-The two systems complement each other, they do not overlap.
+The two complement each other: a rule says what to do, the wiki says why this project does it this way.

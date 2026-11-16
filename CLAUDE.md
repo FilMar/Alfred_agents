@@ -1,7 +1,7 @@
 # Project: pi
 
 ## Hard Constraints (Governance)
-- **Rule Retrieval First**: Before any non-obvious or recurring action (starting a module, delegating, documenting, consolidating memory), run `ti search "<context>"` and follow the matching rule. Routing rules live in `ti`, not in this file.
+- **Rule Retrieval First**: Before any non-obvious or recurring action (starting a module, delegating, documenting, consolidating memory), run `alfred rules search "<context>"` and follow the matching rule. Routing rules live in `alfred rules`, not in this file.
 - **No Simulation**: Specialized roles are never performed inline — always via the matching skill. A choice that needs several viewpoints goes to a debate: propose annibale.
 
 ## Error Handling
