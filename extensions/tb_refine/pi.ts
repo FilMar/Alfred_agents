@@ -15,8 +15,7 @@ function detached(command: string, args: string[]): void {
 export default function (pi: ExtensionAPI): void {
   pi.on("session_start", async () => {
     // Detached and silent: opening a session never waits for these, and never fails because of them.
-    detached("tb", ["refine", "--apply"]);
-    detached("ti", ["refine", "--apply"]);
+    detached("alfred", ["rules", "refine", "--apply"]);
     detached(DISTILL, []);
   });
 }
