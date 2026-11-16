@@ -1,6 +1,7 @@
 pub mod api;
 pub mod chat;
 pub mod client;
+pub mod command;
 pub mod distill;
 pub mod embed;
 pub mod hist;

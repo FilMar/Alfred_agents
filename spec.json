@@ -1,0 +1,211 @@
+{
+  "feature": "alfred command parte A: una run in primo piano. run e hats; pi come processo figlio dentro bwrap; i file della run in /tmp. Parte B (archivio, spool, --detach, wait) dopo",
+  "entita": [
+    {
+      "id": "CommandCli",
+      "codice": [
+        "tools/alfred/src/command/cli.rs"
+      ],
+      "cli": "alfred",
+      "comandi": [
+        "command run",
+        "command hats"
+      ],
+      "stato": "nessuno: gli argomenti di clap",
+      "fa": "run in primo piano, hats list e hats get",
+      "non_fa": "nella parte A non archivia, non fa --detach ne' wait; non tiene history, get, models, archive-pending, sandbox-exec",
+      "serve_a": "gli script delle skill (annibale, efesto, ritchie th_write.sh), con lo stesso output di th",
+      "comanda": [
+        "RunSpec",
+        "JobPaths",
+        "Runner",
+        "Hats"
+      ]
+    },
+    {
+      "id": "Hats",
+      "codice": [
+        "tools/alfred/src/command/hats.rs",
+        "tools/alfred/src/command/hats/"
+      ],
+      "stato": "i sei hat, compilati nel binario con include_str",
+      "fa": "list dei sei nomi in ordine; get del testo di un hat per nome",
+      "non_fa": "non legge una cartella a runtime, non ha TH_HATS_DIR: gli hat sono fissi",
+      "serve_a": "CommandCli, RunSpec",
+      "comanda": []
+    },
+    {
+      "id": "Skill",
+      "codice": [
+        "tools/alfred/src/command/skill.rs"
+      ],
+      "stato": "nome, path del SKILL.md, cartella base",
+      "fa": "trova una skill per nome nelle cartelle di pi; il blocco <skill> con il testo intero e la cartella base",
+      "non_fa": "non offre la skill al modello: la impone nel system prompt",
+      "serve_a": "RunSpec",
+      "comanda": []
+    },
+    {
+      "id": "RunSpec",
+      "codice": [
+        "tools/alfred/src/command/spec.rs"
+      ],
+      "stato": "label, task, system prompt composto, tools, thinking, model, timeout, skill",
+      "fa": "costruisce la run dagli argomenti: label = hat o skill; system prompt = ruolo, hat, skill in quest'ordine; gli argomenti di pi",
+      "non_fa": "non lancia niente",
+      "serve_a": "Runner",
+      "comanda": [
+        "Hats",
+        "Skill"
+      ]
+    },
+    {
+      "id": "JobPaths",
+      "codice": [
+        "tools/alfred/src/command/job.rs"
+      ],
+      "stato": "la base /tmp/alfred-<label>-<ms>-<4 hex> e i quattro path .out .log .status .pid",
+      "fa": "crea i path di una run nuova; ricava gli altri path dal .status; legge e scrive lo Status",
+      "non_fa": "non tiene stato in un database: i file sono lo stato",
+      "serve_a": "Runner, CommandCli",
+      "comanda": []
+    },
+    {
+      "id": "Status",
+      "codice": [
+        "tools/alfred/src/command/job.rs"
+      ],
+      "stato": "running, done, error: <motivo>, timeout",
+      "fa": "il testo del file .status e il suo parse; dice se e' terminale",
+      "non_fa": "niente altro",
+      "serve_a": "Runner",
+      "comanda": []
+    },
+    {
+      "id": "Sandbox",
+      "codice": [
+        "tools/alfred/src/command/sandbox.rs"
+      ],
+      "stato": "nessuno",
+      "fa": "avvolge il comando di pi in bwrap: / in sola lettura, scrivibili solo cwd, ~/.pi, /tmp; senza bwrap avvisa su stderr e lancia pi nudo",
+      "non_fa": "non avvolge alfred: alfred deve raggiungere il Deck",
+      "serve_a": "Runner",
+      "comanda": []
+    },
+    {
+      "id": "Runner",
+      "codice": [
+        "tools/alfred/src/command/runner.rs"
+      ],
+      "stato": "la run in corso: il figlio pi, i file .out e .log aperti, i messaggi di agent_end",
+      "fa": "lancia pi -p --mode json nel Sandbox; legge una riga JSON alla volta; text_delta va su stdout e .out, thinking_delta e i tool su .log; con timeout uccide pi; scrive sempre uno Status terminale; tiene i messaggi di agent_end per la parte B",
+      "non_fa": "non fa il loop dell'agente: lo fa pi",
+      "serve_a": "CommandCli, Detach",
+      "comanda": [
+        "Sandbox",
+        "JobPaths"
+      ]
+    }
+  ],
+  "flussi": [
+    {
+      "da": "CommandCli",
+      "a": "RunSpec",
+      "passa": "gli argomenti di run",
+      "torna": "RunSpec, o un errore (hat o skill sconosciuti, label non valida)"
+    },
+    {
+      "da": "RunSpec",
+      "a": "Hats",
+      "passa": "nome dell'hat",
+      "torna": "testo dell'hat"
+    },
+    {
+      "da": "RunSpec",
+      "a": "Skill",
+      "passa": "nome della skill",
+      "torna": "blocco <skill>"
+    },
+    {
+      "da": "CommandCli",
+      "a": "JobPaths",
+      "passa": "label",
+      "torna": "i quattro path"
+    },
+    {
+      "da": "CommandCli",
+      "a": "Runner",
+      "passa": "RunSpec e i path",
+      "torna": "lo Status finale"
+    },
+    {
+      "da": "Runner",
+      "a": "Sandbox",
+      "passa": "gli argomenti di pi",
+      "torna": "il comando da lanciare"
+    }
+  ],
+  "invarianti": [
+    {
+      "testo": "una run ha un hat, una skill o tutti e due; la label e' l'hat, se no la skill",
+      "su": [
+        "RunSpec"
+      ]
+    },
+    {
+      "testo": "la label contiene solo lettere, cifre, - e _",
+      "su": [
+        "RunSpec",
+        "JobPaths"
+      ]
+    },
+    {
+      "testo": "il system prompt e' ruolo, hat, skill in quest'ordine, i blocchi vuoti tolti, separati da una riga ---",
+      "su": [
+        "RunSpec"
+      ]
+    },
+    {
+      "testo": "i quattro path di una run sono distinti e hanno la stessa base",
+      "su": [
+        "JobPaths"
+      ]
+    },
+    {
+      "testo": "quando Runner finisce, il .status e' terminale, anche se pi non parte",
+      "su": [
+        "Runner",
+        "Status"
+      ]
+    },
+    {
+      "testo": "lo Status scritto si rilegge uguale: il .status passa tra due processi",
+      "su": [
+        "Status"
+      ]
+    },
+    {
+      "testo": "hats list da' i sei nomi in ordine",
+      "su": [
+        "Hats"
+      ]
+    }
+  ],
+  "fatti": [
+    "pi si lancia cosi': pi -p --mode json --no-session --no-extensions --no-context-files --system-prompt <file> [--tools a,b] [--model provider/id] [--thinking livello] -- <task>. Il system prompt va in un file temporaneo accanto ai file della run (<base>.system), non in un argomento",
+    "si passa anche --no-skills: in th il system prompt sostituiva tutto, quindi niente catalogo delle skill e niente CLAUDE.md; la skill imposta e' gia' nel prompt",
+    "stdout di pi e' una riga JSON per evento. message_update con assistantMessageEvent.type text_delta (campo delta) va su stdout e .out; thinking_delta (campo delta) va su .log; tool_execution_start scrive su .log '\\n[tool:<toolName>] <args JSON>\\n'; tool_execution_end scrive '[tool:<toolName>] → ' e poi il testo troncato a 500 caratteri con '… [+N chars]', dove il testo e' il result JSON, preceduto da 'ERROR: ' se isError, e poi '\\n'; agent_end porta messages, i messaggi della run",
+    "il .log passa da sanitize: tolti i codici ANSI \\x1b[...lettera e i caratteri fuori da tab, LF, CR, 0x20-0x7e, 0x80-0xff",
+    "a fine run riuscita si scrive '\\n' su stdout e .out, poi done nel .status. Con timeout: pi riceve kill, lo Status e' timeout. pi che esce con codice diverso da 0 o non parte: error: <motivo>",
+    "su stderr, all'inizio: 'log: <path>' e 'output: <path>', una riga ciascuno, come th",
+    "bwrap: --ro-bind / / --proc /proc --dev /dev --bind <cwd> <cwd> --bind ~/.pi ~/.pi --bind /tmp /tmp --setenv HOME <home> -- pi ... Provato a mano: pi-rust gira cosi'. bwrap si cerca nel PATH; senza, su stderr 'warn: bwrap not available — running WITHOUT sandbox'",
+    "skill per nome: si cerca <cwd>/.pi/skills/<nome>/SKILL.md, poi ~/.pi/agent/skills/<nome>/SKILL.md; la prima che esiste. Blocco: '<skill name=\"<nome>\" location=\"<path SKILL.md>\">', poi 'References inside this skill are relative to <cartella base> — resolve them against it.', una riga vuota, il testo trim, '</skill>', righe unite da \\n",
+    "hat sconosciuto: errore 'Hat \"<nome>\" not found. Available: <sei nomi con virgola e spazio>'. Skill sconosciuta: 'Skill \"<nome>\" not found'. I sei hat sono i file di tools/th/hats, copiati in tools/alfred/src/command/hats/",
+    "hats list stampa i nomi come array JSON pretty; hats get stampa il testo dell'hat seguito da \\n, non JSON",
+    "--tools e' una lista separata da virgole, spazi tolti, vuoti tolti; vuota vuol dire tutti i tool, e allora --tools non si passa a pi",
+    "run in primo piano torna stringa vuota: il testo e' gia' uscito su stdout mentre arrivava; un errore prima del lancio (hat, skill, label) esce con 1 e 'alfred: <errore>'",
+    "i test di stream ed execute non lanciano pi: costruiscono un Launch a mano con program /bin/sh e args [-c, printf di righe JSON finte], e un RunSpec con RunSpec::of; i file della run vanno in una cartella sotto std::env::temp_dir() con un nome unico per test",
+    "un Launch che non parte (program che non esiste) deve finire con Status Error; un sh che dorme oltre il timeout deve finire con Status Timeout",
+    "i test di Skill creano una cartella temporanea con <root>/<nome>/SKILL.md e passano quella root a Skill::find"
+  ]
+}

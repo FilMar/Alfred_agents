@@ -9,6 +9,12 @@
 
 mod chat;
 mod cli;
+mod command_hats;
+mod command_job;
+mod command_runner;
+mod command_sandbox;
+mod command_skill;
+mod command_spec;
 mod distill_ask;
 mod distill_bench;
 mod distill_cli;

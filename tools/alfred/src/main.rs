@@ -5,6 +5,7 @@ use clap::{Parser, Subcommand};
 
 use alfred::chat::Chat;
 use alfred::client::Client;
+use alfred::command::cli::CommandCommand;
 use alfred::distill::cli::{DistillArgs, ExtractorCommand};
 use alfred::distill::runner::Runner;
 use alfred::distill::trigger::Trigger;
@@ -53,6 +54,11 @@ enum Command {
         #[command(subcommand)]
         command: ExtractorCommand,
     },
+    #[command(name = "command")]
+    Delegate {
+        #[command(subcommand)]
+        command: CommandCommand,
+    },
 }
 
 #[derive(Subcommand)]
@@ -68,6 +74,23 @@ enum VaultCommand {
 #[tokio::main]
 async fn main() -> ExitCode {
     let output: Result<String, String> = match Cli::parse().command {
+        Command::Delegate { command } => {
+            return match alfred::command::cli::run(command).await {
+                Ok(reply) => {
+                    let _ =
+                        std::io::Write::write_all(&mut std::io::stdout(), reply.text.as_bytes());
+                    if reply.ok {
+                        ExitCode::SUCCESS
+                    } else {
+                        ExitCode::FAILURE
+                    }
+                }
+                Err(error) => {
+                    eprintln!("alfred: {error}");
+                    ExitCode::FAILURE
+                }
+            };
+        }
         Command::Serve {
             port,
             vault,
