@@ -1,5 +1,6 @@
 mod archive;
 mod extractors;
+mod injections;
 
 use std::path::Path;
 use std::sync::{Mutex, MutexGuard, PoisonError};
@@ -60,7 +61,14 @@ CREATE TABLE IF NOT EXISTS extractions (
   saved_id      TEXT,
   created       TEXT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS extractions_by_run ON extractions(extractor_id, run);";
+CREATE INDEX IF NOT EXISTS extractions_by_run ON extractions(extractor_id, run);
+CREATE TABLE IF NOT EXISTS injections (
+  exchange_id TEXT NOT NULL REFERENCES exchanges(id),
+  kind        TEXT NOT NULL CHECK (kind IN ('rule')),
+  ref         TEXT NOT NULL,
+  text        TEXT NOT NULL,
+  PRIMARY KEY (exchange_id, kind, ref)
+);";
 
 const SESSION_COLUMNS: &str = "id, started, harness, host, path";
 const EXCHANGE_COLUMNS: &str = "id, session, parent, timestamp, kind, actor, model, tokens_in, tokens_out, tokens_cache_read, tokens_cache_write, distilled, meta";

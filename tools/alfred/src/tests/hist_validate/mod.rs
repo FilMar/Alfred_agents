@@ -15,6 +15,7 @@ pub(super) const DAY: &str = "2026-01-02";
 
 mod contents_returns;
 mod exchange_returns;
+mod injection;
 mod is_id;
 mod new_extraction;
 mod new_extraction_outcome;

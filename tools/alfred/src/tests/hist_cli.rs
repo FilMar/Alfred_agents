@@ -145,7 +145,7 @@ fn pretty_prints_indented_json_with_a_trailing_newline() {
     assert_eq!(pretty(&None::<u32>), "null\n");
     assert_eq!(
         pretty(&crate::hist::ingest::Summary::default()),
-        "{\n  \"transcripts\": 0,\n  \"sessions\": 0,\n  \"exchanges\": 0,\n  \"known\": 0,\n  \"orphans\": 0\n}\n"
+        "{\n  \"transcripts\": 0,\n  \"sessions\": 0,\n  \"exchanges\": 0,\n  \"known\": 0,\n  \"orphans\": 0,\n  \"injections\": 0\n}\n"
     );
 }
 
@@ -199,7 +199,7 @@ async fn run_ingest_of_a_sessionless_transcript_prints_the_empty_summary() {
     let text = run(command).await.unwrap();
     assert_eq!(
         text,
-        "{\n  \"transcripts\": 1,\n  \"sessions\": 0,\n  \"exchanges\": 0,\n  \"known\": 0,\n  \"orphans\": 0\n}\n"
+        "{\n  \"transcripts\": 1,\n  \"sessions\": 0,\n  \"exchanges\": 0,\n  \"known\": 0,\n  \"orphans\": 0,\n  \"injections\": 0\n}\n"
     );
 }
 

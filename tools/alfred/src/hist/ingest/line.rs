@@ -24,6 +24,20 @@ pub struct Line {
     pub message: Option<Message>,
     #[serde(deserialize_with = "lenient")]
     pub usage: Option<Usage>,
+    #[serde(deserialize_with = "lenient")]
+    pub attachment: Option<Attachment>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Attachment {
+    #[serde(rename = "type")]
+    #[serde(deserialize_with = "lenient")]
+    pub kind: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub hook_event: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub content: Option<Vec<String>>,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -117,6 +131,18 @@ impl Line {
 
     pub fn model(&self) -> Option<&str> {
         self.message.as_ref()?.model.as_deref()
+    }
+
+    pub fn hook_context(&self, event: &str) -> &[String] {
+        match self.attachment.as_ref() {
+            Some(attachment)
+                if attachment.kind.as_deref() == Some("hook_additional_context")
+                    && attachment.hook_event.as_deref() == Some(event) =>
+            {
+                attachment.content.as_deref().unwrap_or(&[])
+            }
+            _ => &[],
+        }
     }
 
     pub fn provider(&self) -> Option<&str> {

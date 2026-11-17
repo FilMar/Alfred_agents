@@ -155,6 +155,7 @@ pub(super) fn write_exchange(db: &HistDb, id: &str, session: &str, timestamp: &s
         .unwrap();
 }
 
+mod injections;
 mod list_exchanges;
 mod list_extractions;
 mod open_creates;

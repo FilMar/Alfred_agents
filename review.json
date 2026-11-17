@@ -1,0 +1,123 @@
+{
+  "scostamenti": [
+    {
+      "testo": "Il contratto di injections_of è più stretto di quello concordato: le righe devono portare l'id dello scambio dello span (rows_of_exchange), non solo lo stesso id tra loro (one_exchange). La run dei test ha mostrato che il contratto concordato passava anche con un risultato vuoto o con lo scambio sbagliato.",
+      "su": [
+        "LettoreIniezioni"
+      ]
+    },
+    {
+      "testo": "rules_of e injections_of hanno una tabella di esiti nei test, con assert propri. Sono funzioni pure la cui regola è la loro definizione; senza tabella un corpo che non trova niente passava tutti i contratti.",
+      "su": [
+        "LettoreIniezioni"
+      ]
+    },
+    {
+      "testo": "Tre corpi scritti dalla run sono stati corretti a mano, solo nelle righe todo: upsert_injections e has_injection usavano self.conn invece di write_all e lock; injections_of leggeva hook_context invece di harness.injected; validate::injection ricopiava il controllo di is_short_id.",
+      "su": [
+        "Archivio",
+        "LettoreIniezioni"
+      ]
+    },
+    {
+      "testo": "Tre test esistenti registravano lo stato di prima e sono stati aggiornati: due sul riepilogo JSON dell'ingest (ora ha injections) e open_keeps_tl_schema (ora ha la tabella injections).",
+      "su": [
+        "Ingest",
+        "Archivio"
+      ]
+    },
+    {
+      "testo": "Rotta, schema, campo del riepilogo e le righe in transcript() sono stati scritti nello scheletro come codice vero, senza stub. Erano nella pagina concordata.",
+      "su": [
+        "Ingest",
+        "Archivio"
+      ]
+    },
+    {
+      "testo": "contract_report segna tre funzioni con assert che calcolano (una chiusura dentro l'assert). È la stessa forma degli assert già presenti in hist/db/archive.rs; non ho aggiunto helper.",
+      "su": [
+        "LettoreIniezioni",
+        "Archivio"
+      ]
+    },
+    {
+      "testo": "Le run di alfred command sono state lanciate con l'input chiuso (</dev/null): senza, pi resta in attesa fino al timeout. La prima tornata dei test è andata persa così. La causa è in alfred command, fuori da questo lavoro.",
+      "su": [
+        "Ingest"
+      ]
+    },
+    {
+      "testo": "Non provato contro un server: l'ingest vero aspetta il deploy del server. Provato il parser su una trascrizione vera di oggi: 15 scambi, 71 iniezioni, tutte legate a uno scambio e tutte accettate da validate::injection.",
+      "su": [
+        "Ingest"
+      ]
+    }
+  ],
+  "derive": [
+    {
+      "contratto": "injections_of: every row is of the exchange of the span",
+      "da": "invariante 'le iniezioni di uno scambio portano tutte il suo id'",
+      "principio": "P2"
+    },
+    {
+      "contratto": "HistDb.upsert_injections: one write per row",
+      "da": "la forma di write_all, che torna rows.len()",
+      "principio": "P2"
+    }
+  ],
+  "giri": [
+    "ok, mi piace"
+  ],
+  "metriche": "tools/alfred/src/hist/ingest/injection.rs:16  rules_of                     logic=26  inv=3  computes\ntools/alfred/src/hist/ingest/injection.rs:60  injections_of                logic=22  inv=3  computes\n\n5 functions  median=5  mean=12.0  max=26  over40=0  flagged=2  files over350=0\ntools/alfred/src/hist/db/injections.rs:11  upsert_injections            logic=3   inv=2  computes\n\n2 functions  median=4.5  mean=4.5  max=6  over40=0  flagged=1  files over350=0\n\n13 functions  median=1  mean=1.8  max=7  over40=0  flagged=0  files over350=0\n\n22 functions  median=4.5  mean=7.8  max=34  over40=0  flagged=0  files over350=0",
+  "test": {
+    "passati": 636,
+    "falliti": 0,
+    "nuovi": 53
+  },
+  "mutanti": [
+    {
+      "mutazione": "is_short_id: lunghezza invertita",
+      "ucciso": true
+    },
+    {
+      "mutazione": "is_short_id: bordo f portato a g",
+      "ucciso": true
+    },
+    {
+      "mutazione": "rules_of: tiene i blocchi senza azioni",
+      "ucciso": true
+    },
+    {
+      "mutazione": "injections_of: scambia riferimento e testo",
+      "ucciso": true
+    },
+    {
+      "mutazione": "injections_of: senza scarto dei doppi",
+      "ucciso": true
+    },
+    {
+      "mutazione": "injections_of: id di sessione al posto dello scambio",
+      "ucciso": true
+    },
+    {
+      "mutazione": "hook_context: ignora l'evento",
+      "ucciso": true
+    },
+    {
+      "mutazione": "validate::injection: senza controllo sul testo",
+      "ucciso": true
+    },
+    {
+      "mutazione": "validate::injection: qualunque kind",
+      "ucciso": true
+    },
+    {
+      "mutazione": "has_injection: ignora il testo",
+      "ucciso": true
+    },
+    {
+      "mutazione": "upsert: non aggiorna il testo alla seconda scrittura",
+      "ucciso": true
+    }
+  ]
+}

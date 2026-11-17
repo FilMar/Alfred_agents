@@ -74,6 +74,11 @@ fn open_keeps_tl_schema() {
         ),
         (
             "table",
+            "injections",
+            "CREATE TABLE injections (\n  exchange_id TEXT NOT NULL REFERENCES exchanges(id),\n  kind        TEXT NOT NULL CHECK (kind IN ('rule')),\n  ref         TEXT NOT NULL,\n  text        TEXT NOT NULL,\n  PRIMARY KEY (exchange_id, kind, ref)\n)",
+        ),
+        (
+            "table",
             "sessions",
             "CREATE TABLE sessions (\n  id        TEXT PRIMARY KEY,\n  started   TEXT NOT NULL,\n  harness   TEXT,\n  host      TEXT,\n  path      TEXT\n)",
         ),

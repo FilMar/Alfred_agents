@@ -1,0 +1,156 @@
+{
+  "feature": "hist conserva le regole iniettate in ogni scambio",
+  "entita": [
+    {
+      "id": "Injection",
+      "codice": [
+        "tools/alfred/src/hist/mod.rs"
+      ],
+      "stato": "lo scambio, il tipo (rule), l'id corto della regola, il testo delle azioni come è stato iniettato",
+      "fa": "viaggia uguale tra client e server, come riga JSON",
+      "non_fa": "non porta episodi, punteggi o verdetti",
+      "serve_a": "chi un giorno giudicherà una regola da ciò che è successo dopo l'iniezione"
+    },
+    {
+      "id": "Attachment",
+      "codice": [
+        "tools/alfred/src/hist/ingest/line.rs"
+      ],
+      "stato": "il tipo della riga allegata, l'evento del hook, i testi iniettati",
+      "fa": "dà i testi di un hook quando la riga è il contesto aggiunto da quell'evento",
+      "non_fa": "non legge gli altri tipi di allegato della trascrizione",
+      "serve_a": "il lettore delle iniezioni"
+    },
+    {
+      "id": "LettoreIniezioni",
+      "codice": [
+        "tools/alfred/src/hist/ingest/injection.rs",
+        "tools/alfred/src/hist/ingest/harness.rs",
+        "tools/alfred/src/hist/ingest/transcript.rs"
+      ],
+      "stato": "nessuno: funzioni pure",
+      "fa": "spezza il testo 'Rule matches' in regole (id corto, azioni) e le lega allo scambio del prompt",
+      "non_fa": "non legge le trascrizioni di pi; non interroga le regole sul server",
+      "serve_a": "l'ingest",
+      "comanda": [
+        "Attachment",
+        "Injection"
+      ]
+    },
+    {
+      "id": "Ingest",
+      "codice": [
+        "tools/alfred/src/hist/ingest/mod.rs"
+      ],
+      "stato": "il riepilogo, con il conto delle iniezioni",
+      "fa": "manda le iniezioni di tutti gli scambi della trascrizione, anche di quelli già in archivio",
+      "non_fa": "non cambia cosa manda per sessioni, scambi e contenuti",
+      "serve_a": "alfred hist ingest, dal hook di Stop o a mano con --all",
+      "cli": "alfred",
+      "comandi": [
+        "hist ingest"
+      ],
+      "comanda": [
+        "LettoreIniezioni",
+        "Archivio"
+      ]
+    },
+    {
+      "id": "Archivio",
+      "codice": [
+        "tools/alfred/src/hist/db/injections.rs",
+        "tools/alfred/src/hist/db/mod.rs",
+        "tools/alfred/src/hist/routes/mod.rs",
+        "tools/alfred/src/hist/validate.rs"
+      ],
+      "stato": "la tabella injections, con chiave (scambio, tipo, id corto)",
+      "fa": "controlla la riga in ingresso e la scrive; una seconda scrittura della stessa riga non la duplica",
+      "non_fa": "non ha una lettura: nessuna rotta GET, nessun comando",
+      "serve_a": "conservare il dato prima che la trascrizione sparisca dal disco"
+    }
+  ],
+  "flussi": [
+    {
+      "da": "Ingest",
+      "a": "LettoreIniezioni",
+      "passa": "le righe di uno scambio",
+      "torna": "le iniezioni di quello scambio"
+    },
+    {
+      "da": "LettoreIniezioni",
+      "a": "Attachment",
+      "passa": "l'evento UserPromptSubmit",
+      "torna": "i testi iniettati, o niente"
+    },
+    {
+      "da": "Ingest",
+      "a": "Archivio",
+      "passa": "le iniezioni, con POST /hist/injections dopo gli scambi",
+      "torna": "quante righe ha scritto"
+    }
+  ],
+  "invarianti": [
+    {
+      "testo": "un testo senza l'intestazione '## Rule matches' non dà regole",
+      "su": [
+        "LettoreIniezioni"
+      ]
+    },
+    {
+      "testo": "ogni riferimento è un id corto: 8 caratteri esadecimali minuscoli",
+      "su": [
+        "LettoreIniezioni",
+        "Archivio"
+      ]
+    },
+    {
+      "testo": "ogni regola ha almeno una riga di azioni",
+      "su": [
+        "LettoreIniezioni",
+        "Archivio"
+      ]
+    },
+    {
+      "testo": "le iniezioni di uno scambio portano tutte il suo id e il tipo rule",
+      "su": [
+        "LettoreIniezioni"
+      ]
+    },
+    {
+      "testo": "una regola compare una volta sola per scambio",
+      "su": [
+        "LettoreIniezioni",
+        "Archivio"
+      ]
+    },
+    {
+      "testo": "dopo una scrittura riuscita ogni riga mandata è nella tabella",
+      "su": [
+        "Archivio"
+      ]
+    }
+  ],
+  "fatti": [
+    "Una riga di iniezione in una trascrizione di Claude Code: {\"type\":\"attachment\",\"parentUuid\":\"<uuid del prompt>\",\"attachment\":{\"type\":\"hook_additional_context\",\"hookEvent\":\"UserPromptSubmit\",\"hookName\":\"UserPromptSubmit\",\"content\":[\"## Rule matches\\n-- 9d3685f9\\nprima azione\\nseconda azione\\n-- 58708950\\naltra azione\"]}}",
+    "La riga attachment viene dopo la riga user che apre lo scambio, quindi sta nel body dello Span di quello scambio.",
+    "Line.hook_context(event) torna content quando attachment.type è hook_additional_context e attachment.hookEvent è event; altrimenti una slice vuota.",
+    "Una testa di blocco è una riga '-- ' seguita da un id corto e nient'altro. Le righe fino alla testa successiva sono le azioni, unite con \\n, senza righe vuote in testa o in coda.",
+    "is_short_id: esattamente 8 byte, ognuno in 0-9 o a-f.",
+    "Una riga '-- qualcosa' che non è una testa valida è una riga di azione del blocco aperto. Le righe prima della prima testa si scartano. Un blocco senza azioni si scarta.",
+    "Il hook di pi scrive '## Rule matches' seguito da una riga vuota: le righe vuote tra intestazione e prima testa si ignorano.",
+    "Se lo stesso id corto compare due volte nelle righe di uno scambio, vale la prima.",
+    "L'id dello scambio si ottiene con harness.exchange_id(session, span.opener); se è None lo scambio non ha iniezioni.",
+    "validate::injection segue la forma di validate::contents: exchange_id è un id (is_id), kind è 'rule', ref è un id corto, text è pieno. Messaggi: 'injection.exchange_id is not an id: ...', 'injection.kind is not rule: ...', 'injection.ref is not a short id: ...', 'injection.text is required'.",
+    "upsert_injections usa self.write_all con UPSERT_INJECTION, come upsert_contents. has_injection fa una SELECT sulla chiave e confronta il testo; un errore del database vale false.",
+    "In un test del database, uno scambio deve esistere prima della sua iniezione: la tabella ha una chiave esterna su exchanges(id) e foreign_keys è ON.",
+    "Il server va aggiornato prima del client: un client nuovo contro un server vecchio riceve 404 su /hist/injections e l'ingest fallisce.",
+    "Scrivi test solo per le funzioni che hanno una riga todo nel file. Le altre funzioni del file hanno già i loro test altrove.",
+    "In un test una Line si costruisce così: serde_json::from_value::<crate::hist::ingest::line::Line>(serde_json::json!({...})).unwrap(). I campi della riga sono in camelCase come nella trascrizione.",
+    "Una riga che apre uno scambio di Claude: {\"type\":\"user\",\"uuid\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\"sessionId\":\"11111111-1111-1111-1111-111111111111\",\"timestamp\":\"2026-01-02T03:04:05.678Z\",\"origin\":{\"kind\":\"human\"},\"message\":{\"role\":\"user\",\"content\":\"ciao\"}}. Per Harness::Claude l'id dello scambio è il suo uuid.",
+    "Uno Span si costruisce con i campi pubblici: crate::hist::ingest::transcript::Span { opener: &riga, body: vec![&allegato] }. Harness è crate::hist::ingest::harness::Harness, con le varianti Claude e Pi. Per Harness::Pi injections_of torna sempre un vettore vuoto.",
+    "In un test dell'archivio: let db = crate::hist::db::HistDb::open(&path).unwrap(), con path = std::env::temp_dir().join(format!(\"hist_inj_{}_{}.db\", std::process::id(), \"<nome del test>\")) e il file rimosso prima di aprire. Prima di un'iniezione si scrive la sessione e lo scambio: db.upsert_sessions(&[crate::hist::Session { id, started, harness: None, host: None, path: None }]).unwrap(); db.upsert_exchanges(&[crate::hist::Exchange { id, session, parent: None, timestamp, kind: \"chat\".into(), actor: \"alfredo\".into(), model: None, tokens_in: None, tokens_out: None, tokens_cache_read: None, tokens_cache_write: None, distilled: None, meta: None }]).unwrap(). Gli id sono uuid minuscoli di 36 caratteri, i tempi come 2026-01-02T03:04:05.678Z.",
+    "upsert_injections con uno scambio che non esiste torna Err per la chiave esterna: il test è una chiamata nuda con let _ = ...",
+    "Injection si costruisce con i campi pubblici: crate::hist::Injection { exchange_id, kind: \"rule\".into(), reference: \"9d3685f9\".into(), text }. In JSON il campo reference si chiama ref.",
+    "validate::injection prende un &serde_json::Value e torna None per una riga valida, Some(messaggio) per la prima regola violata, nell'ordine: exchange_id, kind, ref, text. È un classificatore: tabella di esiti."
+  ]
+}

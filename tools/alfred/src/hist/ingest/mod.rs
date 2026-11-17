@@ -1,4 +1,5 @@
 pub mod harness;
+pub mod injection;
 pub mod line;
 pub mod transcript;
 
@@ -19,6 +20,8 @@ pub struct Summary {
     pub exchanges: u32,
     pub known: u32,
     pub orphans: u32,
+    #[serde(default)]
+    pub injections: u32,
 }
 
 #[derive(Debug, Clone)]
@@ -35,6 +38,7 @@ impl Summary {
             exchanges: self.exchanges.saturating_add(other.exchanges),
             known: self.known.saturating_add(other.known),
             orphans: self.orphans.saturating_add(other.orphans),
+            injections: self.injections.saturating_add(other.injections),
         };
         debug_assert!(
             result.transcripts == self.transcripts + other.transcripts,
@@ -136,6 +140,7 @@ pub async fn transcript(
     } else {
         known_ids(client, &session.id).await?
     };
+    let injections = parsed.injections;
     let (fresh, known) = split_known(parsed.exchanges, &known);
     let (exchanges, contents): (Vec<crate::hist::Exchange>, Vec<crate::hist::Contents>) =
         fresh.into_iter().unzip();
@@ -145,11 +150,15 @@ pub async fn transcript(
         exchanges: exchanges.len() as u32,
         known,
         orphans: parsed.orphans,
+        injections: injections.len() as u32,
     };
     let _: serde_json::Value = client.post("/hist/sessions", &[session]).await?;
     if !exchanges.is_empty() {
         let _: serde_json::Value = client.post("/hist/exchanges", &exchanges).await?;
         let _: serde_json::Value = client.post("/hist/contents", &contents).await?;
+    }
+    if !injections.is_empty() {
+        let _: serde_json::Value = client.post("/hist/injections", &injections).await?;
     }
     Ok(summary)
 }

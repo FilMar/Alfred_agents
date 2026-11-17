@@ -59,6 +59,15 @@ pub struct Contents {
     pub tools: Option<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Injection {
+    pub exchange_id: String,
+    pub kind: String,
+    #[serde(rename = "ref")]
+    pub reference: String,
+    pub text: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct NewExtractor {
     #[serde(default)]

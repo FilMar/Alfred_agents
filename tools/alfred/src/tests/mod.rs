@@ -52,6 +52,8 @@ mod hist_routes;
 mod hist_stats;
 mod hist_validate;
 mod ingest_formats;
+mod ingest_injection;
+mod ingest_line;
 mod ingest_mod;
 mod ingest_transcript;
 mod page;

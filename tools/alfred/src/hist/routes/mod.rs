@@ -27,6 +27,7 @@ pub fn router() -> Router<Shared> {
         )
         .route("/hist/contents", post(post_contents))
         .route("/hist/contents/{id}", get(get_contents))
+        .route("/hist/injections", post(post_injections))
         .route("/hist/extractors", post(post_extractor))
         .route(
             "/hist/extractors/{id}",
@@ -135,6 +136,13 @@ async fn post_contents(State(app): State<Shared>, body: String) -> Result<Json<V
     );
     crate::distill::runner::Runner::spawn_on_ingest(app);
     Ok(reply)
+}
+
+async fn post_injections(State(app): State<Shared>, body: String) -> Result<Json<Value>, ApiError> {
+    Ok(written(app.hist.upsert_injections(&rows_of(
+        &body,
+        validate::injection,
+    )?)?))
 }
 
 async fn get_contents(

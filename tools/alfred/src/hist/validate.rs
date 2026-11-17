@@ -100,6 +100,27 @@ pub fn contents(row: &Value) -> Option<String> {
     ])
 }
 
+pub fn injection(row: &Value) -> Option<String> {
+    first_failure(vec![
+        (
+            !shaped(row, "exchange_id", is_id),
+            format!(
+                "injection.exchange_id is not an id: {}",
+                js(row.get("exchange_id"))
+            ),
+        ),
+        (
+            !shaped(row, "kind", |k| k == "rule"),
+            format!("injection.kind is not rule: {}", js(row.get("kind"))),
+        ),
+        (
+            !shaped(row, "ref", super::ingest::injection::is_short_id),
+            format!("injection.ref is not a short id: {}", js(row.get("ref"))),
+        ),
+        (!filled(row, "text"), "injection.text is required".into()),
+    ])
+}
+
 pub fn new_extractor(row: &Value) -> Option<String> {
     let parent = row.get("parent");
     first_failure(vec![

@@ -1,8 +1,9 @@
 use serde_json::Value;
 
 use super::harness::Harness;
+use super::injection::injections_of;
 use super::line::Line;
-use crate::hist::{Contents, Exchange, Session};
+use crate::hist::{Contents, Exchange, Injection, Session};
 
 pub const MAIN_ACTOR: &str = "alfredo";
 
@@ -10,6 +11,7 @@ pub const MAIN_ACTOR: &str = "alfredo";
 pub struct Parsed {
     pub session: Option<Session>,
     pub exchanges: Vec<(Exchange, Contents)>,
+    pub injections: Vec<Injection>,
     pub orphans: u32,
 }
 
@@ -30,9 +32,14 @@ pub fn parse(harness: Harness, lines: &[Line], host: Option<&str>) -> Parsed {
                 .iter()
                 .filter_map(|span| exchange_of(harness, &session.id, span))
                 .collect();
+            let injections = found
+                .iter()
+                .flat_map(|span| injections_of(harness, &session.id, span))
+                .collect();
             Parsed {
                 session: Some(session),
                 exchanges,
+                injections,
                 orphans,
             }
         }

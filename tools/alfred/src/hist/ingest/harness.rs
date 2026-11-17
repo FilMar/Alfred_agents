@@ -31,6 +31,13 @@ impl Harness {
         }
     }
 
+    pub fn injected(self, l: &Line) -> &[String] {
+        match self {
+            Harness::Claude => l.hook_context("UserPromptSubmit"),
+            Harness::Pi => &[],
+        }
+    }
+
     pub fn spends(self, l: &Line) -> bool {
         self.is_answer(l) || (self == Harness::Pi && l.is("compaction"))
     }
