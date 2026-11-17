@@ -1,6 +1,6 @@
 ---
 tags: [memory, hist, hook, rules, ingest, injection]
-sources: [conversation, extensions/rules/claude.sh, extensions/hist/claude.sh, tools/alfred/src/hist/db/mod.rs, tools/alfred/src/hist/ingest/harness.rs]
+sources: [conversation, spec.json@82621d5, review.json@82621d5, tools/alfred/src/hist/ingest/injection.rs, tools/alfred/src/hist/db/injections.rs, extensions/rules/claude.sh, extensions/hist/claude.sh, tools/alfred/src/hist/db/mod.rs, tools/alfred/src/hist/ingest/harness.rs]
 ---
 
 ## Decision
