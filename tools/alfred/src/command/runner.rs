@@ -162,6 +162,7 @@ async fn launch_and_follow(
 ) -> Ended {
     let spawned = Command::new(&launch.program)
         .args(&launch.args)
+        .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .kill_on_drop(true)
         .spawn();

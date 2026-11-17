@@ -174,6 +174,8 @@ const END: &str = r#"printf '%s\n' '{"type":"agent_end","messages":[{"role":"ass
 const LOG: &str = r#"printf '%s\n' '{"type":"message_update","assistantMessageEvent":{"type":"thinking_delta","delta":"hmm"}}'
 printf '%s\n' '{"type":"tool_execution_start","toolName":"bash","args":{"command":"ls"}}'
 printf '%s\n' '{"type":"tool_execution_end","toolName":"bash","result":{"ok":true},"isError":false}'"#;
+const STDIN: &str = r#"[ "$(readlink /proc/$$/fd/0)" = /dev/null ] || exit 3
+printf '%s\n' '{"type":"message_update","assistantMessageEvent":{"type":"text_delta","delta":"hi"}}'"#;
 const ANSI: &str = r#"printf '%s\n' '{"type":"message_update","assistantMessageEvent":{"type":"thinking_delta","delta":"\u001b[31mred\u001b[0mx\u0007"}}'"#;
 
 type Case = (
@@ -188,7 +190,7 @@ type Case = (
 
 #[tokio::test]
 async fn stream_outcome_table() {
-    let cases: [Case; 6] = [
+    let cases: [Case; 7] = [
         ("done", TEXT, None, "Done", Some("hi\n"), None, 0),
         ("end", END, None, "Done", Some("\n"), None, 2),
         (
@@ -201,6 +203,7 @@ async fn stream_outcome_table() {
             0,
         ),
         ("ansi", ANSI, None, "Done", None, Some("redx"), 0),
+        ("stdin", STDIN, None, "Done", Some("hi\n"), None, 0),
         ("exit", "exit 3", None, "Error", None, None, 0),
         ("slow", "sleep 5", Some(1), "Timeout", None, None, 0),
     ];
