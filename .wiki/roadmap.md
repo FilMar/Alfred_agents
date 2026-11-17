@@ -1,7 +1,7 @@
 ---
 tags: [pi, roadmap, tasks]
 sources: []
-updated: 2026-11-16
+updated: 2026-11-17
 ---
 
 A block is one run of ritchie (code) or efesto (skill). [A] is architecture: small, read it closely in review. [M] is mechanical: big, the first piece shows the rest.
@@ -27,7 +27,11 @@ One line each. An idea becomes blocks only when it is the next goal.
 - A limit on the extractions API and on `alfred hist extractions`.
 - One home for `requireServices`, or leave it.
 - A generic runner of scheduled jobs inside `alfred serve`, agentic or not: sort the mail, check the state of the Deck. It may meet the `tp` design below.
-- Fix the generic rules that score 0.5-0.6 on every prompt. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
+- Fix the generic rules that score 0.5-0.6 on every prompt. To find them, run the search on 50 real prompts from `alfred hist prompts`: a rule that matches more than half of them has an `if` that is too wide. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
+- A quality signal for the rules, from the user's corrections. The hook records the rules it injects in each turn. The distiller reads the correction in the next turn and gives each injected rule one verdict: `ignored`, `partial` (the skill started, its steps were skipped), `harmful` or `unrelated`. The count sits next to `hits`. To Piano first. [detail](memory_refine_hits_measure_retrieval)
+- The hook prints the `if` of each rule, so the agent can drop a rule that is out of context. [detail](memory_hook_injects_only_the_text_the_agent_uses)
+- Trigger evals for the skills: a file of real prompts per skill with the skill expected, and prompts where no skill starts. A script runs each prompt and prints `PASS` or `FAIL`.
+- Protocol evals for the skills: the required steps of a skill appear among the commands of the run. First case: polo calls `openalex.py` when the question asks for studies.
 - Drop empty episodes from `alfred hist search`. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
 - A test for the hook script of the distiller. [detail](memory_distill_starts_on_ingest_by_threshold)
 - `alfred command` cleans up zombie processes.
