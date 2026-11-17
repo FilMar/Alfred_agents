@@ -1,15 +1,15 @@
 ---
 tags: [memory, distiller, td, tests]
-sources: [tests/helpers/td_stubs.ts, tests/td_active_end_to_end.test.ts, tests/td_save.test.ts]
+sources: [tools/alfred/src/tests/distill_fake.rs, tools/alfred/src/tests/distill_bench.rs, tools/alfred/src/tests/distill_run_flow.rs, tests/helpers/td_stubs.ts@last-typescript, tests/td_active_end_to_end.test.ts@last-typescript, tests/td_save.test.ts@last-typescript]
 ---
 
 ## Decision
 
-The tests of `td` reach the outside world through one helper, and one test file checks what the stores hold.
+The tests of the distiller reach the outside world through one helper, and one test file checks what the stores hold.
 
-- `tests/helpers/td_stubs.ts` holds in-memory stand-ins: Qdrant with the `tb` and `ti` collections, Ollama embeddings, a model that replies from a queue, and a real `tl` app on an in-memory database. A Qdrant path can be made to answer 500 on demand.
-- The unit tests are bare calls on valid input. The contract is the oracle, as in the other `td` tests.
-- `tests/td_active_end_to_end.test.ts` runs a whole session on the stubs and checks the stores with its own expects. It checks the stored note and rule, their exchange id, the refs, the `distilled` value and the `extractions` rows.
+- `tools/alfred/src/tests/distill_fake.rs` holds an in-memory fake world: Qdrant with the rules and the episodes, Ollama embeddings, and a model that replies from a queue. The bench adds a real hist database in a temp file. A service can be marked down, so it fails on demand.
+- The unit tests are bare calls on valid input. The contract is the oracle, as in the other distiller tests.
+- `tools/alfred/src/tests/distill_run_flow.rs` runs whole sessions on the fake and checks the stores with its own asserts. It checks the stored rule, the episodes, the `distilled` value and the `extractions` rows.
 
 ## Why
 
@@ -17,10 +17,8 @@ The unit tests of Save were green while `saveNote` saved nothing. Its contract h
 
 A run of 23 mutants showed the size of the gap. Seven survived the unit tests. Four were a search that counts hits, a limit one too high, a lost tag and a close that does not check its write. Three were a verdict missing from the session list, a lost failure and a lost noise exchange. Tests added to the end-to-end file killed all 23.
 
-A stub that fails on demand is the only way to test the world-error path without a real outage. The stub talks to the real `tb`, `ti` and `tl` code, so a wrong import or a wrong field fails the test.
+A stub that fails on demand is the only way to test the world-error path without a real outage. The fake sits behind the real `Rules`, `Qdrant`, `Embedder` and hist code, so a wrong route or a wrong field fails the test.
 
 ## Cross-references
 
 - [skill_ritchie_classifiers_get_an_outcome_table](skill_ritchie_classifiers_get_an_outcome_table) — the other case of a test with its own expect
-- [memory_td_world_errors_return_as_values_and_programmer_errors_are_rethrown](memory_td_errors_are_values_or_thrown) — the bug that showed the gap
-- [memory_tl_client_reads_its_url_on_each_call_so_a_test_never_reaches_the_real_store](memory_clients_read_their_url_per_call) — why the stubs set the url in the environment

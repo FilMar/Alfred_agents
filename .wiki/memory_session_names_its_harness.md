@@ -1,6 +1,6 @@
 ---
 tags: [memory, tl, sqlite, schema, pi]
-sources: [conversation, tools/tl/src/types.ts, tools/tl/src/db.ts, .wiki/memory_tl_work_archive_not_event_log.md]
+sources: [conversation, tools/alfred/src/hist/db/mod.rs, tools/alfred/src/hist/validate.rs, tools/alfred/src/hist/mod.rs, tools/alfred/src/hist/ingest/harness.rs, tools/tl/src/types.ts@last-typescript, .wiki/memory_tl_work_archive_not_event_log.md]
 ---
 
 ## Decision
@@ -20,10 +20,9 @@ The schema decision already gave the rule that settles where it goes. `sessions`
 
 That rule also says it belongs in **one** place, so the reader stopped writing `meta.harness` on every row when the column arrived. A fact with two homes drifts: one copy gets updated and the other lies.
 
-`ALTER TABLE` is needed because `CREATE TABLE IF NOT EXISTS` leaves an existing table alone — a new column has to be said out loud, and the migration runs when the archive is opened. Old rows read back with the field absent rather than null, the same way a note does: absence is how a missing value is spelled.
+`ALTER TABLE` is needed because `CREATE TABLE IF NOT EXISTS` leaves an existing table alone — a new column has to be said out loud, and the migration runs when the archive is opened. Old rows read back with the field absent rather than null: absence is how a missing value is spelled.
 
 ## Cross-references
 
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the schema this adds a column to, and the rule that decides where a field lives
-- [memory_absence_is_how_qdrant_stores_null](memory_absence_is_how_qdrant_stores_null) — the same treatment of a missing value in the other store
 - [core_orthogonal_layers_no_overlap](core_orthogonal_layers_no_overlap) — why a fact gets one home

@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, critic, config]
-sources: [conversation, tools/td/src/config.ts, tests/td_config.test.ts, spikes/2026-10-02-extractor-f/main.py (deleted)]
+sources: [conversation, tools/alfred/src/distill/config.rs, tools/alfred/src/distill/critic.rs, tools/alfred/src/tests/distill_config.rs, tools/td/src/config.ts@last-typescript, tests/td_config.test.ts@last-typescript, spikes/2026-10-02-extractor-f/main.py (deleted)]
 replaces: [memory_td_question_above_drops_at_the_threshold_and_below_drops_under_it]
 ---
 
@@ -14,27 +14,27 @@ A critic check has a side, `dropWhen`, with two values:
 The rule itself is the same as in the replaced decision. Two things change.
 
 - **The names.** `above` and `below` become `atLeast` and `under`. The type is `CriticCheck`, not `Question`.
-- **The contract.** `CriticCheck.drops(p)` states the rule as two implications, one per side. There is no `firesBySpec` helper.
+- **The contract.** In `td`, `CriticCheck.drops(p)` stated the rule as two implications, one per side, with no `firesBySpec` helper. In alfred, `CriticCheck::drops` asserts only that `p` is from 0 to 1, and an outcome table in the tests fixes both edges.
 
 ```ts
 assert(this.#s.dropWhen !== "atLeast" || result === p >= this.#s.threshold, ...);
 assert(this.#s.dropWhen !== "under" || result === p < this.#s.threshold, ...);
 ```
 
-A probability is a finite number from 0 to 1, both ends included. `NaN` is refused by a contract. If the model writes a number outside that range, it is a world error. The LLM client (component 4) turns it into a failed reply before it calls `drops`.
+A probability is a finite number from 0 to 1, both ends included. `NaN` is refused by a contract. If the model writes a number outside that range, it is a world error. `probabilities_check()` turns it into a failed reply before `drops` is called.
 
 ## Why
 
-**The name carries the edge case.** With `above`, a reader cannot tell if the threshold itself drops. With `atLeast`, the exact threshold drops. With `under`, it stays. The test file fixes both: with threshold 0.4, a rule at exactly 0.4 stays and a rule at 0.39 drops.
+**The name carries the edge case.** With `above`, a reader cannot tell if the threshold itself drops. With `atLeast`, the exact threshold drops. With `under`, it stays. The tests fix both: at the threshold `atLeast` drops and `under` keeps, and just below it `atLeast` keeps and `under` drops.
 
 **The rule matches the extraction spike**, so the first runs give the spike numbers.
 
 **A helper that the body and the contract both call checks nothing.** The old contract called `firesBySpec` twice and compared the result with itself. An error in the rule passed both times. The two implications state the rule once, apart from the body.
 
-**The edge test bites.** The body was written in ritchie's direct mode. A mutant that turns `>=` into `>` makes the edge test for `atLeast` fail.
+**The edge test bites.** The `td` body was written in ritchie's direct mode. A mutant that turns `>=` into `>` makes the edge test for `atLeast` fail.
 
 ## Cross-references
 
 - `memory_td_question_above_drops_at_the_threshold_and_below_drops_under_it@ff370b9` — the replaced decision
 - [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question) — the checks and their thresholds
-- [memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy](memory_td_config_enters_as_checked_json) — how a check is built
+- [memory_td_config_enters_only_as_json_and_keeps_a_frozen_copy](memory_extractor_row_4_has_rules_only_roles) — how a check is built

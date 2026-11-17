@@ -1,6 +1,6 @@
 ---
 tags: [skill, ritchie, tests, contracts]
-sources: [conversation, skills/ritchie/references/rules.md, tests/td_candidate.test.ts]
+sources: [conversation, skills/ritchie/references/rules.md, tests/td_candidate.test.ts@last-typescript]
 replaces: [skill_ritchie_classifiers_get_an_outcome_table_and_runs_write_once]
 ---
 

@@ -1,17 +1,17 @@
 ---
 tags: [memory, ti, ghost-rules, aristotele]
-sources: [conversation, SPEC.md@deaf2ab]
+sources: [conversation, SPEC.md@deaf2ab, tools/alfred/src/rules/cli.rs]
 ---
 
 ## Decision
 
-A ghost rule is a plain `ti add`: a new `if` with the same `do` as a rule that the prompts rarely reach. `ti` has no multi-trigger rule and no command for it.
+A ghost rule is a plain `alfred rules add`: a new `if` with the same `do` as a rule that the prompts rarely reach. `alfred rules` has no multi-trigger rule and no command for it.
 
-This is not the case of the td rule "one `if`, append each action to the list". That rule is about extraction. Ghost rules are a curation move made on purpose by Aristotele.
+This is not the case of the distiller rule "one `if`, append each action to the list". That rule is about extraction. Ghost rules are a curation move made on purpose by Aristotele.
 
 ## Why
 
-Separate rules keep separate stats: each trigger gets its own hits, and `ti refine` archives the triggers that never come up.
+Separate rules keep separate stats: each trigger gets its own hits, and `alfred rules refine` archives the triggers that never come up.
 
 A multi-vector point would need a new collection and a migration, and would hide which trigger was used.
 

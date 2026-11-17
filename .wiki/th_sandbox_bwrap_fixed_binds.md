@@ -1,21 +1,22 @@
 ---
-tags: [th, sandbox, security, bwrap]
-sources: [tools/th/src/runner.ts, .wiki/th_cli.md@787028b, .wiki/architettura.md@f87afd9]
+tags: [th, alfred, command, sandbox, security, bwrap]
+sources: [tools/alfred/src/command/sandbox.rs, tools/th/src/runner.ts@last-typescript, .wiki/th_cli.md@787028b, .wiki/architettura.md@f87afd9]
 ---
 
 ## Decision
 
-Every `th run` executes under `bwrap` when it is available. The filesystem is read-only except for a fixed bind profile: `cwd`, `~/.pi`, `~/.bun`, `/tmp`. Two entry points, two guarantees:
+Every `alfred command run` starts pi under `bwrap` when it is available. The filesystem is read-only except for a fixed bind profile: `cwd`, `~/.pi`, `/tmp`. `~/.bun` left with `th`.
 
-- `th run` (and `spawnSandboxed` internally) degrades with a loud warning when bwrap is missing — it never fails silently.
-- `th sandbox-exec -- <bin> <args...>` refuses with an explicit error when bwrap is missing. Whoever asks for the sandbox must get the sandbox, not a bare execution.
+- When bwrap is missing, the run degrades with a loud warning and starts pi bare. It never fails silently.
+- `th` also had a strict entry, `th sandbox-exec`, that refused to run without bwrap. `alfred command` has no such entry.
 
 
 ## Why
 
-An audited or trusted task must never run unsandboxed by accident: a missing dependency quietly turning off the perimeter is worse than a loud failure. The degraded path warns on stderr and writes the warning verbatim (`warn: bwrap not available — running WITHOUT sandbox`); the strict path refuses. Same bind profile everywhere so behavior is identical for `th run` and `sandbox-exec`.
+An audited or trusted task must never run unsandboxed by accident: a missing dependency quietly turning off the perimeter is worse than a loud failure. The degraded path warns on stderr with the same words as `th`: `warn: bwrap not available — running WITHOUT sandbox`.
 
 ## Cross-references
 
 - `orchestrator_bwrap_task_execution@c194447` — the same sandbox reused for orchestrator tasks
 - [th_detached_runs_state_in_tmp](th_detached_runs_state_in_tmp) — where detached runs leave their state
+- [core_alfred_command_runs_pi_as_a_child_in_bwrap](core_alfred_command_runs_pi_as_a_child_in_bwrap) — why only pi runs inside bwrap

@@ -8,8 +8,8 @@ replaces: [skill_erodoto_removed_because_td_replaces_it_and_it_only_batched_plat
 
 Three skills were removed on 2026-10-12, in the census of the skills (commit `94723f1`).
 
-- **`erodoto`** emptied the `tl pending` queue. It was a batch version of `platone` (concepts to `tb`) and `mose` (corrections as rules in `ti`). `td` now does the same work on its own. `platone` stays until `td distill --active` has a trigger. Then it retires too.
-- **`jobs`** managed tasks through Taskwarrior with GTD semantics. The user does not use Taskwarrior any more. Notes in `tb` that mention it stay: they are knowledge, not a skill.
+- **`erodoto`** emptied the `tl pending` queue. It was a batch version of `platone` (concepts to `tb`) and `mose` (corrections as rules in `ti`). The distiller in `alfred serve` now writes the rules on its own, with its trigger on. `platone` and `mose` are gone too.
+- **`jobs`** managed tasks through Taskwarrior with GTD semantics. The user does not use Taskwarrior any more. Notes in `tb` that mentioned it stayed, until `tb` was removed.
 - **`ulisse`** pointed to the right skill for a task, with the script `list_skills.py`. The roster is still printed by `efesto`: `python3 scripts/roster.py`.
 
 ## Why

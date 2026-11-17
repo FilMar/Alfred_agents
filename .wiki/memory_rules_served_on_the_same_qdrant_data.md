@@ -1,6 +1,6 @@
 ---
 tags: [memory, ti, rules, alfred, qdrant, ollama]
-sources: [spec.json@9d28de2, review.json@9d28de2, tools/alfred/src/rules]
+sources: [spec.json@9d28de2, review.json@9d28de2, tools/alfred/src/rules, tools/alfred/src/embed.rs]
 ---
 
 ## Decision
@@ -13,7 +13,7 @@ The server computes the embeddings with the Ollama on the Deck. At start it load
 
 ## Why
 
-`td` still runs in TypeScript and writes rules through the `ti` code. Both must read and write the same points, so nothing is migrated. A live check gave the same ids and scores as `ti` on real searches. It also gave the same 255 rules, the same `refine` spread, the same `near` pairs and the same `reach` counts on 210 real prompts. A rule added by `alfred` reads the same through `ti meta`.
+At the switch, `td` still ran in TypeScript and wrote rules through the `ti` code. Both had to read and write the same points, so nothing was migrated. A live check gave the same ids and scores as `ti` on real searches. It also gave the same 255 rules, the same `refine` spread, the same `near` pairs and the same `reach` counts on 210 real prompts. A rule added by `alfred` read the same through `ti meta`.
 
 The same flags make the final pass over the callers a plain rename.
 

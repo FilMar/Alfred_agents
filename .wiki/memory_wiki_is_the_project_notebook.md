@@ -1,6 +1,6 @@
 ---
 tags: [memory, wiki, architecture, extraction]
-sources: [conversation, .wiki/index.md]
+sources: [conversation, .wiki/index.md, tools/alfred/src/vault/, tools/alfred/src/distill/save.rs]
 ---
 
 ## Decision
@@ -13,11 +13,11 @@ So every page has two halves, and the test that splits them is one question:
 
 > **Does the why survive if the project is deleted?**
 >
-> Yes, it is a `tb` note. No, it stays in the wiki only.
+> Yes, it belongs in the vault. No, it stays in the wiki only.
 
-The general half goes to `tb`, in Italian and in the first person, with the page path as its `source`. One direction is enough: from another project you find the lesson with `tb search`, and from there you can walk back to the project if you need the detail.
+The general half goes to the vault. The user and the agent write it there together. From another project, you read the lesson with `alfred vault read`.
 
-`.wiki/` needs no producer of its own in `tl`. A `Write` to `.wiki/` is already content inside an exchange, with the whole text in the body. So there is no post-commit hook, no `extracted` flag to maintain, and no second distiller for wiki pages. One distiller reads exchanges, and the test above is a question inside its prompt.
+`.wiki/` needs no producer of its own in `alfred hist`. A `Write` to `.wiki/` is already content inside an exchange, with the whole text in the body. So there is no post-commit hook, no `extracted` flag to maintain, and no second distiller for wiki pages. One distiller reads exchanges, but it writes only rules. The test above is not in its prompt.
 
 ## Why
 
@@ -27,9 +27,9 @@ The risk this answers is measurable. Seven pages written in one session hold sev
 
 Keeping the wiki in the repo was never the problem. Moving it out would cost three things at once. It is versioned with the code it explains. It dies when the project dies. An agent working there can grep it with no network and no embeddings.
 
-Rejected: indexing `.wiki/` into Qdrant so it is searchable across projects. It looks like the shortcut and it fills `tb` with forty projects' conventions, which kills the rule that makes the wiki cheap. Distillation is supposed to lose information — that is the work.
+Rejected: indexing `.wiki/` into Qdrant so it is searchable across projects. It looks like the shortcut and it fills the shared store with forty projects' conventions, which kills the rule that makes the wiki cheap. Distillation is supposed to lose information — that is the work.
 
-What this also means: the extraction is the job of the distiller. Without that pump, knowledge does not leave the project's fence for the cross-project store.
+What this also means: the extraction is not automatic now. The distiller writes only rules, so a general half leaves the project only when the user and the agent write it into the vault.
 
 ## Cross-references
 

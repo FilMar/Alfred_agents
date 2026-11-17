@@ -1,21 +1,21 @@
 ---
 tags: [memory, tl, hindsight, mem0, distiller]
-sources: [conversation, "https://github.com/vectorize-io/hindsight", "https://github.com/mem0ai/mem0", tools/tl/README.md]
+sources: [conversation, https://github.com/vectorize-io/hindsight, https://github.com/mem0ai/mem0, tools/tl/README.md@last-typescript, tools/alfred/src/distill/extract.rs]
 ---
 
 ## Decision
 
-Hindsight does not replace `tl`, and it is not the engine of the distiller. `tb` and `ti` stay as they are.
+Hindsight does not replace `tl`, now `alfred hist`, and it is not the engine of the distiller. The rules store stays as it is.
 
 What is taken from Hindsight and mem0 is their shape, not their code: one structured LLM call with no tools, and code for every other step. The distiller is built in place on that shape. See [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first).
 
-This closes the open question "Hindsight as the engine" in [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) and in `tools/tl/ROADMAP.md`.
+This closes the open question "Hindsight as the engine" in [memory_td_distills_by_itself_at_session_start](memory_distill_starts_on_ingest_by_threshold) and in `tools/tl/ROADMAP.md`.
 
 ## Why
 
 **`tl` keeps the raw text, and Hindsight does not.** `tl` exists so that a note can be extracted again when the distiller improves. Hindsight runs an LLM on every chunk at write time and keeps the extracted facts. Swapping `tl` for it brings back the problem `tl` was built to fix: 369 of 737 notes with no source left.
 
-**Hindsight overlaps `tb`.** Its world facts and observations are semantic memory, which is what `tb` holds. Two semantic stores mean two answers at session start, with no rule for which one wins.
+**Hindsight overlaps the shared knowledge.** Its world facts and observations are semantic memory. `tb` held that then. The vault holds it now. Two semantic stores mean two answers at session start, with no rule for which one wins.
 
 **The code was read, not the docs** (mem0 on 2026-09-25, Hindsight on 2026-10-01). Both systems split the work the same way:
 

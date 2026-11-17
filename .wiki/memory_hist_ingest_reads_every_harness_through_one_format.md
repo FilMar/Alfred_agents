@@ -1,6 +1,6 @@
 ---
 tags: [memory, tl, hist, alfred, ingest, transcripts]
-sources: [conversation, spec.json@7fc206d, review.json@7fc206d, tools/alfred/src/hist/ingest]
+sources: [conversation, spec.json@7fc206d, review.json@7fc206d, tools/alfred/src/hist/ingest/formats.rs, tools/alfred/src/hist/ingest/transcript.rs]
 ---
 
 ## Decision

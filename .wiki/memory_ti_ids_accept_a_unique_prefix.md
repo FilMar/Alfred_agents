@@ -1,11 +1,11 @@
 ---
-tags: [memory, ti, cli, id]
-sources: [SPEC.md@c22c073, tools/ti/src/identity.ts, tools/ti/src/cli.ts]
+tags: [memory, rules, cli, id]
+sources: [SPEC.md@c22c073, tools/alfred/src/rules/store/mod.rs, tools/alfred/src/qdrant.rs, tools/ti/src/identity.ts@last-typescript]
 ---
 
 ## Decision
 
-`ti meta`, `ti delete` and `ti append-do` take a full id or a unique prefix of a rule id. `resolveEntryId` in `tools/ti/src/identity.ts` resolves it, as `resolveNoteId` does for `tb`.
+`alfred rules meta`, `alfred rules delete` and `alfred rules append-do` take a full id or a unique prefix of a rule id. `Rules::resolve` in `tools/alfred/src/rules/store/mod.rs` resolves it, through `Qdrant::resolve`.
 
 No rule starts with the prefix: an error. Several rules do: an "Ambiguous" error with up to five candidates. An empty prefix is refused.
 
@@ -15,7 +15,7 @@ The hook shows an id of 8 characters. An id the agent cannot use in a command is
 
 The 71 rules have 71 different prefixes of 8 characters, and none matches the id of a note.
 
-`resolveEntryId` reads the whole list of rules to find the match. That is cheap for 71 rules. With thousands of rules, scroll only the ids.
+`Qdrant::resolve` reads the whole list of ids to find the match. That is cheap for 71 rules. With thousands of rules, scroll only the ids.
 
 ## Cross-references
 

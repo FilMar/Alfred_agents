@@ -32,4 +32,3 @@ Rejected: a 15-minute timer, proposed when the distiller moved into the server.
 ## Cross-references
 
 - [core_alfred_v2_one_binary_serve_on_the_deck](core_alfred_v2_one_binary_serve_on_the_deck) — the server the distiller runs in
-- [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) — the trigger of `td` today

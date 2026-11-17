@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, td, tl, session]
-sources: [tools/td/SPEC_ACTIVE.md@61d5a9f, tools/td/src/distiller.ts, tools/td/src/save.ts, tools/td/src/session.ts]
+sources: [tools/td/SPEC_ACTIVE.md@61d5a9f, tools/alfred/src/distill/session_run.rs, tools/alfred/src/distill/run.rs, tools/alfred/src/distill/decide_step.rs, tools/alfred/src/hist/validate.rs]
 ---
 
 ## Decision
@@ -11,17 +11,17 @@ A session is the unit of `distilled`.
 - The value is the run time, an ISO-8601 UTC string.
 - The session closes only when nothing failed: the split, every extraction, every critic call, every novelty call and every save. A hit on the `--max-saved` cap also counts as a failure.
 - With any failure, nothing closes. The next run takes the whole session again.
-- `td distill` with no argument takes every session that has pending exchanges, one after the other. `td distill <session>` takes one.
+- `alfred distill` with no argument takes every session that has pending exchanges, one after the other. `alfred distill <session>` takes one.
 
-`tl` checks that `distilled` is a time, so an extractor id cannot be stored there.
+`alfred hist` checks that `distilled` is a time, so an extractor id cannot be stored there.
 
 ## Why
 
 A split into episodes is not deterministic, and the episodes are not saved. A run that stops in the middle and starts again gets a different map. Closing exchange by exchange would leave half a session closed under a map that no longer exists. A whole session is the smallest piece that can be redone.
 
-Redoing is cheap and safe. Phase 2b sees what `tb` and `ti` already hold, so an item saved by the failed run comes back as `duplicate`. In the first live run, the second pass over one session gave 8 duplicates out of 16 judged items and wrote only 5 items.
+Redoing is cheap and safe. The novelty judge sees the rules already held, so a rule saved by the failed run comes back as `duplicate`. In the first live run of `td`, the second pass over one session gave 8 duplicates out of 16 judged items and wrote only 5 items.
 
-Noise is closed too. A task notification is read and dropped by phase 0. If it stayed pending, it would sit in the queue for ever.
+Noise is closed too. A task notification is read and dropped before extraction. If it stayed pending, it would sit in the queue for ever.
 
 Taking every pending session is what makes active mode empty the queue. In shadow mode the queue never shrinks.
 

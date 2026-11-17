@@ -1,11 +1,11 @@
 ---
 tags: [agents, th, skills, delegation]
-sources: [conversation, tools/th/src/prompt.ts, tools/th/src/cli.ts, skills/annibale/SKILL.md]
+sources: [conversation, tools/alfred/src/command/cli.rs, tools/alfred/src/command/skill.rs, tools/alfred/src/command/spec.rs, tools/alfred/src/command/archive.rs, skills/annibale/SKILL.md]
 ---
 
 ## Decision
 
-`th run --skill <name>` puts a skill's whole text in the run's system prompt. The skill is then a constraint, not a request.
+`alfred command run --skill <name>` puts a skill's whole text in the run's system prompt. The skill is then a constraint, not a request.
 
 - `--hat` and `--skill` are both optional and at least one is required. A run can be a way of thinking, a procedure, or both.
 - The block carries the skill's base directory, so its own relative references resolve: `<skill name="..." location="...">`, then where to resolve from, then the file.
@@ -21,9 +21,9 @@ Measured on a real run: forcing `efesto` cost **6,380 input tokens**, the skill'
 
 There is a second gain, in the shape of a rule. The old rule was a prohibition: *never pass a skill name as `--member`*. A prohibition has to be remembered every time, and the thing it forbids is the obvious thing to try. Now there is a flag with the skill's name on it, so the rule becomes *where a skill goes*, which needs no remembering.
 
-The mechanism is pi's own. `loadSkills` finds every skill this machine and this project offer, the same way the interactive agent does. So the names accepted here are exactly the names that work elsewhere. A wrong name is answered with the full list.
+alfred looks for `<name>/SKILL.md` in two folders, in this order: `.pi/skills` of the project, then `~/.pi/agent/skills`. These are the folders pi reads skills from. A wrong name is answered with `Skill "<name>" not found`.
 
-One hazard stays, and code does not solve it. A skill that writes becomes unattended when forced into a detached run. `clio` moves backups. The gate those skills describe lives in their text, not in `th`.
+One hazard stays, and code does not solve it. A skill that writes becomes unattended when forced into a detached run. `omero`, for example, writes wiki pages. The gate those skills describe lives in their text, not in `alfred command`.
 
 ## Cross-references
 

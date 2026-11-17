@@ -8,7 +8,7 @@ replaces: [orchestrator_minimal_rest_surface, orchestrator_run_task_matrix_only,
 
 `tools/orchestrator/` and `tools/cockpit/` are removed from the repository, with their two test files. Filippo deleted them on 2026-09-28: he does not use either.
 
-Nothing replaces them. Delegated execution is `th`'s job. Scheduling has no user: the orchestrator was paused on 2026-07-21 because no real recurring task justified finishing it, and two months later there still is none.
+Nothing replaces them. Delegated execution is the job of `alfred command` (it was `th`). Scheduling has no user: the orchestrator was paused on 2026-07-21 because no real recurring task justified finishing it, and two months later there still is none.
 
 `th_sandbox_bwrap_fixed_binds` and `th_verification_outside_members` are not touched. The orchestrator reused the sandbox of `th` and its verification stance, not the other way round.
 

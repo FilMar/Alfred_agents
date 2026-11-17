@@ -1,13 +1,13 @@
 ---
 tags: [memory, hook, tb, ti, injection, measurement]
-sources: [SPEC.md@c22c073, REVIEW.md@c22c073, extensions/tb_ti/claude.sh, extensions/tb_ti/pi.ts, spikes/2026-10-15-memory-judge/main.py (local, not in git)]
+sources: [SPEC.md@c22c073, REVIEW.md@c22c073, extensions/rules/claude.sh, extensions/rules/pi.ts, tools/alfred/src/rules/cli.rs, spikes/2026-10-15-memory-judge/main.py (local, not in git)]
 ---
 
 ## Decision
 
-The hook injects, for each note, the line `-- <id8>`, then `what`, then `why`. For each rule it injects `-- <id8>` and the actions. It injects no `tags`, `kind`, `score`, `via` or `if`.
+For each rule the hook injects the line `-- <id8>` and the actions. It injects no `tags`, `score` or `if`. Until `tb` was removed, each note came as `-- <id8>`, then `what`, then `why`.
 
-The text comes straight from `tb search` and `ti search`. Direct notes come first and related notes follow.
+The text comes straight from `alfred rules search` (`render_blocks`).
 
 ## Why
 
@@ -20,7 +20,7 @@ A judge run read 39 turns, 205 injected notes and 117 control notes taken from o
 
 So most of what the hook injects is not used in that turn. It also costs: one injection is about 4 000 characters, and the `why` is 40% of the note text.
 
-The `why` stays. In the 9 notes with a clear dependence, the answer held 1% of the rare words of the `why` and 2.8% of those of the `what`. That is too few notes to say the `why` is ignored.
+The `why` stayed while notes existed. In the 9 notes with a clear dependence, the answer held 1% of the rare words of the `why` and 2.8% of those of the `what`. That is too few notes to say the `why` is ignored.
 
 A rule without its `if` does not say when it applies. If rules are used out of context, put the `if` back.
 

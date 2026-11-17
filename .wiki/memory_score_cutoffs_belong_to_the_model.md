@@ -1,6 +1,6 @@
 ---
 tags: [memory, tb, ti, embedding, measurement, hook]
-sources: [spikes/2026-09-28-tb-corpus/tb_threshold.py (deleted), spikes/2026-09-28-tb-corpus/reports/fase0_threshold.json (deleted), extensions/tb_ti/claude.sh, skills/christopher/SKILL.md, skills/mose/SKILL.md (deleted)]
+sources: [spikes/2026-09-28-tb-corpus/tb_threshold.py (deleted), spikes/2026-09-28-tb-corpus/reports/fase0_threshold.json (deleted), extensions/rules/claude.sh, extensions/rules/pi.ts, skills/christopher/SKILL.md@last-typescript, skills/mose/SKILL.md (deleted)]
 ---
 
 ## Decision
@@ -11,8 +11,8 @@ On `nomic-embed-text-v2-moe`, over the 120-paraphrase set: a right answer scores
 
 | consumer | was | is | job |
 |---|---|---|---|
-| `skills/christopher` | 0.6 | 0.35 | deliberate retrieval wants reach; the agent judges |
-| `extensions/tb_ti/claude.sh` | 0.8 | 0.5 | automatic injection, nobody to judge |
+| `skills/christopher` (deleted) | 0.6 | 0.35 | deliberate retrieval wants reach; the agent judges |
+| `extensions/rules/claude.sh` | 0.8, then 0.5 | 0.3 | automatic injection, nobody to judge |
 
 ## Why
 
@@ -28,5 +28,4 @@ Rejected: keep 0.8 and call the behaviour unchanged. It is unchanged in the sens
 
 - [The embedding model follows the corpus language](memory_embedding_model_follows_the_corpus_language)
 - [tb and ti inject automatically through a hook](hook_tb_ti_auto_injection)
-- [Related notes are ranked, not cut](memory_related_notes_ranked_not_cut) — a cutoff cannot
-  filter what arrives with no score. The hook still injects unscored related notes.
+  filter what arrives with no score. This held for `tb`, which is gone.

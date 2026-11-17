@@ -17,5 +17,4 @@ The first body matched verdicts by their place in the list. A model that answers
 
 ## Cross-references
 
-- [memory_td_ref_only_saves_nothing_because_a_ref_needs_two_notes](memory_td_ref_only_saves_nothing_because_a_ref_needs_two_notes) — the note verdicts of `td`
 - [memory_novelty_stays_with_the_judge_not_a_vector_cutoff](memory_novelty_stays_with_the_judge_not_a_vector_cutoff) — why a judge and not a cutoff

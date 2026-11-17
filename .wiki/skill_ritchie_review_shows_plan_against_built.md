@@ -1,13 +1,13 @@
 ---
 tags: [skill, ritchie, review, render, graphify]
-sources: [conversation, skills/ritchie/scripts/overlay.py, spikes/2026-11-04-plan-vs-built/main.py (local, not in git)]
+sources: [conversation, skills/ritchie/scripts/overlay.py, skills/ritchie/scripts/render_page.py, skills/ritchie/scripts/review_page.sh, spikes/2026-11-04-plan-vs-built/main.py (local, not in git)]
 ---
 
 ## Decision
 
 The review page lays `spec.json` over the graphify graph, `.graph/graph.json`. Each spec entity gets one more field, `codice`: the folders or files that hold it, or `null` when it lives outside the repo. A file belongs to the entity with the longest matching path. When two entities share one file, a graph node belongs to the entity its symbol names. A method belongs to its class.
 
-A flow counts as built in two cases. The graph has a code edge between the two folders (`imports`, `imports_from`, `calls`, `dynamic_import`, `indirect_call`). Or a text search finds a CLI call such as `tb search` in the files of the caller.
+A flow counts as built in two cases. The graph has a code edge between the two folders (`imports`, `imports_from`, `calls`, `dynamic_import`, `indirect_call`). Or a text search finds a CLI call such as `alfred rules search` in the files of the caller.
 
 The page shows four states and no more:
 
@@ -32,4 +32,3 @@ The CLI search is needed because the tools call each other as commands, and grap
 
 - [The spec is shown, not written](skill_ritchie_spec_is_shown_not_written)
 - [The review is a page from review.json](skill_ritchie_review_is_a_page_from_review_json)
-- [Shared modules live in tools/common](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags) — the th to tb import breaks it

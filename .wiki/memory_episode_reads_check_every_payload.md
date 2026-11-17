@@ -1,11 +1,11 @@
 ---
 tags: [memory, tl, episodic, contract]
-sources: [SPEC.md@cbce0c9, REVIEW.md@cbce0c9, tools/tl/src/episode_read.ts, tools/tl/src/episode_store.ts]
+sources: [SPEC.md@cbce0c9, REVIEW.md@cbce0c9, tools/alfred/src/hist/episodes.rs, tools/alfred/src/qdrant.rs, tools/tl/src/episode_read.ts@last-typescript]
 ---
 
 ## Decision
 
-Every payload read back from `tl_episodes` is checked before it becomes an episode. `episodeFromPayload` in `episode_read.ts` does it, and it is a pure function.
+Every payload read back from `tl_episodes` is checked before it becomes an episode. `episode_of` in `tools/alfred/src/hist/episodes.rs` does it, and it is a pure function.
 
 A payload is an episode when all of this holds:
 
@@ -18,7 +18,7 @@ A payload is an episode when all of this holds:
 - `created` is an ISO-8601 UTC time.
 - The id of the point is the one derived from `session` and the first exchange.
 
-If one thing fails, the result is a message that names the field. `tl search` and `tl episode` print it as an error.
+If one thing fails, the result is a message that names the field. `alfred hist search` and `alfred hist episode` print it as an error.
 
 A missing collection holds no episode. `tl search` prints nothing for it.
 
@@ -28,7 +28,7 @@ A write and a read are two moments of one program, and the store is shared. The 
 
 A bad payload is an error of the world and not of the program. It comes back as a value and names the field, so the fault is easy to find.
 
-`tl episode` and `tl search` take a unique id prefix, as `tb` and `ti` do. A prefix that matches no episode is an error, and one that matches several is an "Ambiguous" error that lists up to five.
+`alfred hist episode` takes a unique id prefix, as `alfred rules` does. A prefix that matches no episode is an error, and one that matches several is an "Ambiguous" error that lists up to five.
 
 ## Cross-references
 

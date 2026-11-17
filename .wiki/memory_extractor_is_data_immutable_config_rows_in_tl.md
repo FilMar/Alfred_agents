@@ -1,19 +1,19 @@
 ---
 tags: [memory, distiller, tl, sqlite, config]
-sources: [conversation, tools/tl/src/db.ts, spikes/2026-10-01-critic-bench/main.py (deleted)]
+sources: [conversation, tools/alfred/src/hist/db/mod.rs, tools/alfred/src/hist/db/extractors.rs, tools/alfred/src/hist/validate.rs, tools/alfred/src/distill/config.rs, spikes/2026-10-01-critic-bench/main.py (deleted)]
 ---
 
 ## Decision
 
-The extractor is data, not code. `tl` gets two tables.
+The extractor is data, not code. `alfred hist` keeps two tables in `tl.db`.
 
-**`extractor`: one row per version.** Rows are immutable. A change is a new row. Columns: `id`, `parent`, `why` (one line), `active` (the one that saves to `tb` and `ti`), `config` and `created`. `config` is one JSON document, a typed struct in code, checked when it is written and when it is read. It holds every prompt, model, temperature and hat, the critic checks `{name, text, direction, threshold}`, and the sizes and parameters.
+**`extractor`: one row per version.** Rows are immutable. A change is a new row. Columns: `id`, `parent`, `why` (one line), `active` (the one that saves rules), `config` and `created`. `config` is one JSON document, a typed struct in code, checked when it is written and when it is read. It holds every prompt, model, temperature and hat, the critic checks `{name, text, direction, threshold}`, and the sizes and parameters.
 
-**`extractions`: one row per candidate, kept or dropped.** `extractor_id`, `exchange_id`, type, text, quote, the critic probabilities, the verdict of phase 2 and the saved id.
+**`extractions`: one row per candidate, kept or dropped.** `extractor_id`, `run`, `exchange_id`, `kind`, `body`, `quote`, `dropped_by`, the critic `probabilities`, the `verdict` of phase 2, `of` and `saved_id`.
 
 A blank `quote` is allowed only when `dropped_by` starts with `check:`. Phase 1 drops a candidate with an empty quote, and that drop must still be logged. Before this rule `tl` refused exactly those rows. A blank quote elsewhere is a bug.
 
-`exchanges.distilled`, the saved notes and the saved rules link back to the extractor. A second extractor can run in shadow: it writes only to `extractions`. The shape of the flow stays code: the phases and the checks.
+`exchanges.distilled` holds the run. A row of `extractions` holds its run, its extractor and the id of the saved rule. So a saved rule links back to the extractor. A second extractor can run in shadow: it writes only to `extractions`. The shape of the flow stays code: the phases and the checks.
 
 ## Why
 
@@ -25,7 +25,7 @@ A blank `quote` is allowed only when `dropped_by` starts with `check:`. Phase 1 
 
 **Dropped candidates are the point.** With probabilities stored, thresholds move over every real candidate with no new calls. Use becomes the label: a note that decays unused is a bad label for the extractor that let it pass.
 
-Where it will likely break: `tl` is no longer a pure archive, it also holds the register of the distiller. Accepted, because the distiller already reads its queue and sets `distilled`.
+Where it will likely break: `alfred hist` is no longer a pure archive, it also holds the register of the distiller. Accepted, because the distiller already reads its queue and sets `distilled`.
 
 ## Cross-references
 
@@ -34,5 +34,5 @@ Where it will likely break: `tl` is no longer a pure archive, it also holds the 
 - [memory_episode_summaries_are_a_derived_index_over_tl](memory_episode_summaries_are_a_derived_index_over_tl) — the episode index that carries `extractor_id`
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the tables tl has today
 - [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) — use, not reading, judges a note
-- [memory_distiller_is_its_own_tool_td_and_tl_stays_the_register](memory_td_is_its_own_tool) — td checks the config; tl stores it
+- [memory_extractor_row_4_has_rules_only_roles](memory_extractor_row_4_has_rules_only_roles) — the distiller checks the config; `alfred hist` stores it
 - [memory_extractor_calls_go_to_ollama_by_reqwest](memory_extractor_calls_go_to_ollama_by_reqwest) — what a call in the config must state

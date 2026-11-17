@@ -1,17 +1,17 @@
 ---
 tags: [memory, ti, qdrant, rules]
-sources: [conversation, tools/ti/src/identity.ts, tools/ti/src/qdrant.ts, tests/ti.test.ts]
+sources: [conversation, tools/alfred/src/rules/mod.rs, tools/alfred/src/rules/store/mod.rs, tools/alfred/src/rules/cli.rs, tools/ti/src/identity.ts@last-typescript]
 ---
 
 ## Decision
 
-`ti` (Third Identity, implemented 2026-07-21) is a thin CLI over a dedicated Qdrant collection `pi_identity` storing context→action rules — distinct from `tb`'s semantic memory. Schema: `if` (the only embedded field), `do` (plain payload, array), `tags` (payload filter). No note-linking.
+`ti` (Third Identity, implemented 2026-07-21) stores context→action rules in a dedicated Qdrant collection, `pi_identity`. `alfred rules` does this job now: the CLI is a client of `alfred serve`, which holds the collection. Schema: `if` (the only embedded field), `do` (plain payload, array), `tags` (payload filter). No links between rules.
 
-`do` covers three forms: a behavior/attitude, a dispatch to a skill or a `th` run, or a `tb` lookup hint (a search term, never a frozen note id). Deliberately a dumb client: no auto-merge, no similarity judgment, no LLM call inside the CLI — the merge/dedup decision stays with the caller, same discipline as `tb search` → `tb add`. Reuses `tools/tb/src/infra.ts` as a library without modifying it.
+`do` covers three forms: a behavior or attitude, a dispatch to a skill or an `alfred command run`, or a lookup hint (a search term, never a frozen id). Deliberately a dumb store: no auto-merge, no similarity judgment, no LLM call inside `alfred rules add`. The merge and dedup decision stays with the caller, who runs `alfred rules search` before `alfred rules add`.
 
 ## Why
 
-`tb` answers "what do I know about X"; it does not answer "what should happen given context X". Mixing the two retrieval patterns in one collection degrades both: behavioral queries get diluted by semantic noise, semantic queries get cluttered with situational one-offs. `ti` is the answer to the gap of a store indexed by situation, named in [memory_procedural_memory_grows_on_data](memory_procedural_memory_grows_on_data) — narrower than the full move-2 plan, human-in-the-loop by design, consistent with log-first intelligence-after.
+`tb` answered "what do I know about X"; it did not answer "what should happen given context X". Shared knowledge now lives in the vault, and the rules stay apart. Mixing the two retrieval patterns in one collection degrades both: behavioral queries get diluted by semantic noise, semantic queries get cluttered with situational one-offs. `ti` is the answer to the gap of a store indexed by situation, named in [memory_procedural_memory_grows_on_data](memory_procedural_memory_grows_on_data) — narrower than the full move-2 plan, human-in-the-loop by design, consistent with log-first intelligence-after.
 
 Implementation note worth keeping: a live smoke test against the real Qdrant on the Rasp (2026-07-21) found three response-shape bugs the mocked suite could not catch. The mocks were written to match the assumptions of the code. Mocks prove the code matches itself; only the live service proves it matches the world.
 
@@ -19,7 +19,7 @@ Implementation note worth keeping: a live smoke test against the real Qdrant on 
 ## Cross-references
 
 - [memory_procedural_six_gaps](memory_procedural_memory_grows_on_data) — the gap analysis `ti` extends
-- [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](core_alfred_v2_one_binary_serve_on_the_deck) — the Qdrant instance `ti` shares with `tb`
+- [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](core_alfred_v2_one_binary_serve_on_the_deck) — the Qdrant instance behind `alfred serve`
 - [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) — how `ti` rules reach the agent before every prompt
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the raw facts `tl` would feed `ti`'s distillation
 - [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) — `ti` as the procedural type, and the test that splits it from `tb`

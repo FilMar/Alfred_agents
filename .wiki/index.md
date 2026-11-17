@@ -33,7 +33,7 @@ updated: 2026-10-16
 | [th_sandbox_bwrap_fixed_binds](th_sandbox_bwrap_fixed_binds) | bwrap profile; run warns, sandbox-exec refuses |
 | [th_detached_runs_state_in_tmp](th_detached_runs_state_in_tmp) | Detached runs keep state in /tmp files |
 | [th_verification_outside_members](th_verification_outside_members) | Verification never inside a member's run |
-| [th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends](th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends) | A run with --timeout exits when its prompt ends; the old timer kept it up |
+| th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends | A run with --timeout exits when its prompt ends; the old timer kept it up |
 
 ## agents
 
@@ -56,24 +56,24 @@ updated: 2026-10-16
 |------|---------|
 | [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) | tl: an archive of work; chat and subtask, three tables |
 | [memory_wiki_is_the_project_notebook](memory_wiki_is_the_project_notebook) | The wiki is not a memory tier; the extraction test |
-| [memory_identity_splits_descriptive_prescriptive](memory_identity_splits_descriptive_prescriptive) | about on tb notes; ti holds the executable half |
+| memory_identity_splits_descriptive_prescriptive | about on tb notes; ti holds the executable half |
 | [memory_ti_context_action_rules](memory_ti_context_action_rules) | ti: dedicated if/do collection, dumb client |
 | [memory_coala_four_types_map_to_pi](memory_coala_four_types_map_to_pi) | CoALA's four types mapped to pi; episodic is the hole |
 | [memory_human_gate_is_the_bottleneck](memory_human_gate_is_the_bottleneck) | The human OK limits growth; use judges, not reading |
-| [memory_refs_carry_non_semantic_reach](memory_refs_carry_non_semantic_reach) | 74% of refs are not redundant with the vectors |
-| [memory_related_notes_ranked_not_cut](memory_related_notes_ranked_not_cut) | Related notes are scored and ranked, never cut by min-score |
-| [memory_score_is_always_the_engine_cosine](memory_score_is_always_the_engine_cosine) | One score field, one quantity: the engine's cosine |
-| [memory_graph_engine_deferred_not_needed](memory_graph_engine_deferred_not_needed) | No graph DB; the threshold to revisit, written down |
-| [memory_alias_makes_migration_reversible](memory_alias_makes_migration_reversible) | Collection per model behind an alias; atomic swap |
+| memory_refs_carry_non_semantic_reach | 74% of refs are not redundant with the vectors |
+| memory_related_notes_ranked_not_cut | Related notes are scored and ranked, never cut by min-score |
+| memory_score_is_always_the_engine_cosine | One score field, one quantity: the engine's cosine |
+| memory_graph_engine_deferred_not_needed | No graph DB; the threshold to revisit, written down |
+| memory_alias_makes_migration_reversible | Collection per model behind an alias; atomic swap |
 | [memory_embedding_model_follows_the_corpus_language](memory_embedding_model_follows_the_corpus_language) | An Italian corpus needs a multilingual model, with the task prefixes |
 | [memory_score_cutoffs_belong_to_the_model](memory_score_cutoffs_belong_to_the_model) | min-score is measured per model, and the hook was silent without it |
-| [memory_absence_is_how_qdrant_stores_null](memory_absence_is_how_qdrant_stores_null) | No field whose only value is null: Qdrant drops the key |
-| [memory_raw_text_lives_in_the_archive_not_the_note](memory_raw_text_lives_in_the_archive_not_the_note) | No source_raw on a note: the archive holds the text, the note holds a pointer |
+| memory_absence_is_how_qdrant_stores_null | No field whose only value is null: Qdrant drops the key |
+| memory_raw_text_lives_in_the_archive_not_the_note | No source_raw on a note: the archive holds the text, the note holds a pointer |
 | [memory_session_names_its_harness](memory_session_names_its_harness) | A session says which tool ran it, once, in a column |
 | [memory_delegated_run_is_a_pi_subtask](memory_delegated_run_is_a_pi_subtask) | A th run archives itself: a pi session that kind marks as a subtask |
 | [memory_run_spool_survives_reboot](memory_run_spool_survives_reboot) | A run the archive cannot take is spooled outside /tmp and drained by every run and wait |
 | [memory_hook_query_not_rewritten](memory_hook_query_not_rewritten) | The hook sends the prompt as it is: a 9B rewrite lowered recall in the spike |
-| [memory_td_distills_by_itself_at_session_start](memory_td_distills_by_itself_at_session_start) | The start of a session runs the distiller; replaces the manual-only decision |
+| [memory_td_distills_by_itself_at_session_start](memory_distill_starts_on_ingest_by_threshold) | The start of a session runs the distiller; replaces the manual-only decision |
 | [memory_episode_summaries_are_a_derived_index_over_tl](memory_episode_summaries_are_a_derived_index_over_tl) | Phase 0 episode summaries become a derived, rebuildable search index over tl |
 | [memory_hindsight_not_adopted_its_shape_is_copied](memory_hindsight_not_adopted_its_shape_is_copied) | No Hindsight; copy its shape: one structured call, code for the rest |
 | [memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first](memory_extractor_pipeline_is_v7_with_critic_f_built_in_shadow_first) | The extractor is the v7 pipeline with critic F, no tools, built in shadow first; in-session repeats still open, the 0.95 cut is dropped and `distilled` is a run time (see the td rows below) |
@@ -84,24 +84,23 @@ updated: 2026-10-16
 | [memory_distiller_distills_chat_only](memory_distiller_distills_chat_only) | A subtask row is noise to the reader and closes at zero cost; the sweep drains a session with nothing to extract; th runs archive again |
 | [memory_td_phase_2a_only_searches_neighbours_and_leaves_no_hit_so_the_cosine_cut_is_gone](memory_td_phase_2a_only_searches_neighbours_and_leaves_no_hit_so_the_cosine_cut_is_gone) | Phase 2a is a read-only neighbour search with record_hits off; the 0.95 cut never fired, so it is gone |
 | [memory_td_distilled_is_set_for_a_whole_session_at_the_end_to_the_run_time](memory_td_distilled_is_set_for_a_whole_session_at_the_end_to_the_run_time) | A session is the unit of distilled: closed once, with the run time, only when nothing failed; redone whole otherwise |
-| [memory_td_ref_only_saves_nothing_because_a_ref_needs_two_notes](memory_td_ref_only_saves_nothing_because_a_ref_needs_two_notes) | ref_only writes nothing: a ref links two notes and the candidate makes none |
+| [memory_td_ref_only_saves_nothing_because_a_ref_needs_two_notes](memory_distill_novelty_settles_rules_by_cand) | ref_only writes nothing: a ref links two notes and the candidate makes none |
 | [memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending](memory_td_max_saved_caps_the_writes_of_one_run_and_a_capped_session_stays_pending) | --max-saved caps the writes of a run; a capped session stays pending and is redone |
 | [memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores](memory_td_edges_are_tested_on_in_memory_stubs_and_an_end_to_end_test_checks_the_stores) | td tests use in-memory stubs; an end-to-end test checks the stores, since bare calls cannot tell a save from a failure |
 | [memory_extractor_calls_go_to_ollama_by_reqwest](memory_extractor_calls_go_to_ollama_by_reqwest) | Calls are one reqwest POST to Ollama /api/chat, with the system role and the thinking level always set |
-| [memory_bridges_by_shape_are_judged_by_reading](memory_bridges_by_shape_are_judged_by_reading) | Phase 3 bridges by shape; 0/20 ref recovery, so judge by reading the yes answers |
+| memory_bridges_by_shape_are_judged_by_reading | Phase 3 bridges by shape; 0/20 ref recovery, so judge by reading the yes answers |
 | [memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing) | tb refine: trust 0..1 derived from the hit counters, start 0.5, floor at 2026-09-21; the first pass computes it and stores nothing |
-| [memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first) | Delete when archived and no signal for 365 days, after an append-only log line; not before 2027-09-21 |
-| [memory_tb_refine_browse_notes_reads_one_page_so_refine_passes_a_limit_of_10000_and_asserts_the_read_is_not_cut](memory_tb_refine_browse_notes_reads_one_page_so_refine_passes_a_limit_of_10000_and_asserts_the_read_is_not_cut) | browseNotes reads one page of 20; refine passes limit 10000 and asserts the read is not cut |
+| memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first | Delete when archived and no signal for 365 days, after an append-only log line; not before 2027-09-21 |
+| memory_tb_refine_browse_notes_reads_one_page_so_refine_passes_a_limit_of_10000_and_asserts_the_read_is_not_cut | browseNotes reads one page of 20; refine passes limit 10000 and asserts the read is not cut |
 | [memory_tb_refine_half_life_is_30_days](memory_tb_refine_half_life_is_30_days) | Half-life 30 days, threshold 0.2, for tb and ti: a note with no hit leaves the hook about 40 days after its last signal |
-| [memory_tb_note_status_field_is_removed_because_nothing_reads_it_and_nothing_promotes_it](memory_tb_note_status_field_is_removed_because_nothing_reads_it_and_nothing_promotes_it) | The note status field is removed: nobody reads it and nobody promotes it; old notes keep it |
-| [memory_tb_note_payload_is_pinned_by_an_exact_test_so_a_key_cannot_appear_or_vanish_unseen](memory_tb_note_payload_is_pinned_by_an_exact_test_so_a_key_cannot_appear_or_vanish_unseen) | A test pins the exact payload of a note; fields arrive from precise writes |
+| memory_tb_note_status_field_is_removed_because_nothing_reads_it_and_nothing_promotes_it | The note status field is removed: nobody reads it and nobody promotes it; old notes keep it |
+| memory_tb_note_payload_is_pinned_by_an_exact_test_so_a_key_cannot_appear_or_vanish_unseen | A test pins the exact payload of a note; fields arrive from precise writes |
 | [memory_glm_json_comes_from_the_prompt_not_format](memory_glm_json_comes_from_the_prompt_not_format) | GLM ignores format schemas; JSON from the prompt, checked by code, one retry |
 | [memory_procedural_memory_grows_on_data](memory_procedural_memory_grows_on_data) | Procedural memory grows on data: skill telemetry first, then extraction and a revision loop |
-| [memory_clients_read_their_url_per_call](memory_clients_read_their_url_per_call) | tb and tl clients read their URL per call, so a test never reaches the real store |
-| [memory_td_config_enters_as_checked_json](memory_td_config_enters_as_checked_json) | td config enters only as JSON, checked on both sides, and must round trip |
+| memory_clients_read_their_url_per_call | tb and tl clients read their URL per call, so a test never reaches the real store |
+| [memory_td_config_enters_as_checked_json](memory_extractor_row_4_has_rules_only_roles) | td config enters only as JSON, checked on both sides, and must round trip |
 | [memory_td_config_holds_every_input](memory_td_config_holds_every_input) | An extractor row holds every input that shapes a result, cuts included |
-| [memory_td_errors_are_values_or_thrown](memory_td_errors_are_values_or_thrown) | td: world errors are values, programmer errors are thrown |
-| [memory_td_is_its_own_tool](memory_td_is_its_own_tool) | td is its own tool with one entry point; tl stays the register |
+| memory_td_errors_are_values_or_thrown | td: world errors are values, programmer errors are thrown |
 | [memory_refine_archive_hides_from_hook_only](memory_refine_archive_hides_from_hook_only) | Archived notes leave the hook only; a deliberate search revives them; refine owns archived_at |
 | [memory_refine_apply_runs_at_session_start](memory_refine_apply_runs_at_session_start) | tb refine --apply runs at session start, with no write cap |
 | [memory_refine_hits_measure_retrieval](memory_refine_hits_measure_retrieval) | A hit is retrieval, not use; trust measures vitality, so archive comes before delete |
@@ -115,15 +114,15 @@ updated: 2026-10-16
 | [memory_episodes_fill_from_the_normal_distill_run](memory_episodes_fill_from_the_normal_distill_run) | Phase 0 of distill fills the episode index |
 | [memory_episode_search_filters_the_period_in_qdrant](memory_episode_search_filters_the_period_in_qdrant) | tl search filters the period in Qdrant; the default score is 0.35 |
 | [memory_episode_reads_check_every_payload](memory_episode_reads_check_every_payload) | Every episode payload is checked on read; a bad one names the field |
-| [memory_td_session_cap_limits_one_session](memory_td_session_cap_limits_one_session) | td distill --max-per-session: a maximum of items one session decides, default 10 |
+| [memory_td_session_cap_limits_one_session](memory_distill_has_no_session_cap) | td distill --max-per-session: a maximum of items one session decides, default 10 |
 | [memory_novelty_stays_with_the_judge_not_a_vector_cutoff](memory_novelty_stays_with_the_judge_not_a_vector_cutoff) | Novelty stays with the model judge; a 0.9 cosine cutoff finds no duplicate |
 | [memory_distiller_has_no_personal_data_filter](memory_distiller_has_no_personal_data_filter) | The distiller has no personal-data filter; the memory is private to one user |
 | [memory_td_same_session_cutoff_drops_twins](memory_td_same_session_cutoff_drops_twins) | td drops a candidate that repeats an item of the session, cosine 0.8 by default |
-| [memory_td_verdicts_keep_their_kind](memory_td_verdicts_keep_their_kind) | A verdict links only items of the kind of the candidate, else it is new |
+| [memory_td_verdicts_keep_their_kind](memory_distill_novelty_settles_rules_by_cand) | A verdict links only items of the kind of the candidate, else it is new |
 | [memory_td_episodes_are_built_from_the_whole_session](memory_td_episodes_are_built_from_the_whole_session) | Phase 0 reads the whole session so a returning session keeps its episodes |
 | [memory_ti_gets_hits_and_refine_exactly_like_tb](memory_ti_gets_hits_and_refine_exactly_like_tb) | ti counts hits and runs ti refine with the formula and archive of tb |
 | [memory_refine_rows_name_the_text_text](memory_refine_rows_name_the_text_text) | refine rows name the note text or the rule if as text |
-| [memory_tb_merge_moves_links_onto_one_note](memory_tb_merge_moves_links_onto_one_note) | tb merge moves refs, backrefs, tags and hits of the drops onto one note, then deletes them; writes no text |
+| memory_tb_merge_moves_links_onto_one_note | tb merge moves refs, backrefs, tags and hits of the drops onto one note, then deletes them; writes no text |
 | [memory_ghost_rules_are_plain_ti_rules_with_the_same_do](memory_ghost_rules_are_plain_ti_rules_with_the_same_do) | A ghost rule is a plain ti add with the same do: separate stats per trigger, no multi-vector points |
 | [memory_aristotele_is_a_manual_curator_of_tb_and_ti](memory_aristotele_is_a_manual_curator_of_tb_and_ti) | Aristotele curates tb and ti when the user starts it: merges, refs, hubs, ghost rules, no approval, a web report after |
 | [memory_near_and_reach_find_what_aristotele_judges](memory_near_and_reach_find_what_aristotele_judges) | tb near and ti near list close pairs; tl prompts piped into ti reach counts which rules real prompts reach; code finds, Aristotele judges |
@@ -198,11 +197,10 @@ updated: 2026-10-16
 
 | Page | Content |
 |------|---------|
-| [style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags) | tools/common holds every shared module: contract, cli helpers, tags |
+| style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags | tools/common holds every shared module: contract, cli helpers, tags |
 | [style_a_source_that_left_the_tree_is_written_as_path_at_commit_hash_or_marked_deleted](style_a_source_that_left_the_tree_is_written_as_path_at_commit_hash_or_marked_deleted) | A source that left the tree is written path@hash, or (deleted) if git never held it |
-| [style_dual_entrypoint](style_dual_entrypoint) | CLI + HTTP API pattern for tb/ti |
-| [style_type_checks_are_private_static_methods_of_their_class](style_type_checks_are_private_static_methods_of_their_class) | A check that knows one type is a private static method; getters have no contract |
-| [style_tb_ti_layering](style_tb_ti_layering) | Layered architecture and coding standards |
+| style_type_checks_are_private_static_methods_of_their_class | A check that knows one type is a private static method; getters have no contract |
+| style_tb_ti_layering | Layered architecture and coding standards |
 | [style_pi_may_lint_typescript_with_oxlint](style_pi_may_lint_typescript_with_oxlint) | Idea: oxlint and just lint in pi with a subset of anti-slop rules |
 
 ## wiki

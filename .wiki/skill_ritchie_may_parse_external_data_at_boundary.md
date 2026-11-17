@@ -20,4 +20,3 @@ Ritchie names the boundary three times and never states this rule. P4 puts verbo
 ## Cross-references
 
 - [skill_anti_slop_not_adopted_rules_feed_ritchie](skill_anti_slop_not_adopted_rules_feed_ritchie) — where the idea comes from
-- [memory_td_errors_are_values_or_thrown](memory_td_errors_are_values_or_thrown) — world errors in `td`

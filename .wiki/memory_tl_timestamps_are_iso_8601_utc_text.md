@@ -1,19 +1,19 @@
 ---
 tags: [memory, tl, sqlite, schema]
-sources: [tools/tl/src/db.ts, tools/tl/README.md]
+sources: [tools/alfred/src/hist/db/mod.rs, tools/alfred/src/hist/validate.rs, tools/tl/src/db.ts@last-typescript, tools/tl/README.md@last-typescript]
 ---
 
 ## Decision
 
-A time in `tl` is TEXT that holds ISO-8601 in UTC. Always the `Z`, always fixed width.
+A time in hist (the `tl` archive) is TEXT that holds ISO-8601 in UTC. Always the `Z`, always fixed width.
 
 ## Why
 
 SQLite has no datetime type. It has five storage classes. A column declared `DATETIME` gets NUMERIC affinity, which stores an ISO string as TEXT anyway, plus a lie in the schema.
 
-ISO-8601 at fixed width sorts as text the way it sorts in time. Every SQLite date function reads it. It is already the format of the transcripts and of the `when` field of `tb`.
+ISO-8601 at fixed width sorts as text the way it sorts in time. Every SQLite date function reads it. It is already the format of the transcripts and of the `when` field of the rules.
 
-SQLite enforces none of this, and nothing else does either. The format is a rule the writer holds. A row written any other way sorts in the wrong place and breaks every query without raising an error.
+SQLite enforces none of this. `alfred hist` checks it on every write: `is_timestamp()` accepts only `YYYY-MM-DDTHH:MM:SS.mmmZ`. A row written any other way sorts in the wrong place and breaks every query without raising an error.
 
 ## Cross-references
 

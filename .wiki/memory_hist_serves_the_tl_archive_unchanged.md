@@ -1,6 +1,6 @@
 ---
 tags: [memory, tl, hist, alfred, sqlite, compatibility]
-sources: [spec.json@4c8ade4, review.json@4c8ade4, tools/alfred/src/hist]
+sources: [spec.json@4c8ade4, review.json@4c8ade4, tools/alfred/src/hist, tools/alfred/src/main.rs]
 ---
 
 ## Decision
@@ -9,13 +9,13 @@ sources: [spec.json@4c8ade4, review.json@4c8ade4, tools/alfred/src/hist]
 
 The schema is the `tl` schema, copied character by character. Opening an old file adds only the two columns `tl` already adds, `harness` and `tools`. There is no other migration.
 
-Two routes are new: `GET /hist/search` and `GET /hist/episodes/{id}`. They read the episodes from the Qdrant collection `tl_episodes`, which `td` writes.
+Two routes are new: `GET /hist/search` and `GET /hist/episodes/{id}`. They read the episodes from the Qdrant collection `tl_episodes`, which the distiller in `alfred serve` writes.
 
 A POST with many rows writes them in one transaction. `tl` writes them one at a time.
 
 ## Why
 
-`td` and `th` stay in TypeScript and talk to `tl` over HTTP. At the switch, `TL_API_URL=http://filcloud:8791/hist` is enough. No line of `td` or `th` changes, and no data moves.
+At the switch, `td` and `th` were still in TypeScript and talked to `tl` over HTTP. `TL_API_URL=http://filcloud:8791/hist` was enough. No line of `td` or `th` changed, and no data moved.
 
 The proof was run on a copy of the real file from the Deck. `tl serve` and `alfred serve` answered 26 read requests the same way, errors included. 26 write requests sent to two copies gave the same answers and the same five tables, row by row. Six episode searches gave the same ids and scores.
 

@@ -1,12 +1,12 @@
 ---
 tags: [mcp, cli, architecture, tools, contract]
-sources: []
+sources: [conversation, tools/alfred/src/api.rs, tools/alfred/src/rules/cli.rs, extensions/rules/claude.sh, extensions/hist/claude.sh]
 replaces: []
 ---
 
 ## Decision
 
-pi does not migrate `tb`, `ti`, `th` and `tl` to MCP (Model Context Protocol). The four tools stay CLI-first with JSON output and optional HTTP APIs. A contract layer with JSON Schemas is added to the CLIs instead. An MCP shim is deferred behind a binary trigger: a second independent client that mounts the tools in a stable way.
+pi does not move its tools to MCP (Model Context Protocol). The decision was taken for `tb`, `ti`, `th` and `tl`. It holds for `alfred`, the one binary that replaced them. `alfred` stays CLI-first, and `alfred serve` has an HTTP API that speaks JSON. A contract layer with JSON Schemas was planned for the CLIs instead. An MCP shim is deferred behind a binary trigger: a second independent client that mounts the tools in a stable way.
 
 The decision came from a council of four experts (kimi-k3/white, glm-5.3/yellow, mistral-large-4/black, gemma4-31b/green, synthesis by kimi-k3/blue). It reviewed the repo and five 2026 articles on CLI, MCP and API for AI agents.
 
@@ -16,21 +16,21 @@ MCP solves a multi-agent, multi-tenant problem. pi is single-user, single-agent 
 
 pi already has what MCP formalizes:
 
-- The CLI tools emit JSON on stdout. `tb search` and `ti search` print text blocks and give the full JSON with `--json`.
+- `alfred rules search` prints text blocks and gives the full JSON with `--json`. The API of `alfred serve` answers in JSON.
 - `--help` gives discovery for about 200 tokens, against about 55k for an MCP schema dump.
 - Skills are a human-readable layer injected into the prompt. They do what MCP discovery does, cheaper.
-- `extensions/tb_ti` and `extensions/tl` are hooks that act as an MCP server welded to one client.
-- `tb serve` and `ti serve` expose Hono HTTP APIs with OpenAPI specs.
+- `extensions/rules` and `extensions/hist` are hooks that act as an MCP server welded to one client.
+- `alfred serve` exposes an HTTP API. Its reply types are serde types shared by the server and the client.
 
 The real risks are independent of MCP. Prompt debt: SKILL.md files are code in natural language with no types, tests or versions. Prompt injection into the shell: the CLI inherits the shell permissions, and MCP does not fix that. On a Raspberry Pi with local LLMs, schema dumps eat the context a small model needs.
 
-The work is in the roadmap, in priority order. P0: JSON Schemas for the output of the four CLIs, checked in CI. P1: security (a command whitelist, an audit log, the SQLite races in `th`, zombie processes). P2: the MCP stdio shim, when the trigger fires. P3: an optional spike of pi as an MCP client.
+The council set the work in priority order, for the four TypeScript tools. P0: JSON Schemas for their output, checked in CI. In `alfred`, no JSON Schema is checked in CI: the shared serde types of the API keep server and client in step. P1: security (a command whitelist, an audit log, the SQLite races in `th`, zombie processes). P2: the MCP stdio shim, when the trigger fires. P3: an optional spike of pi as an MCP client.
 
 Rejected: native MCP servers, for no measured benefit. Also rejected: an MCP facade "to be ready", because readiness without consumers is over-engineering. Also rejected: SKILL.md files that simulate MCP, because they pollute the source of truth. And the belief that MCP stops prompt injection: injection crosses any transport. Gemini advised the migration with a generic framework, without seeing the code.
 
 ## Cross-references
 
-- [style_dual_entrypoint](style_dual_entrypoint) — the CLI + HTTP API pattern these tools already follow
+- [style_dual_entrypoint](core_alfred_api_speaks_json_cli_prints_text) — the CLI + HTTP API pattern these tools already follow
 - [core_tb_stateless_single_source](core_alfred_v2_one_binary_serve_on_the_deck) — CLIs hold no state
 - [hook_tb_ti_auto_injection](hook_tb_ti_auto_injection) — the hand-built MCP-like hook that already exists
 - [skill_convention_direct_cli](skill_convention_direct_cli) — skills call CLIs directly

@@ -29,7 +29,7 @@ Each run works on copies in a temp directory and cannot run code. The body run r
 
 **No runner inside the run.** The worktree with a linked `node_modules` was the part the user judged too complex. A run writes once and stops. The loop that verifies belongs to Ritchie.
 
-**Where it will likely break.** The isolation is soft: a run can read any file by its absolute path, and the system only tells it not to. A trial on the recorder read the real test file of the same module, so that trial says nothing about GLM. In the normal flow the module is new. A run takes minutes, and part of the old wait was a timer: [th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends](th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends). The script has a 20-minute timeout. Call it in the background.
+**Where it will likely break.** The isolation is soft: a run can read any file by its absolute path, and the system only tells it not to. A trial on the recorder read the real test file of the same module, so that trial says nothing about GLM. In the normal flow the module is new. A run takes minutes, and part of the old wait was a timer: th_timeout_timer_is_cleared_so_a_run_exits_when_its_prompt_ends. The script has a 20-minute timeout. Call it in the background.
 
 ## Cross-references
 

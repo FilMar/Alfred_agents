@@ -13,7 +13,6 @@ Only the next goals have blocks. When a goal is done, pick the next one from Ide
 The distiller and `th` move into alfred. Then the server goes on the Deck, and every caller moves in one pass. [detail](core_alfred_v2_one_binary_serve_on_the_deck)
 
 - [M] `alfred command` tests that close two gaps: pi dies after the timeout, read through the `.pid` file [detail](core_alfred_command_runs_pi_as_a_child_in_bwrap); a sent spool file leaves, with a `Client::at(url)` for tests [detail](core_alfred_command_files_each_run_in_hist_with_a_spool). Parts A and B are done.
-- [M] Review the 62 wiki pages whose sources are only the removed TypeScript tools (tag `last-typescript` holds them). A decision that alfred still follows moves its sources to the alfred code, in place. A page about a TypeScript detail only is retired.
 
 ## Ideas
 
@@ -21,23 +20,22 @@ One line each. An idea becomes blocks only when it is the next goal.
 
 - Start and follow chats and `alfred command` runs from the phone, through the `alfred serve` API: the Deck is a client too.
 - The session failure `split failed` carries the reason of the answer: an Ollama quota error looks like a bad model answer today.
-- Scale the session cap with its exchanges, and record the skipped ones. [detail](memory_td_session_cap_limits_one_session)
-- A guard for tag synonyms in `td`, after reading the proposed tags. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
-- `td` phase 3: bridges between saved notes. [detail](memory_bridges_by_shape_are_judged_by_reading)
+- Scale the session cap with its exchanges, and record the skipped ones. [detail](memory_distill_has_no_session_cap)
+- A guard for tag synonyms in the distiller, after reading the proposed tags. [detail](memory_td_candidates_keep_known_tags_and_propose_new_ones)
 - A rebuild mode for the episode index. [detail](memory_episodes_fill_from_the_normal_distill_run)
 - `browse` and `random` print text, as `search` does. [detail](memory_search_prints_text_blocks_by_default)
-- A limit on the extractions API and on `tl extractions`.
-- One home for `requireServices`, or leave it. [detail](style_shared_modules_live_in_tools_common_one_folder_for_contract_cli_and_tags)
+- A limit on the extractions API and on `alfred hist extractions`.
+- One home for `requireServices`, or leave it.
 - A generic runner of scheduled jobs inside `alfred serve`, agentic or not: sort the mail, check the state of the Deck. It may meet the `tp` design below.
-- Fix the generic `ti` rules that score 0.5-0.6 on every prompt. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
-- Drop empty `tl` episodes from the search. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
-- A test for the hook script of the distiller. [detail](memory_td_distills_by_itself_at_session_start)
-- `th` cleans up zombie processes.
+- Fix the generic rules that score 0.5-0.6 on every prompt. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
+- Drop empty episodes from `alfred hist search`. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
+- A test for the hook script of the distiller. [detail](memory_distill_starts_on_ingest_by_threshold)
+- `alfred command` cleans up zombie processes.
 - Ritchie: the mutant run as a script; a fixture helper; contract messages carry values; an integration net. [detail](skill_ritchie_contract_messages_carry_values)
 - Annibale: named experts in `.expert/`. [detail](skill_annibale_runs_a_debate_of_made_up_viewpoints)
 - Router pass: multi-direction skills become dispatch tables. [detail](skill_router_pass_planned)
-- Socrate becomes a `ti` principle. [detail](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood)
-- The piano rule in `ti` covers new features too. [detail](skill_piano_writes_design_main_md)
+- Socrate becomes a rule principle. [detail](skill_socrate_may_become_a_ti_principle_that_tests_what_the_user_understood)
+- The piano rule covers new features too. [detail](skill_piano_writes_design_main_md)
 - Spec view: a layout that stays readable with 15 entities and 20 flows. [detail](skill_ritchie_spec_is_shown_not_written)
 - Spec view: find CLI calls without a regex per tool, so a call like `bun <path> distill` is not missed. [detail](skill_ritchie_review_shows_plan_against_built)
 - Census of the skills not yet judged: feynman, indiana, polo and the rest.
@@ -54,24 +52,20 @@ To discuss with Piano before any block.
 
 - analisi: `.design/analisi.md`. `polo` reads sources. Missing: official and independent sources, the chart (`atlante` is in git), the stop when there are none. The expense CSV (`.bank.csv` in `essays`, read with `xan`) is a case too. On request only, or a monthly summary.
 - memory: discuss `.design/memory.md`. It says "Io non la curo", "Non è ciò che so io" and "Non è un wiki che leggo io". The v2 memory contradicts these lines: the vault is written with the user. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
-- Procedural memory: `tp`, a runner of procedures (decided 2026-10-20, shape still moving, so no decision page yet). A procedure is a script in a folder; the folder is the registry, there is no register command. The script does the deterministic steps and asks `th` one structured question where judgment is needed: one branch per verdict, no loop. Every run writes a row in `tl` with its outcome, so skill telemetry comes from the runner. Two sources of procedures: a flow over `tl` that finds the operations done often and proposes the script; the agent itself, when it sees that a script it just wrote is generic, saves it in `tp`. The trigger is a `ti` rule whose `do` says `tp run <name>`. Use is the judge: a procedure never run again is archived like a note. Runs under the `th` bwrap profile. Replaces the "tb note of kind protocollo" step in [detail](memory_procedural_memory_grows_on_data); that page is rewritten when the design ends. To Piano first.
-- From the MCP audit: a JSON Schema layer for CLI output, a command whitelist with audit log, the binary trigger rule and an MCP shim for `ti`. [detail](core_mcp_not_adopted_cli_json_schemas_first)
+- Procedural memory: `tp`, a runner of procedures (decided 2026-10-20, shape still moving, so no decision page yet). A procedure is a script in a folder; the folder is the registry, there is no register command. The script does the deterministic steps and asks `alfred command run` one structured question where judgment is needed: one branch per verdict, no loop. Every run writes a row in `alfred hist` with its outcome, so skill telemetry comes from the runner. Two sources of procedures: a flow over `alfred hist` that finds the operations done often and proposes the script; the agent itself, when it sees that a script it just wrote is generic, saves it in `tp`. The trigger is a rule whose `do` says `tp run <name>`. Use is the judge: a procedure never run again is archived like a note. Runs under the `alfred command` bwrap profile. Replaces the "tb note of kind protocollo" step in [detail](memory_procedural_memory_grows_on_data); that page is rewritten when the design ends. To Piano first.
+- From the MCP audit: a JSON Schema layer for CLI output, a command whitelist with audit log, the binary trigger rule and an MCP shim for `alfred rules`. [detail](core_mcp_not_adopted_cli_json_schemas_first)
 
 ## Watch
 
 Measures, trials and work gated by a date or a size.
 
-- `tb refine`: read the first archive list after 2026-10-31. If notes still in use leave, lengthen the half-life. [detail](memory_tb_refine_half_life_is_30_days)
-- `tb refine`: delete a note archived with no signal for a year. Not before 2027-09-21. [detail](memory_tb_refine_a_note_is_deleted_when_it_is_archived_and_has_had_no_signal_for_a_year_with_a_log_line_first)
-- `tb refine`: store a `trust` field only once a reader needs it. [detail](memory_tb_refine_trust_is_a_derived_number_from_zero_to_one_and_the_first_pass_computes_it_and_stores_nothing)
-- `ti refine`: read the archived rules of the first runs, from 2026-11-29. [detail](memory_ti_gets_hits_and_refine_exactly_like_tb)
+- `alfred rules refine`: read the archived rules of the first runs, from 2026-11-29. [detail](memory_ti_gets_hits_and_refine_exactly_like_tb)
 - Count the twins with the cutoff 0.75. Lower to 0.72 if twins pass, raise it if different ideas drop. [detail](memory_td_same_session_cutoff_drops_twins)
-- Find clusters of near notes in one session, for example siblings above 0.55. [detail](memory_td_session_cap_limits_one_session)
-- Check the minimum score 0.30 of `tl search` on more episodes. [detail](memory_episode_search_filters_the_period_in_qdrant)
+- Find clusters of near rule candidates in one session, for example siblings above 0.55. [detail](memory_distill_has_no_session_cap)
+- Check the minimum score 0.30 of `alfred hist search` on more episodes. [detail](memory_episode_search_filters_the_period_in_qdrant)
 - Run the judge and decay spikes again with the new hook text. Compare with the 4.4% of clear dependence. [detail](memory_hook_injects_only_the_text_the_agent_uses)
-- Try in a real session: the `tb_refine` hooks, the pi extension of the distiller, `extensions/tb_ti/pi.ts`.
 - A `datetime` payload index on `tl_episodes`, if the search gets slow. [detail](memory_episode_search_filters_the_period_in_qdrant)
-- A short id of 12 characters when the notes pass 10 000. [detail](memory_search_prints_text_blocks_by_default)
+- A short id of 12 characters when the rules pass 10 000. [detail](memory_search_prints_text_blocks_by_default)
 
 ## Cross-references
 

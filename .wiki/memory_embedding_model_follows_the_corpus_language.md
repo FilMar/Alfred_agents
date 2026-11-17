@@ -1,11 +1,11 @@
 ---
 tags: [memory, tb, ti, embedding, measurement]
-sources: [ROADMAP_MEMORIA.md@7edd8d8, tools/tb/src/infra.ts, spikes/2026-09-28-tb-corpus/tb_benchmark.py (deleted), spikes/2026-09-28-tb-corpus/reports/fase0_benchmark.json (deleted)]
+sources: [ROADMAP_MEMORIA.md@7edd8d8, tools/alfred/src/embed.rs, tools/tb/src/infra.ts@last-typescript, spikes/2026-09-28-tb-corpus/tb_benchmark.py (deleted), spikes/2026-09-28-tb-corpus/reports/fase0_benchmark.json (deleted)]
 ---
 
 ## Decision
 
-`tb` and `ti` embed with `nomic-embed-text-v2-moe`, not with `nomic-embed-text` v1.5. Both stores write documents with the prefix `search_document: ` and run queries with `search_query: `. `embed()` is split in two functions, `embedDocument()` and `embedQuery()`, so a caller cannot pick the wrong task by accident.
+`alfred` embeds rules and episodes with `nomic-embed-text-v2-moe`, not with `nomic-embed-text` v1.5. The model was chosen on the notes of `tb`. Both stores write documents with the prefix `search_document: ` and run queries with `search_query: `. The `Embedder` in `tools/alfred/src/embed.rs` has two functions, `document()` and `query()`, so a caller cannot pick the wrong task by accident.
 
 ## Why
 
@@ -29,6 +29,5 @@ Re-embedding 747 notes took 9 minutes 23 seconds, about 0.75 s per note. That is
 
 ## Cross-references
 
-- [memory_alias_makes_migration_reversible](memory_alias_makes_migration_reversible)
 - [memory_score_cutoffs_belong_to_the_model](memory_score_cutoffs_belong_to_the_model)
 - [memory_tb_and_ti_run_against_qdrant_and_ollama_on_the_rasp_and_every_client_points_there](core_alfred_v2_one_binary_serve_on_the_deck) — argues feasibility with a 137M model. v2-moe is 475M, so if Ollama runs on the Pi the number needs a new measure.

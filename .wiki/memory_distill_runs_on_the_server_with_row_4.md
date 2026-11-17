@@ -1,6 +1,6 @@
 ---
 tags: [memory, distiller, alfred, trigger, switch]
-sources: [conversation, tools/alfred/deploy/alfred.service, tools/alfred/src/distill/trigger.rs, extensions/tb_refine/claude.sh]
+sources: [conversation, tools/alfred/deploy/alfred.service, tools/alfred/src/distill/trigger.rs, extensions/refine/claude.sh]
 replaces: [memory_distill_trigger_is_off_until_the_switch@5a0a1fc]
 ---
 

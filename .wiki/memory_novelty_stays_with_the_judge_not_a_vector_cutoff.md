@@ -30,4 +30,4 @@ Inside one session, the 42 pairs of notes saved in the first batches reached 0.6
 ## Cross-references
 
 - [memory_score_cutoffs_belong_to_the_model](memory_score_cutoffs_belong_to_the_model) — a cutoff belongs to the embedding model
-- [memory_td_session_cap_limits_one_session](memory_td_session_cap_limits_one_session) — what is done for the clusters
+- [memory_td_session_cap_limits_one_session](memory_distill_has_no_session_cap) — what is done for the clusters

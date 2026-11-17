@@ -33,4 +33,3 @@ The surveyed systems agree on one more point, and it is the hard one: forgetting
 - [memory_tl_work_archive_not_event_log](memory_tl_work_archive_not_event_log) — the episodic layer, specified
 - [memory_log_first_three_moves](memory_procedural_memory_grows_on_data) — the same ordering reached from inside the project
 - [core_orthogonal_layers_no_overlap](core_orthogonal_layers_no_overlap) — the layer boundary this map confirms
-- [memory_graph_engine_deferred_not_needed](memory_graph_engine_deferred_not_needed) — why the gap is not a storage-engine problem
