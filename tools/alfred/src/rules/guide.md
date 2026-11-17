@@ -1,14 +1,14 @@
 # Rule quality
 
-The bar for a rule in Third Identity (`ti`). Anyone who saves a rule follows this guide. The text of a rule is written in Italian. This file is in English.
+The bar for a rule in `alfred rules`. Anyone who saves a rule follows this guide. The text of a rule is written in Italian. This file is in English.
 
-`tb` answers "what is true?". `ti` answers "what do I do now?". A rule is procedure. Knowledge goes to `tb`.
+The vault answers "what is true?". The rules answer "what do I do now?". A rule is procedure. Knowledge goes to the vault, which the user writes.
 
 ## 1. Who runs the rule
 
 The executor is the agent, not the user. A rule is one an LLM agent can apply while it works: writing code, designing, estimating, configuring, producing text. The agent has no memory of past sessions and cannot ask questions. It reads the `if`, retrieves the rule and follows the `do`.
 
-Habits, sleep, in-person talk and other personal-life protocols are not rules. The agent never meets those situations. They stay in `tb`.
+Habits, sleep, in-person talk and other personal-life protocols are not rules. The agent never meets those situations. They stay out of the rules.
 
 ## 2. The `if`: a situation
 
@@ -23,20 +23,20 @@ The `if` is a situation the agent can notice itself in, in the middle of a task.
 
 - **Start with a verb.** "Implementa", "Scrivi", "Chiedi", "Non permettere".
 - **Verifiable.** A reviewer can say "followed" or "not followed". "Fai attenzione" leaves no trace. "Non permettere scrittura diretta senza checkpoint umano" does.
-- **A dry order, no reason.** No "perché…". The reason is knowledge and lives in `tb`. If the order needs its reason to be followed, the `if` is not sharp. Fix the `if`. Do not pad the `do`.
+- **A dry order, no reason.** No "perché…". The reason is knowledge and belongs in the vault. If the order needs its reason to be followed, the `if` is not sharp. Fix the `if`. Do not pad the `do`.
 - **Self-contained.** No "come detto sopra". No reference to a conversation, a person, a team member or a session. The rule is read alone, years later.
-- **Tool routing is prime material.** Orders about the agent's own tools fire in every session: when to call `tb`, `ti`, `th`, a skill, a bash pattern. Save them whenever a session settles which tool handles which situation.
+- **Tool routing is prime material.** Orders about the agent's own tools fire in every session: when to call `alfred rules`, `alfred hist`, `alfred command`, a skill, a bash pattern. Save them whenever a session settles which tool handles which situation.
 
 ## 4. What is not a rule
 
 | candidate | goes to |
 |---|---|
-| a fact or mechanism | `tb`, kind `dato` or `sintesi` |
+| a fact or mechanism | the vault, written with the user |
 | a value statement ("l'osservabilità è importante") | drop, or extract the action it implies |
 | a one-off project decision | `.wiki/` |
-| a personal-life protocol | stays in `tb` |
+| a personal-life protocol | not saved |
 | vague advice ("considera i trade-off") | drop |
-| a real "in situation X, do Y" that recurs across projects | `ti` |
+| a real "in situation X, do Y" that recurs across projects | `alfred rules` |
 
 Final test: doing it and not doing it must look different. If they look the same, it is not a rule.
 
@@ -45,14 +45,14 @@ Final test: doing it and not doing it must look different. If they look the same
 Search first. Read the rules that come back, not only their scores.
 
 ```bash
-ti list                                            # once per run: the tag vocabulary
-ti search "<draft context>" --json --limit 5 --min-score 0.5
+alfred rules list                                         # once per run: the tag vocabulary
+alfred rules search "<draft context>" --json --limit 5 --min-score 0.5
 ```
 
 For each close rule, decide:
 
 - **Same context, same action.** Nothing to do.
-- **Same context, new action that adds.** `ti append-do <id> --do "<action>"`, not a new rule.
+- **Same context, new action that adds.** `alfred rules append-do <id> --do "<action>"`, not a new rule.
 - **Overlapping contexts.** Sharpen the new `if` until the two situations differ, or merge them. Merge only when the two are one situation. Split when the `if` holds two.
 - **The new rule denies the old one.** Same situation, opposite order. Replace it, see section 6.
 
@@ -64,26 +64,20 @@ No confirmation step. The anatomy and the checks are the gate. A rule that fails
 
 The newer correction wins. Do this, in order:
 
-1. **Write the lesson to `tb`, first.** The old rule is about to be deleted, and its text goes with it. Save one note that says what the old rule ordered, what the new rule orders, and why the old one was wrong. Give it the origin exchange. The note follows `tb guide` in full.
+1. **Delete the old rule.**
    ```bash
-   tb save --what "<old order vs new order, as a general lesson>" --why "<why the old one failed>" \
-     --kind attrito --tags <tag> --exchange "<id of the correcting exchange>"
+   alfred rules delete <old-id>
    ```
-   If the lesson is only a project detail and fails the note bar, skip the note. The new rule still carries the exchange.
-2. **Delete the old rule.**
-   ```bash
-   ti delete <old-id>
-   ```
-3. **Add the new rule**, with `--exchange <id of the correcting exchange>`.
+2. **Add the new rule**, with `--exchange <id of the correcting exchange>`. The exchange is the way back to the raw text of the correction.
 
 Delete only when the two rules give opposite orders in the same situation. A rule that is only narrower, wider or adds an action is a case of section 5.
 
 ## 7. Save
 
 ```bash
-ti add --if "<context>" --do "<action>" --tags <tag> --tags <tag> [--exchange "<tl exchange id>"]
+alfred rules add --if "<context>" --do "<action>" --tags <tag> --tags <tag> [--exchange "<exchange id>"]
 ```
 
 - **Language.** `if` and `do` in Italian.
-- **Tags.** `--tags` is a repeatable flag, one tag per flag. Lowercase singular nouns. At most 3. Reuse the vocabulary of `ti list` before inventing. A tag is a filter, not a taxonomy: pick the ones someone would filter by.
-- **`exchange`.** The id of the `tl` exchange that holds the evidence. It is the way back to the raw text.
+- **Tags.** `--tags` is a repeatable flag, one tag per flag. Lowercase singular nouns. At most 3. Reuse the vocabulary of `alfred rules list` before inventing. A tag is a filter, not a taxonomy: pick the ones someone would filter by.
+- **`exchange`.** The id of the `alfred hist` exchange that holds the evidence. It is the way back to the raw text.
