@@ -1,7 +1,6 @@
-# Run typecheck then tests
+# Lint, then test alfred
 check:
-    bun run typecheck
-    bun test tests/
+    cd tools/alfred && cargo clippy --all-targets && cargo test
 
 # Lint all skills
 lint-skills:
