@@ -9,6 +9,8 @@ sources: [conversation, spec.json@82621d5, review.json@82621d5, tools/alfred/src
 
 `alfred hist ingest` fills the table. The hook does not change. A Claude Code transcript already holds each injection: a line of type `attachment`, with `attachment.type` equal to `hook_additional_context`. The ingest reads those lines and links each one to the exchange of its prompt.
 
+The ingest reads only a text that starts with `## Rule matches`. A text with another header gives no rows: the transcripts written before 2026-11-16 open with `## Third Identity (ti) matches` or `## Third Brain (tb) matches`, and their ids name rules and notes of the old store. So the table starts on 2026-11-16.
+
 Nothing reads the table yet. The first step is only to save.
 
 The table holds no episodes. The hook does not inject them, and a search of the agent is already in `contents.tools`.

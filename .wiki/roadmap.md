@@ -14,12 +14,6 @@ The distiller and `th` move into alfred. Then the server goes on the Deck, and e
 
 - [M] `alfred command` tests that close two gaps: pi dies after the timeout, read through the `.pid` file [detail](core_alfred_command_runs_pi_as_a_child_in_bwrap); a sent spool file leaves, with a `Client::at(url)` for tests [detail](core_alfred_command_files_each_run_in_hist_with_a_spool). Parts A and B are done.
 
-## hist keeps the injected rules
-
-The archive saves which rules the hook injected in each exchange. Nothing reads them yet. [detail](memory_hist_keeps_the_rules_injected_in_each_exchange)
-
-- [M] Run `alfred hist ingest --all` once, with the new `alfred` on the Deck and on the laptop. The transcripts of 2026-11-17 leave the disk on 2026-12-17.
-
 ## Ideas
 
 One line each. An idea becomes blocks only when it is the next goal.
@@ -36,6 +30,8 @@ One line each. An idea becomes blocks only when it is the next goal.
 - Fix the generic rules that score 0.5-0.6 on every prompt. To find them, run the search on 50 real prompts from `alfred hist prompts`: a rule that matches more than half of them has an `if` that is too wide. [detail](memory_tb_dropped_vault_holds_shared_knowledge)
 - A quality signal for the rules, from the user's corrections. The distiller reads the rules of a turn from `injections` and the correction in the next turn. It gives each injected rule one verdict: `ignored`, `partial` (the skill started, its steps were skipped), `harmful` or `unrelated`. The count sits next to `hits`. To Piano first. [detail](memory_refine_hits_measure_retrieval)
 - The hook prints the `if` of each rule, so the agent can drop a rule that is out of context. [detail](memory_hook_injects_only_the_text_the_agent_uses)
+- `alfred command run` gives `pi` an empty input. With the input of the caller, a run started by an agent waits until the timeout and prints nothing.
+- `setup.sh` is executable in git, so `./setup.sh` runs on a fresh checkout.
 - `injections` for pi: read how a pi transcript stores the hidden rules message, then file it the same way. [detail](memory_hist_keeps_the_rules_injected_in_each_exchange)
 - Trigger evals for the skills: a file of real prompts per skill with the skill expected, and prompts where no skill starts. A script runs each prompt and prints `PASS` or `FAIL`.
 - Protocol evals for the skills: the required steps of a skill appear among the commands of the run. First case: polo calls `openalex.py` when the question asks for studies.

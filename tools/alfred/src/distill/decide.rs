@@ -197,7 +197,7 @@ pub fn known_for(neighbours: Vec<Known>, list: &SessionList) -> Vec<Known> {
     let result: Vec<Known> = neighbours
         .into_iter()
         .fold(Vec::<Known>::new(), |seen, n| {
-            if seen.iter().any(|k| k.key() == n.key()) {
+            if seen.iter().chain(list.items()).any(|k| k.key() == n.key()) {
                 seen
             } else {
                 seen.into_iter().chain([n]).collect()

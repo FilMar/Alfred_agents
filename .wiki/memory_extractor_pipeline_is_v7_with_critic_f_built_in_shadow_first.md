@@ -14,7 +14,7 @@ The extractor is the v7 pipeline of the extraction spike, with critic F in place
 - **1b (LLM, per candidate).** Critic F: [memory_critic_is_f_textbook_as_a_test_and_no_record_question](memory_critic_is_f_textbook_as_a_test_and_no_record_question).
 - **2a (code).** Top 5 neighbours from the rules. Read only, no hit, no cosine cut.
 - **2b (LLM, black hat, per exchange).** A rule is `new`, `duplicate` or `append`. Code checks that `of` is a given id.
-- **2c (code).** Shadow: no save. Active: add a rule or append a `do`, right away. New items join the session list, so later exchanges see them as neighbours.
+- **2c (code).** Shadow: no save. Active: add a rule or append a `do`, right away. New items join the session list, so later exchanges see them as neighbours. A saved rule is in the store too, so it can come back as a store neighbour. `known_for` keeps the session copy and drops the store copy: the judge sees each rule once.
 - **3 (later).** memory_bridges_by_shape_are_judged_by_reading.
 
 The recorder writes one `extractions` row per candidate, once per exchange, so a crash keeps the rows already written. At the end of a session in active mode, `distilled` is set. What is config and what is code: [memory_extractor_is_data_immutable_config_rows_in_tl](memory_extractor_is_data_immutable_config_rows_in_tl).
